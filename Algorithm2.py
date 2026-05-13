@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import logging
 import math
+from platform import node
 import sys
 import warnings
 from collections import defaultdict
@@ -518,6 +519,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
                              node:          TreeNode,
                              labels:        np.ndarray,
                              class_labels:  Optional[List[int]] = None,
+                             N_total:     int = len(np.ndarray),
                              laplace_eps:   float = LAPLACE_EPSILON
                              ) -> BayesianTables:
     """
@@ -587,6 +589,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     users_per_class      = np.zeros(n_classes, dtype=int)
 
     for ci, cls in enumerate(class_labels):
+        
         class_mask = (labels_valid == cls)
         users_per_class[ci] = int(class_mask.sum())
         if users_per_class[ci] == 0:
@@ -616,22 +619,16 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     # consistent with Algorithm 4's _compute_p_h_f which uses node.n_users.
     p_h_and_f = np.zeros(n_classes, dtype=float)
     for ci, cls in enumerate(class_labels):
-        p_h_and_f[ci] = node.health_dist.get(cls, 0) / max(node.n_users, 1)
+        # [PAPER] P(h, f) = count of class h in this branch / total dataset size
+        p_h_and_f[ci] = node.health_dist.get(cls, 0) / N_total
+        # Changed from this p_h_and_f[ci] = node.health_dist.get(cls, 0) / max(node.n_users, 1)
 
-    # ── P(B̂): shape (n_bins,) ─────────────────────────────────────────────────
-    # [PAPER] Line 9: "Calculate P(B̂_m^k(o))"
-    # Total probability: Σ_h P(B̂|h) × P(h, f)
-    # shape: (n_bins, n_classes) × (n_classes,) → (n_bins,)
-    p_bin = p_bin_given_h @ p_h_and_f   # shape (n_bins,)
-
-    # Normalise evidence so it sums to 1 over bins.
-    # [INFER] This is needed because P(h, f) may not sum to 1 if some classes
-    # are absent from the node (they still exist in the total dataset).
+    # P(B̂) = sum over h of P(B̂|h)*P(h,f) — will be < 1 since Σ_h P(h,f) < 1
+    p_bin = p_bin_given_h @ p_h_and_f
+    # Normalize so evidence sums to 1 over bins (standard Bayesian evidence normalization)
     p_bin_sum = p_bin.sum()
     if p_bin_sum > 0:
-        p_bin = p_bin / p_bin_sum
-    else:
-        p_bin = np.ones(n_bins) / n_bins
+        p_bin /= p_bin_sum
 
     # ── P(h|B̂): shape (n_bins, n_classes) ────────────────────────────────────
     # [PAPER] Line 9: "Calculate P(h|B̂)"
@@ -707,15 +704,14 @@ def compute_healthy_range(disc:   DiscretizationResult,
     HealthyRangeResult.
     """
     # ── Identify healthy users in this node with valid feature values ─────────
-    global_valid = node.user_indices[disc.valid_user_rows]
-    labels_valid = labels[global_valid]
-
-    healthy_mask_valid = (labels_valid == HEALTHY_CLASS)
-    n_healthy_valid    = int(healthy_mask_valid.sum())
+    global_valid  = node.user_indices[disc.valid_user_rows]
+    labels_valid  = labels[global_valid]
+    healthy_mask  = (labels_valid == HEALTHY_CLASS)
+    n_healthy     = int(healthy_mask.sum())
 
     fallback_used = False
 
-    if n_healthy_valid > 0:
+    if n_healthy > 0:
         # [PAPER] Lines 11-12 + Eq. 5:
         # "the normal range means that 100% of the values of the features of
         # Users without diseases fall in this range" (p.180116)
@@ -735,41 +731,39 @@ def compute_healthy_range(disc:   DiscretizationResult,
         # This also provides LOOCV stability: removing one healthy user from
         # training does not shift bin edges (other users share the bin),
         # preventing false alarms on held-out healthy users at feature extremes.
-        healthy_bins = disc.bin_assignments[healthy_mask_valid]
-        min_healthy_bin = int(healthy_bins.min())
-        max_healthy_bin = int(healthy_bins.max())
-        b_min = float(disc.bin_edges[min_healthy_bin])
-        b_max = float(disc.bin_edges[max_healthy_bin + 1])
+        raw_vals_valid = disc._raw_values_valid   # raw feature values for valid users
+        healthy_vals   = raw_vals_valid[healthy_mask]
+
+        # [PAPER Eq. 5] b_min/b_max = exact min/max of healthy user values
+        b_min = float(healthy_vals.min())
+        b_max = float(healthy_vals.max())
+
+        # N_kf = (b_max - b_min) / delta_B   [PAPER line 13]
+        n_kf  = (b_max - b_min) / disc.delta_b if disc.delta_b > 0 else 1.0
+
     else:
         # [INFER] No healthy users in this node — fall back to full observed
         # range [B_raw_min, B_raw_max] as a conservative choice.
         fallback_used = True
-        b_min = float(disc.b_raw_min)
-        b_max = float(disc.b_raw_max)
+        b_min, b_max = disc.b_raw_min, disc.b_raw_max
+        n_kf = float(disc.n_bins)
         log.debug(f"    HealthyRange FALLBACK (no healthy users): "
                   f"using full observed range [{b_min}, {b_max}]")
     # ── N_kf: bin count in normal range ───────────────────────────────────────
     # [PAPER] Line 13: N_m^{kf} = (b_max^{kmf} - b_min^{kmf}) / ΔB_{o^{kf}}
     # With bin-edge b_min/b_max, this equals the number of healthy bins.
-    if not fallback_used and n_healthy_valid > 0:
-        n_kf = float(max_healthy_bin - min_healthy_bin + 1)
-    elif disc.delta_b > 0 and b_max > b_min:
-        n_kf = (b_max - b_min) / disc.delta_b
-    elif b_max == b_min:
-        n_kf = 1.0
-    else:
-        n_kf = float(disc.n_bins)
+    
 
     log.debug(
         f"    HealthyRange: [{b_min:.4g}, {b_max:.4g}]  N_kf={n_kf:.2f}  "
-        f"healthy_valid={n_healthy_valid}  {'[FALLBACK]' if fallback_used else ''}"
+        f"healthy_valid={n_healthy}  {'[FALLBACK]' if fallback_used else ''}"
     )
 
     return HealthyRangeResult(
         b_min_healthy   = b_min,
         b_max_healthy   = b_max,
         n_kf            = n_kf,
-        n_healthy_valid = n_healthy_valid,
+        n_healthy_valid = n_healthy,
         fallback_used   = fallback_used,
     )
 
@@ -827,9 +821,13 @@ def compute_executive_actions(disc:          DiscretizationResult,
     - "Below normal" bins: bins 0 to (min_healthy_bin - 1)
     - "Above normal" bins: bins (max_healthy_bin + 1) to (n_bins - 1)
     """
-    actions: List[ExecutiveActionEntry] = []
+    
+    actions = []
     b_min = healthy_range.b_min_healthy
     b_max = healthy_range.b_max_healthy
+
+    global_valid = node.user_indices[disc.valid_user_rows]
+    labels_valid = labels[global_valid]
 
     if b_min > b_max:
         return actions
@@ -967,6 +965,7 @@ def run_algorithm2_for_node(node:          TreeNode,
             disc         = disc,
             node         = node,
             labels       = labels,
+            N_total = len(labels),
             class_labels = list(class_labels),
         )
 
@@ -1622,8 +1621,8 @@ def run_gender_feature_analysis_once(
     # Common convention:
     # 0 = female
     # 1 = male
-    female_mask = (gender_values == 0) & valid_gender_mask
-    male_mask   = (gender_values == 1) & valid_gender_mask
+    female_mask = (gender_values == 1) & valid_gender_mask
+    male_mask   = (gender_values == 0) & valid_gender_mask
 
     if female_mask.sum() == 0 or male_mask.sum() == 0:
         print("[WARN] Missing male/female populations.")

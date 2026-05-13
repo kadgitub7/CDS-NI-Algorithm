@@ -591,8 +591,7 @@ def _refine_one_node(
     alg2_output   : Algorithm 2 results (perceptor + executive libraries).
     data          : full (N, 279) raw data matrix.
     labels        : full (N,) label array (used for disease-class bookkeeping).
-    reset_per_h   : [PAPER §8.8] if True, reset buffer/newinf for each disease class h.
-                    True = correct per paper annotation §8.8.
+    reset_per_h   : 
     verbose       : if True, log every decision.
 
     Returns
@@ -642,7 +641,6 @@ def _refine_one_node(
 
         # [PAPER §8.8] Per-h reset: buffer and newinf reinitialize for each disease class
         if reset_per_h:
-            # [PAPER §8.8 user override] buffer and newinf reset per disease.
             buffer = 0
             newinf = np.zeros(len(node.user_indices), dtype=bool)
             if verbose:
@@ -747,14 +745,6 @@ def _refine_one_node(
             # ─────────────────────────────────────────────────────────────────
             n_newly_flagged_this_iter = 0     # newly flagged by THIS feature
 
-            '''
-            raw_val = _get_raw_value(global_u, o, data)
-
-            if _is_outside_range(raw_val, b_min, b_max):
-                if not newinf[local_i]:   # not already flagged
-                    n_newly_flagged_this_iter += 1
-                newinf[local_i] = True    # [PAPER] line 7: newinf_u = 1
-            '''
             raw_vals = data[node.user_indices, o]
             valid_mask = ~np.isnan(raw_vals)
             outside_mask = (raw_vals > b_max) | (raw_vals < b_min)
@@ -841,6 +831,16 @@ def _refine_one_node(
             ))
             h_order_counter += 1
 
+    
+    # ── [NEW] Ensure detectability before returning ──────────────────────────
+    # Identify which disease classes were present but ended up with 0 actions
+    retained = guarantee_minimum_actions(
+        retained=retained, 
+        alg2_output=alg2_output, 
+        node_id=nid,           # nid is the local variable for node.node_id
+        min_actions=1
+    )
+
     log.debug(
         f"  Node {nid!r}: retained={len(retained)}  removed={len(removed)}  "
         f"final_buffer={buffer}  users_flagged={int(newinf.sum())}"
@@ -881,10 +881,18 @@ def _compute_node_summary(
         h_retained = len([e for e in retained          if e.disease_class == h])
         per_disease[h] = (h_before, h_retained)
 
-    # Final buffer = max s_cumulative in log for this node
+    # With reset_per_h=True, buffer and s_cumulative reset each h, so
+    # the last record only reflects the final disease class. Take the max across
+    # all log records for this node to get the true peak coverage and buffer.
+    # With reset_per_h=False this is also correct (max == running final value).
     node_log = [r for r in log_records if r.node_id == nid]
-    final_buffer   = node_log[-1].buffer_after   if node_log else 0
-    n_users_flagged = node_log[-1].s_cumulative  if node_log else 0
+    if node_log:
+        final_buffer    = max(r.buffer_after  for r in node_log)
+        n_users_flagged = max(r.s_cumulative  for r in node_log)
+    else:
+        final_buffer    = 0
+        n_users_flagged = 0
+
 
     return NodeRefinementSummary(
         node_id            = nid,
@@ -899,6 +907,34 @@ def _compute_node_summary(
         per_disease        = per_disease,
     )
 
+def guarantee_minimum_actions(retained, alg2_output, node_id, min_actions=1):
+    """
+    [INFER] For any disease class that Algorithm 3 pruned to zero actions,
+    restore its top-weighted action from Algorithm 2 to ensure detectability.
+    This is justified by the paper's intent: 'executive keeps important actions
+    for diagnosing between healthy and unhealthy situations' — zero actions
+    defeats the system entirely for that class.
+    """
+    retained_by_h = defaultdict(list)
+    for a in retained:
+        if a.node_id == node_id:
+            retained_by_h[a.disease_class].append(a)
+
+    for entry in alg2_output.executive_library:
+        if entry.node_id != node_id:
+            continue
+        h = entry.disease_class
+        if len(retained_by_h[h]) < min_actions:
+            # Restore the highest-weight action for this class
+            candidates = sorted(
+                [e for e in alg2_output.executive_library
+                 if e.node_id == node_id and e.disease_class == h],
+                key=lambda e: e.action_weight, reverse=True
+            )
+            if candidates:
+                retained.append(copy.copy(candidates[0]))
+                retained_by_h[h].append(candidates[0])
+    return retained
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 8 – MAIN ENTRY POINT
@@ -924,9 +960,7 @@ def run_algorithm3(
     labels       : (N,) health class labels.
     nodes_filter : If not None, only process nodes with these node_ids.
                    If None, process all nodes that have Algorithm 2 results.
-    reset_per_h  : [PAPER] If True (default), reset buffer/newinf at each disease
-                   class h
-                   If False, buffer/newinf accumulate globally (legacy, incorrect).
+    reset_per_h  : [PAPER] 
     verbose      : Whether to log detailed per-decision messages.
 
     Returns
@@ -1044,7 +1078,6 @@ def run_algorithm3(
             f"{n_total_retained/n_total_before*100:.1f}%"
         )
     log.info("=" * 70)
-
     return output
 
 
@@ -1356,8 +1389,7 @@ AMBIGUITIES AND RESOLUTIONS
 ─────────────────────────────
   [AMBIG-1] Scope of buffer/newinf initialisation.
     Paper shows init BEFORE both loops, suggesting global accumulation.
-    Resolution per §8.8: reset_per_h=False (per-disease pruning).
-    Legacy: reset_per_h=False for global accumulation (incorrect).
+    Legacy: reset_per_h=False for global accumulation.
 
   [AMBIG-2] "for o = set O_m^k(f)" – does this iterate ALL features or
     only those in r_buf?
@@ -1514,4 +1546,4 @@ if __name__ == "__main__":
     per_h    = "--per-h"    in _sys.argv
     verbose  = "--verbose"  in _sys.argv
     alg3_out = main(data_path=path, run_full=full,
-                    reset_per_h=True, verbose_alg3=verbose)
+                    reset_per_h=False, verbose_alg3=verbose)

@@ -57,7 +57,7 @@ Possible duplicate feature indices in node.feature_indices (Algorithm 1 → Algo
 The LOOCV loop does not appear to rebuild the tree per fold. The paper's LOOCV method says "all Users except one are used for training." If the code runs Algorithm 1 once on the full dataset and then predicts all 452 users against that single tree, every user was included in their own training data. This is the single largest threat to the 72.8% vs 95.4% gap — the paper's accuracy was achieved with proper LOOCV, and any LOOCV implementation error would produce inflated (or deflated) results depending on how the test user's data bleeds into the model.
 
 Fixes for above problems:
-1. Decision Tree Structuring (Algorithm 1)
+1. Decision Tree Structuring (Algorithm 1) [!!!!!!!INVALID!!!!!!!]
 Fix A — Feature exclusion set
 The paper says to remove features that create redundant symmetric branches. The correct set to remove at level m > 2 is only the features that were already used as branching features on the path from root to the current node — not an integer range up to k. In CDS_Paper_Algorithms.py, when constructing the child node's feature set:
 python# WRONG — removes all features with index <= k (integer range interpretation)
@@ -80,7 +80,7 @@ pythondef select_branching_feature(candidate_features, node_users, labels, u_min
                 best_balance, best_k = balance, k
     return best_k
 
-2. Bin Probability Calculations (Algorithm 2)
+2. Bin Probability Calculations (Algorithm 2) [!!!!!!!CORRECTION MADE!!!!!!!]
 Fix A — Healthy range should use raw min/max, not bin edges
 Replace the bin-edge boundary with the actual min and max of healthy users' raw values, exactly as Eq. 5 states:
 pythondef compute_healthy_range(disc, node, labels):
@@ -123,7 +123,7 @@ pythondef compute_bayesian_tables(disc, node, labels, class_labels, N_total, lap
     # ... rest unchanged
 Pass N_total = len(labels) from the caller. The AF calculation in Algorithm 4 is unaffected because P(h,f)/P(h>1,f) still cancels the denominator, but the Bayesian posterior tables will now be correctly calibrated.
 
-3. Action Weight Assignment (Algorithm 2)
+3. Action Weight Assignment (Algorithm 2) [!!!!! We want bins for probability but raw value for selection !!!!!]
 Fix — Compute action weights against raw healthy boundaries, not bin boundaries
 To make action weights consistent with the alarm check in Algorithms 3 and 4, compute r_{o|h} using the raw healthy range boundaries rather than the bin indices:
 pythondef compute_executive_actions(disc, healthy_range, bayes, node, labels):
@@ -171,7 +171,7 @@ def _is_outside_range(value, b_min, b_max):
     return (value <= b_min) or (value >= b_max)
 Choose whichever is consistent with how you compute the action weight. Just ensure Algorithms 2, 3, and 4 all use the same convention.
 
-4. Action Refinement (Algorithm 3)
+4. Action Refinement (Algorithm 3) [!!!!! Accepted !!!!!]
 Fix A — Default and paper alignment for reset_per_h
 The paper's pseudocode is unambiguous: initialisation before the outer loop means global accumulation. Change the default to match the paper, and clearly document the deviation if you choose per-h:
 pythondef run_algorithm3(
@@ -217,7 +217,7 @@ pythondef guarantee_minimum_actions(retained, alg2_output, node_id, min_actions=
     return retained
 Call this at the end of run_algorithm3 for each node before building the final output.
 
-5. AF Calculation
+5. AF Calculation [!!!!! DISAGREE !!!!!]
 Fix A — Remove the AF cap
 The paper never states AF ∈ [0,1] as a hard constraint, only that it is a "fuzzy" assurance value. Remove the clamp and let AF accumulate naturally:
 pythondef _update_AF(AF_real: float, delta_AF: float) -> float:
@@ -247,7 +247,7 @@ pythonfor h in disease_classes:
 rw_final = max(0.0, 1.0 - AF_real)
 This is a meaningful departure from the current implementation, but it prevents a large class (h=2 with 42 actions) from single-handedly driving AF to 1.0 and masking all smaller classes. Verify against the paper's description of Eq. 7 to confirm this is the intended scope of the accumulator.
 
-6. Tree Traversal Order
+6. Tree Traversal Order [!!! used fix b not a, a seems to break the pseudo code !!!!]
 Fix — Implement the node navigation stub
 Replace the pass placeholder with actual node switching. The current architecture needs the node reference to be mutable within the loop, which requires refactoring _predict_at_node slightly:
 python# Inside _predict_at_node, replace the stub block:

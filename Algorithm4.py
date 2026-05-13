@@ -73,6 +73,8 @@ from __future__ import annotations
 import copy
 import logging
 import math
+from platform import node
+from platform import node
 import random
 import sys
 import time
@@ -469,7 +471,7 @@ class Algorithm4Output:
             # Per-gender confusion matrices
             self.healthy_correct_males = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.HEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
             )
             self.healthy_total_males = sum(
                 1 for r in self.records
@@ -485,7 +487,7 @@ class Algorithm4Output:
             )
             self.healthy_correct_females = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.HEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
             )
             self.healthy_total_females = sum(
                 1 for r in self.records
@@ -691,7 +693,7 @@ def _get_sorted_disease_actions(
     node_id: str,
     disease_h: int,
     alg3_output: Algorithm3Output,
-    consumed: Optional[set] = None,
+    consumed: Optional[Set[Tuple[int, int]]] = None,
 ) -> List[ExecutiveActionEntry]:
     """
     Return refined actions for (node_id, disease_h) sorted by weight DESC.
@@ -702,6 +704,10 @@ def _get_sorted_disease_actions(
     """
     acts = alg3_output.retained_for_node_disease(node_id, disease_h)
     out = [a for a in acts if a.action_weight > 0.0]
+    if consumed:
+        # [FIX5] Exclude any (feature, disease_h) pair already applied at a
+        # prior focus level so its AF contribution is not counted a second time.
+        out = [a for a in out if (a.feature_idx, disease_h) not in consumed]
     return out
 
 def _rl_select_best_action(
@@ -777,81 +783,6 @@ def _rl_select_best_action(
         f"rw_sim={best_rw_sim:.4f}  AF_real={AF_real_current:.4f}"
     )
     return best_action, rl_entries
-'''
-def _rl_select_best_action(
-    candidate_actions: List[ExecutiveActionEntry],
-    node: TreeNode,
-    disease_h: int,
-    AF_real_current: float,
-    alg2_output: Algorithm2Output,
-) -> Tuple[Optional[ExecutiveActionEntry], List[RLLookaheadEntry]]:
-    """
-    RL lookahead: select action J that minimises rw_sim.
-
-    [PAPER + §8.9 override] Algorithm 4 lines 11-17 with the user's resolved
-    typo correction:
-        for all actions c ∈ A_tmkf:
-            for j ∈ set of O_m^kf ∩ features of c:
-                AF^cj = P(h,f) * r_{j|h} / P(h>1,f)            [line 13, corrected]
-                rw^cj = 1 − (AF^cj + AF_tmkf)                   [line 14]
-        J ← argmin_{c ∈ A_tmkf}  Σ_j rw^cj                      [line 17]
-    Per paperImplementationInformation.txt §8.9, the printed line 13's
-    +AF^cj self-reference is a typo; the correct form has no addition.
-
-    [ENGR]  Each action corresponds to one feature.  "features extracted from c"
-    = {c.feature_idx}.  We compute AF_sim for that single feature.
-
-    Returns
-    -------
-    (selected_action, rl_lookahead_entries)
-    selected_action = None if no candidates available.
-    """
-    if not candidate_actions:
-        return None, []
-
-    p_h_f     = _compute_p_h_f(node, disease_h)
-    p_h_gt1_f = _compute_p_h_gt1_f(node)
-
-    rl_entries: List[RLLookaheadEntry] = []
-    best_action: Optional[ExecutiveActionEntry] = None
-    best_rw_sim: float = float("inf")
-
-    for action in candidate_actions:
-        j = action.feature_idx
-        r_j_h = action.action_weight   # r_{j|h} from Algorithm 3
-
-        # [PAPER §8.9 corrected] AF^cj is the lookahead INCREMENT only; it is
-        # NOT accumulated across RL iterations — each candidate is evaluated
-        # independently against the current AF_real.
-        AF_sim_cj = _compute_AF_increment(p_h_f, r_j_h, p_h_gt1_f)
-
-        # [PAPER] line 14: rw^cj = 1 - (AF_sim_cj + AF_real_current)
-        rw_sim_cj = 1.0 - (AF_sim_cj + AF_real_current)
-
-        is_sel = False
-        if rw_sim_cj < best_rw_sim:
-            best_rw_sim  = rw_sim_cj
-            best_action  = action
-            is_sel       = True
-            # Mark previous best as not selected
-            for e in rl_entries:
-                e.is_selected = False
-
-        rl_entries.append(RLLookaheadEntry(
-            action_feature_idx  = j,
-            action_feature_name = action.feature_name,
-            action_weight       = r_j_h,
-            AF_sim_increment    = AF_sim_cj,
-            rw_sim              = rw_sim_cj,
-            is_selected         = is_sel,
-        ))
-
-    log.debug(
-        f"  RL selected: feat={best_action.feature_idx if best_action else None}  "
-        f"rw_sim={best_rw_sim:.4f}  AF_real={AF_real_current:.4f}"
-    )
-    return best_action, rl_entries
-'''
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 5 – CORE PREDICTION ENGINE (SINGLE USER)
@@ -868,7 +799,8 @@ def _predict_at_node(
     AF_real_init:     float,
     pac_counter:      List[int],          # [0] = current PAC count (mutable)
     record:           PredictionRecord,
-    consumed_actions: Optional[set] = None,
+    consumed_actions: Optional[Set[Tuple[int, int]]] = None,
+    initial_action_h: Optional[int] = None
 ) -> Tuple[HealthDecision, float, Optional[int]]:
     """
     Run the inner prediction loop of Algorithm 4 at ONE tree node.
@@ -911,7 +843,6 @@ def _predict_at_node(
     # [PAPER] Line 5: for h = 2 to H do
     # ─────────────────────────────────────────────────────────────────
     for h in disease_classes:
-
         p_h_f     = _compute_p_h_f(node, h)
         p_h_gt1_f = p_h_gt1_f_node
 
@@ -919,7 +850,21 @@ def _predict_at_node(
         # [PAPER] Line 9: C_buf loaded fresh per h — no consumed tracking.
         sorted_actions_h = _get_sorted_disease_actions(
             nid, h, alg3_output,
+            consumed=consumed_actions,   # [FIX5] skip already-applied pairs
         )
+        # [FIX] Exclude j_init from C_buf when processing h_init to prevent
+        # double-application. The initialization block already applied j_init and
+        # credited its delta_AF. Re-selecting it here would add its AF contribution
+        # a second time and waste a PAC budget slot.
+        # [PAPER] The init block is outside the line 5–33 loop; its action must not
+        # re-enter C_buf for disease class h_init.
+        if (initial_action_h is not None
+                and h == initial_action_h
+                and record.initial_action_feat is not None):
+            sorted_actions_h = [
+                a for a in sorted_actions_h
+                if a.feature_idx != record.initial_action_feat
+            ]
 
         # [PAPER] Line 7: Sort r_buf decently and remove 0 value elements
         #         (already done in _get_sorted_disease_actions)
@@ -1004,9 +949,15 @@ def _predict_at_node(
                     continue
 
                 # [PAPER] Line 22: t_mkf = t_mkf + 1
-                pac_counter[0] += 1
                 t_mkf = pac_counter[0]
+                pac_counter[0] += 1
+                
                 disease_check_rec.n_actions_applied += 1
+
+                # [FIX] Mark this (feature, disease_h) as consumed so it cannot
+                # re-enter C_buf if focus escalates to level 2.
+                if consumed_actions is not None:
+                    consumed_actions.add((j, h))
 
                 # Get healthy range from Algorithm 2 perceptor library
                 model_entry = alg2_output.get_model(nid, j)
@@ -1242,7 +1193,13 @@ def run_algorithm4(
     AF_real: float = 0.0   # [PAPER] initial AF at t=0 is zero
     pac_counter = [0]      # mutable counter for PAC number t_mkf
 
+    # [FIX] Shared mutable set of (feature_idx, disease_h) pairs that have
+    # already contributed to AF_real. Passed to every _predict_at_node call
+    # so level-2 C_buf construction skips anything already applied at level 1.
+    consumed_pairs: Set[Tuple[int, int]] = set()
+
     root_all_actions = alg3_output.retained_for_node("root")
+    h_init = -1
     if root_all_actions:
         # [PAPER ALG-4 init] c0 = random action from the refined root library.
         # Step 1: random feature among root features.
@@ -1253,22 +1210,29 @@ def run_algorithm4(
         j_init = -1
         h_init = -1
         initial_action = None
-        for _ in range(10):
-            candidates = [a for a in root_all_actions if a.feature_idx not in tried]
-            if not candidates:
-                break
-            root_feats = sorted({a.feature_idx for a in candidates})
-            j_init_candidate = random.choice(root_feats)
-            V_init_candidate = _get_raw_value(user_global_idx, j_init_candidate, data)
-            if not np.isnan(V_init_candidate):
-                j_init = j_init_candidate
-                V_init = V_init_candidate
-                j_actions = [a for a in root_all_actions if a.feature_idx == j_init]
-                initial_action = max(j_actions, key=lambda a: a.action_weight)
-                h_init = initial_action.disease_class
-                chosen = True
-                break
-            tried.add(j_init_candidate)
+        # [PAPER ALG-4 init] c0 = uniform random draw from all (feature, disease_class)
+        # pairs in the refined root library whose feature value is not NaN.
+        # [FIX] Previously: picked a random *feature* then took the max-weight disease
+        #        for that feature — biasing toward high-weight diseases and effectively
+        #        pre-selecting the RL's first pick deterministically.
+        # [FIX] Now: filter the full action list to non-NaN features, then sample one
+        #        action uniformly so every (j, h) pair has equal probability.
+        valid_candidates = [
+            a for a in root_all_actions
+            if not np.isnan(_get_raw_value(user_global_idx, a.feature_idx, data))
+        ]
+
+        chosen = False
+        j_init = -1
+        h_init = -1
+        initial_action = None
+
+        if valid_candidates:
+            initial_action = random.choice(valid_candidates)
+            j_init  = initial_action.feature_idx
+            h_init  = initial_action.disease_class
+            V_init  = _get_raw_value(user_global_idx, j_init, data)
+            chosen  = True
 
         if not chosen:
             record.initial_action_feat = None
@@ -1320,6 +1284,8 @@ def run_algorithm4(
                     is_nan          = False,
                 )
                 record.af_trace.append(trace_entry)
+                # [FIX] Register init action as consumed.
+                consumed_pairs.add((j_init, h_init))
 
                 log.debug(
                     f"    INIT: PAC={pac_counter[0]:3d}  j={j_init:3d}"
@@ -1385,6 +1351,9 @@ def run_algorithm4(
 
         if active_node is None:
             log.debug(f"  m={current_focus}: no applicable node → stop")
+            # Don't escalate further; the previous focus level's decision was UNKNOWN
+            # but we can't escalate, so treat as SCREENING per paper line 41-42
+            decision = HealthDecision.SCREENING
             break
 
         record.max_focus_reached = current_focus
@@ -1396,10 +1365,17 @@ def run_algorithm4(
 
         # Determine disease classes present in this node (subset of full set)
         # [INFER] Only process disease classes that appear in training data at this node
+        ''' This is what was previously used, we changed to account for more useful search of problems
         node_disease_classes = sorted([
             h for h in all_disease_classes
             if active_node.health_dist.get(h, 0) > 0
         ])
+        '''
+        node_disease_classes = sorted(
+            [h for h in node.health_dist if h != HEALTHY_CLASS and node.health_dist[h] > 0],
+            key=lambda h: node.health_dist[h],
+            reverse=True
+        )
 
         if not node_disease_classes:
             log.debug(f"  Node {active_node.node_id!r}: no disease classes → skip")
@@ -1422,13 +1398,22 @@ def run_algorithm4(
             AF_real_init     = AF_real,
             pac_counter      = pac_counter,
             record           = record,
-            consumed_actions = None,
+            consumed_actions = consumed_pairs,
+            initial_action_h = h_init,
         )
         # Maintain a separate global PAC count for trace/reporting purposes.
         record.total_pac_count += pac_counter[0]
 
         if decision == HealthDecision.UNHEALTHY:
             record.alarm_class = alarm_class
+            # Extract alarm feature from the most recent node record's disease checks
+            for nr in reversed(record.node_records):
+                for dc in reversed(nr.disease_checks):
+                    if dc.alarm_triggered and dc.alarm_feature_idx is not None:
+                        record.alarm_feature_idx = dc.alarm_feature_idx
+                        break
+                if record.alarm_feature_idx is not None:
+                    break
             break
 
         if decision == HealthDecision.HEALTHY:
@@ -1600,7 +1585,7 @@ def run_loocv(
             tree            = tree_i,
             alg2_output     = alg2_i,
             alg3_output     = alg3_i,
-            rng_seed        = rng_seed + i,
+            rng_seed        = rng_seed,
             verbose         = verbose,
         )
         output.records.append(pred)
