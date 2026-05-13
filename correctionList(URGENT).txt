@@ -1,0 +1,502 @@
+1. Decision Tree Structuring (Algorithm 1)
+Feature exclusion at m > 2 is potentially over-aggressive. Algorithm 1 line 8 is:
+O^km_fkm = O^k(m-1)_fk(m-1) - {1, ..., k}
+This removes ALL features with indices 1 through k from the parent's feature set when building level m > 2 nodes. The intent is to prevent symmetric branches (e.g., sex→age and age→sex being equivalent). However, the set {1, ..., k} is being interpreted as the integer range up to the branching feature index k, not just removing the specific feature k. Depending on how features are indexed, this could prune valid, non-redundant features along with the intended ones.
+The paper says only the specific previously-used branching feature should be excluded. If k in the code is a feature index (e.g., sex = index 1), then {1, ..., k} = {1}, which is just sex itself, and this is fine. But if k represents an ordinal position across a larger set, you'd be silently removing diagnostic features that should still be available deeper in the tree.
+There's also no explicit criterion in Algorithm 1 for which feature k to select for branching. The paper implies it's chosen based on the conditional probability P(f^k_m), but Algorithm 1 iterates over all features and doesn't rank or select the best one. The actual tree structure (e.g., why sex is chosen at level 2) is determined implicitly by how CDS_Paper_Algorithms.py constructs the tree — a component you can verify for this selection logic.
+
+
+2. Bin Probability Calculations (Algorithm 2)
+Healthy range boundaries use bin edges rather than raw values. When computing the normal range, the implementation sets:
+pythonb_min = disc.bin_edges[min_healthy_bin]      # left edge of lowest healthy bin
+b_max = disc.bin_edges[max_healthy_bin + 1]  # right edge of highest healthy bin
+The paper's Eq. 5 states: "100% of the values of features of Users without diseases fall in this range." Using raw min/max of healthy users (not bin edges) is the most literal interpretation. The bin-edge approach widens the range slightly (the left edge of the minimum healthy bin is ≤ the actual minimum healthy value). This is a deliberate engineering decision, but it has a concrete consequence: it makes the healthy ranges wider than they need to be, reducing the chance of an abnormal value triggering an alarm in Algorithm 4.
+This is likely contributing to your missed diagnoses (false negatives). You can test this by switching to raw min/max and comparing results.
+Related issue — P(h,f) denominator in Bayesian tables. The implementation uses:
+pythonp_h_and_f[ci] = node.health_dist.get(cls, 0) / max(node.n_users, 1)
+This computes P(h|f) (class h given branch f), not the true joint P(h, f) = n(class h in branch) / N_global. As noted in the code's own comment, this was a deliberate "correction to Bug #2". The consequence: Σ_h P(h,f) = 1 in this implementation, whereas the true joint would sum to < 1 (some of the global probability mass is in other branches). This affects P(B̂) (the evidence term in Eq. 4), which is then renormalized — making the posterior P(h|B̂) correct in relative terms but not absolute. The AF calculation is unaffected (the P(h,f)/P(h>1,f) ratio cancels the branch denominator), but the Bayesian tables used for any other downstream use would be subtly wrong.
+
+3. Action Weight Assignment (Algorithm 2)
+Action weights use a discretized bin approach that's inconsistent with the range check used in Algorithms 3 and 4. The weight computation:
+pythonp_below = float(p_bin_h[:min_healthy_bin].sum())
+p_above = float(p_bin_h[max_healthy_bin + 1:].sum())
+r_o_h = p_below + p_above
+This counts probability mass in bins entirely OUTSIDE the healthy bin span. But Algorithms 3 and 4 check raw values against the bin-edge boundaries with strict inequalities (value < b_min or value > b_max). A disease user whose raw value sits in the same bin as a healthy user's boundary value but still technically outside the strict raw boundary would be counted in the weight but NOT flagged in practice. This creates a systematic overestimate of action weights for features with borderline healthy/disease separation.
+A specific consequence you can see in the wrongUserData: Many features have b_min = 0.0 and the user's value is also 0.0. Because of the strict inequality (0.0 < 0.0 is False), these users are never alarmed even though their value is at the exact boundary. This appears repeatedly across the trace.
+
+4. Action Refinement (Algorithm 3)
+The reset_per_h default is wrong and contradicts the paper. The function signature is:
+pythondef run_algorithm3(..., reset_per_h: bool = False, ...):
+The code's own docstring describes reset_per_h=False as "legacy, incorrect" — but it's the default. The main() call correctly passes reset_per_h=True, but any call to run_algorithm3 using the default (e.g., from other code or tests) silently uses the wrong pruning mode. That said, there's a deeper issue here:
+The paper's pseudocode actually shows global accumulation (reset_per_h=False). The initialisation buffer = 0, newinf = ∅ appears BEFORE the outer for h = 2 to H do loop. This means the paper intends newinf and buffer to accumulate globally across all disease classes. The code's "§8.8 user override" decision to use per-h reset was made to improve practical results, but it deviates from the paper. The fact that the comment labels the paper-faithful mode as "incorrect" is a documentation red flag — it means there are two competing interpretations and the code has resolved the ambiguity by departing from the pseudocode without clear justification in the paper itself.
+Algorithm 3 over-prunes minority disease classes, making them undetectable. For user 1 (class 6), the trace clearly shows h=6: buf_size=0 at the root node. Class 6 has zero retained actions, so it can never trigger an alarm. This happens when a minority class has too few training users with values distinctly outside the healthy range — Algorithm 3 prunes everything because the set-cover never increases. This is a structural limitation of the greedy set-cover approach when applied to small classes: the first feature retained by a larger class flags users that also satisfy the smaller class's newinf criterion, so when the smaller class is processed, its features appear to add nothing new. With per-h reset this is partially mitigated, but small classes can still lose all actions if their users are statistically "hidden" inside the healthy range due to the bin-edge boundary widening from issue 2.
+
+5. AF Calculation
+AF is capped at 1.0, which causes premature HEALTHY decisions. The _update_AF function clamps to [0, 1]. Once AF saturates at 1.0 (as happens at the female node for user 1 after processing h=2's actions), rw = 0.0. Since 0.0 ≤ 0.025 = threshold, the user is immediately declared HEALTHY at the end of the disease loop — regardless of what the remaining h=3...H checks find. No alarm is triggered because the remaining checks (h=3, 4, ...) still run and correctly find the user in-range, but the rw threshold was already met from h=2's accumulation alone.
+The paper never states AF should be capped at 1.0. The capping is introduced as an "engineering choice" based on fuzzy-logic semantics, but it creates a dangerous interaction: high AF driven by a non-relevant disease class (h=2) pre-empts the detection of the actual disease class (h=6).
+The AF accumulates per-disease rather than jointly. Eq. 7 uses r_{j|h} for the specific disease h being checked. As the CDS cycles through h=2, 3, 4, ..., each disease class's actions contribute to the same running AF. This means a user who happens to have many borderline-normal features across many disease classes will accumulate AF quickly and be declared healthy, even if one specific disease class (the correct one) was never effectively tested. There's no re-weighting or discount for the fact that passing tests for h=2 doesn't say much about h=6.
+
+6. Tree Traversal Order
+The node navigation code in Algorithm 4 is a stub. Inside _predict_at_node, after the alarm check, there is this block:
+pythonif node.branching_feat_k == j:
+    next_node = None
+    for child in node.all_children:
+        if child.branch_def.contains(V_j):
+            next_node = child
+            break
+    if next_node:
+        log.info(f"Navigating: {node.node_id} -> {next_node.node_id}")
+        pass   # ← PLACEHOLDER, does nothing
+The comment explicitly says this is "a placeholder that does not change the node." The in-loop node navigation — following the tree branch determined by the measured branching feature — is never executed. The actual focus escalation is handled by _find_applicable_node called from the outer loop in run_algorithm4, so this doesn't break focus level transitions, but the intra-disease-loop navigation is entirely missing. If the paper intends the system to refine its node mid-loop when it reads a branching feature value, that refinement is silently skipped.
+Disease classes are processed in global ascending order (h=2,...,H) regardless of which diseases are more prevalent in the current branch. The paper doesn't specify an ordering, but processing minority classes (e.g., h=14, 15, 16) that have zero retained actions in every fold wastes no time but contributes nothing. More importantly, the AF accumulation from high-prevalence classes (h=2) systematically drowns out minority classes, especially when the global disease distribution doesn't match the branch-local one.
+
+7. Additional Issues Not in Your List
+Duplicate _rl_select_best_action function definition (Algorithm 4). The first definition (lines 707–779) is the live, active function. The second definition (lines 781–853) is wrapped inside a '''...''' string literal block and is dead code. This is likely a version-control artifact where an alternative implementation was "commented out" by surrounding it with triple quotes. It's not currently causing a runtime bug, but it's confusing and means the first version's logic is the one running. You should verify that the first version is actually the intended implementation.
+run_gender_feature_analysis_once is called inside the per-feature inner loop in Algorithm 2. The call appears inside run_algorithm2_for_node, inside the for feature_o in node.feature_indices loop. While the function itself has a guard that prevents it from executing more than once globally, the guard check still runs on every iteration of the inner loop. More problematically, when it DOES execute (the first call), it trains a full RandomForest model and computes permutation importance mid-stream, halfway through processing the first node's features. This shouldn't affect correctness but makes the profiling of Algorithm 2 misleading and is architecturally wrong — side-analysis functions like this should run before or after the main algorithm, not embedded in the hot path.
+Possible duplicate feature indices in node.feature_indices (Algorithm 1 → Algorithm 2 → Algorithm 3 cascade). In the wrongUserData trace for user 1, feature 9 (QRS_angle) appears at both PAC=1 and PAC=23 for the same node, same disease class h=2. Since C_buf removes the applied feature by index after each application, the only way a feature can appear twice is if Algorithm 3's refined_actions contains two separate entries for (root, h=2, feat=9). This can only happen if Algorithm 2's executive_library contains duplicates, which in turn requires node.feature_indices to list feature 9 twice. This would be a bug in Algorithm 1's tree node construction (in CDS_Paper_Algorithms.py). The consequence is that the same sensor is activated twice in one prediction pass, wasting PAC budget and potentially inflating AF by double-counting.
+The LOOCV loop does not appear to rebuild the tree per fold. The paper's LOOCV method says "all Users except one are used for training." If the code runs Algorithm 1 once on the full dataset and then predicts all 452 users against that single tree, every user was included in their own training data. This is the single largest threat to the 72.8% vs 95.4% gap — the paper's accuracy was achieved with proper LOOCV, and any LOOCV implementation error would produce inflated (or deflated) results depending on how the test user's data bleeds into the model.
+
+Fixes for above problems:
+1. Decision Tree Structuring (Algorithm 1)
+Fix A — Feature exclusion set
+The paper says to remove features that create redundant symmetric branches. The correct set to remove at level m > 2 is only the features that were already used as branching features on the path from root to the current node — not an integer range up to k. In CDS_Paper_Algorithms.py, when constructing the child node's feature set:
+python# WRONG — removes all features with index <= k (integer range interpretation)
+O_child = O_parent - set(range(1, k + 1))
+
+# CORRECT — removes only features that were branching features on the path to this node
+# Track used_branching_features as a set passed down through the tree
+O_child = O_parent - used_branching_features  # where used_branching_features grows with each level
+At level m=2, used_branching_features = {k_root_level} (e.g., {sex}). At level m=3 branching on age, used_branching_features = {sex, age}. This exactly implements the paper's redundancy removal without collateral damage to other features.
+Fix B — Branching feature selection criterion
+The paper uses P(f^k_m) — the branch probability — as the branching criterion. The feature k chosen for branching should be the one whose branches best satisfy eq. (2) (the minimum user count u_min). In practice this means: among all candidate features, pick the one that produces the most balanced branches (closest to equal split) while each branch having ≥ u_min users.
+pythondef select_branching_feature(candidate_features, node_users, labels, u_min):
+    best_k, best_balance = None, -1
+    for k in candidate_features:
+        branches = discretize_for_branching(node_users, k)
+        # All branches must meet u_min; among those, pick most balanced
+        if all(len(b) >= u_min for b in branches.values()):
+            balance = min(len(b) for b in branches.values())
+            if balance > best_balance:
+                best_balance, best_k = balance, k
+    return best_k
+
+2. Bin Probability Calculations (Algorithm 2)
+Fix A — Healthy range should use raw min/max, not bin edges
+Replace the bin-edge boundary with the actual min and max of healthy users' raw values, exactly as Eq. 5 states:
+pythondef compute_healthy_range(disc, node, labels):
+    global_valid  = node.user_indices[disc.valid_user_rows]
+    labels_valid  = labels[global_valid]
+    healthy_mask  = (labels_valid == HEALTHY_CLASS)
+    n_healthy     = int(healthy_mask.sum())
+
+    if n_healthy > 0:
+        raw_vals_valid = disc._raw_values_valid   # raw feature values for valid users
+        healthy_vals   = raw_vals_valid[healthy_mask]
+
+        # [PAPER Eq. 5] b_min/b_max = exact min/max of healthy user values
+        b_min = float(healthy_vals.min())
+        b_max = float(healthy_vals.max())
+
+        # N_kf = (b_max - b_min) / delta_B   [PAPER line 13]
+        n_kf = (b_max - b_min) / disc.delta_b if disc.delta_b > 0 else 1.0
+    else:
+        # fallback: full observed range
+        b_min, b_max = disc.b_raw_min, disc.b_raw_max
+        n_kf = float(disc.n_bins)
+
+    return HealthyRangeResult(b_min, b_max, n_kf, n_healthy, fallback_used=(n_healthy == 0))
+This makes the alarm check in Algorithm 4 tighter and directly matches the paper's language.
+Fix B — P(h, f) should use the global dataset denominator
+The paper's Eq. 4 uses the true joint probability P(h, f), not the conditional P(h|f). Fix compute_bayesian_tables by passing the total dataset size:
+pythondef compute_bayesian_tables(disc, node, labels, class_labels, N_total, laplace_eps=0.0):
+    # ...
+    for ci, cls in enumerate(class_labels):
+        # [PAPER] P(h, f) = count of class h in this branch / total dataset size
+        p_h_and_f[ci] = node.health_dist.get(cls, 0) / N_total
+
+    # P(B̂) = sum over h of P(B̂|h)*P(h,f) — will be < 1 since Σ_h P(h,f) < 1
+    p_bin = p_bin_given_h @ p_h_and_f
+    # Normalize so evidence sums to 1 over bins (standard Bayesian evidence normalization)
+    p_bin_sum = p_bin.sum()
+    if p_bin_sum > 0:
+        p_bin /= p_bin_sum
+    # ... rest unchanged
+Pass N_total = len(labels) from the caller. The AF calculation in Algorithm 4 is unaffected because P(h,f)/P(h>1,f) still cancels the denominator, but the Bayesian posterior tables will now be correctly calibrated.
+
+3. Action Weight Assignment (Algorithm 2)
+Fix — Compute action weights against raw healthy boundaries, not bin boundaries
+To make action weights consistent with the alarm check in Algorithms 3 and 4, compute r_{o|h} using the raw healthy range boundaries rather than the bin indices:
+pythondef compute_executive_actions(disc, healthy_range, bayes, node, labels):
+    actions = []
+    b_min = healthy_range.b_min_healthy   # now raw min (after Fix 2A)
+    b_max = healthy_range.b_max_healthy   # now raw max
+
+    global_valid = node.user_indices[disc.valid_user_rows]
+    labels_valid = labels[global_valid]
+
+    for cls in bayes.class_labels:
+        if cls == HEALTHY_CLASS:
+            continue
+        p_h_f = bayes.prevalence(cls)
+        if p_h_f <= 0:
+            continue
+
+        # [PAPER line 19] r_{o|h} using raw values — consistent with Alg 3/4 alarm check
+        disease_mask = (labels_valid == cls)
+        disease_vals = disc._raw_values_valid[disease_mask]
+        valid_disease = disease_vals[~np.isnan(disease_vals)]
+
+        if len(valid_disease) == 0:
+            continue
+
+        n_below = int((valid_disease < b_min).sum())
+        n_above = int((valid_disease > b_max).sum())
+        n_total = len(valid_disease)
+
+        p_below = n_below / n_total
+        p_above = n_above / n_total
+        r_o_h   = p_below + p_above
+
+        if r_o_h > 0:
+            # ... create and append ExecutiveActionEntry as before
+This eliminates the bin-boundary vs raw-boundary mismatch. The action weight now directly measures "what fraction of this disease class's users fall outside the raw healthy range" — exactly what Algorithms 3 and 4 test for.
+Separately: boundary value handling. The strict inequality means value == b_min is treated as healthy. If this is causing missed diagnoses for features clustered at 0.0, change the alarm check in Algorithm 4 (and the range check in Algorithm 3) to use <= and >= for the exclusion:
+python# PAPER line 25 (and Algorithm 3 line 6): strict per paper notation
+def _is_outside_range(value, b_min, b_max):
+    if np.isnan(value):
+        return False
+    return (value < b_min) or (value > b_max)
+
+# If you want to include boundary values as abnormal (non-strict):
+    return (value <= b_min) or (value >= b_max)
+Choose whichever is consistent with how you compute the action weight. Just ensure Algorithms 2, 3, and 4 all use the same convention.
+
+4. Action Refinement (Algorithm 3)
+Fix A — Default and paper alignment for reset_per_h
+The paper's pseudocode is unambiguous: initialisation before the outer loop means global accumulation. Change the default to match the paper, and clearly document the deviation if you choose per-h:
+pythondef run_algorithm3(
+    ...,
+    reset_per_h: bool = False,   # [PAPER-FAITHFUL] global accumulation per pseudocode
+    ...
+):
+    """
+    reset_per_h=False → paper-faithful (buffer/newinf initialised once before h loop).
+    reset_per_h=True  → per-disease reset; improves minority class retention but
+                         deviates from the paper's pseudocode.
+    """
+Update main() accordingly. If per-h reset produces better accuracy, keep it but document it as a deliberate departure from the paper, not the other way around.
+Fix B — Minimum action guarantee for small disease classes
+After Algorithm 3 runs, any disease class with zero retained actions is undetectable. Add a post-processing step that reinstates the single highest-weight action for any such class:
+pythondef guarantee_minimum_actions(retained, alg2_output, node_id, min_actions=1):
+    """
+    [INFER] For any disease class that Algorithm 3 pruned to zero actions,
+    restore its top-weighted action from Algorithm 2 to ensure detectability.
+    This is justified by the paper's intent: 'executive keeps important actions
+    for diagnosing between healthy and unhealthy situations' — zero actions
+    defeats the system entirely for that class.
+    """
+    retained_by_h = defaultdict(list)
+    for a in retained:
+        if a.node_id == node_id:
+            retained_by_h[a.disease_class].append(a)
+
+    for entry in alg2_output.executive_library:
+        if entry.node_id != node_id:
+            continue
+        h = entry.disease_class
+        if len(retained_by_h[h]) < min_actions:
+            # Restore the highest-weight action for this class
+            candidates = sorted(
+                [e for e in alg2_output.executive_library
+                 if e.node_id == node_id and e.disease_class == h],
+                key=lambda e: e.action_weight, reverse=True
+            )
+            if candidates:
+                retained.append(copy.copy(candidates[0]))
+                retained_by_h[h].append(candidates[0])
+    return retained
+Call this at the end of run_algorithm3 for each node before building the final output.
+
+5. AF Calculation
+Fix A — Remove the AF cap
+The paper never states AF ∈ [0,1] as a hard constraint, only that it is a "fuzzy" assurance value. Remove the clamp and let AF accumulate naturally:
+pythondef _update_AF(AF_real: float, delta_AF: float) -> float:
+    """
+    [PAPER Eq. 7] AF_{t} = P(h,f)*r_{j|h}/P(h>1,f) + AF_{t-1}
+    No cap applied — paper does not specify one.
+    """
+    return float(AF_real + max(0.0, delta_AF))
+Then adjust the threshold check to use the raw accumulated value:
+python# [PAPER line 35] rw = 1 - AF; but AF > 1 means rw < 0, so clamp rw at 0 for threshold test
+rw_final = max(0.0, 1.0 - AF_real)
+if rw_final <= DIAGNOSTIC_THRESHOLD_ALG4:
+    return HealthDecision.HEALTHY, AF_real, None
+This preserves the threshold logic while allowing the internal AF register to grow beyond 1.0 without prematurely locking the decision.
+Fix B — Per-disease AF accumulation should not pollute across disease classes
+The paper's Eq. 7 is written within the context of a single disease class h (the inner loop). AF should reset between disease classes, because "passing all tests for h=2" is logically independent from "being healthy with respect to h=6". Add a disease-class-level AF reset:
+pythonfor h in disease_classes:
+    AF_real_h = 0.0   # [PAPER] AF accumulates per PAC within each h's action loop
+    C_buf = list(sorted_actions_h)
+    while C_buf:
+        # ... apply action, compute delta_AF, update AF_real_h
+        # alarm check uses raw value vs b_min/b_max
+    # After exhausting h's actions, contribute h's AF to global accumulator
+    AF_real += AF_real_h   # or some weighted combination
+
+# Threshold check uses total accumulated AF after all h
+rw_final = max(0.0, 1.0 - AF_real)
+This is a meaningful departure from the current implementation, but it prevents a large class (h=2 with 42 actions) from single-handedly driving AF to 1.0 and masking all smaller classes. Verify against the paper's description of Eq. 7 to confirm this is the intended scope of the accumulator.
+
+6. Tree Traversal Order
+Fix — Implement the node navigation stub
+Replace the pass placeholder with actual node switching. The current architecture needs the node reference to be mutable within the loop, which requires refactoring _predict_at_node slightly:
+python# Inside _predict_at_node, replace the stub block:
+if node.branching_feat_k == j and not np.isnan(V_j):
+    for child in node.all_children:
+        if child.branch_def is not None and child.branch_def.contains(V_j):
+            # Update the active node for subsequent disease checks in this level
+            # [PAPER] Once the branching feature is read, all further tests
+            # for this focus level should use the branch-specific models
+            node = child
+            # Re-derive p_h_f, p_h_gt1_f for the new node
+            p_h_f     = _compute_p_h_f(node, h)
+            p_h_gt1_f = _compute_p_h_gt1_f(node)
+            # Reload C_buf from the child node's refined actions
+            C_buf = list(_get_sorted_disease_actions(child.node_id, h, alg3_output))
+            log.info(f"  Mid-loop navigation: → {child.node_id}")
+            break
+Note: this changes the semantics of the function significantly (it now mutates node mid-loop). An alternative that avoids refactoring is to detect the branching feature value before entering the disease loop and pre-select the appropriate node at the start of _predict_at_node.
+Fix — Order disease classes by branch-local prevalence, not global index
+python# Instead of:
+disease_classes = sorted([h for h in node.health_dist if h != HEALTHY_CLASS and node.health_dist[h] > 0])
+
+# Use branch-local prevalence descending:
+disease_classes = sorted(
+    [h for h in node.health_dist if h != HEALTHY_CLASS and node.health_dist[h] > 0],
+    key=lambda h: node.health_dist[h],
+    reverse=True
+)
+This ensures the most common diseases in the current branch are checked first, and their AF contributions reflect the actual branch population rather than the global ordering.
+
+7. Additional Issues
+Fix — Duplicate _rl_select_best_action
+Remove the dead-code version entirely (lines 707–779 including the wrapping '''...'''). Keep only the second active definition starting at line 781. Before deleting, confirm the two versions are logically identical — if there are meaningful differences, decide which is correct and discard the other explicitly with a comment.
+Fix — Relocate run_gender_feature_analysis_once
+Move the call out of the inner feature loop and into the top of run_algorithm2, before any node processing begins:
+pythondef run_algorithm2(tree, data, labels, n_bins=DEFAULT_N_BINS, ...):
+    log.info("Algorithm 2: CDS Perceptor and Executive Training")
+
+    # Run gender analysis once, before any feature processing
+    run_gender_feature_analysis_once(
+        data=data, labels=labels,
+        gender_feature_idx=SEX_FEATURE_INDEX,
+        feature_names=FEATURE_NAMES,
+        healthy_class=HEALTHY_CLASS,
+    )
+
+    # ... then proceed with node/feature loops
+Remove the call from run_algorithm2_for_node entirely.
+Fix — Deduplicate node.feature_indices in Algorithm 1
+In CDS_Paper_Algorithms.py, wherever feature_indices is assigned to a TreeNode, wrap it in a deduplication step:
+pythonnode.feature_indices = list(dict.fromkeys(feature_indices))  # preserves order, removes dupes
+Also add a validation assertion in run_algorithm2_for_node:
+pythonassert len(node.feature_indices) == len(set(node.feature_indices)), \
+    f"Duplicate feature indices in node {node.node_id}: {node.feature_indices}"
+This will surface the root cause immediately if it reappears.
+Fix — Proper LOOCV: rebuild tree and libraries per fold
+This is the most expensive fix but likely the most impactful. The correct structure is:
+pythondef run_loocv(data, labels, threshold=DIAGNOSTIC_THRESHOLD):
+    N = len(labels)
+    decisions = []
+
+    for test_idx in range(N):
+        # Build training mask excluding the test user
+        train_mask = np.ones(N, dtype=bool)
+        train_mask[test_idx] = False
+
+        train_data   = data[train_mask]
+        train_labels = labels[train_mask]
+
+        # Algorithm 1: build tree on training data only
+        tree = build_decision_tree(train_data, train_labels)
+
+        # Algorithm 2: train perceptor and executive on training data
+        alg2 = run_algorithm2(tree, train_data, train_labels)
+
+        # Algorithm 3: refine actions
+        alg3 = run_algorithm3(alg2, tree, train_data, train_labels, reset_per_h=False)
+
+        # Algorithm 4: predict on the single test user
+        # Re-map test_idx to its position in the original full data array
+        decision = run_algorithm4(
+            user_global_idx=test_idx,
+            data=data,          # full data for feature lookup
+            labels=labels,      # full labels for ground truth
+            alg2_output=alg2,
+            alg3_output=alg3,
+            tree=tree,
+        )
+        decisions.append(decision)
+
+    return decisions
+The key point: train_data and train_labels are sliced arrays, so Algorithm 1's user indices are 0-indexed into the training set. Algorithm 4 then looks up the test user in the original data array using test_idx. You'll need to ensure that the tree's user indices and the data lookup are on the same indexing scheme — the simplest approach is to pass the full data/labels to Algorithm 4 for feature reading but use the training-only arrays for all model building.
+
+Additional isues(2nd part):
+A. reset_per_h Mismatch Between main() and run_loocv()
+The main() function calls Algorithm 3 with reset_per_h=True:
+pythonalg3_demo = run_algorithm3(..., reset_per_h=True, ...)  # in main()
+But run_loocv() — the function that actually produced the 72.8% accuracy and wrote the wrongUserData.txt — calls Algorithm 3 with reset_per_h=False:
+pythonalg3_i = run_algorithm3(..., reset_per_h=False, ...)  # in run_loocv()
+These are not testing the same algorithm. Any manual testing done via main() produces a different refined action set than what the LOOCV evaluates. The accuracy figure in the misclassification log came from global accumulation mode; the debug/demo path uses per-h mode. Every LOOCV result is effectively un-reproducible with the demo path, and the two modes will produce different sets of retained actions and therefore different predictions.
+
+B. Initial Action c0 is Double-Applied in the Main Disease Loop
+The initialization block selects a random feature j_init, computes its AF contribution for h_init, and applies it. This is correct per the paper. But then in _predict_at_node, C_buf for disease h_init is loaded freshly from alg3_output.retained_for_node_disease(nid, h_init) with no exclusion for the already-applied j_init:
+pythonC_buf: List[ExecutiveActionEntry] = list(sorted_actions_h)  # fresh, j_init still present
+Since j_init was the highest-weight action for h_init (it was selected by max(j_actions, key=lambda a: a.action_weight)), the RL will eventually select j_init again during the main loop for h_init. The feature is measured a second time (same value) and its delta_AF is added a second time.
+This is directly visible in the trace: user 1 shows QRS_angle (feat=9) at PAC=1 (initialization) AND at PAC=23 (main loop, h=2), both under the root node, same disease class. The duplicate inflates AF and wastes PAC budget. The fix is to exclude j_init from C_buf when processing h_init:
+python# At the start of the h loop, when h == h_init:
+if h == h_init and initial_action is not None:
+    sorted_actions_h = [a for a in sorted_actions_h
+                        if a.feature_idx != record.initial_action_feat]
+
+C. Gender Encoding is Inverted in run_gender_feature_analysis_once
+In Algorithm2.py, run_gender_feature_analysis_once uses:
+pythonfemale_mask = (gender_values == 0) & valid_gender_mask   # 0 = female
+male_mask   = (gender_values == 1) & valid_gender_mask   # 1 = male
+But in Algorithm4.py's _recompute_stats, the same sex column (index 1) is used with the opposite convention:
+python# 0 = male:
+self.total_abnormal_males = sum(... self.data[r.user_global_idx, 1] == 0 ...)
+# 1 = female:
+self.total_abnormal_females = sum(... self.data[r.user_global_idx, 1] == 1 ...)
+The wrongUserData confirms the _recompute_stats convention is correct: user 1 is routed to root|k1_f2 (the female branch), and if data[1, 1] = 1, that's consistent with 1 = female. The gender analysis function therefore has males and females swapped — every permutation importance score, every healthy range table, and every "male vs female" comparison it prints is labelled backwards.
+
+D. Per-Gender Healthy Accuracy Excludes SCREENING
+In _recompute_stats, the overall healthy-correct count correctly includes both HEALTHY and SCREENING outcomes:
+pythonself.n_healthy_correct = sum(
+    1 for r in self.records
+    if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY  # HEALTHY + SCREENING
+)
+But the per-gender breakdown uses only the HEALTHY decision:
+pythonself.healthy_correct_males = sum(
+    1 for r in self.records
+    if r.true_is_healthy
+    and r.decision == HealthDecision.HEALTHY   # ← missing SCREENING
+    and self.data[r.user_global_idx, 1] == 0
+)
+A healthy user sent to SCREENING is counted as correct in the overall specificity but as incorrect in the per-gender breakdown. The per-gender confusion matrix therefore understates both male and female specificity, and any fairness metrics derived from it (SPD, DI, EO) are computed on wrong numbers. The fix in both healthy_correct_males and healthy_correct_females is to change == HealthDecision.HEALTHY to != HealthDecision.UNHEALTHY.
+
+E. N_kf Shortcut in compute_healthy_range is Tied to the Bin-Edge Approach
+The current N_kf calculation uses an integer shortcut:
+pythonn_kf = float(max_healthy_bin - min_healthy_bin + 1)
+This is algebraically equivalent to (b_max - b_min) / delta_b only because b_min and b_max are bin edges (evenly spaced by delta_b). If you apply Fix 2A from the earlier analysis (switching to raw min/max), b_min = healthy_vals.min() and b_max = healthy_vals.max() will not generally be bin edges, and the shortcut will produce a wrong result. The two changes must be made together:
+python# After Fix 2A:
+b_min = float(healthy_vals.min())
+b_max = float(healthy_vals.max())
+n_kf  = (b_max - b_min) / disc.delta_b if disc.delta_b > 0 else 1.0
+This is not currently broken, but it is a latent bug that will be activated by the other fix.
+
+F. Initial Action Selects a Random Feature Then Maximises Over Disease Classes, Not a Truly Random Action
+The paper says c0 should be "randomly selected from C^{Om=1}_{m=1|h>1}(FA=0)" — an action is a (feature, disease_class) pair, so a uniform random draw should pick from all pairs. The implementation instead:
+
+Picks a random feature j_init from the set of all root feature indices
+For that feature, picks the disease class h_init with the MAXIMUM action weight
+
+pythonroot_feats = sorted({a.feature_idx for a in candidates})
+j_init_candidate = random.choice(root_feats)
+...
+initial_action = max(j_actions, key=lambda a: a.action_weight)
+This biases the initial action toward features that are paired with a high-weight disease — it is not a uniform random draw over all (feature, disease) pairs. More practically, since h_init is the maximum-weight disease for j_init, and the RL in the main loop for h_init also selects maximum weight first, j_init is very likely to be selected first in C_buf anyway. The initialization therefore effectively deterministically pre-selects the best action for h_init under the guise of a random draw, then re-applies it in the main loop (bug B above).
+The paper-faithful fix is:
+pythoninitial_action = random.choice([a for a in root_all_actions
+                                 if not np.isnan(_get_raw_value(user_global_idx,
+                                                                 a.feature_idx, data))])
+j_init = initial_action.feature_idx
+h_init = initial_action.disease_class
+
+G. Algorithm 3's Vectorised Inner Loop Replaces a Per-User Loop That Is Now Dead Code Inside a Triple-Quote Block
+In _refine_one_node around line 750, the per-user loop is wrapped in a '''...''' string literal (making it dead code), and the vectorised replacement runs immediately after:
+python'''
+raw_val = _get_raw_value(global_u, o, data)
+if _is_outside_range(raw_val, b_min, b_max):
+    ...
+    newinf[local_i] = True
+'''
+raw_vals = data[node.user_indices, o]       # ← active vectorised code
+outside_mask = (raw_vals > b_max) | (raw_vals < b_min)
+The vectorised code is functionally equivalent and correct. But the > and < in the vectorised form are applied to the FULL raw array including NaN values. The NaN exclusion is handled by valid_mask = ~np.isnan(raw_vals) and flag_mask = valid_mask & outside_mask, which correctly prevents NaN values from triggering flags. However, the comparison raw_vals > b_max when raw_vals contains NaN produces False in NumPy (NaN comparisons are always False), so valid_mask is technically redundant for the outside-range check — but not harmful.
+The issue is purely structural: the dead code block makes the file harder to read and understand, and any future maintainer may be confused about which version is active. The dead block should be removed entirely.
+
+H. run_loocv Passes train_data to Algorithm 3 but Algorithm 3's analyse_coverage Uses a Separate data Argument Inconsistently
+The run_loocv function passes training-set data consistently:
+pythonalg3_i = run_algorithm3(..., data=train_data, labels=train_labels, ...)
+However, the analyse_coverage utility in Algorithm 3 is called in main() with the full dataset:
+pythoncoverage = analyse_coverage(alg3_output, tree, labels, data, alg2_output)
+analyse_coverage does:
+pythonh_vals = data[h_users, o]
+where h_users = [u for u in node.user_indices if labels[u] == h]. The node.user_indices here are training-set indices (from tree_i), but data is the full dataset. If the tree was built on train_data (a slice), then node.user_indices are 0-indexed into train_data, not into the full data array. Calling data[train_set_index] on the full array gives the wrong user's features whenever the held-out user falls at or before that index.
+This does not affect the LOOCV accuracy calculation (analyse_coverage is only for reporting), but any coverage statistics printed after a LOOCV run will be reading data from offset rows. The fix is to pass train_data to analyse_coverage in all LOOCV contexts, not the full data.
+
+New issues(3rd pass):
+1. record.alarm_feature_idx Is Never Set for Non-Initialization Alarms
+This is the most pervasive reporting bug in the codebase. _predict_at_node returns only three values: (decision, AF_real, alarm_class). The feature that triggered the alarm is stored inside disease_check_rec.alarm_feature_idx within the node record, but is never extracted back up to PredictionRecord.alarm_feature_idx. That field is only populated for the initialization alarm (line ~1338).
+The proof is in the wrongUserData: every single one of the 61 false alarms shows Alarm feature: None (?), while the node traversal section correctly reports e.g. *** ALARM feat=102 V=24.000000 outside [0.000000,21.600000]. The information exists inside record.node_records but is never promoted to the top-level record.
+This silently breaks validate_specificity_invariant, which prints alarm feat=None for every false alarm instead of the actual triggering feature, making the LOOCV edge-case analysis useless. The fix is to propagate the alarm feature index upward in _predict_at_node's return signature, or extract it in run_algorithm4 after the break:
+pythonif decision == HealthDecision.UNHEALTHY:
+    record.alarm_class = alarm_class
+    # Extract alarm feature from the most recent node record's disease checks
+    for nr in reversed(record.node_records):
+        for dc in reversed(nr.disease_checks):
+            if dc.alarm_triggered and dc.alarm_feature_idx is not None:
+                record.alarm_feature_idx = dc.alarm_feature_idx
+                break
+        if record.alarm_feature_idx is not None:
+            break
+    break
+
+2. NaN Branching Feature Produces Incorrect SCREENING Decision
+When a test user has NaN for the sex feature (the level-2 branching feature), _find_applicable_node at focus level 2 finds no matching node and returns None. The outer loop in run_algorithm4 then breaks out of the focus loop with decision still equal to HealthDecision.UNKNOWN from the level-1 call (which returned UNKNOWN to signal focus escalation should occur). The finalisation block then converts UNKNOWN → SCREENING.
+The correct behaviour for this user, per the paper, is to use the level-1 decision. If level-1's rw > threshold, the user should have been sent to SCREENING by level-1 itself. But if level-1 returned UNKNOWN specifically because it wanted to escalate, and the escalation fails due to NaN, the user lands in SCREENING through the wrong code path. The correct fix:
+pythonif active_node is None:
+    log.debug(f"  m={current_focus}: no applicable node → keeping previous decision")
+    # Don't escalate further; the previous focus level's decision was UNKNOWN
+    # but we can't escalate, so treat as SCREENING per paper line 41-42
+    decision = HealthDecision.SCREENING
+    break
+This is the same outcome but reached explicitly through the policy path, not as an unhandled fallback.
+
+3. run_test_cases Uses Models Trained on Full Dataset Including Test Users
+run_test_cases in main() calls build_decision_tree(data, labels) and trains Algorithms 2 and 3 on all 452 users, then runs Algorithm 4 on specific users from that same dataset. Every test user was part of training, so the healthy ranges are defined partly from their own values. For a healthy test user, this guarantees their values are within the healthy range by construction, so they can never trigger a false alarm. For a diseased test user, their out-of-range values contributed to Algorithm 3's newinf, so the action weight biases are derived partly from their own data.
+The results from run_test_cases are therefore systematically optimistic and not comparable to the LOOCV results. Any accuracy figures quoted from test cases are not the paper's LOOCV accuracy. There is no in-code warning about this data leakage. The fix is either to use a held-out fold for each test case, or clearly label the test case output as "in-sample sanity check (not LOOCV)".
+
+4. validate_output_consistency in Algorithm 3 Does Not Check That All Algorithm 2 Actions Are Accounted For
+The check verifies: every retained action was in Algorithm 2's library, and removed actions have weight 0. But it never checks:
+
+Every Algorithm 2 action for this node is present in either refined_actions or removed_actions.
+
+If Algorithm 3 silently drops an action (e.g., because the node was skipped due to a prerequisite failure, or because the disease class had 0 users and h_actions was empty), that action disappears with no record. The set-cover semantics then silently miss features that could be diagnostic.
+The missing validation is:
+pythonalg2_node_keys = {(e.node_id, e.feature_idx, e.disease_class)
+                  for e in alg2_output.executive_library
+                  if e.node_id in nodes_processed}
+alg3_keys = set(seen_keys) | {(a.node_id, a.feature_idx, a.disease_class)
+                               for a in alg3_output.removed_actions}
+missing = alg2_node_keys - alg3_keys
+if missing:
+    issues.append(f"{len(missing)} Algorithm 2 actions were silently dropped by Algorithm 3")
+
+5. Algorithm 4's Disease-Class Loop at Level 2 Repeats ALL of h=2...H, Including Classes Already Fully Processed at Level 1
+When focus escalates from level 1 to level 2, _predict_at_node at the new node processes node_disease_classes which is derived from active_node.health_dist — all disease classes present in the female (or male) training branch. This re-runs h=2, h=3, etc. from scratch at the new node with fresh C_buf.
+The paper says (Section VI.B step 2): "Check if the User has the disease hdh ∈ {hd2,...,hdH}". The high-level description implies the loop restarts at hdh=hd2 at the new focus level. The implementation correctly matches this. However, the combined AF carries over. This means the AF accumulated from h=2's 42 actions at level 1 is still in AF_real when level 2 begins processing h=2 again. The level-2 h=2 actions add more AF on top of an already-substantial level-1 h=2 contribution. This makes AF saturate faster at level 2 than it would if AF were reset, contributing to the premature HEALTHY decisions seen in the wrongUserData.
+This is not a deviation from the implementation's documented design ([PAPER §8.11 user override; CORRECTION TO BUG #9]), but it is an undocumented deviation from what the paper actually says. The paper's Figure 11 shows AF starting near 0 at PAC 1 of level 2 for the average user, which is more consistent with a per-level reset than with carry-over.
+
+6. total_pac_count in PredictionRecord Counts the Initialization PAC Separately But pac_counter Inside _predict_at_node Starts at 0, Causing a One-Off in the PAC Numbering Inside Each Node
+The initialization adds record.total_pac_count += 1 directly before the focus loop. Then pac_counter = [0] resets inside the loop. Inside _predict_at_node, the first pac_counter[0] += 1 produces PAC number 1 again. This means both the initialization action and the first main-loop action are recorded with pac_number = 1 in the AF trace, visible in the wrongUserData trace (two entries with PAC=1 at the root).
+For the PAC count totals this is harmless (the init count and main-loop counts are summed correctly). But for the trace's pac_number field, having two different actions with pac_number = 1 at the same node makes the trace ambiguous. Any downstream analysis that uses pac_number to order events will see an ordering collision. The fix is to initialize pac_counter to [1] when entering _predict_at_node if the init action already occurred, or to treat the init PAC as PAC 0 rather than PAC 1.
+
+7. Algorithm 3's _compute_node_summary Uses Only the Last Log Record to Determine final_buffer and n_users_flagged, Which Is Wrong After Per-h Reset
+pythonnode_log = [r for r in log_records if r.node_id == nid]
+final_buffer   = node_log[-1].buffer_after   if node_log else 0
+n_users_flagged = node_log[-1].s_cumulative  if node_log else 0
+With reset_per_h=True, buffer and newinf reset for each h. The last log record has the buffer value from the LAST disease class processed, not the global maximum. If disease class h=16 was processed last and had 0 actions (its C_buf is empty and h_actions_sorted is empty), the last log record may be from h=15 or even h=2, whichever was processed last. The final_buffer in the summary would then reflect only the last active h, not the total unique users flagged across all h classes.
+With reset_per_h=False this is also wrong: the last log record has the running maximum, which is correct in that case, but the summary field is labelled as the "final" value after all iterations, which is semantically misleading when the value means different things depending on the reset mode.
+
