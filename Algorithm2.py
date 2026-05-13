@@ -51,7 +51,6 @@ from __future__ import annotations
 
 import logging
 import math
-from platform import node
 import sys
 import warnings
 from collections import defaultdict
@@ -171,6 +170,7 @@ class DiscretizationResult:
     bin_counts_all:    np.ndarray   # shape (n_bins,)
     is_binary:         bool
     is_degenerate:     bool
+    _raw_values_valid: Optional[np.ndarray] = None
 
     @property
     def n_valid(self) -> int:
@@ -519,7 +519,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
                              node:          TreeNode,
                              labels:        np.ndarray,
                              class_labels:  Optional[List[int]] = None,
-                             N_total:     int = len(np.ndarray),
+                             N_total:     int = 0,
                              laplace_eps:   float = LAPLACE_EPSILON
                              ) -> BayesianTables:
     """
@@ -958,7 +958,7 @@ def run_algorithm2_for_node(node:          TreeNode,
         #        to avoid passing the full data matrix through every helper.
         raw_values_node  = data[node.user_indices, feature_o]
         raw_values_valid = raw_values_node[disc.valid_mask]
-        disc._raw_values_valid = raw_values_valid   # type: ignore[attr-defined]
+        disc._raw_values_valid = raw_values_valid
 
         # ── Lines 8-10: Bayesian probability tables ──────────────────────────
         bayes = compute_bayesian_tables(

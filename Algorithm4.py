@@ -73,8 +73,6 @@ from __future__ import annotations
 import copy
 import logging
 import math
-from platform import node
-from platform import node
 import random
 import sys
 import time
@@ -1372,8 +1370,8 @@ def run_algorithm4(
         ])
         '''
         node_disease_classes = sorted(
-            [h for h in node.health_dist if h != HEALTHY_CLASS and node.health_dist[h] > 0],
-            key=lambda h: node.health_dist[h],
+            [h for h in active_node.health_dist if h != HEALTHY_CLASS and active_node.health_dist[h] > 0],
+            key=lambda h: active_node.health_dist[h],
             reverse=True
         )
 
