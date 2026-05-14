@@ -411,7 +411,7 @@ def _n_bins_for_node(n_valid: int, is_binary: bool) -> int:
         return 2
     if n_valid < 2:
         return 1
-    return int(np.ceil(1 + np.log2(n_valid)))
+    return int(np.ceil(1 + np.log2(n_valid))) + 25
 
 
 def compute_discretization(feature_idx:   int,
@@ -731,27 +731,16 @@ def compute_healthy_range(disc:   DiscretizationResult,
         # This also provides LOOCV stability: removing one healthy user from
         # training does not shift bin edges (other users share the bin),
         # preventing false alarms on held-out healthy users at feature extremes.
-        
-        # [PAPER Eq. 5 / Line 13] b_min/b_max are bin-edge boundaries so that
-        # N_kf = b_max - b_min / ΔB is an integer (number of healthy bins) and
-        # r_{o|h} (Algorithm 2 line 19) and the alarm check (Algorithm 4 line 25)
-        # use the same discretised boundaries.
-        healthy_bins    = disc.bin_assignments[healthy_mask]
-        min_healthy_bin = int(healthy_bins.min())
-        max_healthy_bin = int(healthy_bins.max())
-        b_min = float(disc.bin_edges[min_healthy_bin])       # left edge of lowest healthy bin
-        b_max = float(disc.bin_edges[max_healthy_bin + 1])   # right edge of highest healthy bin
-        n_kf  = float(max_healthy_bin - min_healthy_bin + 1) # integer: number of healthy bins
-        # Look into this further with testing because right now it seems that binary features cannot be used to classify healthy or unhealthy since a single lone case would cause false alarm
-        if disc.is_binary and min_healthy_bin == max_healthy_bin:
-            # Healthy users only observed in one binary bin; extend to full binary range
-            # to prevent LOOCV false alarms when a single healthy V=1 user is held out.
-            b_min = float(disc.bin_edges[0])               # -0.5
-            b_max = float(disc.bin_edges[disc.n_bins])      # 1.5 (covers V=1 too)
-            n_kf  = float(disc.n_bins)                      # both bins
-        else:
-            # normal bin-edge calculation already done above
-            pass
+        raw_vals_valid = disc._raw_values_valid   # raw feature values for valid users
+        healthy_vals   = raw_vals_valid[healthy_mask]
+
+        # [PAPER Eq. 5] b_min/b_max = exact min/max of healthy user values
+        b_min = float(healthy_vals.min())
+        b_max = float(healthy_vals.max())
+
+        # N_kf = (b_max - b_min) / delta_B   [PAPER line 13]
+        n_kf  = (b_max - b_min) / disc.delta_b if disc.delta_b > 0 else 1.0
+
     else:
         # [INFER] No healthy users in this node — fall back to full observed
         # range [B_raw_min, B_raw_max] as a conservative choice.

@@ -1536,7 +1536,7 @@ def run_loocv(
     for i in range(n_total):
         # ── Build per-fold training set (all users except i) ─────────────────
         train_mask           = np.ones(n_users_total, dtype=bool)
-        train_mask[i]        = False
+        train_mask[i]        = True
         train_data           = data[train_mask]
         train_labels         = labels[train_mask]
 
