@@ -1044,13 +1044,6 @@ def _predict_at_node(
                         if child.branch_def.contains(V_j):
                             next_node = child
                             break
-                    
-                    # Move to the child node
-                    if next_node:
-                        log.info(f"Navigating: {node.node_id} -> {next_node.node_id}")
-                        # To implement navigation, the code needs to be restructured to allow changing the current node.
-                        # For now, this is a placeholder that does not change the node.
-                        pass
 
                 # [PAPER] Line 29: End if (alarm)
             # end for j in features_to_test
@@ -1137,7 +1130,7 @@ def run_algorithm4(
     labels          : full (N,) label array (1=healthy, 2-16=disease).
     tree            : DecisionTree from Algorithm 1.
     alg2_output     : Algorithm2Output from Algorithm 2.
-    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=True, per §8.8).
+    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=False, per §8.8).
     rng_seed        : optional random seed for reproducibility.
     verbose         : if True, set logger to DEBUG level.
 
@@ -1363,7 +1356,7 @@ def run_algorithm4(
 
         # Determine disease classes present in this node (subset of full set)
         # [INFER] Only process disease classes that appear in training data at this node
-        ''' This is what was previously used, we changed to account for more useful search of problems
+        
         node_disease_classes = sorted([
             h for h in all_disease_classes
             if active_node.health_dist.get(h, 0) > 0
@@ -1374,6 +1367,7 @@ def run_algorithm4(
             key=lambda h: active_node.health_dist[h],
             reverse=True
         )
+        '''
 
         if not node_disease_classes:
             log.debug(f"  Node {active_node.node_id!r}: no disease classes → skip")
@@ -2569,7 +2563,7 @@ def main(
         )
         alg3_demo = run_algorithm3(
             alg2_output=alg2_demo, tree=tree_demo, data=data, labels=labels,
-            nodes_filter=nodes_filter, reset_per_h=True, verbose=False,
+            nodes_filter=nodes_filter, reset_per_h=False, verbose=False,
         )
         run_test_cases(data, labels, tree_demo, alg2_demo, alg3_demo)
 

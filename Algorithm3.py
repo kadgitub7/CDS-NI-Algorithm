@@ -48,10 +48,6 @@ KEY INTERPRETATION NOTE [AMBIG]
   spanning all disease classes simultaneously.  A feature is retained only if
   it increases the total unique-user coverage beyond the current maximum.
 
-  Alternative interpretation [ENGR-ALT]: reset buffer/newinf for each h.
-  This gives per-disease pruning.  Both modes are implemented; per-h reset
-  is the correct interpretation per §8.8 and is the default.
-
 EQUATIONS
 ---------
   Line 2 :  r_buf       = r_{O_m^{kf}|h}         (action weights for disease h)
@@ -247,7 +243,7 @@ class Algorithm3Output:
                           (with action_weight set to 0).
     refinement_log      : Complete per-(node, h, o) audit trail.
     node_summaries      : Per-node summary statistics.
-    reset_mode          : 'per_h' (correct per §8.8) or 'global' (legacy).
+    reset_mode          : 'global'.
     n_nodes_processed   : how many tree nodes were processed.
     """
     refined_actions:    List[ExecutiveActionEntry]  = field(default_factory=list)
@@ -831,16 +827,6 @@ def _refine_one_node(
             ))
             h_order_counter += 1
 
-    
-    # ── [NEW] Ensure detectability before returning ──────────────────────────
-    # Identify which disease classes were present but ended up with 0 actions
-    retained = guarantee_minimum_actions(
-        retained=retained, 
-        alg2_output=alg2_output, 
-        node_id=nid,           # nid is the local variable for node.node_id
-        min_actions=1
-    )
-
     log.debug(
         f"  Node {nid!r}: retained={len(retained)}  removed={len(removed)}  "
         f"final_buffer={buffer}  users_flagged={int(newinf.sum())}"
@@ -881,7 +867,7 @@ def _compute_node_summary(
         h_retained = len([e for e in retained          if e.disease_class == h])
         per_disease[h] = (h_before, h_retained)
 
-    # With reset_per_h=True, buffer and s_cumulative reset each h, so
+    # With reset_per_h=Falsee, buffer and s_cumulative reset each h, so
     # the last record only reflects the final disease class. Take the max across
     # all log records for this node to get the true peak coverage and buffer.
     # With reset_per_h=False this is also correct (max == running final value).
@@ -906,35 +892,6 @@ def _compute_node_summary(
         n_users_flagged    = n_users_flagged,
         per_disease        = per_disease,
     )
-
-def guarantee_minimum_actions(retained, alg2_output, node_id, min_actions=1):
-    """
-    [INFER] For any disease class that Algorithm 3 pruned to zero actions,
-    restore its top-weighted action from Algorithm 2 to ensure detectability.
-    This is justified by the paper's intent: 'executive keeps important actions
-    for diagnosing between healthy and unhealthy situations' — zero actions
-    defeats the system entirely for that class.
-    """
-    retained_by_h = defaultdict(list)
-    for a in retained:
-        if a.node_id == node_id:
-            retained_by_h[a.disease_class].append(a)
-
-    for entry in alg2_output.executive_library:
-        if entry.node_id != node_id:
-            continue
-        h = entry.disease_class
-        if len(retained_by_h[h]) < min_actions:
-            # Restore the highest-weight action for this class
-            candidates = sorted(
-                [e for e in alg2_output.executive_library
-                 if e.node_id == node_id and e.disease_class == h],
-                key=lambda e: e.action_weight, reverse=True
-            )
-            if candidates:
-                retained.append(copy.copy(candidates[0]))
-                retained_by_h[h].append(candidates[0])
-    return retained
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 8 – MAIN ENTRY POINT
@@ -1455,7 +1412,7 @@ def main(
     data_path    : path to arrhythmia.data CSV.
     run_full     : if True, process all 207 tree nodes; else process only the
                    paper's key nodes (root + sex branches).
-    reset_per_h  : Algorithm 3 interpretation (see docstring above).
+    reset_per_h  : Algorithm 3.
     verbose_alg3 : if True, log every per-(h,o) decision.
     """
     import logging as _logging

@@ -104,7 +104,7 @@ log = _build_logger()
 #   • For branch nodes with ~200 users, bins still have ~10 users on average.
 #   • More bins = better resolution but sparser estimates for rare classes.
 #   • Fewer bins = smoother estimates but coarser normal-range boundaries.
-DEFAULT_N_BINS: int = 20
+DEFAULT_N_BINS: int = 10
 
 # [PAPER] Bin counts are not specified by the paper (AMBIG §8.4). We use
 # Sturges' rule (1 + log2(N)) as a standard statistical discretization method.
