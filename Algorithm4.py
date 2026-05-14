@@ -947,8 +947,8 @@ def _predict_at_node(
                     continue
 
                 # [PAPER] Line 22: t_mkf = t_mkf + 1
-                t_mkf = pac_counter[0]
                 pac_counter[0] += 1
+                t_mkf = pac_counter[0]
                 
                 disease_check_rec.n_actions_applied += 1
 

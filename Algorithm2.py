@@ -742,7 +742,16 @@ def compute_healthy_range(disc:   DiscretizationResult,
         b_min = float(disc.bin_edges[min_healthy_bin])       # left edge of lowest healthy bin
         b_max = float(disc.bin_edges[max_healthy_bin + 1])   # right edge of highest healthy bin
         n_kf  = float(max_healthy_bin - min_healthy_bin + 1) # integer: number of healthy bins
-
+        # Look into this further with testing because right now it seems that binary features cannot be used to classify healthy or unhealthy since a single lone case would cause false alarm
+        if disc.is_binary and min_healthy_bin == max_healthy_bin:
+            # Healthy users only observed in one binary bin; extend to full binary range
+            # to prevent LOOCV false alarms when a single healthy V=1 user is held out.
+            b_min = float(disc.bin_edges[0])               # -0.5
+            b_max = float(disc.bin_edges[disc.n_bins])      # 1.5 (covers V=1 too)
+            n_kf  = float(disc.n_bins)                      # both bins
+        else:
+            # normal bin-edge calculation already done above
+            pass
     else:
         # [INFER] No healthy users in this node — fall back to full observed
         # range [B_raw_min, B_raw_max] as a conservative choice.
