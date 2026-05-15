@@ -411,7 +411,7 @@ def _n_bins_for_node(n_valid: int, is_binary: bool) -> int:
         return 2
     if n_valid < 2:
         return 1
-    return int(np.ceil(1 + np.log2(n_valid))) + 25
+    return int(np.ceil(1 + np.log2(n_valid))) + 18
 
 
 def compute_discretization(feature_idx:   int,
