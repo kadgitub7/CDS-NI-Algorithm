@@ -58,7 +58,15 @@ from sklearn.model_selection import train_test_split
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
-DATA_PATH      = r"C:\Users\kadhi\OneDrive\Desktop\CDS_Algorithms\arrhythmia.data"
+_DATA_CANDIDATES = [
+    os.path.join(_WORKTREE, "arrhythmia.data"),
+    os.path.join(_HERE, "..", "arrhythmia.data"),
+    r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data",
+    r"C:\Users\kadhi\OneDrive\Desktop\CDS_Algorithms\arrhythmia.data",
+]
+DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
+if DATA_PATH is None:
+    raise FileNotFoundError("arrhythmia.data not found. Check _DATA_CANDIDATES.")
 HEALTHY_CLASS  = 1
 SEX_COL        = 1      # column index of the Sex feature
 # Gender encoding observed in Algorithm2.py (lines 1611-1612):

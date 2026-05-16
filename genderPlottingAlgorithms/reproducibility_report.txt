@@ -1,0 +1,87 @@
+========================================================================
+                CDS ALGORITHM -- REPRODUCIBILITY REPORT                 
+========================================================================
+  Dataset : UCI Arrhythmia (n=3 users)
+  Method  : Leave-One-Out Cross-Validation (per-fold retraining)
+  NOTE    : Limited run (max_users=3 of 452)
+  Runtime : 134s
+  Paper target: 95.4% overall accuracy
+
+1. OVERALL PERFORMANCE
+----------------------
+  Total users evaluated : 3
+  Correct predictions   : 3 / 3
+  Overall accuracy      : 100.00%
+  Sensitivity (diseased detection)     : 100.00%
+  Specificity (1 - false alarm rate)   : 0.00%
+  False alarm rate                     : 0.00%
+  Users sent to SCREENING              : 0
+  Healthy users  : 0  |  Diseased users : 3
+
+2. GENDER-DISAGGREGATED ACCURACY
+--------------------------------
+  Metric                                 Male     Female  Diff (M-F)
+  --------------------------------  ---------  ---------  ----------
+  Total users                               2          1            
+  Overall accuracy                    100.00%    100.00%      +0.00%
+  Sensitivity                         100.00%    100.00%      +0.00%
+  Specificity                           0.00%      0.00%      +0.00%
+  Diseased error rate                   0.00%      0.00%      +0.00%
+  Healthy correct                         0/0        0/0            
+  Diseased correct                        2/2        1/1            
+  Sent to SCREENING                         0          0            
+
+  Paper reported: 5% male diseased error, 14% female diseased error
+
+3. PER-GENDER CONFUSION MATRIX (Diseased users only)
+----------------------------------------------------
+  Decision     | Male correct / total  | Female correct / total
+  --------------------------------------------------------
+  Detected     |     2 / 2     (100.0%)  |     1 / 1     (100.0%)
+  Missed       |     0 / 2     (  0.0%)  |     0 / 1     (  0.0%)
+
+4. FAIRNESS METRICS  (Mehrabi et al., 2021)
+-------------------------------------------
+  Metric                        Value    Interpretation
+  ------------------------------------------------------------
+  Statistical Parity Diff (SPD) +0.0000  fair (|SPD|<0.1)
+  Disparate Impact (DI)          1.0000  fair (DI>=0.8)
+  Equalized Odds diff (EO)       0.0000  fair (EO<0.1)
+
+  SPD > 0 means males classified more accurately than females.
+  SPD < 0 means females classified more accurately than males.
+  DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
+
+5. MISCLASSIFICATION BY ARRHYTHMIA CLASS AND GENDER
+---------------------------------------------------
+  Class   Name                         F wrong   F total   F err%   M wrong   M total   M err%
+  ----------------------------------------------------------------------------------
+  2       Coronary Artery Disease            0         0     n/a          0         0     n/a 
+  3       Old Anterior MI                    0         0     n/a          0         0     n/a 
+  4       Old Inferior MI                    0         0     n/a          0         0     n/a 
+  5       Sinus Tachycardia                  0         0     n/a          0         0     n/a 
+  6       Sinus Bradycardia                  0         1     0.0%         0         0     n/a 
+  7       PVC                                0         0     n/a          0         0     n/a 
+  8       Supraventricular PC                0         0     n/a          0         1     0.0%
+  9       Left Bundle Branch Block           0         0     n/a          0         0     n/a 
+  10      Right Bundle Branch Block          0         0     n/a          0         1     0.0%
+  14      LV Hypertrophy                     0         0     n/a          0         0     n/a 
+  15      Atrial Fibrillation                0         0     n/a          0         0     n/a 
+  16      Others                             0         0     n/a          0         0     n/a 
+
+6. CLASSES CONTRIBUTING MOST TO FEMALE MISCLASSIFICATION
+--------------------------------------------------------
+  Rank   Class   Name                          Wrong    Total     Err%
+  -----------------------------------------------------------------
+  1      6       Sinus Bradycardia                 0        1     0.0%
+
+7. CLASSES CONTRIBUTING MOST TO MALE MISCLASSIFICATION
+------------------------------------------------------
+  Rank   Class   Name                          Wrong    Total     Err%
+  -----------------------------------------------------------------
+  1      8       Supraventricular PC               0        1     0.0%
+  2      10      Right Bundle Branch Block         0        1     0.0%
+
+========================================================================
+END OF REPORT
+========================================================================
