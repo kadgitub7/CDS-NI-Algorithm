@@ -1372,7 +1372,47 @@ def main(data_path: str = "/arrhythmia.data") -> DecisionTree:
 
     return tree
 
+def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
+    """
+    Find the arrhythmia dataset path in a cross-platform way.
+
+    Search order:
+      1. Command-line argument
+      2. Current working directory
+      3. Same directory as this script
+      4. data/ subdirectory beside script
+    """
+
+    # 1. Command-line argument
+    if len(sys.argv) > 1:
+        p = Path(sys.argv[1]).expanduser().resolve()
+        if p.exists():
+            return p
+        raise FileNotFoundError(f"Dataset not found: {p}")
+
+    # 2. Current working directory
+    cwd_path = Path.cwd() / filename
+    if cwd_path.exists():
+        return cwd_path.resolve()
+
+    # 3. Same directory as script
+    script_dir = Path(__file__).parent
+    script_path = script_dir / filename
+    if script_path.exists():
+        return script_path.resolve()
+
+    # 4. data/ folder beside script
+    data_path = script_dir / "data" / filename
+    if data_path.exists():
+        return data_path.resolve()
+
+    raise FileNotFoundError(
+        f"Could not locate {filename}. "
+        "Place it beside the script, inside ./data/, "
+        "or pass the path as a command-line argument."
+    )
+
 
 if __name__ == "__main__":
-    path = sys.argv[1] if len(sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data"
+    path = get_arrhythmia_path("arrhythmia.data")
     tree = main(path)
