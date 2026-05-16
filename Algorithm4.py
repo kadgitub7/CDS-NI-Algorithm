@@ -137,6 +137,22 @@ HEALTHY_CLASS_ALG4: int = HEALTHY_CLASS   # = 1
 # [INFER] All disease class labels in the UCI Arrhythmia dataset
 ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: IN-PROCESSING RL REWARD MODIFICATION (Zhang et al., 2018 adapted)
+# ─────────────────────────────────────────────────────────────────────────────
+# Toggle: set to True to enable fairness-constrained RL action selection.
+# Set to False to use the original algorithm.
+ENABLE_FAIRNESS_RL: bool = True
+
+# Lambda (λ): fairness penalty weight for the modified reward structure.
+# rw_modified = rw_original - λ * |AF_male_contribution - AF_female_contribution|
+# Higher λ = stronger fairness constraint (at cost of accuracy).
+# Typical grid search range: 0.01 to 1.0
+FAIRNESS_LAMBDA: float = 0.1
+
+# Sex feature column index (same as Algorithm 2)
+SEX_FEATURE_INDEX_ALG4: int = 1
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – DATA STRUCTURES
@@ -747,6 +763,9 @@ def _rl_select_best_action(
     disease_h: int,
     AF_real_current: float,
     alg2_output: Algorithm2Output,
+    user_sex: Optional[int] = None,
+    data: Optional[np.ndarray] = None,
+    labels: Optional[np.ndarray] = None,
 ) -> Tuple[Optional[ExecutiveActionEntry], List[RLLookaheadEntry]]:
     """
     RL lookahead: select action J that minimises rw_sim.
@@ -761,6 +780,11 @@ def _rl_select_best_action(
     Per  §8.9, the printed line 13's
     +AF^cj self-reference is a typo; the correct form has no addition.
 
+    [FAIRNESS] When ENABLE_FAIRNESS_RL=True, applies modified reward:
+        rw_modified = rw_original - λ * |AF_male_contribution - AF_female_contribution|
+    where AF_male/female_contribution is computed from the sex-stratified
+    action weights for this feature across the training population in the node.
+
     [ENGR]  Each action corresponds to one feature.  "features extracted from c"
     = {c.feature_idx}.  We compute AF_sim for that single feature.
 
@@ -774,6 +798,68 @@ def _rl_select_best_action(
 
     p_h_f     = _compute_p_h_f(node, disease_h)
     p_h_gt1_f = _compute_p_h_gt1_f(node)
+
+    # ── FAIRNESS: Precompute sex-stratified AF contributions for penalty ──────
+    # For each candidate action, compute how differently it contributes to AF
+    # for male vs female subpopulations in the training data at this node.
+    fairness_penalties: Dict[int, float] = {}
+    if ENABLE_FAIRNESS_RL and data is not None and labels is not None:
+        node_users = node.user_indices
+        node_sex = data[node_users, SEX_FEATURE_INDEX_ALG4]
+        node_labels = labels[node_users]
+        male_mask = (node_sex == 0)
+        female_mask = (node_sex == 1)
+        n_male_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & male_mask).sum()
+        n_female_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & female_mask).sum()
+        n_male_node = male_mask.sum()
+        n_female_node = female_mask.sum()
+
+        for action in candidate_actions:
+            j = action.feature_idx
+            # Compute AF contribution separately for male and female subgroups
+            # AF_increment ∝ P(h,f) * r_{j|h} / P(h>1,f)
+            # The sex-specific version uses sex-stratified disease prevalence
+            # and sex-stratified action weight (fraction outside healthy range)
+            vals = data[node_users, j]
+            valid_mask = ~np.isnan(vals)
+
+            # Get healthy range for this feature at this node
+            model = alg2_output.get_model(node.node_id, j)
+            if model is None:
+                fairness_penalties[j] = 0.0
+                continue
+            b_min_h = model.healthy_range.b_min_healthy
+            b_max_h = model.healthy_range.b_max_healthy
+
+            # r_{j|h} stratified by sex: fraction of disease-h users outside range
+            disease_mask = (node_labels == disease_h)
+            male_disease = disease_mask & male_mask & valid_mask
+            female_disease = disease_mask & female_mask & valid_mask
+
+            n_male_d = male_disease.sum()
+            n_female_d = female_disease.sum()
+
+            if n_male_d > 0:
+                male_vals = vals[male_disease]
+                r_male = ((male_vals < b_min_h) | (male_vals > b_max_h)).sum() / n_male_d
+            else:
+                r_male = 0.0
+
+            if n_female_d > 0:
+                female_vals = vals[female_disease]
+                r_female = ((female_vals < b_min_h) | (female_vals > b_max_h)).sum() / n_female_d
+            else:
+                r_female = 0.0
+
+            # AF contribution disparity: |AF_male - AF_female|
+            # Using simplified AF formula: AF ∝ P(h,f) * r / P(h>1,f)
+            AF_male = p_h_f * r_male / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
+            AF_female = p_h_f * r_female / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
+            fairness_penalties[j] = abs(AF_male - AF_female)
+
+    # # ── ORIGINAL (uncomment to disable fairness RL): ─────────────────────────
+    # # To revert: set ENABLE_FAIRNESS_RL = False at the top of this file.
+    # fairness_penalties = {}
 
     rl_entries: List[RLLookaheadEntry] = []
     best_action: Optional[ExecutiveActionEntry] = None
@@ -790,6 +876,13 @@ def _rl_select_best_action(
 
         # [PAPER] line 14: rw^cj = 1 - (AF_sim_cj + AF_real_current)
         rw_sim_cj = 1.0 - (AF_sim_cj + AF_real_current)
+
+        # ── FAIRNESS: Modified reward with demographic parity penalty ─────────
+        # rw_modified = rw_original - λ * |AF_male - AF_female|
+        # Lower rw_sim is better (means higher AF). The penalty INCREASES rw_sim
+        # for actions with high disparity, making them less likely to be selected.
+        if ENABLE_FAIRNESS_RL and j in fairness_penalties:
+            rw_sim_cj += FAIRNESS_LAMBDA * fairness_penalties[j]
 
         is_sel = False
         if rw_sim_cj < best_rw_sim:
@@ -944,6 +1037,9 @@ def _predict_at_node(
                 disease_h         = h,
                 AF_real_current   = AF_real,
                 alg2_output       = alg2_output,
+                user_sex          = int(data[user_global_idx, SEX_FEATURE_INDEX_ALG4]),
+                data              = data,
+                labels            = labels,
             )
             disease_check_rec.rl_selections.extend(rl_entries)
 
@@ -2531,6 +2627,64 @@ def run_test_cases(
         # Run per-record validations
         print(f"\n  Per-record validation:")
         run_all_validations_single(record, verbose=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: LAMBDA GRID SEARCH UTILITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+def fairness_lambda_grid_search(
+    data_path: str = "arrhythmia.data",
+    lambda_values: Optional[List[float]] = None,
+    max_users: Optional[int] = None,
+    rng_seed: int = 42,
+) -> List[Dict]:
+    """
+    Grid search over FAIRNESS_LAMBDA to find the accuracy-fairness tradeoff.
+
+    For each lambda value, runs the full LOOCV pipeline and reports accuracy
+    and fairness metrics. Use this to tune λ for your desired balance.
+
+    Parameters
+    ----------
+    lambda_values : list of λ values to test. Default: [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+    max_users     : limit LOOCV to first N users (for faster iteration).
+
+    Returns
+    -------
+    List of dicts with keys: lambda, accuracy, spd, di, eo_diff, sensitivity, specificity
+    """
+    global FAIRNESS_LAMBDA
+
+    if lambda_values is None:
+        lambda_values = [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+
+    data, labels = load_dataset(data_path)
+    results = []
+
+    for lam in lambda_values:
+        FAIRNESS_LAMBDA = lam
+        log.info(f"\n{'='*50}")
+        log.info(f"GRID SEARCH: lambda={lam}")
+        log.info(f"{'='*50}")
+
+        output = run_loocv(data, labels, max_users=max_users, rng_seed=rng_seed)
+
+        result = {
+            "lambda": lam,
+            "accuracy": output.overall_accuracy,
+            "sensitivity": output.sensitivity,
+            "specificity": output.specificity,
+            "spd": output.fairness_spd,
+            "di": output.fairness_di,
+            "eo_diff": output.fairness_eo_diff,
+        }
+        results.append(result)
+        log.info(f"  lambda={lam:.3f}  acc={output.overall_accuracy*100:.1f}%  "
+                 f"SPD={output.fairness_spd:.4f}  DI={output.fairness_di:.4f}  "
+                 f"EO={output.fairness_eo_diff:.4f}")
+
+    return results
 
 
 # ─────────────────────────────────────────────────────────────────────────────

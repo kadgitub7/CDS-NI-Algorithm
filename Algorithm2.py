@@ -121,6 +121,64 @@ LAPLACE_EPSILON: float = 0.0
 ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 ALL_CLASSES: Tuple[int, ...] = (1,) + ALL_DISEASE_CLASSES
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: REWEIGHING PRE-PROCESSING (Kamiran & Calders, 2012)
+# ─────────────────────────────────────────────────────────────────────────────
+# Toggle: set to True to enable reweighing of training instances for
+# demographic parity in action weight computation. Set to False to use
+# the original unweighted algorithm.
+ENABLE_REWEIGHING: bool = True
+
+def compute_reweighing_weights(
+    labels_valid: np.ndarray,
+    sex_valid: np.ndarray,
+    protected_value: int = 1,
+) -> np.ndarray:
+    """
+    Compute Kamiran & Calders (2012) reweighing weights for demographic parity.
+
+    W(S=s, Y=y) = P(S=s) * P(Y=y) / P(S=s, Y=y)
+
+    where S is the protected attribute (sex), Y is the outcome label
+    (healthy=1 vs diseased=any other class).
+
+    This ensures the weighted joint distribution P_w(S,Y) = P(S)*P(Y),
+    removing statistical dependence between protected attribute and outcome.
+
+    Parameters
+    ----------
+    labels_valid : class labels for valid (non-NaN) users in this node.
+    sex_valid    : sex attribute (0=male, 1=female) for same users.
+    protected_value : value of the protected group (default=1, female).
+
+    Returns
+    -------
+    weights : shape (n_valid,) instance weights achieving demographic parity.
+    """
+    n = len(labels_valid)
+    if n == 0:
+        return np.ones(0)
+
+    # Binary outcome: healthy (Y=1) vs diseased (Y=0)
+    y_binary = (labels_valid == HEALTHY_CLASS).astype(int)
+
+    # Marginals
+    p_s1 = (sex_valid == protected_value).sum() / n  # P(S=protected)
+    p_s0 = 1.0 - p_s1                                # P(S=unprotected)
+    p_y1 = y_binary.sum() / n                         # P(Y=healthy)
+    p_y0 = 1.0 - p_y1                                # P(Y=diseased)
+
+    weights = np.ones(n, dtype=float)
+
+    for s_val, p_s in [(protected_value, p_s1), (1 - protected_value, p_s0)]:
+        for y_val, p_y in [(1, p_y1), (0, p_y0)]:
+            mask = (sex_valid == s_val) & (y_binary == y_val)
+            p_sy = mask.sum() / n  # P(S=s, Y=y)
+            if p_sy > 0:
+                weights[mask] = (p_s * p_y) / p_sy
+
+    return weights
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – DATA STRUCTURES
@@ -776,7 +834,8 @@ def compute_executive_actions(disc:          DiscretizationResult,
                                healthy_range: HealthyRangeResult,
                                bayes:         BayesianTables,
                                node:          TreeNode,
-                               labels:        np.ndarray
+                               labels:        np.ndarray,
+                               data:          Optional[np.ndarray] = None,
                                ) -> List[ExecutiveActionEntry]:
     """
     Compute executive action weights for one (node, feature) pair.
@@ -847,6 +906,21 @@ def compute_executive_actions(disc:          DiscretizationResult,
     min_healthy_bin = int(healthy_bins.min())
     max_healthy_bin = int(healthy_bins.max())
 
+    # ── FAIRNESS: Compute reweighing weights (Kamiran & Calders, 2012) ────────
+    # When enabled, instance weights adjust P(B̂|h) to remove statistical
+    # dependence between the protected attribute (sex) and the outcome,
+    # achieving demographic parity in the action weight computation.
+    instance_weights = None
+    if ENABLE_REWEIGHING and data is not None:
+        sex_valid = data[global_valid, SEX_FEATURE_INDEX]
+        instance_weights = compute_reweighing_weights(labels_valid, sex_valid)
+
+    # # ── ORIGINAL (uncomment to disable reweighing): ─────────────────────────
+    # # The original algorithm uses unweighted P(B̂|h) from Bayesian tables.
+    # # To revert: set ENABLE_REWEIGHING = False at the top of this file,
+    # # or comment out the reweighing block above and uncomment this section.
+    # instance_weights = None
+
     # ── [PAPER] Line 16: "for h = 2 to H do" ─────────────────────────────────
     for cls in bayes.class_labels:
         if cls == HEALTHY_CLASS:
@@ -861,10 +935,31 @@ def compute_executive_actions(disc:          DiscretizationResult,
         # ── [PAPER] Line 19: r_{o|h} via DISCRETIZED bin probabilities ──────
         # P(B̂ < b_min | h) = sum of P(B̂ = j | h) for bins j < min_healthy_bin
         # P(B̂ > b_max | h) = sum of P(B̂ = j | h) for bins j > max_healthy_bin
-        p_bin_h = bayes.p_bin_given_class(cls)  # shape (n_bins,)
 
-        p_below = float(p_bin_h[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
-        p_above = float(p_bin_h[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
+        if instance_weights is not None:
+            # ── FAIRNESS: Reweighted r_{o|h} computation ─────────────────────
+            # Instead of raw counts, use weighted counts per (class, bin) to
+            # compute P_w(B̂|h). This adjusts action weights so features that
+            # discriminate differently across sex groups get equalized influence.
+            class_mask = (labels_valid == cls)
+            class_weights = instance_weights[class_mask]
+            class_bins = disc.bin_assignments[class_mask]
+            w_total = class_weights.sum()
+            if w_total <= 0:
+                continue
+            # Weighted bin counts for this class
+            w_bin_counts = np.zeros(disc.n_bins, dtype=float)
+            for b_idx in range(disc.n_bins):
+                bin_mask = (class_bins == b_idx)
+                w_bin_counts[b_idx] = class_weights[bin_mask].sum()
+            p_bin_h_weighted = w_bin_counts / w_total
+            p_below = float(p_bin_h_weighted[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
+            p_above = float(p_bin_h_weighted[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
+        else:
+            # ── ORIGINAL: unweighted P(B̂|h) from Bayesian tables ─────────────
+            p_bin_h = bayes.p_bin_given_class(cls)  # shape (n_bins,)
+            p_below = float(p_bin_h[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
+            p_above = float(p_bin_h[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
 
         r_o_h = p_below + p_above
 
@@ -1006,6 +1101,7 @@ def run_algorithm2_for_node(node:          TreeNode,
             bayes         = bayes,
             node          = node,
             labels        = labels,
+            data          = data,
         )
         executive_entries.extend(act_entries)
 
