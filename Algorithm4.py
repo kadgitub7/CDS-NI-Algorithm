@@ -375,8 +375,9 @@ class Algorithm4Output:
     diseased_correct_females: int = 0
     diseased_total_females: int = 0
 
-    # Misclassification by true class for females
+    # Misclassification by true class, split by gender
     misclassified_females_by_class: Dict[int, int] = field(default_factory=dict)
+    misclassified_males_by_class:   Dict[int, int] = field(default_factory=dict)
 
     # Fairness metrics counters
     total_men: int = 0
@@ -500,12 +501,17 @@ class Algorithm4Output:
                 if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1
             )
 
-            # Misclassification by true class for females
+            # Misclassification by true class, split by gender
             self.misclassified_females_by_class = {}
+            self.misclassified_males_by_class   = {}
             for r in self.records:
-                if self.data[r.user_global_idx, 1] == 1 and r.true_is_diseased and not r.is_correct:
+                if r.true_is_diseased and not r.is_correct:
                     cls = r.true_label
-                    self.misclassified_females_by_class[cls] = self.misclassified_females_by_class.get(cls, 0) + 1
+                    sex = self.data[r.user_global_idx, 1]
+                    if sex == 1:
+                        self.misclassified_females_by_class[cls] = self.misclassified_females_by_class.get(cls, 0) + 1
+                    elif sex == 0:
+                        self.misclassified_males_by_class[cls] = self.misclassified_males_by_class.get(cls, 0) + 1
 
             # Fairness metrics
             self.total_men = sum(1 for r in self.records if self.data[r.user_global_idx, 1] == 0)
@@ -1130,7 +1136,7 @@ def run_algorithm4(
     labels          : full (N,) label array (1=healthy, 2-16=disease).
     tree            : DecisionTree from Algorithm 1.
     alg2_output     : Algorithm2Output from Algorithm 2.
-    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=False, per §8.8).
+    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=True, per §8.8).
     rng_seed        : optional random seed for reproducibility.
     verbose         : if True, set logger to DEBUG level.
 
@@ -1361,14 +1367,6 @@ def run_algorithm4(
             h for h in all_disease_classes
             if active_node.health_dist.get(h, 0) > 0
         ])
-        '''
-        node_disease_classes = sorted(
-            [h for h in active_node.health_dist if h != HEALTHY_CLASS and active_node.health_dist[h] > 0],
-            key=lambda h: active_node.health_dist[h],
-            reverse=True
-        )
-        '''
-
         if not node_disease_classes:
             log.debug(f"  Node {active_node.node_id!r}: no disease classes → skip")
             # [INFER] If no disease classes at this node, treat as healthy
@@ -1536,7 +1534,7 @@ def run_loocv(
     for i in range(n_total):
         # ── Build per-fold training set (all users except i) ─────────────────
         train_mask           = np.ones(n_users_total, dtype=bool)
-        train_mask[i]        = True
+        train_mask[i]        = False
         train_data           = data[train_mask]
         train_labels         = labels[train_mask]
 
@@ -2208,14 +2206,20 @@ def print_algorithm4_summary(output: Algorithm4Output) -> None:
     print(f"    Females (Diseased): {output.diseased_correct_females}/{output.diseased_total_females} correct "
           f"({output.diseased_correct_females/output.diseased_total_females*100:.1f}% sensitivity)" if output.diseased_total_females else "    Females (Diseased): No diseased females")
 
-    # Misclassified females by arrhythmia class
-    if output.misclassified_females_by_class:
-        print(f"\n  Misclassified females by arrhythmia class:")
-        for cls in sorted(output.misclassified_females_by_class.keys()):
-            count = output.misclassified_females_by_class[cls]
-            print(f"    Class {cls}: {count} misclassifications")
+    # Misclassification by arrhythmia class, split by gender
+    all_classes = sorted(
+        set(output.misclassified_females_by_class) | set(output.misclassified_males_by_class)
+    )
+    if all_classes:
+        print(f"\n  Misclassified diseased users by arrhythmia class and gender:")
+        print(f"    {'Class':<8}  {'Female':>8}  {'Male':>8}")
+        print(f"    {'-'*28}")
+        for cls in all_classes:
+            f_count = output.misclassified_females_by_class.get(cls, 0)
+            m_count = output.misclassified_males_by_class.get(cls, 0)
+            print(f"    {cls:<8}  {f_count:>8}  {m_count:>8}")
     else:
-        print(f"\n  No misclassified females by arrhythmia class.")
+        print(f"\n  No misclassified diseased users.")
 
     # Per-disease-class breakdown
     diseased_recs = [r for r in output.records if r.true_is_diseased]
@@ -2507,7 +2511,7 @@ def run_test_cases(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:  str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+    data_path:  str = "arrhythmia.data",
     run_loocv_flag: bool = True,
     max_users:  Optional[int] = None,
     run_tests:  bool = True,
@@ -2627,7 +2631,8 @@ def main(
 
 if __name__ == "__main__":
     import sys as _sys
-    path = _sys.argv[1] if len(_sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\amux\\verilogLearning\\CDS-NI-Algorithm\\arrhythmia.data"
+    _default_path = str(Path(__file__).parent / "arrhythmia.data")
+    path = _sys.argv[1] if len(_sys.argv) > 1 else _default_path
     # For quick test: limit users; remove max_users for full LOOCV
     n = int(_sys.argv[2]) if len(_sys.argv) > 2 else None
     output = main(

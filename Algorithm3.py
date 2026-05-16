@@ -1399,7 +1399,7 @@ COMPLEXITY ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:    str   = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+    data_path:    str   = "arrhythmia.data",
     run_full:     bool  = False,
     reset_per_h:  bool  = False,     # [PAPER]
     verbose_alg3: bool  = False,
@@ -1498,7 +1498,7 @@ def main(
 
 if __name__ == "__main__":
     import sys as _sys
-    path     = _sys.argv[1] if len(_sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data"
+    path     = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "arrhythmia.data")
     full     = "--full"     in _sys.argv
     per_h    = "--per-h"    in _sys.argv
     verbose  = "--verbose"  in _sys.argv

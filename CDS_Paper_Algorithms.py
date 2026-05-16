@@ -1374,5 +1374,5 @@ def main(data_path: str = "/arrhythmia.data") -> DecisionTree:
 
 
 if __name__ == "__main__":
-    path = sys.argv[1] if len(sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data"
+    path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).parent / "arrhythmia.data")
     tree = main(path)

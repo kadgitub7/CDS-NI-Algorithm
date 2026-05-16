@@ -41,13 +41,11 @@ import numpy as np
 import pandas as pd
 from scipy.stats import ttest_ind
 
-# ── Locate the worktree that contains CDS_Paper_Algorithms ────────────────────
+# ── Locate the repo root that contains CDS_Paper_Algorithms ──────────────────
 _HERE       = os.path.dirname(os.path.abspath(__file__))
-_WORKTREE   = os.path.normpath(os.path.join(
-    _HERE, "..", ".claude", "worktrees", "nifty-hoover-f39cac"
-))
-if _WORKTREE not in sys.path:
-    sys.path.insert(0, _WORKTREE)
+_REPO_ROOT  = os.path.normpath(os.path.join(_HERE, ".."))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 from CDS_Paper_Algorithms import load_dataset, FEATURE_NAMES  # type: ignore
 
@@ -59,10 +57,8 @@ from sklearn.model_selection import train_test_split
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 _DATA_CANDIDATES = [
-    os.path.join(_WORKTREE, "arrhythmia.data"),
-    os.path.join(_HERE, "..", "arrhythmia.data"),
-    r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data",
-    r"C:\Users\kadhi\OneDrive\Desktop\CDS_Algorithms\arrhythmia.data",
+    os.path.join(_REPO_ROOT, "arrhythmia.data"),
+    os.path.join(_HERE, "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:

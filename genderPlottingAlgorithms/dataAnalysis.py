@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from math import isnan
@@ -13,7 +14,17 @@ warnings.filterwarnings("ignore")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-DATA_PATH = "C:\\Users\\kadhi\\OneDrive\\Desktop\\amux\\verilogLearning\\CDS-NI-Algorithm\\arrhythmia.data"
+_HERE     = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
+DATA_PATH = next(
+    (p for p in [
+        os.path.join(_REPO_ROOT, "arrhythmia.data"),
+        os.path.join(_HERE, "arrhythmia.data"),
+    ] if os.path.exists(p)),
+    None,
+)
+if DATA_PATH is None:
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the repo root.")
 N_IMPUTATIONS = 5
 RANDOM_STATE = 42
 ALPHA = 0.05   # significance level for informative-missingness tests

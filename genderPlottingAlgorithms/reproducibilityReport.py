@@ -40,18 +40,14 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------------------------
 # PATH SETUP
 # ---------------------------------------------------------------------------
-_HERE     = os.path.dirname(os.path.abspath(__file__))
-_WORKTREE = os.path.normpath(os.path.join(
-    _HERE, "..", ".claude", "worktrees", "nifty-hoover-f39cac"
-))
-if _WORKTREE not in sys.path:
-    sys.path.insert(0, _WORKTREE)
+_HERE      = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 _DATA_CANDIDATES = [
-    os.path.join(_WORKTREE, "arrhythmia.data"),
-    os.path.join(_HERE, "..", "arrhythmia.data"),
-    r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data",
-    r"C:\Users\kadhi\OneDrive\Desktop\CDS_Algorithms\arrhythmia.data",
+    os.path.join(_REPO_ROOT, "arrhythmia.data"),
+    os.path.join(_HERE, "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:

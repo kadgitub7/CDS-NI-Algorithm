@@ -54,15 +54,12 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------------------------
 # PATHS
 # ---------------------------------------------------------------------------
-_HERE     = os.path.dirname(os.path.abspath(__file__))
-_WORKTREE = os.path.normpath(os.path.join(
-    _HERE, "..", ".claude", "worktrees", "nifty-hoover-f39cac"
-))
+_HERE      = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
 
 _DATA_CANDIDATES = [
-    os.path.join(_WORKTREE, "arrhythmia.data"),
-    os.path.join(_HERE, "..", "arrhythmia.data"),
-    r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data",
+    os.path.join(_REPO_ROOT, "arrhythmia.data"),
+    os.path.join(_HERE, "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
