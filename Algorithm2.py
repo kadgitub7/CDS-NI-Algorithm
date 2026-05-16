@@ -132,7 +132,7 @@ class DiscretizationResult:
     Result of discretizing one feature for one tree node.
 
     Produced by lines 4-7 of Algorithm 2:
-        Line 4:  B_m^k = BD_m^k(o, U)  →  raw feature values for node users
+        Line 4:  B_m^k = BD_m^k(o, U)  ->  raw feature values for node users
         Line 5:  B_min, B_max computed from B_m^k
         Line 6:  ΔB = (B_max - B_min) / N_bins  [ENGR: we choose N_bins]
         Line 7:  B̂_m^k = discretized bin assignments for each user
@@ -345,7 +345,7 @@ class ExecutiveActionEntry:
                 f"p_below={self.p_below_normal:.4f}  "
                 f"p_above={self.p_above_normal:.4f}  "
                 f"prev={self.p_h_and_f:.4f}  "
-                f"→ {self.action_label}")
+                f"-> {self.action_label}")
 
 
 @dataclass
@@ -364,10 +364,10 @@ class Algorithm2Output:
     executive_library:  List[ExecutiveActionEntry]  = field(default_factory=list)
 
     # ── Fast-lookup indices ──────────────────────────────────────────────────
-    # (node_id, feature_idx) → PerceptorModelEntry
+    # (node_id, feature_idx) -> PerceptorModelEntry
     perceptor_index:    Dict[Tuple[str,int], PerceptorModelEntry] = \
                             field(default_factory=dict)
-    # (node_id, feature_idx, disease_h) → ExecutiveActionEntry
+    # (node_id, feature_idx, disease_h) -> ExecutiveActionEntry
     executive_index:    Dict[Tuple[str,int,int], ExecutiveActionEntry] = \
                             field(default_factory=dict)
 
@@ -577,7 +577,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     n_classes = len(class_labels)
     n_bins    = disc.n_bins
 
-    # ── Map: node-local valid-user row → global label ─────────────────────────
+    # ── Map: node-local valid-user row -> global label ─────────────────────────
     # valid_user_rows are node-local indices into node.user_indices
     # global_idx = node.user_indices[local_row]
     global_indices_valid = node.user_indices[disc.valid_user_rows]
@@ -605,7 +605,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     for ci, cls in enumerate(class_labels):
         n_cls = users_per_class[ci]
         if n_cls == 0:
-            # No users of this class in node → uniform likelihood
+            # No users of this class in node -> uniform likelihood
             p_bin_given_h[:, ci] = 1.0 / n_bins
         else:
             raw = counts_per_class_bin[ci] + laplace_eps
@@ -637,7 +637,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     for b in range(n_bins):
         denom = p_bin[b]
         if denom < 1e-300:
-            # Degenerate bin (no evidence) → uniform posterior
+            # Degenerate bin (no evidence) -> uniform posterior
             p_h_given_bin[b] = 1.0 / n_classes
         else:
             p_h_given_bin[b] = (p_bin_given_h[b] * p_h_and_f) / denom
@@ -1095,7 +1095,7 @@ def run_algorithm2(tree:          DecisionTree,
 
             nodes_processed += 1
 
-        log.info(f"  Level m={m}: cumulative entries → "
+        log.info(f"  Level m={m}: cumulative entries -> "
                  f"perceptor={len(output.perceptor_library)}  "
                  f"executive={len(output.executive_library)}")
 
@@ -1475,7 +1475,7 @@ def print_executive_summary_by_disease(output:   Algorithm2Output,
 def main(data_path: str = "arrhythmia.data",
          run_full:  bool = False) -> Algorithm2Output:
     """
-    End-to-end execution: Algorithm 1 → Algorithm 2 → Validation → Reports.
+    End-to-end execution: Algorithm 1 -> Algorithm 2 -> Validation -> Reports.
 
     Parameters
     ----------
@@ -1503,9 +1503,9 @@ def main(data_path: str = "arrhythmia.data",
         log.info("Step 3: Processing ALL nodes in the tree")
     else:
         # [PAPER] Key nodes for the Arrhythmia case study:
-        #   root   → Focus Level 1 (all users)
-        #   k=1,f=1 → male branch (Focus Level 2)
-        #   k=1,f=2 → female branch (Focus Level 2)
+        #   root   -> Focus Level 1 (all users)
+        #   k=1,f=1 -> male branch (Focus Level 2)
+        #   k=1,f=2 -> female branch (Focus Level 2)
         key_nodes = ["root", "root|k1_f1", "root|k1_f2"]
         nodes_filter = [n for n in key_nodes if n in tree.all_nodes]
         log.info(f"Step 3: Processing {len(nodes_filter)} key nodes: {nodes_filter}")

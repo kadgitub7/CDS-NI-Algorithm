@@ -85,9 +85,9 @@ N_FEATURES: int = 279
 class FeatureKind(Enum):
     """
     [PAPER] Algorithm 1 lines 3-4 distinguish two kinds of features:
-      BINARY     – "sex, smoking, drug, family disease history …"  → F_k = 2,
+      BINARY     – "sex, smoking, drug, family disease history …"  -> F_k = 2,
                    branches are simply {0} and {1}.
-      CONTINUOUS – "age, weight, height, heart rate …"             → F_k >= 2,
+      CONTINUOUS – "age, weight, height, heart rate …"             -> F_k >= 2,
                    branches are determined by statistical discretisation (FSD).
     [INFER] We detect the kind automatically from the actual data values rather
             than a hard-coded list, because the UCI dataset does not include
@@ -145,10 +145,10 @@ def classify_features(data: np.ndarray) -> Dict[int, FeatureKind]:
 
     Returns
     -------
-    Dict mapping feature_index → FeatureKind
+    Dict mapping feature_index -> FeatureKind
 
     [INFER] Detection rule: if the set of non-NaN unique values is a subset of
-            {0.0, 1.0} → BINARY; else → CONTINUOUS.
+            {0.0, 1.0} -> BINARY; else -> CONTINUOUS.
     [ENGR]  A feature that is entirely NaN is classified as CONTINUOUS because
             it cannot produce branches anyway (it will be pruned at Eq. 2).
     """
@@ -157,7 +157,7 @@ def classify_features(data: np.ndarray) -> Dict[int, FeatureKind]:
         col_data = data[:, col]
         valid    = col_data[~np.isnan(col_data)]
         if len(valid) == 0:
-            kinds[col] = FeatureKind.CONTINUOUS   # all-NaN → unusable
+            kinds[col] = FeatureKind.CONTINUOUS   # all-NaN -> unusable
             continue
         unique_vals = set(valid)
         if unique_vals.issubset({0.0, 1.0}):
@@ -245,7 +245,7 @@ class BranchDef:
         if self.kind == FeatureKind.BINARY:
             return value in self.value_set        # type: ignore[operator]
         else:
-            # [INFER] Closed lower bound, open upper bound → [lo, hi)
+            # [INFER] Closed lower bound, open upper bound -> [lo, hi)
             # Except the last bin which is [lo, +inf].
             return self.lo <= value < self.hi     # type: ignore[operator]
 
@@ -318,7 +318,7 @@ def _fsd_continuous_median(feature_idx: int, user_indices: np.ndarray,
         return []
     median_val = float(np.median(valid))
     if float(valid.min()) == float(valid.max()):
-        return []    # no variation → cannot split
+        return []    # no variation -> cannot split
 
     fname = FEATURE_NAMES.get(feature_idx, f"feat_{feature_idx}")
     b1 = BranchDef(
@@ -351,8 +351,8 @@ def compute_fsd_branches(feature_idx: int,
     Dispatch to the appropriate FSD strategy for the given feature kind.
 
     [PAPER] Algorithm 1 lines 3-4 are the dispatch logic:
-      line 3 → CONTINUOUS → _fsd_continuous_median
-      line 4 → BINARY     → _fsd_binary
+      line 3 -> CONTINUOUS -> _fsd_continuous_median
+      line 4 -> BINARY     -> _fsd_binary
 
     Parameters
     ----------
@@ -436,8 +436,8 @@ def compute_branch_probability(branch_user_count: int,
     [PAPER] Algorithm 1, line 6: "Calculate the P_f^{(k_m,m)}: use previous
             probabilities extracted in previous focus level."
     [INFER] "Previous probabilities" means we always condition on the parent
-            node's user set (not the full dataset).  For the root→level-2
-            transition the parent is the root.  For level-2→level-3 the parent
+            node's user set (not the full dataset).  For the root->level-2
+            transition the parent is the root.  For level-2->level-3 the parent
             is whichever level-2 node we are currently expanding.
 
     Parameters
@@ -543,10 +543,10 @@ class TreeNode:
     One node in the CDS decision tree.
 
     Naming convention mirrors the paper:
-        focus_level      → m
-        branching_feat_k → k  (the feature used by the PARENT to create this node;
+        focus_level      -> m
+        branching_feat_k -> k  (the feature used by the PARENT to create this node;
                                 -1 for the root, which has no parent)
-        branch_f         → f  (the branch index that led to this node; 0 = root)
+        branch_f         -> f  (the branch index that led to this node; 0 = root)
 
     The root node represents focus level 1 (all users, all features).
     Nodes at focus level 2 are children of the root, branched on some feature k.
@@ -562,7 +562,7 @@ class TreeNode:
     feature_indices  : O_m^{k,f} – feature columns available at this node.
     branch_prob      : P_f^{(k_m,m)}.
     health_dist      : {class: count} distribution.
-    children_by_k    : Dict[feature_k → List[TreeNode]] grouping children by
+    children_by_k    : Dict[feature_k -> List[TreeNode]] grouping children by
                         which feature was used to split them.
     is_leaf          : True if no further splitting was possible.
     prune_reason     : Non-empty if this node was pruned / not expanded.
@@ -632,8 +632,8 @@ class DecisionTree:
     Attributes
     ----------
     root              : the level-1 root node.
-    nodes_by_level    : Dict[m → List[TreeNode]] for easy per-level access.
-    all_nodes         : flat Dict[node_id → TreeNode] for lookup.
+    nodes_by_level    : Dict[m -> List[TreeNode]] for easy per-level access.
+    all_nodes         : flat Dict[node_id -> TreeNode] for lookup.
     valid_branches    : count of branches that passed Eq. 2 at each level.
     pruned_branches   : count of branches pruned at each level.
     feature_kinds     : the kind classification used.
@@ -760,7 +760,7 @@ def _expand_node(parent:      TreeNode,
     n_pruned    = 0
     valid_ks    = []
 
-    log.debug(f"  Expanding {parent.node_id!r} → m={m_child}, "
+    log.debug(f"  Expanding {parent.node_id!r} -> m={m_child}, "
               f"trying {len(parent.feature_indices)} features …")
 
     for k in sorted(parent.feature_indices):
@@ -788,8 +788,8 @@ def _expand_node(parent:      TreeNode,
     tree.pruned_branches[m_child] += n_pruned
 
     log.info(
-        f"  m={parent.focus_level}→{m_child} | node {parent.node_id!r} | "
-        f"valid splits: {len(valid_ks)} features → {n_created} children | "
+        f"  m={parent.focus_level}->{m_child} | node {parent.node_id!r} | "
+        f"valid splits: {len(valid_ks)} features -> {n_created} children | "
         f"pruned branches: {n_pruned}"
     )
     if not valid_ks:
@@ -992,7 +992,7 @@ def print_node_details(node: TreeNode, feature_kinds: Dict[int, FeatureKind]) ->
             kname = FEATURE_NAMES.get(k, f"feat_{k}")
             labels_str = ", ".join(
                 f"f={c.branch_f}({c.branch_def.label if c.branch_def else '?'})"
-                f"→{c.n_users}u" for c in children
+                f"->{c.n_users}u" for c in children
             )
             print(f"    k={k} ({kname}): {labels_str}")
     else:
@@ -1112,7 +1112,7 @@ def explain_level3_impossibility(tree: DecisionTree) -> None:
         print(f"    Best-case branch size (50/50 split): {best_possible}")
         print(f"    u_min required                     : {u_min}")
         print(f"    Best-case >= u_min?                : {best_possible >= u_min}")
-        print(f"    → LEVEL 3 {'POSSIBLE' if best_possible >= u_min else 'IMPOSSIBLE'} "
+        print(f"    -> LEVEL 3 {'POSSIBLE' if best_possible >= u_min else 'IMPOSSIBLE'} "
               f"for this parent node.")
 
 
@@ -1173,7 +1173,7 @@ def validate_user_partition(tree: DecisionTree) -> None:
                   f"parent={parent.n_users}u | "
                   f"children={[s.n_users for s in siblings]} | "
                   f"union={len(sibling_union)} | disjoint={ok_disjoint} | "
-                  f"subset={ok_subset} → {status}")
+                  f"subset={ok_subset} -> {status}")
 
     print(f"\n  Overall validation: {'ALL PASS ✓' if all_ok else 'FAILURES DETECTED ✗'}")
 
@@ -1224,7 +1224,7 @@ def validate_feature_exclusion(tree: DecisionTree) -> None:
             bad = [f for f in node.feature_indices if f <= k]
             if bad:
                 violations += 1
-                print(f"  FAIL: {node.node_id!r} | k={k} but features ≤ k present: {bad}")
+                print(f"  FAIL: {node.node_id!r} | k={k} but features <= k present: {bad}")
             else:
                 print(f"  PASS: {node.node_id!r} | k={k} | "
                       f"features all > k ✓ ({node.n_features} remaining)")

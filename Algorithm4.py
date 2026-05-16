@@ -44,9 +44,9 @@ CRITICAL DESIGN DECISIONS
      P(h>1,node) = node.n_diseased / node.n_users            [INFER]
      (both computed over training users in the relevant tree node)
 
-  3. Each action ↔ ONE feature  (sensor → feature reading).  [PAPER]
+  3. Each action ↔ ONE feature  (sensor -> feature reading).  [PAPER]
 
-  4. Line 32 "Go to line 18" → implemented as an inner while-loop.  [PAPER]
+  4. Line 32 "Go to line 18" -> implemented as an inner while-loop.  [PAPER]
 
   5. Initial AF at t=0 is zero.                                [PAPER]
 
@@ -146,10 +146,10 @@ class HealthDecision(Enum):
     """
     [PAPER] Section VI.B: three possible outcomes of Algorithm 4.
 
-    HEALTHY    → "start healthy living recommendations"           (line 36)
-    UNHEALTHY  → "Alarm and disease diagnosis process"            (line 26)
-    SCREENING  → "Run Screening process"                          (line 42)
-    UNKNOWN    → prediction incomplete (should not occur normally)
+    HEALTHY    -> "start healthy living recommendations"           (line 36)
+    UNHEALTHY  -> "Alarm and disease diagnosis process"            (line 26)
+    SCREENING  -> "Run Screening process"                          (line 42)
+    UNKNOWN    -> prediction incomplete (should not occur normally)
     """
     HEALTHY   = "Healthy"
     UNHEALTHY = "Unhealthy"
@@ -595,9 +595,9 @@ def _get_raw_value(global_user_idx: int, feature_idx: int,
 def _is_outside_healthy_range(value: float, b_min: float, b_max: float) -> bool:
     """
     [PAPER] Algorithm 4, line 25:
-        if V_j < b_min^{mkfj}  OR  V_j > b_max^{kmfj}  → alarm
+        if V_j < b_min^{mkfj}  OR  V_j > b_max^{kmfj}  -> alarm
 
-    [ENGR]  NaN → False (missing measurement cannot confirm abnormality).
+    [ENGR]  NaN -> False (missing measurement cannot confirm abnormality).
     [PAPER] Strict inequalities as written in the paper.
     [ENGR]  Inverted range (b_min > b_max) signals an undefined healthy band
             (no healthy training users had a valid value for this feature);
@@ -901,7 +901,7 @@ def _predict_at_node(
         #         (already done in _get_sorted_disease_actions)
 
         if not sorted_actions_h:
-            log.debug(f"    h={h}: no refined actions at node {nid!r} → skip")
+            log.debug(f"    h={h}: no refined actions at node {nid!r} -> skip")
             dc_rec = DiseaseCheckRecord(
                 node_id=nid, focus_level=m, disease_h=h,
                 n_actions_in_buf=0, n_actions_applied=0,
@@ -931,7 +931,7 @@ def _predict_at_node(
 
         # ─────────────────────────────────────────────────────────────
         # [PAPER] Lines 18–33: while C_buf ≠ ∅:
-        #   (Line 32: "Go to line 18" → while-loop)
+        #   (Line 32: "Go to line 18" -> while-loop)
         # ─────────────────────────────────────────────────────────────
         while C_buf:
 
@@ -974,7 +974,7 @@ def _predict_at_node(
             for j in features_to_test:
                 V_j = VO_buf[j]
 
-                # [PAPER §VII.A + spec §8.13] Sensor failure → skip entirely.
+                # [PAPER §VII.A + spec §8.13] Sensor failure -> skip entirely.
                 if np.isnan(V_j):
                     log.debug(f"    [SKIP NaN] j={j} for h={h}: sensor failure, no PAC update")
                     continue
@@ -993,7 +993,7 @@ def _predict_at_node(
                 # Get healthy range from Algorithm 2 perceptor library
                 model_entry = alg2_output.get_model(nid, j)
                 if model_entry is None:
-                    log.debug(f"    h={h} j={j}: no model entry at node {nid!r} → skip")
+                    log.debug(f"    h={h} j={j}: no model entry at node {nid!r} -> skip")
                     continue
 
                 b_min = model_entry.healthy_range.b_min_healthy
@@ -1047,7 +1047,7 @@ def _predict_at_node(
                 )
 
                 if alarm:
-                    # [PAPER] Lines 26-28: Alarm and disease diagnosis → Decision=Unhealthy
+                    # [PAPER] Lines 26-28: Alarm and disease diagnosis -> Decision=Unhealthy
                     disease_check_rec.alarm_triggered   = True
                     disease_check_rec.alarm_feature_idx = j
                     disease_check_rec.alarm_raw_value   = V_j
@@ -1081,7 +1081,7 @@ def _predict_at_node(
                 # [PAPER] Line 29: End if (alarm)
             # end for j in features_to_test
 
-            # [PAPER] Line 31: if C_buf ≠ ∅ → Go to line 18 (while-loop continues)
+            # [PAPER] Line 31: if C_buf ≠ ∅ -> Go to line 18 (while-loop continues)
             # [PAPER] Line 33: End if
         # end while C_buf
 
@@ -1108,7 +1108,7 @@ def _predict_at_node(
                   f"{DIAGNOSTIC_THRESHOLD_ALG4} -> HEALTHY")
         return HealthDecision.HEALTHY, AF_real, None
 
-    # [PAPER] Line 39: elseif Users in focus level m+1 >= u_min → increase focus
+    # [PAPER] Line 39: elseif Users in focus level m+1 >= u_min -> increase focus
     # [INFER] "Users in focus level m+1" means: are there child nodes of the
     #         current node with sufficient users to provide reliable models?
     can_increase_focus = False
@@ -1127,12 +1127,12 @@ def _predict_at_node(
         node_rec.focus_increased = True
         log.debug(f"  Node {nid!r}: rw={rw_final:.4f} > threshold, "
                   f"focus can increase to m={next_m}")
-        return HealthDecision.UNKNOWN, AF_real, None   # UNKNOWN → caller increases focus
+        return HealthDecision.UNKNOWN, AF_real, None   # UNKNOWN -> caller increases focus
 
-    # [PAPER] Lines 41-42: else → Run Screening process
+    # [PAPER] Lines 41-42: else -> Run Screening process
     node_rec.sent_to_screening = True
     log.debug(f"  Node {nid!r}: rw={rw_final:.4f} > threshold, "
-              f"focus cannot increase → SCREENING")
+              f"focus cannot increase -> SCREENING")
     return HealthDecision.SCREENING, AF_real, None
 
 
@@ -1171,7 +1171,7 @@ def run_algorithm4(
     -------
     PredictionRecord with full decision trace.
 
-    Algorithm 4 Pseudocode → Implementation Mapping
+    Algorithm 4 Pseudocode -> Implementation Mapping
     ------------------------------------------------
     Init  : load root node normal ranges, actions          ← [below]
     Init  : randomly select initial action from C          ← initial_action step
@@ -1348,8 +1348,8 @@ def run_algorithm4(
     # ─────────────────────────────────────────────────────────────────────
     # [PAPER] Line 1: for k = set of k_m
     # [INFER] We iterate over focus levels m=1, 2, ...
-    #         At m=1: k=∅, f=∅ → root node.
-    #         At m=2: k=1 (sex feature), f=male/female → appropriate child.
+    #         At m=1: k=∅, f=∅ -> root node.
+    #         At m=2: k=1 (sex feature), f=male/female -> appropriate child.
     #         We stop when a definitive decision is reached or focus cannot increase.
     # ─────────────────────────────────────────────────────────────────────
     max_focus_level = tree.depth()
@@ -1374,7 +1374,7 @@ def run_algorithm4(
         )
 
         if active_node is None:
-            log.debug(f"  m={current_focus}: no applicable node → stop")
+            log.debug(f"  m={current_focus}: no applicable node -> stop")
             # Don't escalate further; the previous focus level's decision was UNKNOWN
             # but we can't escalate, so treat as SCREENING per paper line 41-42
             decision = HealthDecision.SCREENING
@@ -1395,7 +1395,7 @@ def run_algorithm4(
             if active_node.health_dist.get(h, 0) > 0
         ])
         if not node_disease_classes:
-            log.debug(f"  Node {active_node.node_id!r}: no disease classes → skip")
+            log.debug(f"  Node {active_node.node_id!r}: no disease classes -> skip")
             # [INFER] If no disease classes at this node, treat as healthy
             decision = HealthDecision.HEALTHY
             break
@@ -1439,7 +1439,7 @@ def run_algorithm4(
         if decision == HealthDecision.SCREENING:
             break
 
-        # decision == UNKNOWN → focus can be increased → continue outer loop
+        # decision == UNKNOWN -> focus can be increased -> continue outer loop
         # [PAPER §8.11 user override; CORRECTION TO BUG #9]
         # AF persists across focus-level transitions. The user override
         # explicitly rejects the per-focus-level reset implied by Figs 11/12.
@@ -1452,13 +1452,13 @@ def run_algorithm4(
     if decision == HealthDecision.UNKNOWN:
         # [ENGR] Should not occur in normal operation; fall back to SCREENING
         decision = HealthDecision.SCREENING
-        log.debug("  Decision remained UNKNOWN after all focus levels → SCREENING")
+        log.debug("  Decision remained UNKNOWN after all focus levels -> SCREENING")
 
     # Determine correctness — paper-faithful metric per §VII.A and Table 5.
     #
     # Paper Table 5 reports "Total accuracy = 95.4%" with "Diagnosis accuracy = 90%"
     # at Focus Level 2. Working backwards: 95.4% × 452 ≈ 431 correct = 90% × 207
-    # diseased + 100% × 245 healthy → specificity = 100%. The paper achieves this
+    # diseased + 100% × 245 healthy -> specificity = 100%. The paper achieves this
     # despite explicitly sending healthy female users to SCREENING (§VII.A).
     #
     # Reconciliation: SCREENING is a "soft healthy" outcome — the system did NOT
@@ -1467,10 +1467,10 @@ def run_algorithm4(
     # the screening" — SCREENING is *under the healthy verdict* with extra checks.
     #
     # Therefore:
-    #   • True healthy: HEALTHY or SCREENING → correct (no false alarm)
-    #                   UNHEALTHY            → wrong (false alarm; FA>0)
-    #   • True diseased: UNHEALTHY           → correct (diagnosis caught it)
-    #                    HEALTHY or SCREENING → wrong (missed diagnosis)
+    #   • True healthy: HEALTHY or SCREENING -> correct (no false alarm)
+    #                   UNHEALTHY            -> wrong (false alarm; FA>0)
+    #   • True diseased: UNHEALTHY           -> correct (diagnosis caught it)
+    #                    HEALTHY or SCREENING -> wrong (missed diagnosis)
     if true_label == HEALTHY_CLASS_ALG4:
         # User is truly healthy: correct unless we falsely alarmed them
         is_correct = (decision != HealthDecision.UNHEALTHY)
@@ -1484,7 +1484,7 @@ def run_algorithm4(
 
     log.info(
         f"  DECISION: user={user_global_idx}  true={true_label}  "
-        f"→ {decision.value}  correct={is_correct}  "
+        f"-> {decision.value}  correct={is_correct}  "
         f"PAC={record.total_pac_count}  AF={AF_real:.4f}  "
         f"elapsed={record.elapsed_ms:.1f}ms"
     )
@@ -1520,9 +1520,9 @@ def run_loocv(
 
     Per-fold protocol: for each held-out test user u,
       1. Build training set = all 452 users EXCEPT u (451 users).
-      2. Run Algorithm 1 on training set → tree_u.
-      3. Run Algorithm 2 on training set + tree_u → alg2_u.
-      4. Run Algorithm 3 on training set + tree_u + alg2_u → alg3_u.
+      2. Run Algorithm 1 on training set -> tree_u.
+      3. Run Algorithm 2 on training set + tree_u -> alg2_u.
+      4. Run Algorithm 3 on training set + tree_u + alg2_u -> alg3_u.
       5. Run Algorithm 4 prediction on user u using (tree_u, alg2_u, alg3_u).
     Repeat for all 452 users; aggregate the predictions.
 
@@ -1728,7 +1728,7 @@ def validate_healthy_rw_threshold(record: PredictionRecord) -> List[str]:
     Verify that HEALTHY decisions have rw ≤ DIAGNOSTIC_THRESHOLD at their
     last PAC.
 
-    [PAPER] Line 35: "if rw_{t_mkf} ≤ Threshold → Claim User is healthy"
+    [PAPER] Line 35: "if rw_{t_mkf} ≤ Threshold -> Claim User is healthy"
     """
     issues: List[str] = []
     if record.decision != HealthDecision.HEALTHY:
@@ -1935,7 +1935,7 @@ def run_all_validations_output(output: Algorithm4Output, verbose: bool = True) -
             print(f"  [FAIL] Premature HEALTHY: {n_premature_healthy} records flagged")
 
     # ── 2. FA=0 policy: specificity invariant (true healthy NOT classified UNHEALTHY) ─
-    # [PAPER §VI.B / Table 5] Diagnostic-test policy is FA=0 → Specificity should be 100%.
+    # [PAPER §VI.B / Table 5] Diagnostic-test policy is FA=0 -> Specificity should be 100%.
     # In strict per-fold LOOCV this can be violated when a held-out healthy user is at
     # a feature extreme (their value defined the *full* dataset's b_min/b_max but is
     # outside the *training* range). Such cases are reported as warnings.
@@ -2011,7 +2011,7 @@ def print_prediction_detail(record: PredictionRecord, show_full_trace: bool = Tr
           f"true_label={record.true_label}  "
           f"({'HEALTHY' if record.true_is_healthy else 'DISEASED'})")
     print(f"  Decision      : {record.decision.value}  "
-          f"({'✓ CORRECT' if record.is_correct else '✗ WRONG'})")
+          f"({'CORRECT' if record.is_correct else 'WRONG'})")
     print(f"  Focus reached : m={record.max_focus_reached}")
     print(f"  PAC count     : {record.total_pac_count}")
     print(f"  Actions applied: {record.total_actions_applied}")
@@ -2546,7 +2546,7 @@ def main(
     rng_seed:   int  = 42,
 ) -> Algorithm4Output:
     """
-    End-to-end pipeline: Algorithm 1 → 2 → 3 → 4.
+    End-to-end pipeline: Algorithm 1 -> 2 -> 3 -> 4.
 
     Steps:
       1. Load dataset.

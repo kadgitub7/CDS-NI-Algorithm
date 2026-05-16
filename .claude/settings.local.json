@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python genderPlottingAlgorithms/reproducibilityReport.py)",
+      "Bash(python genderPlottingAlgorithms/featureImportanceByGender.py)",
+      "PowerShell(if \\(-not $?\\) { \"File empty or not found\" })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\kadhi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-kadhi-OneDrive-Desktop-amux-verilogLearning-CDS-NI-Algorithm\\\\64017df0-b882-4813-8cc4-424d374ecdb9\\\\tasks\\\\b5f05w13e.output\" -ErrorAction SilentlyContinue; \"---LENGTH---\"; \\(Get-Item \"C:\\\\Users\\\\kadhi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-kadhi-OneDrive-Desktop-amux-verilogLearning-CDS-NI-Algorithm\\\\64017df0-b882-4813-8cc4-424d374ecdb9\\\\tasks\\\\b5f05w13e.output\" -ErrorAction SilentlyContinue\\).Length)"
+    ]
+  }
+}
