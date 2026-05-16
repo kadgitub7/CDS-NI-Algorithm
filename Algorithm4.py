@@ -395,6 +395,12 @@ class Algorithm4Output:
     fairness_spd: float = 0.0
     fairness_di: float = 0.0
     fairness_eo_diff: float = 0.0
+    fairness_eo_tpr_diff: float = 0.0
+    fairness_eo_fpr_diff: float = 0.0
+    fairness_tpr_male: float = 0.0
+    fairness_tpr_female: float = 0.0
+    fairness_fpr_male: float = 0.0
+    fairness_fpr_female: float = 0.0
 
     def _recompute_stats(self) -> None:
         """
@@ -539,14 +545,35 @@ class Algorithm4Output:
             accuracy_men = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 0) / self.total_men if self.total_men > 0 else 0
             accuracy_women = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 1) / self.total_women if self.total_women > 0 else 0
 
-            # Compute fairness metrics
-            self.fairness_spd = accuracy_men - accuracy_women
-            self.fairness_di = accuracy_women / accuracy_men if accuracy_men > 0 else 0
+            # Compute fairness metrics (Mehrabi et al., 2021)
+            #
+            # Statistical Parity Difference (SPD):
+            #   P(Y_hat=UNHEALTHY | male) - P(Y_hat=UNHEALTHY | female)
+            #   Measures whether the positive prediction rate differs by group.
+            #   SPD = 0 means equal rates; >0 means males get more UNHEALTHY predictions.
+            p_unhealthy_male = (self.unhealthy_abnormal_men + self.unhealthy_normal_men) / self.total_men if self.total_men > 0 else 0
+            p_unhealthy_female = (self.unhealthy_abnormal_women + self.unhealthy_normal_women) / self.total_women if self.total_women > 0 else 0
+            self.fairness_spd = p_unhealthy_male - p_unhealthy_female
+
+            # Disparate Impact (DI):
+            #   P(Y_hat=UNHEALTHY | female) / P(Y_hat=UNHEALTHY | male)
+            #   DI < 0.8 indicates adverse impact against the female group (80% rule).
+            self.fairness_di = p_unhealthy_female / p_unhealthy_male if p_unhealthy_male > 0 else 0
+
+            # Equalized Odds (Hardt et al., 2016):
+            #   Requires BOTH TPR and FPR to be equal across groups.
+            #   Report each component separately plus the max absolute difference.
             tpr_male = self.unhealthy_abnormal_men / self.abnormal_men if self.abnormal_men > 0 else 0
             fpr_male = self.unhealthy_normal_men / self.normal_men if self.normal_men > 0 else 0
             tpr_female = self.unhealthy_abnormal_women / self.abnormal_women if self.abnormal_women > 0 else 0
             fpr_female = self.unhealthy_normal_women / self.normal_women if self.normal_women > 0 else 0
-            self.fairness_eo_diff = abs(tpr_male - tpr_female) + abs(fpr_male - fpr_female)
+            self.fairness_tpr_male = tpr_male
+            self.fairness_tpr_female = tpr_female
+            self.fairness_fpr_male = fpr_male
+            self.fairness_fpr_female = fpr_female
+            self.fairness_eo_tpr_diff = tpr_male - tpr_female
+            self.fairness_eo_fpr_diff = fpr_male - fpr_female
+            self.fairness_eo_diff = max(abs(tpr_male - tpr_female), abs(fpr_male - fpr_female))
 
 
 # ─────────────────────────────────────────────────────────────────────────────

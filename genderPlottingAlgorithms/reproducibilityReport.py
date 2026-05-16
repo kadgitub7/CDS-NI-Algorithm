@@ -169,16 +169,27 @@ def compute_metrics(output: Algorithm4Output):
     female_blk = _gender_block(FEMALE_CODE)
 
     # --- fairness metrics ---
-    acc_m = male_blk["accuracy"]
-    acc_f = female_blk["accuracy"]
-    spd   = acc_m - acc_f          # Statistical Parity Difference
-    di    = acc_f / acc_m if acc_m > 0 else float("nan")  # Disparate Impact
+    # SPD: P(Y_hat=UNHEALTHY|male) - P(Y_hat=UNHEALTHY|female)
+    n_male_pred_unhealthy = sum(1 for r in records
+                                if data[r.user_global_idx, SEX_COL] == MALE_CODE
+                                and r.decision == HealthDecision.UNHEALTHY)
+    n_female_pred_unhealthy = sum(1 for r in records
+                                  if data[r.user_global_idx, SEX_COL] == FEMALE_CODE
+                                  and r.decision == HealthDecision.UNHEALTHY)
+    n_male_total = male_blk["total"]
+    n_female_total = female_blk["total"]
+    p_unhealthy_male = n_male_pred_unhealthy / n_male_total if n_male_total > 0 else 0
+    p_unhealthy_female = n_female_pred_unhealthy / n_female_total if n_female_total > 0 else 0
+    spd = p_unhealthy_male - p_unhealthy_female
+    di  = p_unhealthy_female / p_unhealthy_male if p_unhealthy_male > 0 else float("nan")
 
     tpr_m = male_blk["sensitivity"]
     fpr_m = 1.0 - male_blk["specificity"]
     tpr_f = female_blk["sensitivity"]
     fpr_f = 1.0 - female_blk["specificity"]
-    eo_diff = abs(tpr_m - tpr_f) + abs(fpr_m - fpr_f)    # Equalized Odds diff
+    eo_tpr_diff = tpr_m - tpr_f
+    eo_fpr_diff = fpr_m - fpr_f
+    eo_diff = max(abs(eo_tpr_diff), abs(eo_fpr_diff))
 
     # --- per-class error counts by gender ---
     class_errors = defaultdict(lambda: {"female_wrong": 0, "male_wrong": 0,
