@@ -1,10 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python genderPlottingAlgorithms/reproducibilityReport.py)",
-      "Bash(python genderPlottingAlgorithms/featureImportanceByGender.py)",
-      "PowerShell(if \\(-not $?\\) { \"File empty or not found\" })",
-      "PowerShell(Get-Content \"C:\\\\Users\\\\kadhi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-kadhi-OneDrive-Desktop-amux-verilogLearning-CDS-NI-Algorithm\\\\64017df0-b882-4813-8cc4-424d374ecdb9\\\\tasks\\\\b5f05w13e.output\" -ErrorAction SilentlyContinue; \"---LENGTH---\"; \\(Get-Item \"C:\\\\Users\\\\kadhi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-kadhi-OneDrive-Desktop-amux-verilogLearning-CDS-NI-Algorithm\\\\64017df0-b882-4813-8cc4-424d374ecdb9\\\\tasks\\\\b5f05w13e.output\" -ErrorAction SilentlyContinue\\).Length)"
+      "PowerShell($dir = \"C:\\\\Users\\\\kadhi\\\\OneDrive\\\\Desktop\\\\amux\\\\verilogLearning\\\\CDS-NI-Algorithm\\\\genderPlottingAlgorithms\"; Rename-Item \"$dir\\\\week4_importance.csv\" \"importance.csv\"; Rename-Item \"$dir\\\\week4_significant.csv\" \"significant.csv\"; Rename-Item \"$dir\\\\week5_missingness.csv\" \"missingness.csv\"; Rename-Item \"$dir\\\\week5_informative.csv\" \"informative.csv\"; Rename-Item \"$dir\\\\week6_augmentation.csv\" \"augmentation.csv\")"
     ]
   }
 }

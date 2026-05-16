@@ -23,11 +23,11 @@ Covers three analysis stages and produces a single root-cause report:
 Output
 ------
   technical_report.txt    -- formatted ASCII report (all sections)
-  week4_importance.csv    -- per-feature importance (male, female, delta)
-  week4_significant.csv   -- features significant at BH q < 0.05
-  week5_missingness.csv   -- per-feature missing-data summary
-  week5_informative.csv   -- informative-missingness test results
-  week6_augmentation.csv  -- augmentation strategy gap summary
+  importance.csv          -- per-feature importance (male, female, delta)
+  significant.csv         -- features significant at BH q < 0.05
+  missingness.csv         -- per-feature missing-data summary
+  informative.csv         -- informative-missingness test results
+  augmentation.csv        -- augmentation strategy gap summary
 
 Usage
 -----
@@ -235,7 +235,7 @@ def run_week4(X_imp, y_raw, report_lines):
                 f"{row['importance_female']:>10.4f}  {row['delta']:>+8.4f}  {row['q_value_bh']:>8.4f}"
             )
         if n_sig > 20:
-            report_lines.append(f"  ... {n_sig - 20} more features (see week4_significant.csv)")
+            report_lines.append(f"  ... {n_sig - 20} more features (see significant.csv)")
 
     # Normal ranges (Eq. 5: exact min/max of healthy users)
     _subsection(report_lines, "4b. Normal Ranges by Gender (Eq. 5)")
@@ -840,23 +840,23 @@ def main():
 
     # Save CSVs
     if not importance_df.empty:
-        p = os.path.join(OUT_DIR, "week4_importance.csv")
+        p = os.path.join(OUT_DIR, "importance.csv")
         importance_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not sig_df.empty:
-        p = os.path.join(OUT_DIR, "week4_significant.csv")
+        p = os.path.join(OUT_DIR, "significant.csv")
         sig_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not miss_df.empty:
-        p = os.path.join(OUT_DIR, "week5_missingness.csv")
+        p = os.path.join(OUT_DIR, "missingness.csv")
         miss_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not inf_df.empty:
-        p = os.path.join(OUT_DIR, "week5_informative.csv")
+        p = os.path.join(OUT_DIR, "informative.csv")
         inf_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not aug_summary_df.empty:
-        p = os.path.join(OUT_DIR, "week6_augmentation.csv")
+        p = os.path.join(OUT_DIR, "augmentation.csv")
         aug_summary_df.to_csv(p, index=False)
         print(f"Saved: {p}")
 
