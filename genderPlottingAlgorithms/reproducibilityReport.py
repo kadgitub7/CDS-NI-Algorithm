@@ -70,6 +70,8 @@ from Algorithm4 import (
     HealthDecision,
     DEFAULT_N_BINS,
 )
+import fairness_config
+from adversarial_debiasing import run_adversarial_debiasing
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -191,6 +193,34 @@ def compute_metrics(output: Algorithm4Output):
     eo_fpr_diff = fpr_m - fpr_f
     eo_diff = max(abs(eo_tpr_diff), abs(eo_fpr_diff))
 
+    # --- Subgroup Disparity Calibration Error (SDCE) ---
+    # SDCE measures the gap in calibration between subgroups.
+    # For each group g, calibration error = |P(Y=1 | Y_hat=positive, G=g) - overall_positive_rate|
+    # SDCE = max over groups of |group_precision - overall_precision|
+    #
+    # Here "positive" = UNHEALTHY prediction, Y=1 = truly diseased.
+    n_pred_unhealthy_male = n_male_pred_unhealthy
+    n_pred_unhealthy_female = n_female_pred_unhealthy
+    n_true_pos_male = sum(
+        1 for r in records
+        if data[r.user_global_idx, SEX_COL] == MALE_CODE
+        and r.decision == HealthDecision.UNHEALTHY
+        and r.true_is_diseased
+    )
+    n_true_pos_female = sum(
+        1 for r in records
+        if data[r.user_global_idx, SEX_COL] == FEMALE_CODE
+        and r.decision == HealthDecision.UNHEALTHY
+        and r.true_is_diseased
+    )
+    n_total_pred_unhealthy = n_pred_unhealthy_male + n_pred_unhealthy_female
+    n_total_true_pos = n_true_pos_male + n_true_pos_female
+
+    precision_overall = n_total_true_pos / n_total_pred_unhealthy if n_total_pred_unhealthy > 0 else 0
+    precision_male = n_true_pos_male / n_pred_unhealthy_male if n_pred_unhealthy_male > 0 else 0
+    precision_female = n_true_pos_female / n_pred_unhealthy_female if n_pred_unhealthy_female > 0 else 0
+    sdce = max(abs(precision_male - precision_overall), abs(precision_female - precision_overall))
+
     # --- per-class error counts by gender ---
     class_errors = defaultdict(lambda: {"female_wrong": 0, "male_wrong": 0,
                                         "female_total": 0, "male_total": 0})
@@ -226,6 +256,10 @@ def compute_metrics(output: Algorithm4Output):
         "spd":           spd,
         "di":            di,
         "eo_diff":       eo_diff,
+        "sdce":          sdce,
+        "precision_male":    precision_male,
+        "precision_female":  precision_female,
+        "precision_overall": precision_overall,
         "class_errors":  dict(class_errors),
     }
 
@@ -234,7 +268,7 @@ def compute_metrics(output: Algorithm4Output):
 # REPORT FORMATTER
 # ---------------------------------------------------------------------------
 
-def build_report(metrics, data, labels, max_users, elapsed_sec):
+def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None):
     lines = []
     W = 72
 
@@ -271,6 +305,7 @@ def build_report(metrics, data, labels, max_users, elapsed_sec):
         lines.append(f"  NOTE    : Limited run (max_users={max_users} of 452)")
     lines.append(f"  Runtime : {elapsed_sec:.0f}s")
     lines.append(f"  Paper target: 95.4% overall accuracy")
+    lines.append(f"  Config  : {fairness_config.summary()}")
 
     # ---- 1. overall ----
     h2("1. OVERALL PERFORMANCE")
@@ -338,10 +373,17 @@ def build_report(metrics, data, labels, max_users, elapsed_sec):
                  f"{'fair (DI>=0.8)' if di>=0.8 else 'BIASED (DI<0.8)'}")
     lines.append(f"  Equalized Odds diff (EO)      {eo:>7.4f}  "
                  f"{'fair (EO<0.1)' if eo<0.1 else 'BIASED (EO>=0.1)'}")
+
+    sdce = metrics["sdce"]
+    lines.append(f"  Subgroup Disparity Cal. Err   {sdce:>7.4f}  "
+                 f"{'fair (SDCE<0.05)' if sdce<0.05 else 'BIASED (SDCE>=0.05)'}")
+    lines.append(f"    Precision (male UNHEALTHY)  {metrics['precision_male']:>7.4f}")
+    lines.append(f"    Precision (female UNHEALTHY){metrics['precision_female']:>7.4f}")
+    lines.append(f"    Precision (overall)         {metrics['precision_overall']:>7.4f}")
     lines.append("")
-    lines.append("  SPD > 0 means males classified more accurately than females.")
-    lines.append("  SPD < 0 means females classified more accurately than males.")
+    lines.append("  SPD > 0 means males get UNHEALTHY predictions more often.")
     lines.append("  DI < 0.8 is the standard 80% rule threshold (EEOC guideline).")
+    lines.append("  SDCE measures calibration gap between subgroups (lower=fairer).")
 
     # ---- 5. per-class error ----
     h2("5. MISCLASSIFICATION BY ARRHYTHMIA CLASS AND GENDER")
@@ -406,6 +448,61 @@ def build_report(metrics, data, labels, max_users, elapsed_sec):
         if rank >= 10:
             break
 
+    # ---- 8. adversarial debiasing (if results provided) ----
+    if adv_result is not None:
+        h2("8. ADVERSARIAL DEBIASING (Zhang et al., 2018 adapted)")
+        lines.append(f"  Adversary architecture : MLP ({fairness_config.ADVERSARIAL_HIDDEN_DIM} hidden units)")
+        lines.append(f"  Training epochs        : {fairness_config.ADVERSARIAL_EPOCHS}")
+        lines.append(f"  Learning rate          : {fairness_config.ADVERSARIAL_LR}")
+        lines.append("")
+        lines.append(f"  Adversary accuracy (before)  : {adv_result.adversary_accuracy_before*100:.2f}%")
+        lines.append(f"  Adversary accuracy (after)   : {adv_result.adversary_accuracy_after*100:.2f}%")
+        lines.append(f"  Chance baseline              : 50.00%")
+        lines.append("")
+        lines.append(f"  Threshold offset (male)      : {adv_result.threshold_offset_male:+.4f}")
+        lines.append(f"  Threshold offset (female)    : {adv_result.threshold_offset_female:+.4f}")
+        lines.append(f"  Predictions changed          : {adv_result.n_predictions_changed}")
+        lines.append("")
+        lines.append(f"  {'Metric':<30}  {'Before':>9}  {'After':>9}  {'Delta':>9}")
+        lines.append("  " + "-" * 62)
+        lines.append(f"  {'Overall accuracy':<30}  "
+                     f"{adv_result.original_overall_accuracy*100:>8.2f}%  "
+                     f"{adv_result.debiased_overall_accuracy*100:>8.2f}%  "
+                     f"{(adv_result.debiased_overall_accuracy-adv_result.original_overall_accuracy)*100:>+8.2f}%")
+        lines.append(f"  {'Male accuracy':<30}  "
+                     f"{adv_result.original_male_accuracy*100:>8.2f}%  "
+                     f"{adv_result.debiased_male_accuracy*100:>8.2f}%  "
+                     f"{(adv_result.debiased_male_accuracy-adv_result.original_male_accuracy)*100:>+8.2f}%")
+        lines.append(f"  {'Female accuracy':<30}  "
+                     f"{adv_result.original_female_accuracy*100:>8.2f}%  "
+                     f"{adv_result.debiased_female_accuracy*100:>8.2f}%  "
+                     f"{(adv_result.debiased_female_accuracy-adv_result.original_female_accuracy)*100:>+8.2f}%")
+        gap_before = abs(adv_result.original_male_accuracy - adv_result.original_female_accuracy)
+        gap_after = abs(adv_result.debiased_male_accuracy - adv_result.debiased_female_accuracy)
+        lines.append(f"  {'Gender accuracy gap':<30}  "
+                     f"{gap_before*100:>8.2f}%  "
+                     f"{gap_after*100:>8.2f}%  "
+                     f"{(gap_after-gap_before)*100:>+8.2f}%")
+        lines.append("")
+        if adv_result.adversary_accuracy_before > 0.55:
+            lines.append("  Adversary could predict sex from CDS outputs -> gender signal exists.")
+        else:
+            lines.append("  Adversary close to chance -> CDS outputs carry little gender signal.")
+
+    # ---- 9. active configuration summary ----
+    h2("9. ACTIVE FAIRNESS CONFIGURATION")
+    lines.append(f"  {fairness_config.summary()}")
+    lines.append("")
+    lines.append(f"  ENABLE_REWEIGHING            = {fairness_config.ENABLE_REWEIGHING}")
+    lines.append(f"  ENABLE_FAIRNESS_RL           = {fairness_config.ENABLE_FAIRNESS_RL}")
+    if fairness_config.ENABLE_FAIRNESS_RL:
+        lines.append(f"    FAIRNESS_LAMBDA            = {fairness_config.FAIRNESS_LAMBDA}")
+    lines.append(f"  ENABLE_ADVERSARIAL_DEBIASING = {fairness_config.ENABLE_ADVERSARIAL_DEBIASING}")
+    lines.append(f"  ENABLE_FORCED_SEX_BRANCHING  = {fairness_config.ENABLE_FORCED_SEX_BRANCHING}")
+    lines.append(f"  ENABLE_DATA_AUGMENTATION     = {fairness_config.ENABLE_DATA_AUGMENTATION}")
+    if fairness_config.ENABLE_DATA_AUGMENTATION:
+        lines.append(f"    AUGMENTATION_STRATEGY      = {fairness_config.AUGMENTATION_STRATEGY}")
+
     lines.append("")
     lines.append("=" * W)
     lines.append("END OF REPORT")
@@ -455,6 +552,7 @@ def main():
     print("=" * 72)
     print("CDS REPRODUCIBILITY REPORT")
     print("=" * 72)
+    print(f"Config: {fairness_config.summary()}")
     print(f"Loading data from: {DATA_PATH}")
 
     data, labels = load_dataset(DATA_PATH)
@@ -482,7 +580,20 @@ def main():
     print(f"LOOCV complete in {elapsed:.0f}s.  Computing metrics ...")
 
     metrics = compute_metrics(output)
-    report  = build_report(metrics, data, labels, args.max_users, elapsed)
+
+    # Run adversarial debiasing if enabled
+    adv_result = None
+    if fairness_config.ENABLE_ADVERSARIAL_DEBIASING:
+        print("Running adversarial debiasing ...")
+        from Algorithm4 import DIAGNOSTIC_THRESHOLD_ALG4
+        adv_result = run_adversarial_debiasing(
+            output=output,
+            data=data,
+            labels=labels,
+            diagnostic_threshold=DIAGNOSTIC_THRESHOLD_ALG4,
+        )
+
+    report  = build_report(metrics, data, labels, args.max_users, elapsed, adv_result)
     csv_df  = build_class_csv(metrics, labels)
 
     # --- print to console ---

@@ -140,18 +140,10 @@ ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 # ─────────────────────────────────────────────────────────────────────────────
 # FAIRNESS: IN-PROCESSING RL REWARD MODIFICATION (Zhang et al., 2018 adapted)
 # ─────────────────────────────────────────────────────────────────────────────
-# Toggle: set to True to enable fairness-constrained RL action selection.
-# Set to False to use the original algorithm.
-ENABLE_FAIRNESS_RL: bool = True
+# Controlled by fairness_config.py — the centralized toggle file.
+from fairness_config import ENABLE_FAIRNESS_RL, FAIRNESS_LAMBDA, SEX_FEATURE_INDEX
 
-# Lambda (λ): fairness penalty weight for the modified reward structure.
-# rw_modified = rw_original - λ * |AF_male_contribution - AF_female_contribution|
-# Higher λ = stronger fairness constraint (at cost of accuracy).
-# Typical grid search range: 0.01 to 1.0
-FAIRNESS_LAMBDA: float = 0.1
-
-# Sex feature column index (same as Algorithm 2)
-SEX_FEATURE_INDEX_ALG4: int = 1
+SEX_FEATURE_INDEX_ALG4: int = SEX_FEATURE_INDEX
 
 
 # ─────────────────────────────────────────────────────────────────────────────

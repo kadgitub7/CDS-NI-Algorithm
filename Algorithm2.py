@@ -124,10 +124,8 @@ ALL_CLASSES: Tuple[int, ...] = (1,) + ALL_DISEASE_CLASSES
 # ─────────────────────────────────────────────────────────────────────────────
 # FAIRNESS: REWEIGHING PRE-PROCESSING (Kamiran & Calders, 2012)
 # ─────────────────────────────────────────────────────────────────────────────
-# Toggle: set to True to enable reweighing of training instances for
-# demographic parity in action weight computation. Set to False to use
-# the original unweighted algorithm.
-ENABLE_REWEIGHING: bool = True
+# Controlled by fairness_config.py — the centralized toggle file.
+from fairness_config import ENABLE_REWEIGHING
 
 def compute_reweighing_weights(
     labels_valid: np.ndarray,
