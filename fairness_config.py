@@ -103,7 +103,7 @@ def summary() -> str:
     if ENABLE_REWEIGHING:
         flags.append("Reweigh")
     if ENABLE_FAIRNESS_RL:
-        flags.append(f"FairnessRL(λ={FAIRNESS_LAMBDA})")
+        flags.append(f"FairnessRL(lambda={FAIRNESS_LAMBDA})")
     if ENABLE_ADVERSARIAL_DEBIASING:
         flags.append("AdvDebiasing")
     if ENABLE_FORCED_SEX_BRANCHING:

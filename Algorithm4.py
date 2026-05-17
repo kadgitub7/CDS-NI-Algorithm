@@ -458,19 +458,19 @@ class Algorithm4Output:
         if self.data is not None:
             self.total_abnormal_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.total_abnormal_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.incorrect_abnormal_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.incorrect_abnormal_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.error_rate_abnormal_males = (
                 self.incorrect_abnormal_males / self.total_abnormal_males
@@ -484,35 +484,35 @@ class Algorithm4Output:
             # Per-gender confusion matrices
             self.healthy_correct_males = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.healthy_total_males = sum(
                 1 for r in self.records
-                if r.true_is_healthy and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.diseased_correct_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.diseased_total_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.healthy_correct_females = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.healthy_total_females = sum(
                 1 for r in self.records
-                if r.true_is_healthy and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.diseased_correct_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.diseased_total_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
 
             # Misclassification by true class, split by gender
@@ -521,37 +521,37 @@ class Algorithm4Output:
             for r in self.records:
                 if r.true_is_diseased and not r.is_correct:
                     cls = r.true_label
-                    sex = self.data[r.user_global_idx, 1]
+                    sex = self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4]
                     if sex == 1:
                         self.misclassified_females_by_class[cls] = self.misclassified_females_by_class.get(cls, 0) + 1
                     elif sex == 0:
                         self.misclassified_males_by_class[cls] = self.misclassified_males_by_class.get(cls, 0) + 1
 
             # Fairness metrics
-            self.total_men = sum(1 for r in self.records if self.data[r.user_global_idx, 1] == 0)
-            self.total_women = sum(1 for r in self.records if self.data[r.user_global_idx, 1] == 1)
-            self.abnormal_men = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0)
-            self.abnormal_women = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1)
+            self.total_men = sum(1 for r in self.records if self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.total_women = sum(1 for r in self.records if self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
+            self.abnormal_men = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.abnormal_women = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
             self.unhealthy_abnormal_men = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.unhealthy_abnormal_women = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
-            self.normal_men = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, 1] == 0)
-            self.normal_women = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, 1] == 1)
+            self.normal_men = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.normal_women = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
             self.unhealthy_normal_men = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.unhealthy_normal_women = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
-            accuracy_men = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 0) / self.total_men if self.total_men > 0 else 0
-            accuracy_women = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 1) / self.total_women if self.total_women > 0 else 0
+            accuracy_men = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0) / self.total_men if self.total_men > 0 else 0
+            accuracy_women = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1) / self.total_women if self.total_women > 0 else 0
 
             # Compute fairness metrics (Mehrabi et al., 2021)
             #
@@ -758,6 +758,8 @@ def _rl_select_best_action(
     user_sex: Optional[int] = None,
     data: Optional[np.ndarray] = None,
     labels: Optional[np.ndarray] = None,
+    train_data: Optional[np.ndarray] = None,
+    train_labels: Optional[np.ndarray] = None,
 ) -> Tuple[Optional[ExecutiveActionEntry], List[RLLookaheadEntry]]:
     """
     RL lookahead: select action J that minimises rw_sim.
@@ -773,7 +775,7 @@ def _rl_select_best_action(
     +AF^cj self-reference is a typo; the correct form has no addition.
 
     [FAIRNESS] When ENABLE_FAIRNESS_RL=True, applies modified reward:
-        rw_modified = rw_original - λ * |AF_male_contribution - AF_female_contribution|
+        rw_modified = rw_original + λ * |AF_male_contribution - AF_female_contribution|
     where AF_male/female_contribution is computed from the sex-stratified
     action weights for this feature across the training population in the node.
 
@@ -796,9 +798,11 @@ def _rl_select_best_action(
     # for male vs female subpopulations in the training data at this node.
     fairness_penalties: Dict[int, float] = {}
     if ENABLE_FAIRNESS_RL and data is not None and labels is not None:
+        fair_data = train_data if train_data is not None else data
+        fair_labels = train_labels if train_labels is not None else labels
         node_users = node.user_indices
-        node_sex = data[node_users, SEX_FEATURE_INDEX_ALG4]
-        node_labels = labels[node_users]
+        node_sex = fair_data[node_users, SEX_FEATURE_INDEX_ALG4]
+        node_labels = fair_labels[node_users]
         male_mask = (node_sex == 0)
         female_mask = (node_sex == 1)
         n_male_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & male_mask).sum()
@@ -812,7 +816,7 @@ def _rl_select_best_action(
             # AF_increment ∝ P(h,f) * r_{j|h} / P(h>1,f)
             # The sex-specific version uses sex-stratified disease prevalence
             # and sex-stratified action weight (fraction outside healthy range)
-            vals = data[node_users, j]
+            vals = fair_data[node_users, j]
             valid_mask = ~np.isnan(vals)
 
             # Get healthy range for this feature at this node
@@ -870,7 +874,7 @@ def _rl_select_best_action(
         rw_sim_cj = 1.0 - (AF_sim_cj + AF_real_current)
 
         # ── FAIRNESS: Modified reward with demographic parity penalty ─────────
-        # rw_modified = rw_original - λ * |AF_male - AF_female|
+        # rw_modified = rw_original + λ * |AF_male - AF_female|
         # Lower rw_sim is better (means higher AF). The penalty INCREASES rw_sim
         # for actions with high disparity, making them less likely to be selected.
         if ENABLE_FAIRNESS_RL and j in fairness_penalties:
@@ -916,7 +920,9 @@ def _predict_at_node(
     pac_counter:      List[int],          # [0] = current PAC count (mutable)
     record:           PredictionRecord,
     consumed_actions: Optional[Set[Tuple[int, int]]] = None,
-    initial_action_h: Optional[int] = None
+    initial_action_h: Optional[int] = None,
+    train_data: Optional[np.ndarray] = None,
+    train_labels: Optional[np.ndarray] = None,
 ) -> Tuple[HealthDecision, float, Optional[int]]:
     """
     Run the inner prediction loop of Algorithm 4 at ONE tree node.
@@ -1032,6 +1038,8 @@ def _predict_at_node(
                 user_sex          = int(data[user_global_idx, SEX_FEATURE_INDEX_ALG4]),
                 data              = data,
                 labels            = labels,
+                train_data        = train_data,
+                train_labels      = train_labels,
             )
             disease_check_rec.rl_selections.extend(rl_entries)
 
@@ -1156,16 +1164,6 @@ def _predict_at_node(
                     # [PAPER] Line 28: Return Decision
                     return HealthDecision.UNHEALTHY, AF_real, alarm_class
 
-                # --- Algorithm 4: Node Update Logic ---
-                # [PAPER Page 320, Line 18] Check if this feature branches the tree
-                if node.branching_feat_k == j:
-                    # Determine which branch (f) the user falls into
-                    next_node = None
-                    for child in node.all_children:
-                        if child.branch_def.contains(V_j):
-                            next_node = child
-                            break
-
                 # [PAPER] Line 29: End if (alarm)
             # end for j in features_to_test
 
@@ -1237,6 +1235,8 @@ def run_algorithm4(
     alg3_output:      Algorithm3Output,
     rng_seed:         Optional[int] = None,
     verbose:          bool = False,
+    train_data:       Optional[np.ndarray] = None,
+    train_labels:     Optional[np.ndarray] = None,
 ) -> PredictionRecord:
     """
     Run Algorithm 4 for a single test user.
@@ -1505,6 +1505,8 @@ def run_algorithm4(
             record           = record,
             consumed_actions = consumed_pairs,
             initial_action_h = h_init,
+            train_data       = train_data,
+            train_labels     = train_labels,
         )
         # Maintain a separate global PAC count for trace/reporting purposes.
         record.total_pac_count += pac_counter[0]
@@ -1625,6 +1627,8 @@ def run_loocv(
     n_bins       : Algorithm 2 discretization bin count (default 20).
     nodes_filter : Algorithm 2/3 nodes_filter (default: root + sex branches).
     """
+    import fairness_config as _fc
+
     if nodes_filter is None:
         # [PAPER §VII.A] Sex-branched nodes at level 2 (Sex = column 1).
         nodes_filter = ["root", "root|k1_f1", "root|k1_f2"]
@@ -1633,12 +1637,19 @@ def run_loocv(
     log.info(f"\n{'='*65}")
     log.info(f"LOOCV (per-fold retraining) | n_users={n_total}  "
              f"threshold={DIAGNOSTIC_THRESHOLD_ALG4}")
+    log.info(f"Config: {_fc.summary()}")
     log.info(f"{'='*65}")
 
     # Suppress per-fold training logs (each fold logs Algorithms 1-3 progress).
     import logging as _logging
-    for name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3"):
+    for name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3", "CDS.Alg1.ForcedSex"):
         _logging.getLogger(name).setLevel(_logging.WARNING)
+
+    # Lazy imports for optional features
+    if _fc.ENABLE_FORCED_SEX_BRANCHING:
+        from Algorithm1_forcedBranch import build_forced_sex_forest, route_user
+    if _fc.ENABLE_DATA_AUGMENTATION:
+        from augmentation_strategies import apply_augmentation
 
     output = Algorithm4Output(data=data)
     random.seed(rng_seed)
@@ -1653,9 +1664,35 @@ def run_loocv(
         train_data           = data[train_mask]
         train_labels         = labels[train_mask]
 
-        # ── Per-fold Algorithm 1: build decision tree on training set ────────
-        tree_i = build_decision_tree(train_data, train_labels)
-        
+        # ── Optional: augment training data (female sub-population) ──────────
+        if _fc.ENABLE_DATA_AUGMENTATION and _fc.AUGMENTATION_STRATEGY != "none":
+            train_data, train_labels = apply_augmentation(
+                strategy_name = _fc.AUGMENTATION_STRATEGY,
+                X_train       = train_data,
+                y_train       = train_labels,
+                rng_seed      = rng_seed + i,
+            )
+
+        # ── Per-fold Algorithm 1 ─────────────────────────────────────────────
+        if _fc.ENABLE_FORCED_SEX_BRANCHING:
+            # Build two sex-specific trees, then route test user
+            forest_i = build_forced_sex_forest(train_data, train_labels)
+            test_user_sex = data[i, SEX_FEATURE_INDEX_ALG4]
+            if test_user_sex == 0:
+                tree_i = forest_i.male_tree
+            else:
+                tree_i = forest_i.female_tree
+            # Build nodes_filter: root of the sub-tree + its level-2 children
+            # This mirrors the standard pipeline's ["root", "root|k1_f1", "root|k1_f2"]
+            root_id = tree_i.root.node_id
+            nodes_filter_i = [root_id]
+            if 2 in tree_i.nodes_by_level:
+                for child in tree_i.nodes_by_level[2]:
+                    nodes_filter_i.append(child.node_id)
+        else:
+            tree_i = build_decision_tree(train_data, train_labels)
+            nodes_filter_i = nodes_filter
+
         treeCounter += 1
         print(f"Tree built: {treeCounter}")
         # ── Per-fold Algorithm 2: perceptor + executive training ─────────────
@@ -1664,7 +1701,7 @@ def run_loocv(
             data         = train_data,
             labels       = train_labels,
             n_bins       = n_bins,
-            nodes_filter = nodes_filter,
+            nodes_filter = nodes_filter_i,
         )
 
         # ── Per-fold Algorithm 3: action refinement (FA = 0, paper-literal) ──
@@ -1673,8 +1710,8 @@ def run_loocv(
             tree         = tree_i,
             data         = train_data,
             labels       = train_labels,
-            nodes_filter = nodes_filter,
-            reset_per_h  = False,    
+            nodes_filter = nodes_filter_i,
+            reset_per_h  = False,
             verbose      = False,
         )
 
@@ -1692,6 +1729,8 @@ def run_loocv(
             alg3_output     = alg3_i,
             rng_seed        = rng_seed,
             verbose         = verbose,
+            train_data      = train_data,
+            train_labels    = train_labels,
         )
         output.records.append(pred)
         output.total_elapsed_ms += pred.elapsed_ms
@@ -2646,15 +2685,18 @@ def fairness_lambda_grid_search(
     -------
     List of dicts with keys: lambda, accuracy, spd, di, eo_diff, sensitivity, specificity
     """
+    import fairness_config as _fc
     global FAIRNESS_LAMBDA
 
     if lambda_values is None:
         lambda_values = [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
 
+    saved_lambda = FAIRNESS_LAMBDA
     data, labels = load_dataset(data_path)
     results = []
 
     for lam in lambda_values:
+        _fc.FAIRNESS_LAMBDA = lam
         FAIRNESS_LAMBDA = lam
         log.info(f"\n{'='*50}")
         log.info(f"GRID SEARCH: lambda={lam}")
@@ -2675,6 +2717,9 @@ def fairness_lambda_grid_search(
         log.info(f"  lambda={lam:.3f}  acc={output.overall_accuracy*100:.1f}%  "
                  f"SPD={output.fairness_spd:.4f}  DI={output.fairness_di:.4f}  "
                  f"EO={output.fairness_eo_diff:.4f}")
+
+    _fc.FAIRNESS_LAMBDA = saved_lambda
+    FAIRNESS_LAMBDA = saved_lambda
 
     return results
 

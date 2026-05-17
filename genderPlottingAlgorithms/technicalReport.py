@@ -289,7 +289,7 @@ def run_week5(X_raw, y_raw, report_lines):
     f_mask = sex == FEMALE_CODE
     n_male, n_female = int(m_mask.sum()), int(f_mask.sum())
     n_feat = X_raw.shape[1]
-    feat_cols = [c for c in range(n_feat) if c != SEX_COL and c != n_feat - 1]
+    feat_cols = [c for c in range(n_feat) if c != SEX_COL]
 
     report_lines.append(f"Features scanned for missingness: {len(feat_cols)}")
     report_lines.append(f"Male samples: {n_male}  |  Female samples: {n_female}")
@@ -402,7 +402,8 @@ def run_week5(X_raw, y_raw, report_lines):
         imp = IterativeImputer(random_state=RANDOM_STATE + m_iter, max_iter=10)
         X_m = imp.fit_transform(X_raw)
         imputed_means_per_feature.append(X_m[:, feat_cols].mean(axis=0))
-        imputed_vars_per_feature.append( X_m[:, feat_cols].var(axis=0, ddof=0))
+        n_samples = X_m.shape[0]
+        imputed_vars_per_feature.append( X_m[:, feat_cols].var(axis=0, ddof=1) / n_samples)
 
     Q   = np.array(imputed_means_per_feature)   # (M, n_feat)
     U   = np.array(imputed_vars_per_feature)    # (M, n_feat) -- within-imputation variance proxy

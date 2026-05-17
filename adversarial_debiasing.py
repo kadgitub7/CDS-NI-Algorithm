@@ -195,7 +195,7 @@ def extract_adversary_features(records, data: np.ndarray) -> Tuple[np.ndarray, n
     std[std < 1e-8] = 1.0
     X = (X - mu) / std
 
-    return X, y
+    return X, y, mu, std
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -238,7 +238,7 @@ def run_adversarial_debiasing(
         log.warning("Too few records for adversarial debiasing")
         return result
 
-    X, y_sex = extract_adversary_features(records, data)
+    X, y_sex, feat_mu, feat_std = extract_adversary_features(records, data)
 
     # Step 1: Train adversary
     adversary = AdversaryMLP(
@@ -312,12 +312,16 @@ def run_adversarial_debiasing(
             }
             X_new = X.copy()
             for i, d in enumerate(new_decisions):
-                X_new[i, 4] = decision_map.get(d, 2)
-                X_new[i, 1] = 1.0 - X[i, 0]  # rw doesn't change
+                X_new[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
 
             # Score: adversary accuracy on new features (want close to 0.5)
+            # Mask non-decision features (cols 0-3) to zero so the adversary
+            # can only exploit the decision column for sex prediction.
+            # This ensures threshold search targets decision-level parity.
+            X_eval = X_new.copy()
+            X_eval[:, :4] = 0.0
             # + penalty for accuracy loss
-            adv_acc = adversary.accuracy(X_new, y_sex)
+            adv_acc = adversary.accuracy(X_eval, y_sex)
 
             n_correct_new = 0
             for i, r in enumerate(records):
@@ -400,7 +404,7 @@ def run_adversarial_debiasing(
     }
     X_debiased = X.copy()
     for i, d in enumerate(final_decisions):
-        X_debiased[i, 4] = decision_map.get(d, 2)
+        X_debiased[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
     result.adversary_accuracy_after = adversary.accuracy(X_debiased, y_sex)
 
     log.info(f"Adversary accuracy (after debiasing): {result.adversary_accuracy_after:.4f}")

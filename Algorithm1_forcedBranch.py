@@ -585,7 +585,9 @@ def route_user(
         return 'unknown', None
     if sex == MALE_VALUE:
         return 'male', forest.male_tree
-    return 'female', forest.female_tree
+    elif sex == FEMALE_VALUE:
+        return 'female', forest.female_tree
+    return 'unknown', None
 
 
 def get_nodes_for_user(

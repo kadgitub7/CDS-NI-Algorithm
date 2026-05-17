@@ -249,7 +249,11 @@ print("=" * 80)
 
 # Drop the added 'gender' column for imputation; keep class label so that
 # the imputer can exploit class-feature correlations.
+# Impute SEPARATELY per gender to avoid cross-gender information leakage.
 numeric_df = df.drop(columns=['gender']).copy()
+
+male_mask_imp = numeric_df[SEX_COLUMN] == 0
+female_mask_imp = numeric_df[SEX_COLUMN] == 1
 
 imputed_datasets = []
 
@@ -257,15 +261,20 @@ for i in range(N_IMPUTATIONS):
     print(f"Running MICE imputation {i + 1}/{N_IMPUTATIONS}  "
           f"(seed={RANDOM_STATE + i})...")
 
-    imputer = IterativeImputer(
-        max_iter      = 10,          # rounds of chained-equation cycling
-        random_state  = RANDOM_STATE + i,
-        initial_strategy = 'mean',   # initialise missing cells with column mean
-        imputation_order = 'roman',  # left-to-right column order per round
+    imp_m = IterativeImputer(
+        max_iter=10, random_state=RANDOM_STATE + i,
+        initial_strategy='mean', imputation_order='roman',
+    )
+    imp_f = IterativeImputer(
+        max_iter=10, random_state=RANDOM_STATE + i,
+        initial_strategy='mean', imputation_order='roman',
     )
 
-    imputed_array = imputer.fit_transform(numeric_df.values)
-    imputed_df    = pd.DataFrame(
+    imputed_array = numeric_df.values.copy()
+    imputed_array[male_mask_imp] = imp_m.fit_transform(numeric_df.values[male_mask_imp])
+    imputed_array[female_mask_imp] = imp_f.fit_transform(numeric_df.values[female_mask_imp])
+
+    imputed_df = pd.DataFrame(
         imputed_array, columns=numeric_df.columns, index=numeric_df.index
     )
     imputed_datasets.append(imputed_df)
@@ -312,7 +321,8 @@ for col in numeric_df.columns:
     for imputed_df in imputed_datasets:
         imputed_values = imputed_df.loc[missing_mask, col]
         imputed_means.append(imputed_values.mean())
-        imputed_variances.append(imputed_values.var(ddof=1) if len(imputed_values) > 1 else 0.0)
+        n_imp = len(imputed_values)
+        imputed_variances.append(imputed_values.var(ddof=1) / n_imp if n_imp > 1 else 0.0)
 
     pooled_mean      = float(np.mean(imputed_means))
     within_variance  = float(np.mean(imputed_variances))               # Ū
@@ -345,9 +355,9 @@ print()
 # 5. SAVE OUTPUTS
 # ============================================================
 
-missing_df.to_csv('missingness_by_gender.csv', index=False)
-informative_df.to_csv('informative_missingness_tests.csv', index=False)
-impact_df.to_csv('multiple_imputation_impact.csv', index=False)
+missing_df.to_csv(os.path.join(_HERE, 'missingness_by_gender.csv'), index=False)
+informative_df.to_csv(os.path.join(_HERE, 'informative_missingness_tests.csv'), index=False)
+impact_df.to_csv(os.path.join(_HERE, 'multiple_imputation_impact.csv'), index=False)
 
 print("=" * 80)
 print("OUTPUT FILES GENERATED")

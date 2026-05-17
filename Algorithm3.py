@@ -763,6 +763,7 @@ def _refine_one_node(
                 # ── Lines 12-13: remove action ───────────────────────────────
                 # [PAPER] "c_{mh|o^k_m}(f_m^k, FA=0) ← {}"
                 # [PAPER] "r_{o^{kf}_m|h} = 0"
+                orig_weight = action.action_weight
                 action.action_weight = 0.0    # mark as removed
                 removed.append(action)
 
@@ -776,7 +777,7 @@ def _refine_one_node(
                 was_retained = False
                 log.debug(
                     f"      PRUNE  h={h:2d} o={o:3d}({o_name[:15]:15s}) "
-                    f"r={action.action_weight:.4f}  "
+                    f"r={orig_weight:.4f}  "
                     f"s={s:3d}  buffer={buffer:3d}  -> {prune_reason}"
                 )
             else:
@@ -867,7 +868,7 @@ def _compute_node_summary(
         h_retained = len([e for e in retained          if e.disease_class == h])
         per_disease[h] = (h_before, h_retained)
 
-    # With reset_per_h=Falsee, buffer and s_cumulative reset each h, so
+    # With reset_per_h=True, buffer and s_cumulative reset each h, so
     # the last record only reflects the final disease class. Take the max across
     # all log records for this node to get the true peak coverage and buffer.
     # With reset_per_h=False this is also correct (max == running final value).
@@ -1503,4 +1504,4 @@ if __name__ == "__main__":
     per_h    = "--per-h"    in _sys.argv
     verbose  = "--verbose"  in _sys.argv
     alg3_out = main(data_path=path, run_full=full,
-                    reset_per_h=False, verbose_alg3=verbose)
+                    reset_per_h=per_h, verbose_alg3=verbose)
