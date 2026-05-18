@@ -1,7 +1,7 @@
 ========================================================================
 CDS GENDER BIAS -- TECHNICAL ROOT-CAUSE REPORT (WEEKS 4-6)
 ========================================================================
-Dataset : C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\.claude\worktrees\nifty-hoover-f39cac\arrhythmia.data
+Dataset : c:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data
 Samples : 452 users  |  Features: 279
 Classes : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16]
 BH FDR threshold     : 0.05
@@ -47,7 +47,7 @@ Features with significant gender difference (BH q<0.05): 64
   AVR_T_amp                           0.0085     -0.0048   +0.0133    0.0000
   Age                                -0.0026     -0.0153   +0.0127    0.0000
   V6_T_amp                           -0.0144     -0.0021   -0.0123    0.0015
-  ... 44 more features (see week4_significant.csv)
+  ... 44 more features (see significant.csv)
 
 ------------------------------------------------------------
 4b. Normal Ranges by Gender (Eq. 5)
@@ -71,7 +71,7 @@ Top-10 features with largest gender normal-range difference:
 ========================================================================
 WEEK 5: MISSING DATA ANALYSIS
 ========================================================================
-Features scanned for missingness: 277
+Features scanned for missingness: 278
 Male samples: 203  |  Female samples: 249
 
 ------------------------------------------------------------
@@ -105,16 +105,16 @@ M = 5 imputations, estimand = mean of each feature
   Top-10 features with highest between-imputation variance (most unstable):
   Feature                              Q_bar           B           T        SE
   ------------------------------  ----------  ----------  ----------  --------
-  DI_R_wid                           51.6283      0.0000    332.3220   18.2297
-  V6_S_wid                           28.3097      0.0000    496.2226   22.2761
-  V3_N_defl                          27.7345      0.0000    102.7968   10.1389
-  DII_N_defl                         31.6372      0.0000     92.4347    9.6143
-  AVR_N_defl                         31.2301      0.0000    779.4072   27.9179
-  DIII_N_defl                        30.5133      0.0000    336.3383   18.3395
-  DI_QRSA                            13.8442      0.0000    173.6680   13.1783
-  V1_QRSTA                          -15.8812      0.0000    440.6149   20.9908
-  AVR_S_wid                           7.7965      0.0000    336.5603   18.3456
-  DIII_R_amp                          3.4923      0.0000     11.8702    3.4453
+  DI_R_wid                           51.6283      0.0000      0.7369    0.8584
+  AVR_N_defl                         31.2301      0.0000      1.7282    1.3146
+  DIII_N_defl                        30.5133      0.0000      0.7458    0.8636
+  V6_S_wid                           28.3097      0.0000      1.1003    1.0489
+  V6_QRSTA                           29.4732      0.0000      0.7567    0.8699
+  V3_N_defl                          27.7345      0.0000      0.2279    0.4774
+  DII_N_defl                         31.6372      0.0000      0.2050    0.4527
+  DI_QRSA                            13.8442      0.0000      0.3851    0.6205
+  V1_QRSTA                          -15.8812      0.0000      0.9770    0.9884
+  AVR_S_wid                           7.7965      0.0000      0.7463    0.8639
 
 ========================================================================
 WEEK 6: FOCUS LEVEL ANALYSIS
@@ -123,8 +123,34 @@ WEEK 6: FOCUS LEVEL ANALYSIS
 ------------------------------------------------------------
 6a. ForcedSexForest Structure (Algorithm 1 Forced Branch)
 ------------------------------------------------------------
-  [WARNING] Could not build ForcedSexForest: No module named 'Algorithm1_forcedBranch'
-  Ensure Algorithm1_forcedBranch.py is in the worktree and importable.
+Building ForcedSexForest (max_m=2) ...
+  
+  ========================================================================
+  FORCED SEX FOREST SUMMARY
+  ========================================================================
+    Total users in dataset : 452
+    Male users  (tree 1)   : 203
+    Female users (tree 2)  : 249
+    Threshold              : 0.025
+    u_min                  : 200
+  
+    -- MALE TREE --
+    Depth : 2
+    Nodes : 91
+    Level       Nodes    Users (root)
+    ----------------------------------
+    1               1             203
+    2              90             203
+  
+    -- FEMALE TREE --
+    Depth : 2
+    Nodes : 106
+    Level       Nodes    Users (root)
+    ----------------------------------
+    1               1             249
+    2             105             249
+  [WARNING] Could not build ForcedSexForest: 'TreeNode' object has no attribute 'children'
+  Ensure Algorithm1_forcedBranch.py is in the repo root and importable.
 
 ------------------------------------------------------------
 6b. Augmentation Gap Analysis (5-fold CV proxy for Focus Level 3)
@@ -206,5 +232,5 @@ RECOMMENDATIONS
    female patients in sparse disease classes.
 
 ========================================================================
-Report generated in 3013.5s
+Report generated in 770.2s
 ========================================================================

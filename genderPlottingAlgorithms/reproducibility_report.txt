@@ -3,8 +3,9 @@
 ========================================================================
   Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  Runtime : 1190s
+  Runtime : 1479s
   Paper target: 95.4% overall accuracy
+  Config  : Baseline (no modifications)
 
 1. OVERALL PERFORMANCE
 ----------------------
@@ -46,10 +47,14 @@
   Statistical Parity Diff (SPD) +0.2399  BIASED (|SPD|>=0.1)
   Disparate Impact (DI)          0.6522  BIASED (DI<0.8)
   Equalized Odds diff (EO)       0.1493  BIASED (EO>=0.1)
+  Subgroup Disparity Cal. Err    0.0694  BIASED (SDCE>=0.05)
+    Precision (male UNHEALTHY)   0.7500
+    Precision (female UNHEALTHY) 0.6250
+    Precision (overall)          0.6944
 
-  SPD > 0 means males classified more accurately than females.
-  SPD < 0 means females classified more accurately than males.
+  SPD > 0 means males get UNHEALTHY predictions more often.
   DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
+  SDCE measures calibration gap between subgroups (lower=fairer).
 
 5. MISCLASSIFICATION BY ARRHYTHMIA CLASS AND GENDER
 ---------------------------------------------------
@@ -96,6 +101,16 @@
   8      14      LV Hypertrophy                    0        3     0.0%
   9      3       Old Anterior MI                   0       15     0.0%
   10     5       Sinus Tachycardia                 0        4     0.0%
+
+9. ACTIVE FAIRNESS CONFIGURATION
+--------------------------------
+  Baseline (no modifications)
+
+  ENABLE_REWEIGHING            = False
+  ENABLE_FAIRNESS_RL           = False
+  ENABLE_ADVERSARIAL_DEBIASING = False
+  ENABLE_FORCED_SEX_BRANCHING  = False
+  ENABLE_DATA_AUGMENTATION     = False
 
 ========================================================================
 END OF REPORT
