@@ -1691,15 +1691,26 @@ def run_loocv(
         else:
             tree_i = build_decision_tree(train_data, train_labels)
 
-        # Build nodes_filter from the actual tree: root + valid level-2 children.
-        # Only include level-2 nodes from splits where BOTH branches passed Eq.2.
-        # Single-survivor splits (is_leaf=True) are excluded — they are degenerate
-        # nodes containing nearly the same population as the root.
+        # Build nodes_filter: which nodes get Alg2/3 training.
         root_id = tree_i.root.node_id
         nodes_filter_i = [root_id]
-        if 2 in tree_i.nodes_by_level:
-            for child in tree_i.nodes_by_level[2]:
-                if not child.is_leaf:
+        if _fc.ENABLE_FORCED_SEX_BRANCHING:
+            # Forced sex tree: include level-2 nodes only from genuine
+            # two-sided splits (both branches passed Eq.2).
+            if 2 in tree_i.nodes_by_level:
+                for child in tree_i.nodes_by_level[2]:
+                    if not child.is_leaf:
+                        nodes_filter_i.append(child.node_id)
+        else:
+            # Standard tree: paper uses Sex (k=1) branching at level 2.
+            # Only include the two Sex branch nodes if both exist.
+            sex_k = SEX_FEATURE_INDEX_ALG4
+            sex_children = [
+                n for n in tree_i.nodes_by_level.get(2, [])
+                if n.branching_feat_k == sex_k and not n.is_leaf
+            ]
+            if len(sex_children) >= 2:
+                for child in sex_children:
                     nodes_filter_i.append(child.node_id)
 
         treeCounter += 1

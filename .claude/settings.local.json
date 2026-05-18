@@ -16,7 +16,8 @@
       "Bash(python test_forced_5users.py)",
       "Bash(python test_fixes.py)",
       "Bash(findstr /V \"DEBUG PRUNED VALID Expanding\")",
-      "Bash(Select-String -NotMatch \"DEBUG|PRUNED|VALID|Expanding|candidates\")"
+      "Bash(Select-String -NotMatch \"DEBUG|PRUNED|VALID|Expanding|candidates\")",
+      "PowerShell(python test_tree_diag.py 2>&1)"
     ]
   }
 }

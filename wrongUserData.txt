@@ -63,7 +63,7 @@ WRONG USER #2: user_idx=9
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 6.8ms
+  Elapsed        : 5.1ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -245,7 +245,7 @@ WRONG USER #3: user_idx=21
   Focus reached  : m=1
   Total PAC count: 38
   Total actions  : 38
-  Elapsed        : 5.3ms
+  Elapsed        : 3.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 102 (V2_Rp_wid)
@@ -314,7 +314,7 @@ WRONG USER #4: user_idx=36
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 23.4ms
+  Elapsed        : 13.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 42 (DIII_Rp_wid)
@@ -420,7 +420,7 @@ WRONG USER #5: user_idx=37
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 8.1ms
+  Elapsed        : 5.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -602,7 +602,7 @@ WRONG USER #6: user_idx=38
   Focus reached  : m=1
   Total PAC count: 13
   Total actions  : 13
-  Elapsed        : 5.5ms
+  Elapsed        : 2.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 166 (DI_T_amp)
@@ -646,7 +646,7 @@ WRONG USER #7: user_idx=40
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 22.5ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=6
   Alarm feature  : 233 (V2_Rp_amp)
@@ -755,7 +755,7 @@ WRONG USER #8: user_idx=43
   Focus reached  : m=1
   Total PAC count: 2
   Total actions  : 2
-  Elapsed        : 2.0ms
+  Elapsed        : 1.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 266 (V5_T_amp)
@@ -788,7 +788,7 @@ WRONG USER #9: user_idx=50
   Focus reached  : m=1
   Total PAC count: 5
   Total actions  : 5
-  Elapsed        : 1.9ms
+  Elapsed        : 1.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 246 (V3_T_amp)
@@ -824,7 +824,7 @@ WRONG USER #10: user_idx=54
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.8ms
+  Elapsed        : 5.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1003,7 +1003,7 @@ WRONG USER #11: user_idx=56
   Focus reached  : m=2
   Total PAC count: 53
   Total actions  : 53
-  Elapsed        : 8.0ms
+  Elapsed        : 4.5ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 8 (P_int)
@@ -1100,7 +1100,7 @@ WRONG USER #12: user_idx=58
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 6.0ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1279,7 +1279,7 @@ WRONG USER #13: user_idx=61
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 9.6ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1461,7 +1461,7 @@ WRONG USER #14: user_idx=71
   Focus reached  : m=2
   Total PAC count: 63
   Total actions  : 63
-  Elapsed        : 8.7ms
+  Elapsed        : 4.8ms
   Initial action : feat=191 (AVR_R_amp)
 
   --- NODE TRAVERSAL ---
@@ -1642,7 +1642,7 @@ WRONG USER #15: user_idx=73
   Focus reached  : m=2
   Total PAC count: 59
   Total actions  : 59
-  Elapsed        : 7.1ms
+  Elapsed        : 5.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=4
   Alarm feature  : 44 (DIII_N_defl)
@@ -1746,7 +1746,7 @@ WRONG USER #16: user_idx=77
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 8.6ms
+  Elapsed        : 5.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1928,7 +1928,7 @@ WRONG USER #17: user_idx=82
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 6.3ms
+  Elapsed        : 5.1ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -2110,7 +2110,7 @@ WRONG USER #18: user_idx=90
   Focus reached  : m=1
   Total PAC count: 49
   Total actions  : 49
-  Elapsed        : 8.2ms
+  Elapsed        : 4.8ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=3
   Alarm feature  : 87 (V1_Q_wid)
@@ -2191,7 +2191,7 @@ WRONG USER #19: user_idx=91
   Focus reached  : m=2
   Total PAC count: 63
   Total actions  : 63
-  Elapsed        : 7.8ms
+  Elapsed        : 9.6ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -2369,7 +2369,7 @@ WRONG USER #20: user_idx=95
   Focus reached  : m=2
   Total PAC count: 55
   Total actions  : 55
-  Elapsed        : 8.1ms
+  Elapsed        : 4.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 229 (V2_JJ_amp)
@@ -2468,7 +2468,7 @@ WRONG USER #21: user_idx=98
   Focus reached  : m=1
   Total PAC count: 21
   Total actions  : 21
-  Elapsed        : 7.7ms
+  Elapsed        : 2.8ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 6 (QT_int)
@@ -2520,7 +2520,7 @@ WRONG USER #22: user_idx=99
   Focus reached  : m=1
   Total PAC count: 8
   Total actions  : 8
-  Elapsed        : 2.9ms
+  Elapsed        : 1.6ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 13 (J_angle)
@@ -2559,7 +2559,7 @@ WRONG USER #23: user_idx=100
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 16.7ms
+  Elapsed        : 5.5ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -2738,7 +2738,7 @@ WRONG USER #24: user_idx=101
   Focus reached  : m=1
   Total PAC count: 29
   Total actions  : 29
-  Elapsed        : 6.1ms
+  Elapsed        : 3.3ms
   Initial action : feat=193 (AVR_Rp_amp)
   Alarm class    : h=2
   Alarm feature  : 242 (V3_S_amp)
@@ -2798,7 +2798,7 @@ WRONG USER #25: user_idx=102
   Focus reached  : m=1
   Total PAC count: 6
   Total actions  : 6
-  Elapsed        : 1.8ms
+  Elapsed        : 1.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 268 (V5_QRSTA)
@@ -2835,7 +2835,7 @@ WRONG USER #26: user_idx=103
   Focus reached  : m=1
   Total PAC count: 3
   Total actions  : 3
-  Elapsed        : 1.9ms
+  Elapsed        : 1.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 256 (V4_T_amp)
@@ -2869,7 +2869,7 @@ WRONG USER #27: user_idx=109
   Focus reached  : m=1
   Total PAC count: 7
   Total actions  : 7
-  Elapsed        : 10.6ms
+  Elapsed        : 2.0ms
   Initial action : feat=177 (DII_QRSA)
   Alarm class    : h=2
   Alarm feature  : 239 (V3_JJ_amp)
@@ -2907,7 +2907,7 @@ WRONG USER #28: user_idx=113
   Focus reached  : m=1
   Total PAC count: 27
   Total actions  : 27
-  Elapsed        : 5.6ms
+  Elapsed        : 2.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 228 (V1_QRSTA)
@@ -2965,7 +2965,7 @@ WRONG USER #29: user_idx=114
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 16.6ms
+  Elapsed        : 5.3ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -3144,7 +3144,7 @@ WRONG USER #30: user_idx=117
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 7.8ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=5
   Alarm feature  : 226 (V1_T_amp)
@@ -3252,7 +3252,7 @@ WRONG USER #31: user_idx=126
   Focus reached  : m=1
   Total PAC count: 30
   Total actions  : 30
-  Elapsed        : 7.9ms
+  Elapsed        : 3.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 3 (Weight)
@@ -3313,7 +3313,7 @@ WRONG USER #32: user_idx=129
   Focus reached  : m=1
   Total PAC count: 23
   Total actions  : 23
-  Elapsed        : 2.9ms
+  Elapsed        : 2.7ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 182 (DIII_S_amp)
@@ -3367,7 +3367,7 @@ WRONG USER #33: user_idx=130
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 6.2ms
+  Elapsed        : 5.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 186 (DIII_T_amp)
@@ -3472,7 +3472,7 @@ WRONG USER #34: user_idx=133
   Focus reached  : m=1
   Total PAC count: 17
   Total actions  : 17
-  Elapsed        : 2.5ms
+  Elapsed        : 10.8ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 189 (AVR_JJ_amp)
@@ -3520,7 +3520,7 @@ WRONG USER #35: user_idx=136
   Focus reached  : m=2
   Total PAC count: 63
   Total actions  : 63
-  Elapsed        : 7.9ms
+  Elapsed        : 5.1ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=6
   Alarm feature  : 235 (V2_P_amp)
@@ -3630,7 +3630,7 @@ WRONG USER #36: user_idx=137
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 7.1ms
+  Elapsed        : 5.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -3807,7 +3807,7 @@ WRONG USER #37: user_idx=144
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 14.3ms
+  Elapsed        : 13.3ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -3986,7 +3986,7 @@ WRONG USER #38: user_idx=154
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 8.8ms
+  Elapsed        : 74.4ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4168,7 +4168,7 @@ WRONG USER #39: user_idx=157
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 6.7ms
+  Elapsed        : 82.4ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4350,7 +4350,7 @@ WRONG USER #40: user_idx=158
   Focus reached  : m=1
   Total PAC count: 26
   Total actions  : 26
-  Elapsed        : 4.7ms
+  Elapsed        : 38.0ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 219 (V1_JJ_amp)
@@ -4407,7 +4407,7 @@ WRONG USER #41: user_idx=160
   Focus reached  : m=1
   Total PAC count: 26
   Total actions  : 26
-  Elapsed        : 4.7ms
+  Elapsed        : 79.9ms
   Initial action : feat=248 (V3_QRSTA)
   Alarm class    : h=2
   Alarm feature  : 223 (V1_Rp_amp)
@@ -4464,7 +4464,7 @@ WRONG USER #42: user_idx=171
   Focus reached  : m=1
   Total PAC count: 24
   Total actions  : 24
-  Elapsed        : 8.3ms
+  Elapsed        : 59.4ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 205 (AVL_P_amp)
@@ -4519,7 +4519,7 @@ WRONG USER #43: user_idx=173
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.5ms
+  Elapsed        : 157.3ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4698,7 +4698,7 @@ WRONG USER #44: user_idx=177
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 5.9ms
+  Elapsed        : 101.1ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=5
   Alarm feature  : 227 (V1_QRSA)
@@ -4805,7 +4805,7 @@ WRONG USER #45: user_idx=179
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 13.8ms
+  Elapsed        : 91.2ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4987,7 +4987,7 @@ WRONG USER #46: user_idx=181
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 14.5ms
+  Elapsed        : 99.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -5166,7 +5166,7 @@ WRONG USER #47: user_idx=186
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 11.9ms
+  Elapsed        : 51.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -5348,7 +5348,7 @@ WRONG USER #48: user_idx=190
   Focus reached  : m=1
   Total PAC count: 21
   Total actions  : 21
-  Elapsed        : 3.2ms
+  Elapsed        : 69.8ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 32 (DII_N_defl)
@@ -5400,7 +5400,7 @@ WRONG USER #49: user_idx=199
   Focus reached  : m=1
   Total PAC count: 27
   Total actions  : 27
-  Elapsed        : 6.9ms
+  Elapsed        : 22.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 227 (V1_QRSA)
@@ -5458,7 +5458,7 @@ WRONG USER #50: user_idx=200
   Focus reached  : m=2
   Total PAC count: 64
   Total actions  : 64
-  Elapsed        : 9.3ms
+  Elapsed        : 83.1ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -5638,7 +5638,7 @@ WRONG USER #51: user_idx=202
   Focus reached  : m=1
   Total PAC count: 23
   Total actions  : 23
-  Elapsed        : 9.2ms
+  Elapsed        : 69.4ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 80 (AVF_N_defl)
@@ -5692,7 +5692,7 @@ WRONG USER #52: user_idx=208
   Focus reached  : m=1
   Total PAC count: 23
   Total actions  : 23
-  Elapsed        : 3.7ms
+  Elapsed        : 25.9ms
   Initial action : feat=177 (DII_QRSA)
   Alarm class    : h=2
   Alarm feature  : 171 (DII_R_amp)
@@ -5746,7 +5746,7 @@ WRONG USER #53: user_idx=211
   Focus reached  : m=1
   Total PAC count: 11
   Total actions  : 11
-  Elapsed        : 3.2ms
+  Elapsed        : 15.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 259 (V5_JJ_amp)
@@ -5788,7 +5788,7 @@ WRONG USER #54: user_idx=220
   Focus reached  : m=1
   Total PAC count: 20
   Total actions  : 20
-  Elapsed        : 10.5ms
+  Elapsed        : 2.7ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 229 (V2_JJ_amp)
@@ -5839,7 +5839,7 @@ WRONG USER #55: user_idx=223
   Focus reached  : m=1
   Total PAC count: 22
   Total actions  : 22
-  Elapsed        : 3.2ms
+  Elapsed        : 15.7ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 78 (AVF_Rp_wid)
@@ -5892,7 +5892,7 @@ WRONG USER #56: user_idx=228
   Focus reached  : m=2
   Total PAC count: 52
   Total actions  : 52
-  Elapsed        : 8.2ms
+  Elapsed        : 5.0ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 235 (V2_P_amp)
@@ -5988,7 +5988,7 @@ WRONG USER #57: user_idx=233
   Focus reached  : m=2
   Total PAC count: 55
   Total actions  : 55
-  Elapsed        : 8.0ms
+  Elapsed        : 12.0ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 222 (V1_S_amp)
@@ -6087,7 +6087,7 @@ WRONG USER #58: user_idx=234
   Focus reached  : m=1
   Total PAC count: 15
   Total actions  : 15
-  Elapsed        : 3.6ms
+  Elapsed        : 15.3ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 181 (DIII_R_amp)
@@ -6133,7 +6133,7 @@ WRONG USER #59: user_idx=238
   Focus reached  : m=2
   Total PAC count: 51
   Total actions  : 51
-  Elapsed        : 18.7ms
+  Elapsed        : 9.8ms
   Initial action : feat=193 (AVR_Rp_amp)
   Alarm class    : h=2
   Alarm feature  : 176 (DII_T_amp)
@@ -6228,7 +6228,7 @@ WRONG USER #60: user_idx=239
   Focus reached  : m=1
   Total PAC count: 42
   Total actions  : 42
-  Elapsed        : 4.8ms
+  Elapsed        : 5.0ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 192 (AVR_S_amp)
@@ -6301,7 +6301,7 @@ WRONG USER #61: user_idx=240
   Focus reached  : m=2
   Total PAC count: 56
   Total actions  : 56
-  Elapsed        : 8.8ms
+  Elapsed        : 16.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 235 (V2_P_amp)
@@ -6401,7 +6401,7 @@ WRONG USER #62: user_idx=241
   Focus reached  : m=1
   Total PAC count: 9
   Total actions  : 9
-  Elapsed        : 3.1ms
+  Elapsed        : 3.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 10 (T_angle)
@@ -6441,7 +6441,7 @@ WRONG USER #63: user_idx=242
   Focus reached  : m=1
   Total PAC count: 42
   Total actions  : 42
-  Elapsed        : 4.2ms
+  Elapsed        : 3.7ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 193 (AVR_Rp_amp)
@@ -6514,7 +6514,7 @@ WRONG USER #64: user_idx=246
   Focus reached  : m=1
   Total PAC count: 20
   Total actions  : 20
-  Elapsed        : 3.1ms
+  Elapsed        : 13.0ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 220 (V1_Q_amp)
@@ -6565,7 +6565,7 @@ WRONG USER #65: user_idx=254
   Focus reached  : m=1
   Total PAC count: 22
   Total actions  : 22
-  Elapsed        : 6.1ms
+  Elapsed        : 7.1ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 3 (Weight)
@@ -6618,7 +6618,7 @@ WRONG USER #66: user_idx=255
   Focus reached  : m=1
   Total PAC count: 3
   Total actions  : 3
-  Elapsed        : 1.6ms
+  Elapsed        : 1.2ms
   Initial action : feat=193 (AVR_Rp_amp)
   Alarm class    : h=2
   Alarm feature  : 246 (V3_T_amp)
@@ -6718,7 +6718,7 @@ WRONG USER #68: user_idx=271
   Focus reached  : m=1
   Total PAC count: 22
   Total actions  : 22
-  Elapsed        : 2.7ms
+  Elapsed        : 2.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 175 (DII_P_amp)
@@ -6771,7 +6771,7 @@ WRONG USER #69: user_idx=275
   Focus reached  : m=2
   Total PAC count: 64
   Total actions  : 64
-  Elapsed        : 16.2ms
+  Elapsed        : 6.3ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -6951,7 +6951,7 @@ WRONG USER #70: user_idx=280
   Focus reached  : m=1
   Total PAC count: 33
   Total actions  : 33
-  Elapsed        : 5.0ms
+  Elapsed        : 3.3ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 44 (DIII_N_defl)
@@ -7015,7 +7015,7 @@ WRONG USER #71: user_idx=295
   Focus reached  : m=2
   Total PAC count: 66
   Total actions  : 66
-  Elapsed        : 7.7ms
+  Elapsed        : 4.9ms
   Initial action : feat=191 (AVR_R_amp)
 
   --- NODE TRAVERSAL ---
@@ -7199,7 +7199,7 @@ WRONG USER #72: user_idx=309
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 23.5ms
+  Elapsed        : 6.5ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -7378,7 +7378,7 @@ WRONG USER #73: user_idx=310
   Focus reached  : m=2
   Total PAC count: 60
   Total actions  : 60
-  Elapsed        : 9.2ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 175 (DII_P_amp)
@@ -7482,7 +7482,7 @@ WRONG USER #74: user_idx=311
   Focus reached  : m=1
   Total PAC count: 26
   Total actions  : 26
-  Elapsed        : 3.7ms
+  Elapsed        : 2.8ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 225 (V1_P_amp)
@@ -7539,7 +7539,7 @@ WRONG USER #75: user_idx=321
   Focus reached  : m=1
   Total PAC count: 27
   Total actions  : 27
-  Elapsed        : 6.9ms
+  Elapsed        : 3.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 228 (V1_QRSTA)
@@ -7597,7 +7597,7 @@ WRONG USER #76: user_idx=326
   Focus reached  : m=2
   Total PAC count: 64
   Total actions  : 64
-  Elapsed        : 19.5ms
+  Elapsed        : 5.1ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -7811,7 +7811,7 @@ WRONG USER #78: user_idx=335
   Focus reached  : m=1
   Total PAC count: 11
   Total actions  : 11
-  Elapsed        : 8.8ms
+  Elapsed        : 2.0ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 7 (T_int)
@@ -7853,7 +7853,7 @@ WRONG USER #79: user_idx=340
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 9.1ms
+  Elapsed        : 5.7ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -8030,7 +8030,7 @@ WRONG USER #80: user_idx=341
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 8.1ms
+  Elapsed        : 6.9ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -8212,7 +8212,7 @@ WRONG USER #81: user_idx=343
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 8.1ms
+  Elapsed        : 6.1ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -8391,7 +8391,7 @@ WRONG USER #82: user_idx=347
   Focus reached  : m=2
   Total PAC count: 66
   Total actions  : 66
-  Elapsed        : 8.9ms
+  Elapsed        : 14.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=10
   Alarm feature  : 228 (V1_QRSTA)
@@ -8506,7 +8506,7 @@ WRONG USER #83: user_idx=351
   Focus reached  : m=2
   Total PAC count: 63
   Total actions  : 63
-  Elapsed        : 7.1ms
+  Elapsed        : 6.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -8684,7 +8684,7 @@ WRONG USER #84: user_idx=352
   Focus reached  : m=1
   Total PAC count: 6
   Total actions  : 6
-  Elapsed        : 2.3ms
+  Elapsed        : 1.7ms
   Initial action : feat=177 (DII_QRSA)
   Alarm class    : h=2
   Alarm feature  : 259 (V5_JJ_amp)
@@ -8721,7 +8721,7 @@ WRONG USER #85: user_idx=355
   Focus reached  : m=2
   Total PAC count: 57
   Total actions  : 57
-  Elapsed        : 6.4ms
+  Elapsed        : 4.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 247 (V3_QRSA)
@@ -8822,7 +8822,7 @@ WRONG USER #86: user_idx=362
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 14.0ms
+  Elapsed        : 5.7ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -9004,7 +9004,7 @@ WRONG USER #87: user_idx=365
   Focus reached  : m=1
   Total PAC count: 11
   Total actions  : 11
-  Elapsed        : 3.2ms
+  Elapsed        : 2.0ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 104 (V2_N_defl)
@@ -9046,7 +9046,7 @@ WRONG USER #88: user_idx=367
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 9.3ms
+  Elapsed        : 5.2ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -9223,7 +9223,7 @@ WRONG USER #89: user_idx=375
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 7.3ms
+  Elapsed        : 5.7ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -9405,7 +9405,7 @@ WRONG USER #90: user_idx=378
   Focus reached  : m=2
   Total PAC count: 57
   Total actions  : 57
-  Elapsed        : 12.2ms
+  Elapsed        : 5.0ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 199 (AVL_JJ_amp)
@@ -9506,7 +9506,7 @@ WRONG USER #91: user_idx=383
   Focus reached  : m=2
   Total PAC count: 61
   Total actions  : 61
-  Elapsed        : 8.1ms
+  Elapsed        : 8.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 186 (DIII_T_amp)
@@ -9611,7 +9611,7 @@ WRONG USER #92: user_idx=389
   Focus reached  : m=1
   Total PAC count: 3
   Total actions  : 3
-  Elapsed        : 1.3ms
+  Elapsed        : 1.4ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 276 (V6_T_amp)
@@ -9645,7 +9645,7 @@ WRONG USER #93: user_idx=391
   Focus reached  : m=1
   Total PAC count: 2
   Total actions  : 2
-  Elapsed        : 2.6ms
+  Elapsed        : 1.6ms
   Initial action : feat=193 (AVR_Rp_amp)
   Alarm class    : h=2
   Alarm feature  : 266 (V5_T_amp)
@@ -9678,7 +9678,7 @@ WRONG USER #94: user_idx=393
   Focus reached  : m=1
   Total PAC count: 11
   Total actions  : 11
-  Elapsed        : 2.8ms
+  Elapsed        : 2.0ms
   Initial action : feat=206 (AVL_T_amp)
   Alarm class    : h=2
   Alarm feature  : 237 (V2_QRSA)
@@ -9720,7 +9720,7 @@ WRONG USER #95: user_idx=394
   Focus reached  : m=1
   Total PAC count: 12
   Total actions  : 12
-  Elapsed        : 4.4ms
+  Elapsed        : 2.2ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 7 (T_int)
@@ -9763,7 +9763,7 @@ WRONG USER #96: user_idx=400
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 6.5ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -9945,7 +9945,7 @@ WRONG USER #97: user_idx=407
   Focus reached  : m=1
   Total PAC count: 17
   Total actions  : 17
-  Elapsed        : 3.2ms
+  Elapsed        : 2.3ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 198 (AVR_QRSTA)
@@ -9993,7 +9993,7 @@ WRONG USER #98: user_idx=408
   Focus reached  : m=2
   Total PAC count: 57
   Total actions  : 57
-  Elapsed        : 11.3ms
+  Elapsed        : 5.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 162 (DI_S_amp)
@@ -10094,7 +10094,7 @@ WRONG USER #99: user_idx=413
   Focus reached  : m=2
   Total PAC count: 56
   Total actions  : 56
-  Elapsed        : 8.1ms
+  Elapsed        : 5.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 34 (DII_Diph_R)
@@ -10194,7 +10194,7 @@ WRONG USER #100: user_idx=416
   Focus reached  : m=1
   Total PAC count: 19
   Total actions  : 19
-  Elapsed        : 3.0ms
+  Elapsed        : 2.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 216 (AVF_T_amp)
@@ -10244,7 +10244,7 @@ WRONG USER #101: user_idx=422
   Focus reached  : m=1
   Total PAC count: 21
   Total actions  : 21
-  Elapsed        : 3.3ms
+  Elapsed        : 2.7ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 18 (DI_Rp_wid)
@@ -10296,7 +10296,7 @@ WRONG USER #102: user_idx=426
   Focus reached  : m=2
   Total PAC count: 53
   Total actions  : 53
-  Elapsed        : 24.7ms
+  Elapsed        : 5.1ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 179 (DIII_JJ_amp)
@@ -10393,7 +10393,7 @@ WRONG USER #103: user_idx=434
   Focus reached  : m=2
   Total PAC count: 55
   Total actions  : 55
-  Elapsed        : 5.5ms
+  Elapsed        : 7.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 229 (V2_JJ_amp)
@@ -10492,7 +10492,7 @@ WRONG USER #104: user_idx=439
   Focus reached  : m=1
   Total PAC count: 34
   Total actions  : 34
-  Elapsed        : 5.6ms
+  Elapsed        : 3.7ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 65 (AVL_S_wid)
@@ -10557,7 +10557,7 @@ WRONG USER #105: user_idx=440
   Focus reached  : m=1
   Total PAC count: 51
   Total actions  : 51
-  Elapsed        : 7.2ms
+  Elapsed        : 3.9ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=3
   Alarm feature  : 14 (Heart_rate)
@@ -10640,7 +10640,7 @@ WRONG USER #106: user_idx=445
   Focus reached  : m=2
   Total PAC count: 52
   Total actions  : 52
-  Elapsed        : 13.7ms
+  Elapsed        : 22.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 275 (V6_P_amp)
@@ -10736,7 +10736,7 @@ WRONG USER #107: user_idx=447
   Focus reached  : m=1
   Total PAC count: 8
   Total actions  : 8
-  Elapsed        : 2.8ms
+  Elapsed        : 8.2ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 278 (V6_QRSTA)
@@ -10775,7 +10775,7 @@ WRONG USER #108: user_idx=450
   Focus reached  : m=1
   Total PAC count: 20
   Total actions  : 20
-  Elapsed        : 3.4ms
+  Elapsed        : 2.6ms
   Initial action : feat=191 (AVR_R_amp)
   Alarm class    : h=2
   Alarm feature  : 215 (AVF_P_amp)
@@ -10826,7 +10826,7 @@ WRONG USER #109: user_idx=451
   Focus reached  : m=1
   Total PAC count: 20
   Total actions  : 20
-  Elapsed        : 3.8ms
+  Elapsed        : 2.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 237 (V2_QRSA)
