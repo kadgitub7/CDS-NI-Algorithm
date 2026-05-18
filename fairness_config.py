@@ -75,7 +75,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # When True, uses Algorithm1_forcedBranch.py which routes users to
 # sex-specific sub-trees BEFORE any other branching.  This gives each
 # gender its own CDS decision tree with gender-specific healthy ranges.
-ENABLE_FORCED_SEX_BRANCHING: bool = False
+ENABLE_FORCED_SEX_BRANCHING: bool = True
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA: Augmentation strategy for female sub-population

@@ -1310,7 +1310,7 @@ def run_algorithm4(
     # so level-2 C_buf construction skips anything already applied at level 1.
     consumed_pairs: Set[Tuple[int, int]] = set()
 
-    root_all_actions = alg3_output.retained_for_node("root")
+    root_all_actions = alg3_output.retained_for_node(root_node.node_id)
     h_init = -1
     if root_all_actions:
         # [PAPER ALG-4 init] c0 = random action from the refined root library.
@@ -1629,9 +1629,8 @@ def run_loocv(
     """
     import fairness_config as _fc
 
-    if nodes_filter is None:
-        # [PAPER §VII.A] Sex-branched nodes at level 2 (Sex = column 1).
-        nodes_filter = ["root", "root|k1_f1", "root|k1_f2"]
+    # nodes_filter is built per-fold from the actual tree structure.
+    # All branching features that satisfy Eq.2 produce level-2 nodes.
 
     n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
     log.info(f"\n{'='*65}")
@@ -1647,7 +1646,7 @@ def run_loocv(
 
     # Lazy imports for optional features
     if _fc.ENABLE_FORCED_SEX_BRANCHING:
-        from Algorithm1_forcedBranch import build_forced_sex_forest, route_user
+        from Algorithm1_forcedBranch import build_forced_sex_forest, build_sex_specific_tree, route_user
     if _fc.ENABLE_DATA_AUGMENTATION:
         from augmentation_strategies import apply_augmentation
 
@@ -1675,23 +1674,33 @@ def run_loocv(
 
         # ── Per-fold Algorithm 1 ─────────────────────────────────────────────
         if _fc.ENABLE_FORCED_SEX_BRANCHING:
-            # Build two sex-specific trees, then route test user
-            forest_i = build_forced_sex_forest(train_data, train_labels)
+            # Build only the sex-specific tree needed for this test user
             test_user_sex = data[i, SEX_FEATURE_INDEX_ALG4]
             if test_user_sex == 0:
-                tree_i = forest_i.male_tree
+                sex_indices = np.where(train_data[:, SEX_FEATURE_INDEX_ALG4] == 0)[0]
+                tree_i = build_sex_specific_tree(
+                    data=train_data, labels=train_labels,
+                    sex_user_indices=sex_indices, sex_label="male",
+                )
             else:
-                tree_i = forest_i.female_tree
-            # Build nodes_filter: root of the sub-tree + its level-2 children
-            # This mirrors the standard pipeline's ["root", "root|k1_f1", "root|k1_f2"]
-            root_id = tree_i.root.node_id
-            nodes_filter_i = [root_id]
-            if 2 in tree_i.nodes_by_level:
-                for child in tree_i.nodes_by_level[2]:
-                    nodes_filter_i.append(child.node_id)
+                sex_indices = np.where(train_data[:, SEX_FEATURE_INDEX_ALG4] == 1)[0]
+                tree_i = build_sex_specific_tree(
+                    data=train_data, labels=train_labels,
+                    sex_user_indices=sex_indices, sex_label="female",
+                )
         else:
             tree_i = build_decision_tree(train_data, train_labels)
-            nodes_filter_i = nodes_filter
+
+        # Build nodes_filter from the actual tree: root + valid level-2 children.
+        # Only include level-2 nodes from splits where BOTH branches passed Eq.2.
+        # Single-survivor splits (is_leaf=True) are excluded — they are degenerate
+        # nodes containing nearly the same population as the root.
+        root_id = tree_i.root.node_id
+        nodes_filter_i = [root_id]
+        if 2 in tree_i.nodes_by_level:
+            for child in tree_i.nodes_by_level[2]:
+                if not child.is_leaf:
+                    nodes_filter_i.append(child.node_id)
 
         treeCounter += 1
         print(f"Tree built: {treeCounter}")
@@ -2803,7 +2812,7 @@ def main(
             rng_seed     = rng_seed,
             verbose      = False,
             n_bins       = DEFAULT_N_BINS,
-            nodes_filter = ["root", "root|k1_f1", "root|k1_f2"],
+            nodes_filter = None,  # built per-fold from actual tree
         )
 
         # ── 8. Validation ─────────────────────────────────────────────────────
