@@ -2667,11 +2667,11 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 if __name__ == "__main__":
     import sys as _sys
-<<<<<<< Updated upstream
+###<<<<<<< Updated upstream
     path = _sys.argv[1] if len(_sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\amux\\verilogLearning\\CDS-NI-Algorithm\\arrhythmia.data"
-=======
+###=======
     path = _sys.argv[1] if len(_sys.argv) > 1 else get_arrhythmia_path("arrhythmia.data") 
->>>>>>> Stashed changes
+###>>>>>>> Stashed changes
     # For quick test: limit users; remove max_users for full LOOCV
     n = int(_sys.argv[2]) if len(_sys.argv) > 2 else None
     output = main(
