@@ -3,9 +3,9 @@
 ========================================================================
   Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  Runtime : 503s
+  Runtime : 3973s
   Paper target: 95.4% overall accuracy
-  Config  : ForcedSexBranch
+  Config  : ForcedSexBranch + Augment(smotenc)
 
 1. OVERALL PERFORMANCE
 ----------------------
@@ -104,13 +104,14 @@
 
 9. ACTIVE FAIRNESS CONFIGURATION
 --------------------------------
-  ForcedSexBranch
+  ForcedSexBranch + Augment(smotenc)
 
   ENABLE_REWEIGHING            = False
   ENABLE_FAIRNESS_RL           = False
   ENABLE_ADVERSARIAL_DEBIASING = False
   ENABLE_FORCED_SEX_BRANCHING  = True
-  ENABLE_DATA_AUGMENTATION     = False
+  ENABLE_DATA_AUGMENTATION     = True
+    AUGMENTATION_STRATEGY      = smotenc
 
 ========================================================================
 END OF REPORT

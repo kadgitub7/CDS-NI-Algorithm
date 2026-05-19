@@ -87,7 +87,7 @@ ENABLE_DATA_AUGMENTATION: bool = True
 
 # Strategy: one of "none", "random_oversample", "perturbation",
 #           "smotenc", "cross_gender", "combined"
-AUGMENTATION_STRATEGY: str = "none"
+AUGMENTATION_STRATEGY: str = "smotenc"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SHARED CONSTANTS (do not change unless the dataset changes)
