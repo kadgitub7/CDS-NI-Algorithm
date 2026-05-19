@@ -853,7 +853,7 @@ def main():
         print("Running BASELINE LOOCV (shared by tests 1A, 5A, 6B, 7A, 7B, 8)...")
         print("━"*80)
         t0 = time.time()
-        baseline_records = run_standard_loocv(data, labels, force_sex_branch=True)
+        baseline_records = run_standard_loocv(data, labels, force_sex_branch=False)
         baseline_elapsed = time.time() - t0
         print(f"  Baseline complete in {baseline_elapsed:.1f}s")
 
@@ -877,7 +877,7 @@ def main():
         print("TEST 1B: Global binning (bin edges from full dataset)")
         print("━"*80)
         t0 = time.time()
-        records = run_loocv_global_binning(data, labels, force_sex_branch=True)
+        records = run_loocv_global_binning(data, labels, force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -895,7 +895,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_epsilon_smoothing(data, labels, epsilon=1e-6,
-                                               force_sex_branch=True)
+                                               force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -913,7 +913,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_relaxed_range(data, labels, mode="one_bin",
-                                           force_sex_branch=True)
+                                           force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -931,7 +931,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_relaxed_range(data, labels, mode="percentile_5_95",
-                                           force_sex_branch=True)
+                                           force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -949,7 +949,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_relaxed_range(data, labels, mode="percentile_1_99",
-                                           force_sex_branch=True)
+                                           force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -967,7 +967,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_relaxed_range(data, labels, mode="iqr",
-                                           force_sex_branch=True)
+                                           force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -985,7 +985,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_rare_feature_handling(data, labels, mode="exclude",
-                                                   min_support=2, force_sex_branch=True)
+                                                   min_support=2, force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -1004,7 +1004,7 @@ def main():
         t0 = time.time()
         records = run_loocv_rare_feature_handling(data, labels, mode="downweight",
                                                    min_support=2, downweight_factor=0.1,
-                                                   force_sex_branch=True)
+                                                   force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -1022,7 +1022,7 @@ def main():
         print("━"*80)
         t0 = time.time()
         records = run_loocv_rare_feature_handling(data, labels, mode="min_support",
-                                                   min_support=5, force_sex_branch=True)
+                                                   min_support=5, force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -1054,7 +1054,7 @@ def main():
         print("TEST 5B: Global feature/action selection (leakage test)")
         print("━"*80)
         t0 = time.time()
-        records = run_loocv_global_selection(data, labels, force_sex_branch=True)
+        records = run_loocv_global_selection(data, labels, force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
@@ -1071,7 +1071,7 @@ def main():
         print("TEST 6A: Focus level 1 only (no sex-based branching at level 2)")
         print("━"*80)
         t0 = time.time()
-        records = run_loocv_focus_level_1_only(data, labels, force_sex_branch=True)
+        records = run_loocv_focus_level_1_only(data, labels, force_sex_branch=False)
         elapsed = time.time() - t0
         metrics = compute_metrics_from_records(records, data)
         fa_feats = extract_fa_features_from_records(records, data)
