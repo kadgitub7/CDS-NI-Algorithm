@@ -63,7 +63,7 @@ WRONG USER #2: user_idx=9
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 5.1ms
+  Elapsed        : 15.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -312,9 +312,9 @@ WRONG USER #4: user_idx=36
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 62
-  Total actions  : 62
-  Elapsed        : 13.3ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 11.3ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 42 (DIII_Rp_wid)
@@ -646,7 +646,7 @@ WRONG USER #7: user_idx=40
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.2ms
+  Elapsed        : 13.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=6
   Alarm feature  : 233 (V2_Rp_amp)
@@ -1100,7 +1100,7 @@ WRONG USER #12: user_idx=58
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.2ms
+  Elapsed        : 10.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1279,7 +1279,7 @@ WRONG USER #13: user_idx=61
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 5.2ms
+  Elapsed        : 14.9ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -1461,7 +1461,7 @@ WRONG USER #14: user_idx=71
   Focus reached  : m=2
   Total PAC count: 63
   Total actions  : 63
-  Elapsed        : 4.8ms
+  Elapsed        : 27.7ms
   Initial action : feat=191 (AVR_R_amp)
 
   --- NODE TRAVERSAL ---
@@ -1640,9 +1640,9 @@ WRONG USER #15: user_idx=73
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 59
-  Total actions  : 59
-  Elapsed        : 5.3ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 14.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=4
   Alarm feature  : 44 (DIII_N_defl)
@@ -1928,7 +1928,7 @@ WRONG USER #17: user_idx=82
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 5.1ms
+  Elapsed        : 12.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -2189,187 +2189,9 @@ WRONG USER #19: user_idx=91
   Prediction     : Healthy
   Error type     : MISSED DIAGNOSIS (diseased user classified as Healthy)
   Focus reached  : m=2
-  Total PAC count: 63
-  Total actions  : 63
-  Elapsed        : 9.6ms
-  Initial action : feat=193 (AVR_Rp_amp)
-
-  --- NODE TRAVERSAL ---
-  Node: 'root'  m=1  AF_final=0.728155  rw_final=0.271845  [FOCUS INCREASED]
-    h= 2: buf_size= 46  applied= 44  AF_end=0.635922  rw_end=0.364078
-    h= 3: buf_size=  4  applied=  4  AF_end=0.703883  rw_end=0.296117
-    h= 4: buf_size=  0  applied=  0  AF_end=0.703883  rw_end=0.296117
-    h= 5: buf_size=  1  applied=  1  AF_end=0.728155  rw_end=0.271845
-    h= 6: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h= 7: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h= 8: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h= 9: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h=10: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h=14: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h=15: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-    h=16: buf_size=  0  applied=  0  AF_end=0.728155  rw_end=0.271845
-  Node: 'root|k1_f2'  m=2  AF_final=1.000000  rw_final=0.000000  [THRESHOLD MET -> HEALTHY]
-    h= 2: buf_size=  8  applied=  7  AF_end=0.841792  rw_end=0.158208
-    h= 4: buf_size=  0  applied=  0  AF_end=0.841792  rw_end=0.158208
-    h= 5: buf_size=  2  applied=  2  AF_end=0.887246  rw_end=0.112754
-    h= 6: buf_size=  2  applied=  2  AF_end=0.909974  rw_end=0.090026
-    h= 9: buf_size=  1  applied=  1  AF_end=0.955428  rw_end=0.044572
-    h=10: buf_size=  1  applied=  1  AF_end=1.000000  rw_end=0.000000
-    h=14: buf_size=  0  applied=  0  AF_end=1.000000  rw_end=0.000000
-    h=15: buf_size=  0  applied=  0  AF_end=1.000000  rw_end=0.000000
-    h=16: buf_size=  0  applied=  0  AF_end=1.000000  rw_end=0.000000
-
-  --- FULL AF/rw TRACE (every action) ---
-   PAC | node                 |  m |   h | feat | feature_name           |  raw_value |      b_min |      b_max |    r_j_h |      p_h_f |  p_h_gt1_f |   delta_AF |     AF_cum |         rw | alarm | calc_detail
-  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-     1 | root                 |  1 |   2 |  193 | AVR_Rp_amp             |     0.0000 |     0.0000 |     2.3000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.004854 |   0.995146 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-     1 | root                 |  1 |   2 |  266 | V5_T_amp               |     1.2000 |    -1.4000 |     7.6000 | 0.272727 |   0.097561 |   0.456763 |   0.058252 |   0.063107 |   0.936893 |    no | dAF = 0.097561 * 0.272727 / 0.456763 = 0.058252
-     2 | root                 |  1 |   2 |  256 | V4_T_amp               |     3.8000 |    -1.7000 |     9.3000 | 0.204545 |   0.097561 |   0.456763 |   0.043689 |   0.106796 |   0.893204 |    no | dAF = 0.097561 * 0.204545 / 0.456763 = 0.043689
-     3 | root                 |  1 |   2 |  249 | V4_JJ_amp              |     0.0000 |    -1.2000 |     1.9000 | 0.204545 |   0.097561 |   0.456763 |   0.043689 |   0.150485 |   0.849515 |    no | dAF = 0.097561 * 0.204545 / 0.456763 = 0.043689
-     4 | root                 |  1 |   2 |  246 | V3_T_amp               |     4.5000 |    -0.6000 |    11.9000 | 0.181818 |   0.097561 |   0.456763 |   0.038835 |   0.189320 |   0.810680 |    no | dAF = 0.097561 * 0.181818 / 0.456763 = 0.038835
-     5 | root                 |  1 |   2 |  268 | V5_QRSTA               |    14.3000 |    -8.3000 |   116.9000 | 0.181818 |   0.097561 |   0.456763 |   0.038835 |   0.228155 |   0.771845 |    no | dAF = 0.097561 * 0.181818 / 0.456763 = 0.038835
-     6 | root                 |  1 |   2 |  239 | V3_JJ_amp              |     0.2000 |    -1.1000 |     3.5000 | 0.159091 |   0.097561 |   0.456763 |   0.033981 |   0.262136 |   0.737864 |    no | dAF = 0.097561 * 0.159091 / 0.456763 = 0.033981
-     7 | root                 |  1 |   2 |  276 | V6_T_amp               |     0.4000 |    -1.3000 |     6.0000 | 0.136364 |   0.097561 |   0.456763 |   0.029126 |   0.291262 |   0.708738 |    no | dAF = 0.097561 * 0.136364 / 0.456763 = 0.029126
-     8 | root                 |  1 |   2 |   12 | QRST_angle             |    -1.0000 |   -32.0000 |   124.0000 | 0.113636 |   0.097561 |   0.456763 |   0.024272 |   0.315534 |   0.684466 |    no | dAF = 0.097561 * 0.113636 / 0.456763 = 0.024272
-     9 | root                 |  1 |   2 |  259 | V5_JJ_amp              |    -0.2000 |    -1.6000 |     1.0000 | 0.090909 |   0.097561 |   0.456763 |   0.019417 |   0.334951 |   0.665049 |    no | dAF = 0.097561 * 0.090909 / 0.456763 = 0.019417
-    10 | root                 |  1 |   2 |  104 | V2_N_defl              |    20.0000 |     0.0000 |    48.0000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.349515 |   0.650485 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    11 | root                 |  1 |   2 |  166 | DI_T_amp               |     1.2000 |    -1.7000 |     3.7000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.364078 |   0.635922 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    12 | root                 |  1 |   2 |  169 | DII_JJ_amp             |    -0.3000 |    -1.5000 |     1.2000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.378641 |   0.621359 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    13 | root                 |  1 |   2 |  187 | DIII_QRSA              |    -9.6000 |   -43.5000 |    45.4000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.393204 |   0.606796 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    14 | root                 |  1 |   2 |  189 | AVR_JJ_amp             |    -0.1000 |    -1.2000 |     1.1000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.407767 |   0.592233 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    15 | root                 |  1 |   2 |  198 | AVR_QRSTA              |    -9.4000 |   -82.7000 |     0.8000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.422330 |   0.577670 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    16 | root                 |  1 |   2 |  211 | AVF_R_amp              |     1.2000 |     0.0000 |    14.6000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.436893 |   0.563107 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    17 | root                 |  1 |   2 |  218 | AVF_QRSTA              |     5.4000 |   -14.3000 |    62.8000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.451456 |   0.548544 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    18 | root                 |  1 |   2 |  237 | V2_QRSA                |    -8.1000 |   -59.0000 |    13.5000 | 0.068182 |   0.097561 |   0.456763 |   0.014563 |   0.466019 |   0.533981 |    no | dAF = 0.097561 * 0.068182 / 0.456763 = 0.014563
-    19 | root                 |  1 |   2 |   32 | DII_N_defl             |    36.0000 |     0.0000 |    48.0000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.475728 |   0.524272 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    20 | root                 |  1 |   2 |  178 | DII_QRSTA              |     7.8000 |    -3.9000 |    83.8000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.485437 |   0.514563 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    21 | root                 |  1 |   2 |  185 | DIII_P_amp             |     0.6000 |    -1.1000 |     1.7000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.495146 |   0.504854 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    22 | root                 |  1 |   2 |  205 | AVL_P_amp              |    -0.1000 |    -0.7000 |     1.0000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.504854 |   0.495146 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    23 | root                 |  1 |   2 |  219 | V1_JJ_amp              |     0.3000 |    -0.9000 |     2.2000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.514563 |   0.485437 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    24 | root                 |  1 |   2 |  225 | V1_P_amp               |    -0.6000 |    -1.4000 |     0.7000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.524272 |   0.475728 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    25 | root                 |  1 |   2 |  228 | V1_QRSTA               |   -17.4000 |   -93.4000 |    21.4000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.533981 |   0.466019 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    26 | root                 |  1 |   2 |  236 | V2_T_amp               |     2.2000 |    -0.9000 |    11.4000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.543689 |   0.456311 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    27 | root                 |  1 |   2 |  242 | V3_S_amp               |    -5.6000 |   -27.1000 |     0.0000 | 0.045455 |   0.097561 |   0.456763 |   0.009709 |   0.553398 |   0.446602 |    no | dAF = 0.097561 * 0.045455 / 0.456763 = 0.009709
-    28 | root                 |  1 |   2 |    3 | Weight                 |    88.0000 |    18.0000 |   124.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.558252 |   0.441748 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    29 | root                 |  1 |   2 |    9 | QRS_angle              |    -4.0000 |   -58.0000 |   169.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.563107 |   0.436893 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    30 | root                 |  1 |   2 |   24 | DI_Diph_P              |     0.0000 |     0.0000 |     0.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.567961 |   0.432039 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    31 | root                 |  1 |   2 |   60 | AVR_Diph_P             |     0.0000 |     0.0000 |     0.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.572816 |   0.427184 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    32 | root                 |  1 |   2 |   65 | AVL_S_wid              |     0.0000 |     0.0000 |    68.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.577670 |   0.422330 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    33 | root                 |  1 |   2 |   90 | V1_Rp_wid              |     0.0000 |     0.0000 |    36.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.582524 |   0.417476 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    34 | root                 |  1 |   2 |   92 | V1_N_defl              |    16.0000 |     0.0000 |    76.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.587379 |   0.412621 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    35 | root                 |  1 |   2 |   99 | V2_Q_wid               |     0.0000 |     0.0000 |    64.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.592233 |   0.407767 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    36 | root                 |  1 |   2 |  102 | V2_Rp_wid              |     0.0000 |     0.0000 |    24.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.597087 |   0.402913 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    37 | root                 |  1 |   2 |  111 | V3_Q_wid               |     0.0000 |     0.0000 |    20.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.601942 |   0.398058 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    38 | root                 |  1 |   2 |  177 | DII_QRSA               |     7.3000 |   -10.6000 |    64.6000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.606796 |   0.393204 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    39 | root                 |  1 |   2 |  191 | AVR_R_amp              |     0.0000 |     0.0000 |     3.9000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.611650 |   0.388350 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    40 | root                 |  1 |   2 |  192 | AVR_S_amp              |     0.0000 |   -11.6000 |     0.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.616505 |   0.383495 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    41 | root                 |  1 |   2 |  206 | AVL_T_amp              |    -1.2000 |    -1.4000 |     2.7000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.621359 |   0.378641 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    42 | root                 |  1 |   2 |  221 | V1_R_amp               |     0.9000 |     0.0000 |     5.1000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.626214 |   0.373786 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    43 | root                 |  1 |   2 |  223 | V1_Rp_amp              |     0.0000 |     0.0000 |     1.9000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.631068 |   0.368932 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    44 | root                 |  1 |   2 |  248 | V3_QRSTA               |    38.7000 |   -64.9000 |   134.0000 | 0.022727 |   0.097561 |   0.456763 |   0.004854 |   0.635922 |   0.364078 |    no | dAF = 0.097561 * 0.022727 / 0.456763 = 0.004854
-    45 | root                 |  1 |   3 |  136 | V5_R_wid               |    40.0000 |    32.0000 |    84.0000 | 0.333333 |   0.033259 |   0.456763 |   0.024272 |   0.660194 |   0.339806 |    no | dAF = 0.033259 * 0.333333 / 0.456763 = 0.024272
-    46 | root                 |  1 |   3 |  230 | V2_Q_amp               |     0.0000 |   -14.7000 |     0.0000 | 0.266667 |   0.033259 |   0.456763 |   0.019417 |   0.679612 |   0.320388 |    no | dAF = 0.033259 * 0.266667 / 0.456763 = 0.019417
-    47 | root                 |  1 |   3 |  140 | V5_N_defl              |    28.0000 |    20.0000 |    48.0000 | 0.200000 |   0.033259 |   0.456763 |   0.014563 |   0.694175 |   0.305825 |    no | dAF = 0.033259 * 0.200000 / 0.456763 = 0.014563
-    48 | root                 |  1 |   3 |   14 | Heart_rate             |    85.0000 |    55.0000 |   101.0000 | 0.133333 |   0.033259 |   0.456763 |   0.009709 |   0.703883 |   0.296117 |    no | dAF = 0.033259 * 0.133333 / 0.456763 = 0.009709
-    49 | root                 |  1 |   5 |    2 | Height                 |   155.0000 |   132.0000 |   186.0000 | 0.384615 |   0.028825 |   0.456763 |   0.024272 |   0.728155 |   0.271845 |    no | dAF = 0.028825 * 0.384615 / 0.456763 = 0.024272
-     1 | root|k1_f2           |  2 |   2 |  179 | DIII_JJ_amp            |     0.0000 |    -1.2000 |     1.2000 | 0.076923 |   0.104839 |   0.354839 |   0.022727 |   0.750883 |   0.249117 |    no | dAF = 0.104839 * 0.076923 / 0.354839 = 0.022727
-     2 | root|k1_f2           |  2 |   2 |  210 | AVF_Q_amp              |    -1.1000 |    -2.4000 |     0.0000 | 0.076923 |   0.104839 |   0.354839 |   0.022727 |   0.773610 |   0.226390 |    no | dAF = 0.104839 * 0.076923 / 0.354839 = 0.022727
-     3 | root|k1_f2           |  2 |   2 |  241 | V3_R_amp               |     5.4000 |     0.5000 |    20.7000 | 0.076923 |   0.104839 |   0.354839 |   0.022727 |   0.796337 |   0.203663 |    no | dAF = 0.104839 * 0.076923 / 0.354839 = 0.022727
-     4 | root|k1_f2           |  2 |   2 |   14 | Heart_rate             |    85.0000 |    58.0000 |   101.0000 | 0.038462 |   0.104839 |   0.354839 |   0.011364 |   0.807701 |   0.192299 |    no | dAF = 0.104839 * 0.038462 / 0.354839 = 0.011364
-     5 | root|k1_f2           |  2 |   2 |   88 | V1_R_wid               |    24.0000 |     0.0000 |    36.0000 | 0.038462 |   0.104839 |   0.354839 |   0.011364 |   0.819064 |   0.180936 |    no | dAF = 0.104839 * 0.038462 / 0.354839 = 0.011364
-     6 | root|k1_f2           |  2 |   2 |  199 | AVL_JJ_amp             |    -0.5000 |    -1.2000 |     0.6000 | 0.038462 |   0.104839 |   0.354839 |   0.011364 |   0.830428 |   0.169572 |    no | dAF = 0.104839 * 0.038462 / 0.354839 = 0.011364
-     7 | root|k1_f2           |  2 |   2 |  220 | V1_Q_amp               |     0.0000 |   -10.8000 |     0.0000 | 0.038462 |   0.104839 |   0.354839 |   0.011364 |   0.841792 |   0.158208 |    no | dAF = 0.104839 * 0.038462 / 0.354839 = 0.011364
-     8 | root|k1_f2           |  2 |   5 |    0 | Age                    |    64.0000 |    16.0000 |    83.0000 | 0.222222 |   0.036290 |   0.354839 |   0.022727 |   0.864519 |   0.135481 |    no | dAF = 0.036290 * 0.222222 / 0.354839 = 0.022727
-     9 | root|k1_f2           |  2 |   5 |  227 | V1_QRSA                |   -18.5000 |   -61.0000 |    -2.4000 | 0.222222 |   0.036290 |   0.354839 |   0.022727 |   0.887246 |   0.112754 |    no | dAF = 0.036290 * 0.222222 / 0.354839 = 0.022727
-    10 | root|k1_f2           |  2 |   6 |  233 | V2_Rp_amp              |     0.0000 |     0.0000 |     1.5000 | 0.090909 |   0.044355 |   0.354839 |   0.011364 |   0.898610 |   0.101390 |    no | dAF = 0.044355 * 0.090909 / 0.354839 = 0.011364
-    11 | root|k1_f2           |  2 |   6 |  235 | V2_P_amp               |    -0.4000 |    -1.6000 |     0.9000 | 0.090909 |   0.044355 |   0.354839 |   0.011364 |   0.909974 |   0.090026 |    no | dAF = 0.044355 * 0.090909 / 0.354839 = 0.011364
-    12 | root|k1_f2           |  2 |   9 |   64 | AVL_R_wid              |    68.0000 |     0.0000 |    88.0000 | 0.800000 |   0.020161 |   0.354839 |   0.045455 |   0.955428 |   0.044572 |    no | dAF = 0.020161 * 0.800000 / 0.354839 = 0.045455
-    13 | root|k1_f2           |  2 |  10 |   90 | V1_Rp_wid              |     0.0000 |     0.0000 |    36.0000 | 0.227273 |   0.088710 |   0.354839 |   0.056818 |   1.000000 |   0.000000 |    no | dAF = 0.088710 * 0.227273 / 0.354839 = 0.056818
-
-  --- SUMMARY FOR USER 91 ---
-  Unique features tested: 61 [0, 2, 3, 9, 12, 14, 24, 32, 60, 64, 65, 88, 90, 92, 99, 102, 104, 111, 136, 140, 166, 169, 177, 178, 179, 185, 187, 189, 191, 192, 193, 198, 199, 205, 206, 210, 211, 218, 219, 220, 221, 223, 225, 227, 228, 230, 233, 235, 236, 237, 239, 241, 242, 246, 248, 249, 256, 259, 266, 268, 276]
-  Disease classes processed: [2, 3, 5, 6, 9, 10]
-  Total AF accumulated: 1.012246
-  Final AF: 1.000000  Final rw: 0.000000
-  Threshold: 0.025  (rw <= threshold -> HEALTHY)
-  WHY MISSED: rw=0.000000, needed alarm (out-of-range value) but none found across 63 actions on 61 unique features
-  RANGE CHECK DETAIL (all features tested):
-    feat= 193 (AVR_Rp_amp          ): V=    0.0000  range=[    0.0000,     2.3000]  IN RANGE  margin_low=   +0.0000  margin_high=   +2.3000
-    feat= 266 (V5_T_amp            ): V=    1.2000  range=[   -1.4000,     7.6000]  IN RANGE  margin_low=   +2.6000  margin_high=   +6.4000
-    feat= 256 (V4_T_amp            ): V=    3.8000  range=[   -1.7000,     9.3000]  IN RANGE  margin_low=   +5.5000  margin_high=   +5.5000
-    feat= 249 (V4_JJ_amp           ): V=    0.0000  range=[   -1.2000,     1.9000]  IN RANGE  margin_low=   +1.2000  margin_high=   +1.9000
-    feat= 246 (V3_T_amp            ): V=    4.5000  range=[   -0.6000,    11.9000]  IN RANGE  margin_low=   +5.1000  margin_high=   +7.4000
-    feat= 268 (V5_QRSTA            ): V=   14.3000  range=[   -8.3000,   116.9000]  IN RANGE  margin_low=  +22.6000  margin_high= +102.6000
-    feat= 239 (V3_JJ_amp           ): V=    0.2000  range=[   -1.1000,     3.5000]  IN RANGE  margin_low=   +1.3000  margin_high=   +3.3000
-    feat= 276 (V6_T_amp            ): V=    0.4000  range=[   -1.3000,     6.0000]  IN RANGE  margin_low=   +1.7000  margin_high=   +5.6000
-    feat=  12 (QRST_angle          ): V=   -1.0000  range=[  -32.0000,   124.0000]  IN RANGE  margin_low=  +31.0000  margin_high= +125.0000
-    feat= 259 (V5_JJ_amp           ): V=   -0.2000  range=[   -1.6000,     1.0000]  IN RANGE  margin_low=   +1.4000  margin_high=   +1.2000
-    feat= 104 (V2_N_defl           ): V=   20.0000  range=[    0.0000,    48.0000]  IN RANGE  margin_low=  +20.0000  margin_high=  +28.0000
-    feat= 166 (DI_T_amp            ): V=    1.2000  range=[   -1.7000,     3.7000]  IN RANGE  margin_low=   +2.9000  margin_high=   +2.5000
-    feat= 169 (DII_JJ_amp          ): V=   -0.3000  range=[   -1.5000,     1.2000]  IN RANGE  margin_low=   +1.2000  margin_high=   +1.5000
-    feat= 187 (DIII_QRSA           ): V=   -9.6000  range=[  -43.5000,    45.4000]  IN RANGE  margin_low=  +33.9000  margin_high=  +55.0000
-    feat= 189 (AVR_JJ_amp          ): V=   -0.1000  range=[   -1.2000,     1.1000]  IN RANGE  margin_low=   +1.1000  margin_high=   +1.2000
-    feat= 198 (AVR_QRSTA           ): V=   -9.4000  range=[  -82.7000,     0.8000]  IN RANGE  margin_low=  +73.3000  margin_high=  +10.2000
-    feat= 211 (AVF_R_amp           ): V=    1.2000  range=[    0.0000,    14.6000]  IN RANGE  margin_low=   +1.2000  margin_high=  +13.4000
-    feat= 218 (AVF_QRSTA           ): V=    5.4000  range=[  -14.3000,    62.8000]  IN RANGE  margin_low=  +19.7000  margin_high=  +57.4000
-    feat= 237 (V2_QRSA             ): V=   -8.1000  range=[  -59.0000,    13.5000]  IN RANGE  margin_low=  +50.9000  margin_high=  +21.6000
-    feat=  32 (DII_N_defl          ): V=   36.0000  range=[    0.0000,    48.0000]  IN RANGE  margin_low=  +36.0000  margin_high=  +12.0000
-    feat= 178 (DII_QRSTA           ): V=    7.8000  range=[   -3.9000,    83.8000]  IN RANGE  margin_low=  +11.7000  margin_high=  +76.0000
-    feat= 185 (DIII_P_amp          ): V=    0.6000  range=[   -1.1000,     1.7000]  IN RANGE  margin_low=   +1.7000  margin_high=   +1.1000
-    feat= 205 (AVL_P_amp           ): V=   -0.1000  range=[   -0.7000,     1.0000]  IN RANGE  margin_low=   +0.6000  margin_high=   +1.1000
-    feat= 219 (V1_JJ_amp           ): V=    0.3000  range=[   -0.9000,     2.2000]  IN RANGE  margin_low=   +1.2000  margin_high=   +1.9000
-    feat= 225 (V1_P_amp            ): V=   -0.6000  range=[   -1.4000,     0.7000]  IN RANGE  margin_low=   +0.8000  margin_high=   +1.3000
-    feat= 228 (V1_QRSTA            ): V=  -17.4000  range=[  -93.4000,    21.4000]  IN RANGE  margin_low=  +76.0000  margin_high=  +38.8000
-    feat= 236 (V2_T_amp            ): V=    2.2000  range=[   -0.9000,    11.4000]  IN RANGE  margin_low=   +3.1000  margin_high=   +9.2000
-    feat= 242 (V3_S_amp            ): V=   -5.6000  range=[  -27.1000,     0.0000]  IN RANGE  margin_low=  +21.5000  margin_high=   +5.6000
-    feat=   3 (Weight              ): V=   88.0000  range=[   18.0000,   124.0000]  IN RANGE  margin_low=  +70.0000  margin_high=  +36.0000
-    feat=   9 (QRS_angle           ): V=   -4.0000  range=[  -58.0000,   169.0000]  IN RANGE  margin_low=  +54.0000  margin_high= +173.0000
-    feat=  24 (DI_Diph_P           ): V=    0.0000  range=[    0.0000,     0.0000]  IN RANGE  margin_low=   +0.0000  margin_high=   +0.0000
-    feat=  60 (AVR_Diph_P          ): V=    0.0000  range=[    0.0000,     0.0000]  IN RANGE  margin_low=   +0.0000  margin_high=   +0.0000
-    feat=  65 (AVL_S_wid           ): V=    0.0000  range=[    0.0000,    68.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +68.0000
-    feat=  90 (V1_Rp_wid           ): V=    0.0000  range=[    0.0000,    36.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +36.0000
-    feat=  92 (V1_N_defl           ): V=   16.0000  range=[    0.0000,    76.0000]  IN RANGE  margin_low=  +16.0000  margin_high=  +60.0000
-    feat=  99 (V2_Q_wid            ): V=    0.0000  range=[    0.0000,    64.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +64.0000
-    feat= 102 (V2_Rp_wid           ): V=    0.0000  range=[    0.0000,    24.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +24.0000
-    feat= 111 (V3_Q_wid            ): V=    0.0000  range=[    0.0000,    20.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +20.0000
-    feat= 177 (DII_QRSA            ): V=    7.3000  range=[  -10.6000,    64.6000]  IN RANGE  margin_low=  +17.9000  margin_high=  +57.3000
-    feat= 191 (AVR_R_amp           ): V=    0.0000  range=[    0.0000,     3.9000]  IN RANGE  margin_low=   +0.0000  margin_high=   +3.9000
-    feat= 192 (AVR_S_amp           ): V=    0.0000  range=[  -11.6000,     0.0000]  IN RANGE  margin_low=  +11.6000  margin_high=   +0.0000
-    feat= 206 (AVL_T_amp           ): V=   -1.2000  range=[   -1.4000,     2.7000]  IN RANGE  margin_low=   +0.2000  margin_high=   +3.9000
-    feat= 221 (V1_R_amp            ): V=    0.9000  range=[    0.0000,     5.1000]  IN RANGE  margin_low=   +0.9000  margin_high=   +4.2000
-    feat= 223 (V1_Rp_amp           ): V=    0.0000  range=[    0.0000,     1.9000]  IN RANGE  margin_low=   +0.0000  margin_high=   +1.9000
-    feat= 248 (V3_QRSTA            ): V=   38.7000  range=[  -64.9000,   134.0000]  IN RANGE  margin_low= +103.6000  margin_high=  +95.3000
-    feat= 136 (V5_R_wid            ): V=   40.0000  range=[   32.0000,    84.0000]  IN RANGE  margin_low=   +8.0000  margin_high=  +44.0000
-    feat= 230 (V2_Q_amp            ): V=    0.0000  range=[  -14.7000,     0.0000]  IN RANGE  margin_low=  +14.7000  margin_high=   +0.0000
-    feat= 140 (V5_N_defl           ): V=   28.0000  range=[   20.0000,    48.0000]  IN RANGE  margin_low=   +8.0000  margin_high=  +20.0000
-    feat=  14 (Heart_rate          ): V=   85.0000  range=[   55.0000,   101.0000]  IN RANGE  margin_low=  +30.0000  margin_high=  +16.0000
-    feat=   2 (Height              ): V=  155.0000  range=[  132.0000,   186.0000]  IN RANGE  margin_low=  +23.0000  margin_high=  +31.0000
-    feat= 179 (DIII_JJ_amp         ): V=    0.0000  range=[   -1.2000,     1.2000]  IN RANGE  margin_low=   +1.2000  margin_high=   +1.2000
-    feat= 210 (AVF_Q_amp           ): V=   -1.1000  range=[   -2.4000,     0.0000]  IN RANGE  margin_low=   +1.3000  margin_high=   +1.1000
-    feat= 241 (V3_R_amp            ): V=    5.4000  range=[    0.5000,    20.7000]  IN RANGE  margin_low=   +4.9000  margin_high=  +15.3000
-    feat=  14 (Heart_rate          ): V=   85.0000  range=[   58.0000,   101.0000]  IN RANGE  margin_low=  +27.0000  margin_high=  +16.0000
-    feat=  88 (V1_R_wid            ): V=   24.0000  range=[    0.0000,    36.0000]  IN RANGE  margin_low=  +24.0000  margin_high=  +12.0000
-    feat= 199 (AVL_JJ_amp          ): V=   -0.5000  range=[   -1.2000,     0.6000]  IN RANGE  margin_low=   +0.7000  margin_high=   +1.1000
-    feat= 220 (V1_Q_amp            ): V=    0.0000  range=[  -10.8000,     0.0000]  IN RANGE  margin_low=  +10.8000  margin_high=   +0.0000
-    feat=   0 (Age                 ): V=   64.0000  range=[   16.0000,    83.0000]  IN RANGE  margin_low=  +48.0000  margin_high=  +19.0000
-    feat= 227 (V1_QRSA             ): V=  -18.5000  range=[  -61.0000,    -2.4000]  IN RANGE  margin_low=  +42.5000  margin_high=  +16.1000
-    feat= 233 (V2_Rp_amp           ): V=    0.0000  range=[    0.0000,     1.5000]  IN RANGE  margin_low=   +0.0000  margin_high=   +1.5000
-    feat= 235 (V2_P_amp            ): V=   -0.4000  range=[   -1.6000,     0.9000]  IN RANGE  margin_low=   +1.2000  margin_high=   +1.3000
-    feat=  64 (AVL_R_wid           ): V=   68.0000  range=[    0.0000,    88.0000]  IN RANGE  margin_low=  +68.0000  margin_high=  +20.0000
-    feat=  90 (V1_Rp_wid           ): V=    0.0000  range=[    0.0000,    36.0000]  IN RANGE  margin_low=   +0.0000  margin_high=  +36.0000
-
-========================================================================================================================
-
-########################################################################################################################
-WRONG USER #20: user_idx=95
-########################################################################################################################
-  True label     : 1 (HEALTHY)
-  Prediction     : Unhealthy
-  Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
-  Focus reached  : m=2
-  Total PAC count: 55
-  Total actions  : 55
-  Elapsed        : 4.9ms
+  Total PAC count: 62
+  Total actions  : 62
+  Elapsed        : 14.2ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 229 (V2_JJ_amp)
@@ -2965,7 +2787,7 @@ WRONG USER #29: user_idx=114
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.3ms
+  Elapsed        : 19.2ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -3144,7 +2966,7 @@ WRONG USER #30: user_idx=117
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 5.2ms
+  Elapsed        : 10.5ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=5
   Alarm feature  : 226 (V1_T_amp)
@@ -3986,7 +3808,7 @@ WRONG USER #38: user_idx=154
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 74.4ms
+  Elapsed        : 13.8ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4168,7 +3990,7 @@ WRONG USER #39: user_idx=157
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 82.4ms
+  Elapsed        : 13.5ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -4696,9 +4518,9 @@ WRONG USER #44: user_idx=177
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 61
-  Total actions  : 61
-  Elapsed        : 101.1ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 8.9ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=5
   Alarm feature  : 227 (V1_QRSA)
@@ -4987,7 +4809,7 @@ WRONG USER #46: user_idx=181
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 99.8ms
+  Elapsed        : 13.6ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -5166,7 +4988,7 @@ WRONG USER #47: user_idx=186
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 51.0ms
+  Elapsed        : 16.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -5458,7 +5280,7 @@ WRONG USER #50: user_idx=200
   Focus reached  : m=2
   Total PAC count: 64
   Total actions  : 64
-  Elapsed        : 83.1ms
+  Elapsed        : 6.8ms
   Initial action : feat=193 (AVR_Rp_amp)
 
   --- NODE TRAVERSAL ---
@@ -5890,9 +5712,9 @@ WRONG USER #56: user_idx=228
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 52
-  Total actions  : 52
-  Elapsed        : 5.0ms
+  Total PAC count: 62
+  Total actions  : 62
+  Elapsed        : 15.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 235 (V2_P_amp)
@@ -7376,9 +7198,9 @@ WRONG USER #73: user_idx=310
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 60
-  Total actions  : 60
-  Elapsed        : 5.2ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 55.8ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 175 (DII_P_amp)
@@ -8212,7 +8034,7 @@ WRONG USER #81: user_idx=343
   Focus reached  : m=2
   Total PAC count: 62
   Total actions  : 62
-  Elapsed        : 6.1ms
+  Elapsed        : 33.1ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -8389,9 +8211,9 @@ WRONG USER #82: user_idx=347
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 66
-  Total actions  : 66
-  Elapsed        : 14.6ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 17.1ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=10
   Alarm feature  : 228 (V1_QRSTA)
@@ -9223,7 +9045,7 @@ WRONG USER #89: user_idx=375
   Focus reached  : m=2
   Total PAC count: 65
   Total actions  : 65
-  Elapsed        : 5.7ms
+  Elapsed        : 16.0ms
   Initial action : feat=192 (AVR_S_amp)
 
   --- NODE TRAVERSAL ---
@@ -9403,9 +9225,9 @@ WRONG USER #90: user_idx=378
   Prediction     : Unhealthy
   Error type     : FALSE ALARM (healthy user classified as UNHEALTHY)
   Focus reached  : m=2
-  Total PAC count: 57
-  Total actions  : 57
-  Elapsed        : 5.0ms
+  Total PAC count: 65
+  Total actions  : 65
+  Elapsed        : 13.6ms
   Initial action : feat=192 (AVR_S_amp)
   Alarm class    : h=2
   Alarm feature  : 199 (AVL_JJ_amp)
