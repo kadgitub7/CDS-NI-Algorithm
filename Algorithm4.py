@@ -44,9 +44,9 @@ CRITICAL DESIGN DECISIONS
      P(h>1,node) = node.n_diseased / node.n_users            [INFER]
      (both computed over training users in the relevant tree node)
 
-  3. Each action ↔ ONE feature  (sensor → feature reading).  [PAPER]
+  3. Each action ↔ ONE feature  (sensor -> feature reading).  [PAPER]
 
-  4. Line 32 "Go to line 18" → implemented as an inner while-loop.  [PAPER]
+  4. Line 32 "Go to line 18" -> implemented as an inner while-loop.  [PAPER]
 
   5. Initial AF at t=0 is zero.                                [PAPER]
 
@@ -137,6 +137,14 @@ HEALTHY_CLASS_ALG4: int = HEALTHY_CLASS   # = 1
 # [INFER] All disease class labels in the UCI Arrhythmia dataset
 ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: IN-PROCESSING RL REWARD MODIFICATION (Zhang et al., 2018 adapted)
+# ─────────────────────────────────────────────────────────────────────────────
+# Controlled by fairness_config.py — the centralized toggle file.
+from fairness_config import ENABLE_FAIRNESS_RL, FAIRNESS_LAMBDA, SEX_FEATURE_INDEX
+
+SEX_FEATURE_INDEX_ALG4: int = SEX_FEATURE_INDEX
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – DATA STRUCTURES
@@ -146,10 +154,10 @@ class HealthDecision(Enum):
     """
     [PAPER] Section VI.B: three possible outcomes of Algorithm 4.
 
-    HEALTHY    → "start healthy living recommendations"           (line 36)
-    UNHEALTHY  → "Alarm and disease diagnosis process"            (line 26)
-    SCREENING  → "Run Screening process"                          (line 42)
-    UNKNOWN    → prediction incomplete (should not occur normally)
+    HEALTHY    -> "start healthy living recommendations"           (line 36)
+    UNHEALTHY  -> "Alarm and disease diagnosis process"            (line 26)
+    SCREENING  -> "Run Screening process"                          (line 42)
+    UNKNOWN    -> prediction incomplete (should not occur normally)
     """
     HEALTHY   = "Healthy"
     UNHEALTHY = "Unhealthy"
@@ -375,8 +383,9 @@ class Algorithm4Output:
     diseased_correct_females: int = 0
     diseased_total_females: int = 0
 
-    # Misclassification by true class for females
+    # Misclassification by true class, split by gender
     misclassified_females_by_class: Dict[int, int] = field(default_factory=dict)
+    misclassified_males_by_class:   Dict[int, int] = field(default_factory=dict)
 
     # Fairness metrics counters
     total_men: int = 0
@@ -394,6 +403,12 @@ class Algorithm4Output:
     fairness_spd: float = 0.0
     fairness_di: float = 0.0
     fairness_eo_diff: float = 0.0
+    fairness_eo_tpr_diff: float = 0.0
+    fairness_eo_fpr_diff: float = 0.0
+    fairness_tpr_male: float = 0.0
+    fairness_tpr_female: float = 0.0
+    fairness_fpr_male: float = 0.0
+    fairness_fpr_female: float = 0.0
 
     def _recompute_stats(self) -> None:
         """
@@ -443,19 +458,19 @@ class Algorithm4Output:
         if self.data is not None:
             self.total_abnormal_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.total_abnormal_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.incorrect_abnormal_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.incorrect_abnormal_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and not r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.error_rate_abnormal_males = (
                 self.incorrect_abnormal_males / self.total_abnormal_males
@@ -469,78 +484,104 @@ class Algorithm4Output:
             # Per-gender confusion matrices
             self.healthy_correct_males = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.healthy_total_males = sum(
                 1 for r in self.records
-                if r.true_is_healthy and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.diseased_correct_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.diseased_total_males = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.healthy_correct_females = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and r.decision != HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.healthy_total_females = sum(
                 1 for r in self.records
-                if r.true_is_healthy and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.diseased_correct_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
             self.diseased_total_females = sum(
                 1 for r in self.records
-                if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
 
-            # Misclassification by true class for females
+            # Misclassification by true class, split by gender
             self.misclassified_females_by_class = {}
+            self.misclassified_males_by_class   = {}
             for r in self.records:
-                if self.data[r.user_global_idx, 1] == 1 and r.true_is_diseased and not r.is_correct:
+                if r.true_is_diseased and not r.is_correct:
                     cls = r.true_label
-                    self.misclassified_females_by_class[cls] = self.misclassified_females_by_class.get(cls, 0) + 1
+                    sex = self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4]
+                    if sex == 1:
+                        self.misclassified_females_by_class[cls] = self.misclassified_females_by_class.get(cls, 0) + 1
+                    elif sex == 0:
+                        self.misclassified_males_by_class[cls] = self.misclassified_males_by_class.get(cls, 0) + 1
 
             # Fairness metrics
-            self.total_men = sum(1 for r in self.records if self.data[r.user_global_idx, 1] == 0)
-            self.total_women = sum(1 for r in self.records if self.data[r.user_global_idx, 1] == 1)
-            self.abnormal_men = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, 1] == 0)
-            self.abnormal_women = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, 1] == 1)
+            self.total_men = sum(1 for r in self.records if self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.total_women = sum(1 for r in self.records if self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
+            self.abnormal_men = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.abnormal_women = sum(1 for r in self.records if r.true_is_diseased and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
             self.unhealthy_abnormal_men = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.unhealthy_abnormal_women = sum(
                 1 for r in self.records
-                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_diseased and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
-            self.normal_men = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, 1] == 0)
-            self.normal_women = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, 1] == 1)
+            self.normal_men = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0)
+            self.normal_women = sum(1 for r in self.records if r.true_is_healthy and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1)
             self.unhealthy_normal_men = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 0
+                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0
             )
             self.unhealthy_normal_women = sum(
                 1 for r in self.records
-                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, 1] == 1
+                if r.true_is_healthy and r.decision == HealthDecision.UNHEALTHY and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1
             )
-            accuracy_men = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 0) / self.total_men if self.total_men > 0 else 0
-            accuracy_women = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, 1] == 1) / self.total_women if self.total_women > 0 else 0
+            accuracy_men = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 0) / self.total_men if self.total_men > 0 else 0
+            accuracy_women = sum(1 for r in self.records if r.is_correct and self.data[r.user_global_idx, SEX_FEATURE_INDEX_ALG4] == 1) / self.total_women if self.total_women > 0 else 0
 
-            # Compute fairness metrics
-            self.fairness_spd = accuracy_men - accuracy_women
-            self.fairness_di = accuracy_women / accuracy_men if accuracy_men > 0 else 0
+            # Compute fairness metrics (Mehrabi et al., 2021)
+            #
+            # Statistical Parity Difference (SPD):
+            #   P(Y_hat=UNHEALTHY | male) - P(Y_hat=UNHEALTHY | female)
+            #   Measures whether the positive prediction rate differs by group.
+            #   SPD = 0 means equal rates; >0 means males get more UNHEALTHY predictions.
+            p_unhealthy_male = (self.unhealthy_abnormal_men + self.unhealthy_normal_men) / self.total_men if self.total_men > 0 else 0
+            p_unhealthy_female = (self.unhealthy_abnormal_women + self.unhealthy_normal_women) / self.total_women if self.total_women > 0 else 0
+            self.fairness_spd = p_unhealthy_male - p_unhealthy_female
+
+            # Disparate Impact (DI):
+            #   P(Y_hat=UNHEALTHY | female) / P(Y_hat=UNHEALTHY | male)
+            #   DI < 0.8 indicates adverse impact against the female group (80% rule).
+            self.fairness_di = p_unhealthy_female / p_unhealthy_male if p_unhealthy_male > 0 else 0
+
+            # Equalized Odds (Hardt et al., 2016):
+            #   Requires BOTH TPR and FPR to be equal across groups.
+            #   Report each component separately plus the max absolute difference.
             tpr_male = self.unhealthy_abnormal_men / self.abnormal_men if self.abnormal_men > 0 else 0
             fpr_male = self.unhealthy_normal_men / self.normal_men if self.normal_men > 0 else 0
             tpr_female = self.unhealthy_abnormal_women / self.abnormal_women if self.abnormal_women > 0 else 0
             fpr_female = self.unhealthy_normal_women / self.normal_women if self.normal_women > 0 else 0
-            self.fairness_eo_diff = abs(tpr_male - tpr_female) + abs(fpr_male - fpr_female)
+            self.fairness_tpr_male = tpr_male
+            self.fairness_tpr_female = tpr_female
+            self.fairness_fpr_male = fpr_male
+            self.fairness_fpr_female = fpr_female
+            self.fairness_eo_tpr_diff = tpr_male - tpr_female
+            self.fairness_eo_fpr_diff = fpr_male - fpr_female
+            self.fairness_eo_diff = max(abs(tpr_male - tpr_female), abs(fpr_male - fpr_female))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -562,9 +603,9 @@ def _get_raw_value(global_user_idx: int, feature_idx: int,
 def _is_outside_healthy_range(value: float, b_min: float, b_max: float) -> bool:
     """
     [PAPER] Algorithm 4, line 25:
-        if V_j < b_min^{mkfj}  OR  V_j > b_max^{kmfj}  → alarm
+        if V_j < b_min^{mkfj}  OR  V_j > b_max^{kmfj}  -> alarm
 
-    [ENGR]  NaN → False (missing measurement cannot confirm abnormality).
+    [ENGR]  NaN -> False (missing measurement cannot confirm abnormality).
     [PAPER] Strict inequalities as written in the paper.
     [ENGR]  Inverted range (b_min > b_max) signals an undefined healthy band
             (no healthy training users had a valid value for this feature);
@@ -714,6 +755,11 @@ def _rl_select_best_action(
     disease_h: int,
     AF_real_current: float,
     alg2_output: Algorithm2Output,
+    user_sex: Optional[int] = None,
+    data: Optional[np.ndarray] = None,
+    labels: Optional[np.ndarray] = None,
+    train_data: Optional[np.ndarray] = None,
+    train_labels: Optional[np.ndarray] = None,
 ) -> Tuple[Optional[ExecutiveActionEntry], List[RLLookaheadEntry]]:
     """
     RL lookahead: select action J that minimises rw_sim.
@@ -728,6 +774,11 @@ def _rl_select_best_action(
     Per  §8.9, the printed line 13's
     +AF^cj self-reference is a typo; the correct form has no addition.
 
+    [FAIRNESS] When ENABLE_FAIRNESS_RL=True, applies modified reward:
+        rw_modified = rw_original + λ * |AF_male_contribution - AF_female_contribution|
+    where AF_male/female_contribution is computed from the sex-stratified
+    action weights for this feature across the training population in the node.
+
     [ENGR]  Each action corresponds to one feature.  "features extracted from c"
     = {c.feature_idx}.  We compute AF_sim for that single feature.
 
@@ -741,6 +792,70 @@ def _rl_select_best_action(
 
     p_h_f     = _compute_p_h_f(node, disease_h)
     p_h_gt1_f = _compute_p_h_gt1_f(node)
+
+    # ── FAIRNESS: Precompute sex-stratified AF contributions for penalty ──────
+    # For each candidate action, compute how differently it contributes to AF
+    # for male vs female subpopulations in the training data at this node.
+    fairness_penalties: Dict[int, float] = {}
+    if ENABLE_FAIRNESS_RL and data is not None and labels is not None:
+        fair_data = train_data if train_data is not None else data
+        fair_labels = train_labels if train_labels is not None else labels
+        node_users = node.user_indices
+        node_sex = fair_data[node_users, SEX_FEATURE_INDEX_ALG4]
+        node_labels = fair_labels[node_users]
+        male_mask = (node_sex == 0)
+        female_mask = (node_sex == 1)
+        n_male_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & male_mask).sum()
+        n_female_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & female_mask).sum()
+        n_male_node = male_mask.sum()
+        n_female_node = female_mask.sum()
+
+        for action in candidate_actions:
+            j = action.feature_idx
+            # Compute AF contribution separately for male and female subgroups
+            # AF_increment ∝ P(h,f) * r_{j|h} / P(h>1,f)
+            # The sex-specific version uses sex-stratified disease prevalence
+            # and sex-stratified action weight (fraction outside healthy range)
+            vals = fair_data[node_users, j]
+            valid_mask = ~np.isnan(vals)
+
+            # Get healthy range for this feature at this node
+            model = alg2_output.get_model(node.node_id, j)
+            if model is None:
+                fairness_penalties[j] = 0.0
+                continue
+            b_min_h = model.healthy_range.b_min_healthy
+            b_max_h = model.healthy_range.b_max_healthy
+
+            # r_{j|h} stratified by sex: fraction of disease-h users outside range
+            disease_mask = (node_labels == disease_h)
+            male_disease = disease_mask & male_mask & valid_mask
+            female_disease = disease_mask & female_mask & valid_mask
+
+            n_male_d = male_disease.sum()
+            n_female_d = female_disease.sum()
+
+            if n_male_d > 0:
+                male_vals = vals[male_disease]
+                r_male = ((male_vals < b_min_h) | (male_vals > b_max_h)).sum() / n_male_d
+            else:
+                r_male = 0.0
+
+            if n_female_d > 0:
+                female_vals = vals[female_disease]
+                r_female = ((female_vals < b_min_h) | (female_vals > b_max_h)).sum() / n_female_d
+            else:
+                r_female = 0.0
+
+            # AF contribution disparity: |AF_male - AF_female|
+            # Using simplified AF formula: AF ∝ P(h,f) * r / P(h>1,f)
+            AF_male = p_h_f * r_male / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
+            AF_female = p_h_f * r_female / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
+            fairness_penalties[j] = abs(AF_male - AF_female)
+
+    # # ── ORIGINAL (uncomment to disable fairness RL): ─────────────────────────
+    # # To revert: set ENABLE_FAIRNESS_RL = False at the top of this file.
+    # fairness_penalties = {}
 
     rl_entries: List[RLLookaheadEntry] = []
     best_action: Optional[ExecutiveActionEntry] = None
@@ -757,6 +872,13 @@ def _rl_select_best_action(
 
         # [PAPER] line 14: rw^cj = 1 - (AF_sim_cj + AF_real_current)
         rw_sim_cj = 1.0 - (AF_sim_cj + AF_real_current)
+
+        # ── FAIRNESS: Modified reward with demographic parity penalty ─────────
+        # rw_modified = rw_original + λ * |AF_male - AF_female|
+        # Lower rw_sim is better (means higher AF). The penalty INCREASES rw_sim
+        # for actions with high disparity, making them less likely to be selected.
+        if ENABLE_FAIRNESS_RL and j in fairness_penalties:
+            rw_sim_cj += FAIRNESS_LAMBDA * fairness_penalties[j]
 
         is_sel = False
         if rw_sim_cj < best_rw_sim:
@@ -798,7 +920,9 @@ def _predict_at_node(
     pac_counter:      List[int],          # [0] = current PAC count (mutable)
     record:           PredictionRecord,
     consumed_actions: Optional[Set[Tuple[int, int]]] = None,
-    initial_action_h: Optional[int] = None
+    initial_action_h: Optional[int] = None,
+    train_data: Optional[np.ndarray] = None,
+    train_labels: Optional[np.ndarray] = None,
 ) -> Tuple[HealthDecision, float, Optional[int]]:
     """
     Run the inner prediction loop of Algorithm 4 at ONE tree node.
@@ -868,7 +992,7 @@ def _predict_at_node(
         #         (already done in _get_sorted_disease_actions)
 
         if not sorted_actions_h:
-            log.debug(f"    h={h}: no refined actions at node {nid!r} → skip")
+            log.debug(f"    h={h}: no refined actions at node {nid!r} -> skip")
             dc_rec = DiseaseCheckRecord(
                 node_id=nid, focus_level=m, disease_h=h,
                 n_actions_in_buf=0, n_actions_applied=0,
@@ -898,7 +1022,7 @@ def _predict_at_node(
 
         # ─────────────────────────────────────────────────────────────
         # [PAPER] Lines 18–33: while C_buf ≠ ∅:
-        #   (Line 32: "Go to line 18" → while-loop)
+        #   (Line 32: "Go to line 18" -> while-loop)
         # ─────────────────────────────────────────────────────────────
         while C_buf:
 
@@ -911,6 +1035,11 @@ def _predict_at_node(
                 disease_h         = h,
                 AF_real_current   = AF_real,
                 alg2_output       = alg2_output,
+                user_sex          = int(data[user_global_idx, SEX_FEATURE_INDEX_ALG4]),
+                data              = data,
+                labels            = labels,
+                train_data        = train_data,
+                train_labels      = train_labels,
             )
             disease_check_rec.rl_selections.extend(rl_entries)
 
@@ -941,7 +1070,7 @@ def _predict_at_node(
             for j in features_to_test:
                 V_j = VO_buf[j]
 
-                # [PAPER §VII.A + spec §8.13] Sensor failure → skip entirely.
+                # [PAPER §VII.A + spec §8.13] Sensor failure -> skip entirely.
                 if np.isnan(V_j):
                     log.debug(f"    [SKIP NaN] j={j} for h={h}: sensor failure, no PAC update")
                     continue
@@ -960,7 +1089,7 @@ def _predict_at_node(
                 # Get healthy range from Algorithm 2 perceptor library
                 model_entry = alg2_output.get_model(nid, j)
                 if model_entry is None:
-                    log.debug(f"    h={h} j={j}: no model entry at node {nid!r} → skip")
+                    log.debug(f"    h={h} j={j}: no model entry at node {nid!r} -> skip")
                     continue
 
                 b_min = model_entry.healthy_range.b_min_healthy
@@ -1014,7 +1143,7 @@ def _predict_at_node(
                 )
 
                 if alarm:
-                    # [PAPER] Lines 26-28: Alarm and disease diagnosis → Decision=Unhealthy
+                    # [PAPER] Lines 26-28: Alarm and disease diagnosis -> Decision=Unhealthy
                     disease_check_rec.alarm_triggered   = True
                     disease_check_rec.alarm_feature_idx = j
                     disease_check_rec.alarm_raw_value   = V_j
@@ -1035,20 +1164,10 @@ def _predict_at_node(
                     # [PAPER] Line 28: Return Decision
                     return HealthDecision.UNHEALTHY, AF_real, alarm_class
 
-                # --- Algorithm 4: Node Update Logic ---
-                # [PAPER Page 320, Line 18] Check if this feature branches the tree
-                if node.branching_feat_k == j:
-                    # Determine which branch (f) the user falls into
-                    next_node = None
-                    for child in node.all_children:
-                        if child.branch_def.contains(V_j):
-                            next_node = child
-                            break
-
                 # [PAPER] Line 29: End if (alarm)
             # end for j in features_to_test
 
-            # [PAPER] Line 31: if C_buf ≠ ∅ → Go to line 18 (while-loop continues)
+            # [PAPER] Line 31: if C_buf ≠ ∅ -> Go to line 18 (while-loop continues)
             # [PAPER] Line 33: End if
         # end while C_buf
 
@@ -1075,7 +1194,7 @@ def _predict_at_node(
                   f"{DIAGNOSTIC_THRESHOLD_ALG4} -> HEALTHY")
         return HealthDecision.HEALTHY, AF_real, None
 
-    # [PAPER] Line 39: elseif Users in focus level m+1 >= u_min → increase focus
+    # [PAPER] Line 39: elseif Users in focus level m+1 >= u_min -> increase focus
     # [INFER] "Users in focus level m+1" means: are there child nodes of the
     #         current node with sufficient users to provide reliable models?
     can_increase_focus = False
@@ -1094,12 +1213,12 @@ def _predict_at_node(
         node_rec.focus_increased = True
         log.debug(f"  Node {nid!r}: rw={rw_final:.4f} > threshold, "
                   f"focus can increase to m={next_m}")
-        return HealthDecision.UNKNOWN, AF_real, None   # UNKNOWN → caller increases focus
+        return HealthDecision.UNKNOWN, AF_real, None   # UNKNOWN -> caller increases focus
 
-    # [PAPER] Lines 41-42: else → Run Screening process
+    # [PAPER] Lines 41-42: else -> Run Screening process
     node_rec.sent_to_screening = True
     log.debug(f"  Node {nid!r}: rw={rw_final:.4f} > threshold, "
-              f"focus cannot increase → SCREENING")
+              f"focus cannot increase -> SCREENING")
     return HealthDecision.SCREENING, AF_real, None
 
 
@@ -1116,6 +1235,8 @@ def run_algorithm4(
     alg3_output:      Algorithm3Output,
     rng_seed:         Optional[int] = None,
     verbose:          bool = False,
+    train_data:       Optional[np.ndarray] = None,
+    train_labels:     Optional[np.ndarray] = None,
 ) -> PredictionRecord:
     """
     Run Algorithm 4 for a single test user.
@@ -1130,7 +1251,7 @@ def run_algorithm4(
     labels          : full (N,) label array (1=healthy, 2-16=disease).
     tree            : DecisionTree from Algorithm 1.
     alg2_output     : Algorithm2Output from Algorithm 2.
-    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=False, per §8.8).
+    alg3_output     : Algorithm3Output from Algorithm 3 (reset_per_h=True, per §8.8).
     rng_seed        : optional random seed for reproducibility.
     verbose         : if True, set logger to DEBUG level.
 
@@ -1138,7 +1259,7 @@ def run_algorithm4(
     -------
     PredictionRecord with full decision trace.
 
-    Algorithm 4 Pseudocode → Implementation Mapping
+    Algorithm 4 Pseudocode -> Implementation Mapping
     ------------------------------------------------
     Init  : load root node normal ranges, actions          ← [below]
     Init  : randomly select initial action from C          ← initial_action step
@@ -1189,7 +1310,7 @@ def run_algorithm4(
     # so level-2 C_buf construction skips anything already applied at level 1.
     consumed_pairs: Set[Tuple[int, int]] = set()
 
-    root_all_actions = alg3_output.retained_for_node("root")
+    root_all_actions = alg3_output.retained_for_node(root_node.node_id)
     h_init = -1
     if root_all_actions:
         # [PAPER ALG-4 init] c0 = random action from the refined root library.
@@ -1315,8 +1436,8 @@ def run_algorithm4(
     # ─────────────────────────────────────────────────────────────────────
     # [PAPER] Line 1: for k = set of k_m
     # [INFER] We iterate over focus levels m=1, 2, ...
-    #         At m=1: k=∅, f=∅ → root node.
-    #         At m=2: k=1 (sex feature), f=male/female → appropriate child.
+    #         At m=1: k=∅, f=∅ -> root node.
+    #         At m=2: k=1 (sex feature), f=male/female -> appropriate child.
     #         We stop when a definitive decision is reached or focus cannot increase.
     # ─────────────────────────────────────────────────────────────────────
     max_focus_level = tree.depth()
@@ -1341,7 +1462,7 @@ def run_algorithm4(
         )
 
         if active_node is None:
-            log.debug(f"  m={current_focus}: no applicable node → stop")
+            log.debug(f"  m={current_focus}: no applicable node -> stop")
             # Don't escalate further; the previous focus level's decision was UNKNOWN
             # but we can't escalate, so treat as SCREENING per paper line 41-42
             decision = HealthDecision.SCREENING
@@ -1361,16 +1482,8 @@ def run_algorithm4(
             h for h in all_disease_classes
             if active_node.health_dist.get(h, 0) > 0
         ])
-        '''
-        node_disease_classes = sorted(
-            [h for h in active_node.health_dist if h != HEALTHY_CLASS and active_node.health_dist[h] > 0],
-            key=lambda h: active_node.health_dist[h],
-            reverse=True
-        )
-        '''
-
         if not node_disease_classes:
-            log.debug(f"  Node {active_node.node_id!r}: no disease classes → skip")
+            log.debug(f"  Node {active_node.node_id!r}: no disease classes -> skip")
             # [INFER] If no disease classes at this node, treat as healthy
             decision = HealthDecision.HEALTHY
             break
@@ -1392,6 +1505,8 @@ def run_algorithm4(
             record           = record,
             consumed_actions = consumed_pairs,
             initial_action_h = h_init,
+            train_data       = train_data,
+            train_labels     = train_labels,
         )
         # Maintain a separate global PAC count for trace/reporting purposes.
         record.total_pac_count += pac_counter[0]
@@ -1414,7 +1529,7 @@ def run_algorithm4(
         if decision == HealthDecision.SCREENING:
             break
 
-        # decision == UNKNOWN → focus can be increased → continue outer loop
+        # decision == UNKNOWN -> focus can be increased -> continue outer loop
         # [PAPER §8.11 user override; CORRECTION TO BUG #9]
         # AF persists across focus-level transitions. The user override
         # explicitly rejects the per-focus-level reset implied by Figs 11/12.
@@ -1427,13 +1542,13 @@ def run_algorithm4(
     if decision == HealthDecision.UNKNOWN:
         # [ENGR] Should not occur in normal operation; fall back to SCREENING
         decision = HealthDecision.SCREENING
-        log.debug("  Decision remained UNKNOWN after all focus levels → SCREENING")
+        log.debug("  Decision remained UNKNOWN after all focus levels -> SCREENING")
 
     # Determine correctness — paper-faithful metric per §VII.A and Table 5.
     #
     # Paper Table 5 reports "Total accuracy = 95.4%" with "Diagnosis accuracy = 90%"
     # at Focus Level 2. Working backwards: 95.4% × 452 ≈ 431 correct = 90% × 207
-    # diseased + 100% × 245 healthy → specificity = 100%. The paper achieves this
+    # diseased + 100% × 245 healthy -> specificity = 100%. The paper achieves this
     # despite explicitly sending healthy female users to SCREENING (§VII.A).
     #
     # Reconciliation: SCREENING is a "soft healthy" outcome — the system did NOT
@@ -1442,10 +1557,10 @@ def run_algorithm4(
     # the screening" — SCREENING is *under the healthy verdict* with extra checks.
     #
     # Therefore:
-    #   • True healthy: HEALTHY or SCREENING → correct (no false alarm)
-    #                   UNHEALTHY            → wrong (false alarm; FA>0)
-    #   • True diseased: UNHEALTHY           → correct (diagnosis caught it)
-    #                    HEALTHY or SCREENING → wrong (missed diagnosis)
+    #   • True healthy: HEALTHY or SCREENING -> correct (no false alarm)
+    #                   UNHEALTHY            -> wrong (false alarm; FA>0)
+    #   • True diseased: UNHEALTHY           -> correct (diagnosis caught it)
+    #                    HEALTHY or SCREENING -> wrong (missed diagnosis)
     if true_label == HEALTHY_CLASS_ALG4:
         # User is truly healthy: correct unless we falsely alarmed them
         is_correct = (decision != HealthDecision.UNHEALTHY)
@@ -1459,7 +1574,7 @@ def run_algorithm4(
 
     log.info(
         f"  DECISION: user={user_global_idx}  true={true_label}  "
-        f"→ {decision.value}  correct={is_correct}  "
+        f"-> {decision.value}  correct={is_correct}  "
         f"PAC={record.total_pac_count}  AF={AF_real:.4f}  "
         f"elapsed={record.elapsed_ms:.1f}ms"
     )
@@ -1495,9 +1610,9 @@ def run_loocv(
 
     Per-fold protocol: for each held-out test user u,
       1. Build training set = all 452 users EXCEPT u (451 users).
-      2. Run Algorithm 1 on training set → tree_u.
-      3. Run Algorithm 2 on training set + tree_u → alg2_u.
-      4. Run Algorithm 3 on training set + tree_u + alg2_u → alg3_u.
+      2. Run Algorithm 1 on training set -> tree_u.
+      3. Run Algorithm 2 on training set + tree_u -> alg2_u.
+      4. Run Algorithm 3 on training set + tree_u + alg2_u -> alg3_u.
       5. Run Algorithm 4 prediction on user u using (tree_u, alg2_u, alg3_u).
     Repeat for all 452 users; aggregate the predictions.
 
@@ -1512,20 +1627,28 @@ def run_loocv(
     n_bins       : Algorithm 2 discretization bin count (default 20).
     nodes_filter : Algorithm 2/3 nodes_filter (default: root + sex branches).
     """
-    if nodes_filter is None:
-        # [PAPER §VII.A] Sex-branched nodes at level 2 (Sex = column 1).
-        nodes_filter = ["root", "root|k1_f1", "root|k1_f2"]
+    import fairness_config as _fc
+
+    # nodes_filter is built per-fold from the actual tree structure.
+    # All branching features that satisfy Eq.2 produce level-2 nodes.
 
     n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
     log.info(f"\n{'='*65}")
     log.info(f"LOOCV (per-fold retraining) | n_users={n_total}  "
              f"threshold={DIAGNOSTIC_THRESHOLD_ALG4}")
+    log.info(f"Config: {_fc.summary()}")
     log.info(f"{'='*65}")
 
     # Suppress per-fold training logs (each fold logs Algorithms 1-3 progress).
     import logging as _logging
-    for name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3"):
+    for name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3", "CDS.Alg1.ForcedSex"):
         _logging.getLogger(name).setLevel(_logging.WARNING)
+
+    # Lazy imports for optional features
+    if _fc.ENABLE_FORCED_SEX_BRANCHING:
+        from Algorithm1_forcedBranch import build_forced_sex_forest, build_sex_specific_tree, route_user
+    if _fc.ENABLE_DATA_AUGMENTATION:
+        from augmentation_strategies import apply_augmentation
 
     output = Algorithm4Output(data=data)
     random.seed(rng_seed)
@@ -1536,13 +1659,60 @@ def run_loocv(
     for i in range(n_total):
         # ── Build per-fold training set (all users except i) ─────────────────
         train_mask           = np.ones(n_users_total, dtype=bool)
-        train_mask[i]        = True
+        train_mask[i]        = False
         train_data           = data[train_mask]
         train_labels         = labels[train_mask]
 
-        # ── Per-fold Algorithm 1: build decision tree on training set ────────
-        tree_i = build_decision_tree(train_data, train_labels)
-        
+        # ── Optional: augment training data (female sub-population) ──────────
+        if _fc.ENABLE_DATA_AUGMENTATION and _fc.AUGMENTATION_STRATEGY != "none":
+            train_data, train_labels = apply_augmentation(
+                strategy_name = _fc.AUGMENTATION_STRATEGY,
+                X_train       = train_data,
+                y_train       = train_labels,
+                rng_seed      = rng_seed + i,
+            )
+
+        # ── Per-fold Algorithm 1 ─────────────────────────────────────────────
+        if _fc.ENABLE_FORCED_SEX_BRANCHING:
+            # Build only the sex-specific tree needed for this test user
+            test_user_sex = data[i, SEX_FEATURE_INDEX_ALG4]
+            if test_user_sex == 0:
+                sex_indices = np.where(train_data[:, SEX_FEATURE_INDEX_ALG4] == 0)[0]
+                tree_i = build_sex_specific_tree(
+                    data=train_data, labels=train_labels,
+                    sex_user_indices=sex_indices, sex_label="male",
+                )
+            else:
+                sex_indices = np.where(train_data[:, SEX_FEATURE_INDEX_ALG4] == 1)[0]
+                tree_i = build_sex_specific_tree(
+                    data=train_data, labels=train_labels,
+                    sex_user_indices=sex_indices, sex_label="female",
+                )
+        else:
+            tree_i = build_decision_tree(train_data, train_labels)
+
+        # Build nodes_filter: which nodes get Alg2/3 training.
+        root_id = tree_i.root.node_id
+        nodes_filter_i = [root_id]
+        if _fc.ENABLE_FORCED_SEX_BRANCHING:
+            # Forced sex tree: include level-2 nodes only from genuine
+            # two-sided splits (both branches passed Eq.2).
+            if 2 in tree_i.nodes_by_level:
+                for child in tree_i.nodes_by_level[2]:
+                    if not child.is_leaf:
+                        nodes_filter_i.append(child.node_id)
+        else:
+            # Standard tree: paper uses Sex (k=1) branching at level 2.
+            # Only include the two Sex branch nodes if both exist.
+            sex_k = SEX_FEATURE_INDEX_ALG4
+            sex_children = [
+                n for n in tree_i.nodes_by_level.get(2, [])
+                if n.branching_feat_k == sex_k and not n.is_leaf
+            ]
+            if len(sex_children) >= 2:
+                for child in sex_children:
+                    nodes_filter_i.append(child.node_id)
+
         treeCounter += 1
         print(f"Tree built: {treeCounter}")
         # ── Per-fold Algorithm 2: perceptor + executive training ─────────────
@@ -1551,7 +1721,7 @@ def run_loocv(
             data         = train_data,
             labels       = train_labels,
             n_bins       = n_bins,
-            nodes_filter = nodes_filter,
+            nodes_filter = nodes_filter_i,
         )
 
         # ── Per-fold Algorithm 3: action refinement (FA = 0, paper-literal) ──
@@ -1560,8 +1730,8 @@ def run_loocv(
             tree         = tree_i,
             data         = train_data,
             labels       = train_labels,
-            nodes_filter = nodes_filter,
-            reset_per_h  = False,    
+            nodes_filter = nodes_filter_i,
+            reset_per_h  = False,
             verbose      = False,
         )
 
@@ -1579,6 +1749,8 @@ def run_loocv(
             alg3_output     = alg3_i,
             rng_seed        = rng_seed,
             verbose         = verbose,
+            train_data      = train_data,
+            train_labels    = train_labels,
         )
         output.records.append(pred)
         output.total_elapsed_ms += pred.elapsed_ms
@@ -1703,7 +1875,7 @@ def validate_healthy_rw_threshold(record: PredictionRecord) -> List[str]:
     Verify that HEALTHY decisions have rw ≤ DIAGNOSTIC_THRESHOLD at their
     last PAC.
 
-    [PAPER] Line 35: "if rw_{t_mkf} ≤ Threshold → Claim User is healthy"
+    [PAPER] Line 35: "if rw_{t_mkf} ≤ Threshold -> Claim User is healthy"
     """
     issues: List[str] = []
     if record.decision != HealthDecision.HEALTHY:
@@ -1910,7 +2082,7 @@ def run_all_validations_output(output: Algorithm4Output, verbose: bool = True) -
             print(f"  [FAIL] Premature HEALTHY: {n_premature_healthy} records flagged")
 
     # ── 2. FA=0 policy: specificity invariant (true healthy NOT classified UNHEALTHY) ─
-    # [PAPER §VI.B / Table 5] Diagnostic-test policy is FA=0 → Specificity should be 100%.
+    # [PAPER §VI.B / Table 5] Diagnostic-test policy is FA=0 -> Specificity should be 100%.
     # In strict per-fold LOOCV this can be violated when a held-out healthy user is at
     # a feature extreme (their value defined the *full* dataset's b_min/b_max but is
     # outside the *training* range). Such cases are reported as warnings.
@@ -1986,7 +2158,7 @@ def print_prediction_detail(record: PredictionRecord, show_full_trace: bool = Tr
           f"true_label={record.true_label}  "
           f"({'HEALTHY' if record.true_is_healthy else 'DISEASED'})")
     print(f"  Decision      : {record.decision.value}  "
-          f"({'✓ CORRECT' if record.is_correct else '✗ WRONG'})")
+          f"({'CORRECT' if record.is_correct else 'WRONG'})")
     print(f"  Focus reached : m={record.max_focus_reached}")
     print(f"  PAC count     : {record.total_pac_count}")
     print(f"  Actions applied: {record.total_actions_applied}")
@@ -2208,14 +2380,20 @@ def print_algorithm4_summary(output: Algorithm4Output) -> None:
     print(f"    Females (Diseased): {output.diseased_correct_females}/{output.diseased_total_females} correct "
           f"({output.diseased_correct_females/output.diseased_total_females*100:.1f}% sensitivity)" if output.diseased_total_females else "    Females (Diseased): No diseased females")
 
-    # Misclassified females by arrhythmia class
-    if output.misclassified_females_by_class:
-        print(f"\n  Misclassified females by arrhythmia class:")
-        for cls in sorted(output.misclassified_females_by_class.keys()):
-            count = output.misclassified_females_by_class[cls]
-            print(f"    Class {cls}: {count} misclassifications")
+    # Misclassification by arrhythmia class, split by gender
+    all_classes = sorted(
+        set(output.misclassified_females_by_class) | set(output.misclassified_males_by_class)
+    )
+    if all_classes:
+        print(f"\n  Misclassified diseased users by arrhythmia class and gender:")
+        print(f"    {'Class':<8}  {'Female':>8}  {'Male':>8}")
+        print(f"    {'-'*28}")
+        for cls in all_classes:
+            f_count = output.misclassified_females_by_class.get(cls, 0)
+            m_count = output.misclassified_males_by_class.get(cls, 0)
+            print(f"    {cls:<8}  {f_count:>8}  {m_count:>8}")
     else:
-        print(f"\n  No misclassified females by arrhythmia class.")
+        print(f"\n  No misclassified diseased users.")
 
     # Per-disease-class breakdown
     diseased_recs = [r for r in output.records if r.true_is_diseased]
@@ -2503,11 +2681,75 @@ def run_test_cases(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: LAMBDA GRID SEARCH UTILITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+def fairness_lambda_grid_search(
+    data_path: str = "arrhythmia.data",
+    lambda_values: Optional[List[float]] = None,
+    max_users: Optional[int] = None,
+    rng_seed: int = 42,
+) -> List[Dict]:
+    """
+    Grid search over FAIRNESS_LAMBDA to find the accuracy-fairness tradeoff.
+
+    For each lambda value, runs the full LOOCV pipeline and reports accuracy
+    and fairness metrics. Use this to tune λ for your desired balance.
+
+    Parameters
+    ----------
+    lambda_values : list of λ values to test. Default: [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+    max_users     : limit LOOCV to first N users (for faster iteration).
+
+    Returns
+    -------
+    List of dicts with keys: lambda, accuracy, spd, di, eo_diff, sensitivity, specificity
+    """
+    import fairness_config as _fc
+    global FAIRNESS_LAMBDA
+
+    if lambda_values is None:
+        lambda_values = [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+
+    saved_lambda = FAIRNESS_LAMBDA
+    data, labels = load_dataset(data_path)
+    results = []
+
+    for lam in lambda_values:
+        _fc.FAIRNESS_LAMBDA = lam
+        FAIRNESS_LAMBDA = lam
+        log.info(f"\n{'='*50}")
+        log.info(f"GRID SEARCH: lambda={lam}")
+        log.info(f"{'='*50}")
+
+        output = run_loocv(data, labels, max_users=max_users, rng_seed=rng_seed)
+
+        result = {
+            "lambda": lam,
+            "accuracy": output.overall_accuracy,
+            "sensitivity": output.sensitivity,
+            "specificity": output.specificity,
+            "spd": output.fairness_spd,
+            "di": output.fairness_di,
+            "eo_diff": output.fairness_eo_diff,
+        }
+        results.append(result)
+        log.info(f"  lambda={lam:.3f}  acc={output.overall_accuracy*100:.1f}%  "
+                 f"SPD={output.fairness_spd:.4f}  DI={output.fairness_di:.4f}  "
+                 f"EO={output.fairness_eo_diff:.4f}")
+
+    _fc.FAIRNESS_LAMBDA = saved_lambda
+    FAIRNESS_LAMBDA = saved_lambda
+
+    return results
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 12 – MAIN PIPELINE
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:  str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+    data_path:  str = "arrhythmia.data",
     run_loocv_flag: bool = True,
     max_users:  Optional[int] = None,
     run_tests:  bool = True,
@@ -2515,7 +2757,7 @@ def main(
     rng_seed:   int  = 42,
 ) -> Algorithm4Output:
     """
-    End-to-end pipeline: Algorithm 1 → 2 → 3 → 4.
+    End-to-end pipeline: Algorithm 1 -> 2 -> 3 -> 4.
 
     Steps:
       1. Load dataset.
@@ -2581,7 +2823,7 @@ def main(
             rng_seed     = rng_seed,
             verbose      = False,
             n_bins       = DEFAULT_N_BINS,
-            nodes_filter = ["root", "root|k1_f1", "root|k1_f2"],
+            nodes_filter = None,  # built per-fold from actual tree
         )
 
         # ── 8. Validation ─────────────────────────────────────────────────────
@@ -2667,11 +2909,8 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 if __name__ == "__main__":
     import sys as _sys
-###<<<<<<< Updated upstream
-    path = _sys.argv[1] if len(_sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\amux\\verilogLearning\\CDS-NI-Algorithm\\arrhythmia.data"
-###=======
-    path = _sys.argv[1] if len(_sys.argv) > 1 else get_arrhythmia_path("arrhythmia.data") 
-###>>>>>>> Stashed changes
+    _default_path = str(Path(__file__).parent / "arrhythmia.data")
+    path = _sys.argv[1] if len(_sys.argv) > 1 else _default_path
     # For quick test: limit users; remove max_users for full LOOCV
     n = int(_sys.argv[2]) if len(_sys.argv) > 2 else None
     output = main(

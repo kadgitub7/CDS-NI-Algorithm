@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($dir = \"C:\\\\Users\\\\kadhi\\\\OneDrive\\\\Desktop\\\\amux\\\\verilogLearning\\\\CDS-NI-Algorithm\\\\genderPlottingAlgorithms\"; Rename-Item \"$dir\\\\week4_importance.csv\" \"importance.csv\"; Rename-Item \"$dir\\\\week4_significant.csv\" \"significant.csv\"; Rename-Item \"$dir\\\\week5_missingness.csv\" \"missingness.csv\"; Rename-Item \"$dir\\\\week5_informative.csv\" \"informative.csv\"; Rename-Item \"$dir\\\\week6_augmentation.csv\" \"augmentation.csv\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kadhi\\\\OneDrive\\\\Desktop\\\\amux\\\\verilogLearning\\\\CDS-NI-Algorithm\" -Recurse -File)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('Algorithm2.py', doraise=True\\); print\\('Algorithm2.py OK'\\)\")",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('Algorithm4.py', doraise=True\\); print\\('Algorithm4.py OK'\\)\")",
+      "Bash(python -c \"from Algorithm2 import run_algorithm2, ENABLE_REWEIGHING, compute_reweighing_weights; print\\(f'ENABLE_REWEIGHING={ENABLE_REWEIGHING}'\\); print\\('Algorithm2 import OK'\\)\")",
+      "Bash(python -c \"from Algorithm4 import ENABLE_FAIRNESS_RL, FAIRNESS_LAMBDA; print\\(f'ENABLE_FAIRNESS_RL={ENABLE_FAIRNESS_RL}'\\); print\\(f'FAIRNESS_LAMBDA={FAIRNESS_LAMBDA}'\\); print\\('Algorithm4 import OK'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\kadhi\\\\OneDrive\\\\Desktop\\\\amux\\\\verilogLearning\\\\CDS-NI-Algorithm\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(pip install *)",
+      "Bash(python test_forced_5users.py)",
+      "Bash(python test_fixes.py)",
+      "Bash(findstr /V \"DEBUG PRUNED VALID Expanding\")",
+      "Bash(Select-String -NotMatch \"DEBUG|PRUNED|VALID|Expanding|candidates\")",
+      "PowerShell(python test_tree_diag.py 2>&1)"
+    ]
+  }
+}

@@ -1,0 +1,1839 @@
+================================================================================
+EXHAUSTIVE CODEBASE ANALYSIS: CDS-NI Algorithm Implementation
+================================================================================
+Brain-Inspired Intelligence for Real-Time Health Situation Understanding
+in Smart e-Health Home Applications
+
+Paper: IEEE Access, 2019 (DOI: 10.1109/ACCESS.2019.2958547)
+Dataset: UCI Arrhythmia Database (452 instances, 279 features, 16 classes)
+================================================================================
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 1: HIGH-LEVEL ARCHITECTURE OVERVIEW
+████████████████████████████████████████████████████████████████████████████████
+
+1.1 SYSTEM OVERVIEW
+-------------------
+This codebase implements a Cognitive Decision Support (CDS) system for
+automated health monitoring. The system is modeled after Natural Intelligence
+(NI) — specifically, a brain-inspired cognitive architecture with:
+
+  • PERCEPTOR  – statistical model library (maps sensor readings to health states)
+  • EXECUTIVE  – action library (decides which sensor to activate next)
+  • PLANNER    – reinforcement learning (RL) agent (optimizes action selection)
+
+The system diagnoses arrhythmia from ECG features using a 4-algorithm pipeline:
+
+  Algorithm 1: Build a hierarchical decision tree partitioning users by
+               demographic/physiological features.
+  Algorithm 2: Train Bayesian perceptor models and compute action weights for
+               every (node, feature, disease) triplet.
+  Algorithm 3: Prune redundant actions via a greedy set-cover (retain only
+               features that add new discriminating information).
+  Algorithm 4: Predict health status for a test user by sequentially activating
+               sensors, accumulating an Assurance Factor (AF), and checking if
+               values fall outside learned healthy ranges.
+
+Extension: The codebase adds fairness-aware modifications:
+  • Reweighing (Kamiran & Calders 2012) in Algorithm 2
+  • Fairness-constrained RL reward in Algorithm 4
+  • Gender-based error analysis and data augmentation experiments
+
+
+1.2 ARCHITECTURE DIAGRAM (Logical)
+-----------------------------------
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │                         TRAINING PHASE                              │
+  │                                                                     │
+  │  arrhythmia.data ──► Algorithm 1 ──► DecisionTree                  │
+  │                          │                │                         │
+  │                          │       ┌────────┴─────────┐               │
+  │                          ▼       ▼                   ▼              │
+  │                   Algorithm 2 (per node)     Algorithm 2 (per node) │
+  │                          │                         │                │
+  │                    PerceptorLib              ExecutiveLib            │
+  │                          │                         │                │
+  │                          └─────────┬───────────────┘                │
+  │                                    ▼                                │
+  │                              Algorithm 3                            │
+  │                                    │                                │
+  │                          Refined Action Library                     │
+  └──────────────────────────────┬──────────────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼──────────────────────────────────────┐
+  │                        PREDICTION PHASE                             │
+  │                                                                     │
+  │  Test User ──► Algorithm 4 (RL + Diagnostic Tests)                 │
+  │                     │                                               │
+  │           ┌─────────┼──────────┐                                    │
+  │           ▼         ▼          ▼                                    │
+  │       HEALTHY   UNHEALTHY   SCREENING                              │
+  └─────────────────────────────────────────────────────────────────────┘
+
+
+1.3 EVALUATION METHODOLOGY
+---------------------------
+  • Leave-One-Out Cross-Validation (LOOCV): For each of 452 users, train on
+    451, predict on 1. Full pipeline (Alg 1-3) retrained per fold.
+  • Metrics: Total accuracy, sensitivity (disease detection), specificity
+    (healthy = no false alarm), false alarm rate (target: 0%).
+  • Fairness metrics: Statistical Parity Difference (SPD), Disparate Impact
+    (DI), Equalized Odds (TPR/FPR difference by sex).
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 2: DIRECTORY / FILE STRUCTURE EXPLANATION
+████████████████████████████████████████████████████████████████████████████████
+
+ROOT DIRECTORY:
+├── CDS_Paper_Algorithms.py          Algorithm 1: Decision tree construction
+├── Algorithm1_forcedBranch.py       Variant: Forced sex-based tree routing
+├── Algorithm2.py                    Algorithm 2: Perceptor + Executive training
+├── Algorithm3.py                    Algorithm 3: Action refinement (set cover)
+├── Algorithm4.py                    Algorithm 4: Prediction engine (RL + AF)
+├── dataplot.py                      Visualization: feature scatter plots
+├── arrhythmia.data                  UCI Arrhythmia dataset (452×280 CSV)
+├── arrhythmia.names                 UCI dataset documentation
+├── README.md                        Project description + paper reference
+├── *.csv                            Intermediate analysis outputs
+│
+├── genderPlottingAlgorithms/
+│   ├── machineLearningImplementation.py   Neural network baseline comparison
+│   ├── dataAugmentation.py                Female sample augmentation study
+│   ├── createAugmentedDataset.py          Generates augmented .data file
+│   ├── dataAnalysis.py                    Missingness/bias analysis
+│   ├── featureImportanceByGender.py       Per-sex feature importance
+│   ├── plot_algorithm4_results.py         Visualization of Alg4 outputs
+│   ├── reproducibilityReport.py           Reproducibility statistics
+│   ├── technicalReport.py                 Technical report generation
+│   ├── arrhythmia_augmented.data          Augmented dataset (952 rows)
+│   └── *.csv                              Analysis result tables
+│
+├── graphs/                          Output visualizations (confusion matrices)
+├── featureGraphs/                   Per-feature scatter plots (healthy vs not)
+└── Brain-Inspired_...pdf            Source paper PDF
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 3: EXECUTION FLOW WALKTHROUGH
+████████████████████████████████████████████████████████████████████████████████
+
+3.1 TYPICAL EXECUTION: LOOCV (Algorithm4.py __main__)
+------------------------------------------------------
+
+  1. LOAD: pd.read_csv("arrhythmia.data") → (452, 280) DataFrame
+     • Replace '?' with NaN
+     • Split: data = cols[0:279], labels = col[279]
+
+  2. FOR EACH USER i IN [0..451]:
+     a. TRAIN SET: Remove user i → (451, 279) training data
+
+     b. ALGORITHM 1: build_decision_tree(train_data, train_labels)
+        - classify_features() → detect BINARY vs CONTINUOUS features
+        - Create root node (m=1, all 451 users, all 279 features)
+        - BFS expansion: for each parent at m=1, try all features as splits
+        - For each feature:
+          * compute_fsd_branches(): median split (continuous) or {0}/{1} (binary)
+          * filter_users_by_branch(): assign users to branches
+          * check_branching_condition(): |branch| >= u_min (200)?
+          * If passes: create child TreeNode at m=2
+        - Result: tree with root + ~100-200 level-2 nodes (only Sex + a few
+          others pass with 200+ users per branch)
+
+     c. ALGORITHM 2: run_algorithm2(tree, train_data, train_labels)
+        - For each node in nodes_filter ["root", "root|k1_f1", "root|k1_f2"]:
+          * For each of 279 features:
+            - compute_discretization(): bin edges, assign users to bins
+            - compute_bayesian_tables(): P(B̂|h), P(h,f), P(B̂), P(h|B̂)
+            - compute_healthy_range(): [b_min, b_max] from healthy users
+            - compute_executive_actions(): r_{o|h} per disease class
+          * Store PerceptorModelEntry + ExecutiveActionEntry
+
+     d. ALGORITHM 3: run_algorithm3(alg2_output, tree, train_data, train_labels)
+        - For each node:
+          * For h = 2..H (disease classes):
+            - Sort features by r_{o|h} descending
+            - For each feature o (best-first):
+              * Flag users with values outside [b_min, b_max]
+              * s = cumulative flagged count
+              * If s <= buffer: PRUNE (no new coverage); else RETAIN
+              * buffer = s
+          * Result: refined action library (subset of Algorithm 2 actions)
+
+     e. ALGORITHM 4: run_algorithm4(user_i, data, labels, tree, alg2, alg3)
+        - INIT: random action from root library → read value → compute AF_0
+        - If init alarm (outside range): → UNHEALTHY immediately
+        - FOR focus_level m = 1, 2:
+          * Route user to applicable node at level m
+          * FOR each disease class h = 2..H:
+            - C_buf = refined actions for (node, h), sorted by weight
+            - WHILE C_buf ≠ ∅:
+              * RL lookahead: evaluate AF_sim for each candidate
+                (with fairness penalty if enabled)
+              * Select action J = argmin rw_sim
+              * Remove J from C_buf
+              * Read sensor value V_j for feature J
+              * Compute AF increment: delta = P(h,f)*r_{j|h}/P(h>1,f)
+              * AF_real += delta (capped at 1.0)
+              * rw = 1 - AF_real
+              * If V_j outside [b_min, b_max]: → ALARM → UNHEALTHY
+          * After all h: check rw <= threshold?
+            - Yes → HEALTHY
+            - No, can increase focus → escalate to m+1
+            - No, cannot increase → SCREENING
+        - Return PredictionRecord
+
+  3. AGGREGATE: _recompute_stats() → accuracy, sensitivity, specificity,
+     fairness metrics, per-gender confusion matrices
+
+
+3.2 FORCED SEX VARIANT (Algorithm1_forcedBranch.py)
+----------------------------------------------------
+  Same pipeline but sex is a ROUTING variable, not a tree feature:
+  • User sex → selects male_tree OR female_tree
+  • Each tree: root = same-sex users only, features exclude Sex column
+  • All CDS rules apply within each tree independently
+
+
+████████████████████████████████████████████████████████████████████��███████████
+ PART 4: CORE ABSTRACTIONS AND SYSTEM DESIGN
+████████████████████████████████████████████████████████████████████████████████
+
+4.1 KEY DATA STRUCTURES
+------------------------
+
+TreeNode (CDS_Paper_Algorithms.py)
+  • Represents one partition of the user population
+  • Contains: user_indices (who), feature_indices (what to measure),
+    branch_def (how to route), health_dist (class counts)
+  • Tree is a DAG: parent → children_by_k[feature] → list of child nodes
+
+DecisionTree (CDS_Paper_Algorithms.py)
+  • Container holding root + all_nodes dict + nodes_by_level dict
+  • Stores metadata: feature_kinds, threshold, u_min
+
+BranchDef (CDS_Paper_Algorithms.py)
+  • Defines membership: BINARY (value_set = {0} or {1}) or
+    CONTINUOUS (half-open interval [lo, hi))
+  • Method: contains(value) → bool
+
+DiscretizationResult (Algorithm2.py)
+  • Per (node, feature): bin_edges, bin_assignments, valid_mask
+  • Properties: n_valid, bin_midpoints
+
+BayesianTables (Algorithm2.py)
+  • Per (node, feature): P(B̂|h), P(h,f), P(B̂), P(h|B̂)
+  • Shape: (n_bins, n_classes) for conditional tables
+
+HealthyRangeResult (Algorithm2.py)
+  • [b_min, b_max]: min/max of healthy users' raw values
+  • n_kf: (b_max - b_min) / delta_B (diagnostic power indicator)
+
+ExecutiveActionEntry (Algorithm2.py)
+  • Per (node, feature, disease): action_weight r_{o|h}
+  • Decomposed: p_below_normal + p_above_normal
+
+Algorithm2Output / Algorithm3Output / Algorithm4Output
+  • Container classes with indexed lookups and aggregate statistics
+
+PredictionRecord (Algorithm4.py)
+  • Per-user: decision, af_trace (every PAC step), node_records,
+    alarm info, timing
+
+HealthDecision (Algorithm4.py)
+  • Enum: HEALTHY | UNHEALTHY | SCREENING | UNKNOWN
+
+
+4.2 KEY CONSTANTS AND THEIR DERIVATION
+---------------------------------------
+
+DIAGNOSTIC_THRESHOLD = 0.025
+  [Paper Eq. 3] Acceptable diagnostic error probability.
+  Determines u_min = 5/0.025 = 200 (minimum users per branch).
+  Also used as the rw threshold for HEALTHY decision.
+
+U_MIN = 200
+  [Paper Eq. 3] ceil(5/Threshold). Any branch with fewer users is pruned.
+  This forces the tree to be shallow (max depth 2 with 452 users).
+
+N_FEATURES = 279
+  UCI Arrhythmia dataset: 15 base features + 12 ECG channels × 22 features.
+
+HEALTHY_CLASS = 1
+  Class label for normal sinus rhythm (245 users).
+
+DEFAULT_N_BINS = 10
+  [ENGR] Discretization bin count. Actually overridden by Sturges' rule
+  internally: 1 + log2(n_valid) + 18 for continuous features.
+
+FAIRNESS_LAMBDA = 0.1
+  Penalty weight in modified RL reward for demographic parity.
+
+
+████████████████████████████████████��███████████████████████████████████████████
+ PART 5: DETAILED FILE-BY-FILE ANALYSIS
+████████████████████████████████████████████████████████████████████████████████
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: CDS_Paper_Algorithms.py (Algorithm 1)
+═══════════════════════════════════════��═══════════════════════════════════════
+
+PURPOSE: Build the CDS decision tree. This tree partitions the user population
+into demographic sub-groups that will each receive their own Bayesian models.
+
+ROLE IN ARCHITECTURE: Foundation layer. All other algorithms consume this tree.
+
+IMPORTS: numpy, pandas, standard library (logging, math, dataclasses, etc.)
+
+MAJOR FUNCTIONS:
+
+  classify_features(data) → Dict[int, FeatureKind]
+    Scans all 279 columns. If unique non-NaN values ⊆ {0,1} → BINARY else
+    CONTINUOUS. All-NaN columns default to CONTINUOUS (unusable anyway).
+    O(279 × N) where N = number of users.
+
+  load_dataset(path) → (data, labels)
+    pd.read_csv with na_values='?'. Asserts shape (452, 280).
+    Returns (452, 279) float64 matrix + (452,) int labels.
+
+  _fsd_binary(feature_idx, user_indices, data) → List[BranchDef]
+    Creates exactly 2 BranchDef objects: one for value 0, one for value 1.
+    Returns [] if only one value is present (can't split).
+    Special case: feature 1 (Sex) gets labels "male"/"female".
+
+  _fsd_continuous_median(feature_idx, user_indices, data) → List[BranchDef]
+    Median split: branch 1 = [−∞, median), branch 2 = [median, +∞).
+    Returns [] if all values identical (no variance).
+    DESIGN CHOICE: Median maximizes P(both branches ≥ u_min).
+
+  compute_fsd_branches(feature_idx, user_indices, data, kind) → List[BranchDef]
+    Dispatch: BINARY → _fsd_binary, CONTINUOUS → _fsd_continuous_median.
+
+  filter_users_by_branch(user_indices, branch, data) → np.ndarray
+    Vectorized: mask = (vals >= lo) & (vals < hi) & ~isnan.
+    Returns subset of user_indices that satisfy the branch condition.
+
+  check_branching_condition(branch_count, parent_count, threshold) → (bool, lhs, u_min)
+    Eq. 2: branch_count >= u_min (= ceil(5/threshold)).
+    The multiplication ceil(parent × P_f) simplifies to branch_count itself.
+
+  compute_child_feature_set(parent_features, branching_k, focus_level_m) → List[int]
+    Line 9 exclusion: at m > 2, remove features with index ≤ k.
+    At m ≤ 2: no exclusion (full parent feature set inherited).
+
+  _try_split_node(parent, feature_k, kind, data, labels, threshold)
+    Core splitting logic:
+    1. Compute branch definitions (FSD)
+    2. Filter users into branches
+    3. Check Eq. 2 per branch
+    4. Create TreeNode for passing branches
+    5. If only 1 branch passes → mark as leaf (single-branch = no split)
+
+  _expand_node(parent, data, labels, kinds, threshold, tree)
+    Iterates ALL features in parent.feature_indices.
+    Calls _try_split_node for each. Registers valid children in tree.
+    If no feature produces valid branches → parent becomes leaf.
+
+  build_decision_tree(data, labels, threshold, max_m) → DecisionTree
+    Main Algorithm 1 entry point. BFS: expand all nodes at level m,
+    then all their children at m+1, until no new nodes created or max_m reached.
+
+DESIGN RATIONALE:
+  • BFS (not DFS): matches paper's "for m = 2 to M" outer loop.
+  • All features tried: paper's Fig. 6b shows BOTH Sex and Age as parallel
+    candidates. The tree stores ALL valid splits, not just the best one.
+  • Median split: with N=452 and u_min=200, only 2 branches are feasible.
+    Median gives closest to 50/50, maximizing both branches passing Eq. 2.
+
+EDGE CASES:
+  • NaN values: excluded from all branch membership (cannot be assigned).
+  • Degenerate features (all identical): return empty branch list → pruned.
+  • Level 3 impossibility: with 452 users, largest level-2 branch has ~250
+    users; 250/2 = 125 < 200 = u_min → level 3 always fails Eq. 2.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: Algorithm1_forcedBranch.py (Forced Sex Forest)
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Alternative interpretation where sex is a ROUTING mechanism (Step 0),
+not a within-tree feature. Produces two independent trees.
+
+DESIGN DEPARTURE FROM PAPER:
+  The standard Algorithm 1 treats Sex as just another feature. This variant
+  pre-routes users by sex, then builds per-sex trees. Motivation: fairness
+  analysis requires sex-specific model evaluation.
+
+KEY CLASSES:
+  ForcedSexForest: holds male_tree + female_tree + index arrays.
+
+KEY FUNCTIONS:
+  load_dataset_flexible(): Removes the 452-row assertion so augmented (952-row)
+  datasets can also be loaded.
+
+  build_sex_specific_tree(): Creates a DecisionTree for one sex group.
+    - Root contains only same-sex users
+    - Sex feature excluded from candidate list (constant = can't split)
+    - Standard Alg1 rules apply within
+
+  build_forced_sex_forest(): Partitions by sex, builds both trees.
+
+  route_user(forest, user_row): Reads sex value → returns (label, tree).
+  get_nodes_for_user(tree, user_idx): Finds all nodes containing user at each level.
+
+INTERACTION WITH OTHER FILES:
+  - Imports all infrastructure from CDS_Paper_Algorithms.py
+  - Used by augmentation/analysis scripts that need per-sex evaluation
+
+
+════���══════════════════════════════════════════════════════════════════════════
+FILE: Algorithm2.py (Perceptor and Executive Training)
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: For each tree node, build statistical models of feature distributions
+conditioned on health class, and compute action weights measuring each
+feature's discriminating power per disease.
+
+SECTIONS:
+
+  Section 2: Constants
+    DEFAULT_N_BINS = 10, LAPLACE_EPSILON = 0.0
+    ENABLE_REWEIGHING = True (fairness toggle)
+
+  Section 3: Data Structures
+    DiscretizationResult, BayesianTables, HealthyRangeResult,
+    PerceptorModelEntry, ExecutiveActionEntry, Algorithm2Output
+
+  Section 4: Discretization (Lines 4-7)
+    _n_bins_for_node(): Sturges' rule: 1 + log2(n) + 18
+    compute_discretization():
+      - Extract raw values, compute min/max
+      - Handle degenerate (constant) and binary features
+      - np.linspace for bin edges
+      - np.searchsorted for bin assignment
+      - Returns DiscretizationResult with all intermediate data
+
+  Section 5: Bayesian Tables (Lines 8-10)
+    compute_bayesian_tables():
+      - Count users per (class, bin)
+      - P(B̂|h) = count_in_bin / total_class_users (+ Laplace)
+      - P(h,f) = count_class_in_node / N_total_dataset
+      - P(B̂) = Σ_h P(B̂|h)×P(h,f), normalized to sum=1
+      - P(h|B̂) = P(B̂|h)×P(h,f) / P(B̂) (Bayes theorem)
+
+  Section 6: Healthy Range (Lines 11-14)
+    compute_healthy_range():
+      - b_min = min(healthy users' raw values for this feature)
+      - b_max = max(healthy users' raw values for this feature)
+      - N_kf = (b_max - b_min) / delta_B
+      - Fallback: if no healthy users, use full range [B_min, B_max]
+      - CRITICAL: Uses RAW min/max of healthy values (not bin edges)
+        to satisfy Eq. 5 (100% healthy coverage) exactly.
+
+  Section 7: Executive Actions (Lines 15-23)
+    compute_executive_actions():
+      - For each disease class h ≥ 2:
+        * Identify healthy bins: [min_healthy_bin, max_healthy_bin]
+        * p_below = Σ P(B̂=b|h) for b < min_healthy_bin
+        * p_above = Σ P(B̂=b|h) for b > max_healthy_bin
+        * r_{o|h} = p_below + p_above
+        * If r > 0 AND P(h,f) > 0: create ExecutiveActionEntry
+      - FAIRNESS: When ENABLE_REWEIGHING=True, uses Kamiran & Calders
+        reweighing weights to compute sex-fair P(B̂|h).
+
+  compute_reweighing_weights():
+    W(S=s, Y=y) = P(S=s) × P(Y=y) / P(S=s, Y=y)
+    Removes statistical dependence between sex and outcome in the weighted
+    joint distribution. Applied per-instance during action weight computation.
+
+MATHEMATICAL FOUNDATION:
+  Bayesian inference: P(disease|observation) via Bayes' theorem.
+  FA=0 policy: healthy range covers 100% of healthy training users →
+  P(false alarm) = 0 by construction (on training data; LOOCV tests this).
+  Action weight r_{o|h}: probability mass of disease-h users OUTSIDE healthy
+  range → high r means this feature strongly discriminates disease h from health.
+
+NUMERICAL STABILITY:
+  - Laplace smoothing set to 0.0 (paper fidelity) → zero likelihoods possible
+  - Evidence normalization prevents underflow in posterior computation
+  - Uniform fallback for degenerate bins (P(B̂)=0)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: Algorithm3.py (Actions Refining)
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Greedy set-cover pruning. Removes features that don't add NEW
+discriminating information beyond what higher-weight features already provide.
+
+ALGORITHM (per node):
+  buffer = 0; newinf = empty set
+  FOR h = 2..H (disease classes):
+    Sort features by r_{o|h} descending
+    FOR each feature o (best first):
+      FOR each user u in node:
+        if value(u, o) outside [b_min, b_max]:
+          newinf[u] = 1  (flagged)
+      s = |newinf|  (cumulative across ALL h and o)
+      if s ≤ buffer: PRUNE o for h (zeroes r_{o|h})
+      buffer = s
+
+CRITICAL INTERPRETATION [AMBIG-1]:
+  buffer and newinf are initialized ONCE before both loops → GLOBAL
+  accumulation across all disease classes. A feature is retained ONLY if it
+  increases total unique-user coverage. This is a GREEDY SET COVER heuristic.
+
+  Alternative (reset_per_h=True): reset buffer/newinf per disease class.
+  The code supports both modes; default is global (reset_per_h=False).
+
+KEY DATA STRUCTURES:
+  RefinementRecord: per-(node, h, feature) audit trail
+  NodeRefinementSummary: per-node aggregate statistics
+  Algorithm3Output: retained + removed actions + full log
+
+VALIDATION SUITE:
+  - FA=0 constraint: no healthy-class actions retained
+  - Output consistency: every retained action exists in Alg2, weight ≤ original
+  - Monotonicity: s_cumulative never decreases (newinf only ever SET, not unset)
+  - Coverage sanity: flagged users ≤ node size
+
+VECTORIZATION:
+  Inner loop (user iteration) vectorized with NumPy:
+    raw_vals = data[node.user_indices, o]
+    outside_mask = (raw_vals > b_max) | (raw_vals < b_min)
+    newinf |= flag_mask
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: Algorithm4.py (Prediction Engine)
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Given a test user, run the CDS cognitive cycle: select actions via
+RL lookahead, read sensors, accumulate Assurance Factor, decide health status.
+
+CORE EQUATIONS:
+  Eq. 7: AF_t = P(h,f) × r_{j|h} / P(h>1,f) + AF_{t-1}
+  Eq. 8: rw_t = 1 - AF_t
+
+EXECUTION MODEL:
+  1. INITIALIZATION: Random action from refined root library → apply,
+     compute AF_0, check alarm.
+  2. FOCUS LEVEL LOOP (m=1..depth):
+     - Route user to applicable node
+     - DISEASE LOOP (h=2..H):
+       - C_buf = sorted refined actions for (node, h)
+       - WHILE C_buf ≠ ∅:
+         - RL LOOKAHEAD: For each candidate c:
+           * AF_sim = P(h,f)×r_c/P(h>1,f) (independent, not accumulated)
+           * rw_sim = 1 - (AF_sim + AF_real_current)
+           * [FAIRNESS] rw_sim += λ × |AF_male - AF_female| (penalty)
+         - SELECT J = argmin rw_sim
+         - APPLY: read V_j = data[user, J.feature]
+         - If NaN: skip (sensor failure)
+         - COMPUTE: delta_AF → AF_real += delta (capped at 1.0)
+         - TEST: if V_j < b_min OR V_j > b_max → ALARM → UNHEALTHY
+     - After all h: check rw ≤ threshold → HEALTHY / escalate / SCREENING
+
+CRITICAL DESIGN DECISIONS:
+  - AF persists across focus levels (not reset per level)
+  - AF capped at 1.0 (fuzzy logic semantics from paper §VI.A)
+  - consumed_pairs set prevents double-counting actions across levels
+  - NaN values never trigger alarms (conservative)
+  - LOOCV: full per-fold retraining (Alg1+2+3 rebuilt each iteration)
+
+FAIRNESS EXTENSION (ENABLE_FAIRNESS_RL = True):
+  Modified RL reward: rw_modified = rw_original + λ × fairness_penalty
+  fairness_penalty = |AF_contribution_male - AF_contribution_female|
+  where AF_contribution is computed from sex-stratified r_{j|h} using
+  training data at the current node.
+
+  Effect: Actions that discriminate equally across sexes are preferred;
+  actions with high sex-dependent diagnostic power are penalized.
+
+CORRECTNESS DEFINITION (paper-faithful):
+  - Healthy user: correct iff NOT classified UNHEALTHY (SCREENING = OK)
+  - Diseased user: correct iff classified UNHEALTHY
+  (Paper Table 5: specificity counts HEALTHY+SCREENING as correct for healthy)
+
+VALIDATION SUITE (8 checks):
+  1. AF monotonicity: AF never decreases
+  2. AF in [0,1]: fuzzy logic bounds
+  3. rw monotone decrease: 1-AF never increases
+  4. Unhealthy immediate return: no PACs after alarm
+  5. No healthy-class actions: h=1 never processed
+  6. Healthy rw threshold: HEALTHY only when rw ≤ 0.025
+  7. Focus-level progression: HEALTHY requires met threshold
+  8. Specificity invariant: no healthy user gets UNHEALTHY (FA=0 goal)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: dataplot.py (Feature Visualization)
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Generate scatter plots for all 279 features, coloring healthy (blue)
+vs unhealthy (red) users. Saves PNGs to featureGraphs/.
+
+SIMPLE SCRIPT: Loads data, iterates features, matplotlib scatter, saves.
+No algorithmic complexity. Useful for visual feature screening.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: genderPlottingAlgorithms/machineLearningImplementation.py
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Neural network baseline for comparison with CDS algorithm.
+MLP with 2 hidden layers (64, 32) + LOOCV evaluation.
+
+ROLE: Provides a modern ML benchmark. The CDS paper claims 95.4% accuracy;
+this script tests whether a simple NN achieves similar or better performance
+and whether it exhibits the same gender bias patterns.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: genderPlottingAlgorithms/dataAugmentation.py
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Test whether augmenting female samples closes the male/female
+accuracy gap in a RandomForest proxy for CDS Level 3.
+
+STRATEGIES: baseline, random_oversample, perturbation (Gaussian noise),
+SMOTE-NC, cross_gender (perturb male → female), combined.
+
+5-fold CV with separate male/female accuracy tracking per fold.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FILE: genderPlottingAlgorithms/createAugmentedDataset.py
+═══════════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Generate the 952-row augmented dataset by synthesizing 500 additional
+female samples via Gaussian perturbation of existing female users.
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 6: ALGORITHMIC / THEORETICAL ANALYSIS
+████████████████████████████████████████████████████████████████████████████████
+
+6.1 ALGORITHM 1: DECISION TREE THEORY
+---------------------------------------
+
+MATHEMATICAL FOUNDATION:
+  The tree performs hierarchical PARTITIONING based on demographic similarity.
+  NOT a classification tree (no information gain / Gini criterion).
+
+  Purpose: create SUB-POPULATIONS where Bayesian models (Alg 2) are more
+  accurate (narrower distributions within homogeneous groups).
+
+  Eq. 2: ceil(|U_{m-1}| × P_f) ≥ u_min
+    Ensures STATISTICAL RELIABILITY: each branch needs ≥ 200 users for the
+    Bayesian estimates to be meaningful. This is a sample-size requirement,
+    not a purity criterion.
+
+  Eq. 3: u_min = 5/Threshold = 5/0.025 = 200
+    Derivation: from Chernoff bound, to guarantee that the empirical
+    distribution within a bin approximates the true distribution with error
+    ≤ Threshold, need O(1/Threshold) samples. The factor 5 is heuristic.
+
+  Line 9 exclusion: removes features with index ≤ k at m > 2.
+    PURPOSE: eliminate redundant tree paths. Branching on {Age, Sex} and
+    {Sex, Age} gives the same partition — the index ordering breaks ties.
+
+WHY MEDIAN SPLIT (not optimal split):
+  With u_min=200 from 452 users, maximum 2 branches are possible (452/200=2).
+  Median split is the ONLY strategy that reliably produces two branches both
+  satisfying Eq. 2 (closest to 50/50). Information-gain splits might produce
+  a 400/52 split — the 52-user branch fails Eq. 2.
+
+COMPLEXITY:
+  O(F × N) per parent node expansion (F features × N users for filtering).
+  Total: O(|nodes_at_m| × F × N) per level. With 1 root and ~100 level-2
+  nodes: O(100 × 279 × 452) ≈ 12.6M operations.
+
+
+6.2 ALGORITHM 2: BAYESIAN PERCEPTOR THEORY
+--------------------------------------------
+
+MATHEMATICAL FOUNDATION:
+  Bayes' theorem (Eq. 4):
+    P(h|B̂) = P(B̂|h) × P(h,f) / P(B̂)
+
+  Where:
+    B̂ = discretized feature value (bin assignment)
+    h = health class (1=healthy, 2-16=disease)
+    f = branch (which tree node)
+
+  P(B̂|h): LIKELIHOOD. Estimated by counting class-h users per bin.
+  P(h,f): PRIOR. Fraction of total population with class h in this branch.
+  P(B̂):  EVIDENCE. Marginal probability of seeing this bin value.
+  P(h|B̂): POSTERIOR. What we want: probability of disease given observation.
+
+HEALTHY RANGE (Eq. 5):
+  Σ P(h=1 | b_min ≤ B̂ ≤ b_max) = 1
+
+  Interpretation: ALL healthy users' values fall within [b_min, b_max].
+  Implementation: b_min = min(healthy_values), b_max = max(healthy_values).
+
+  This is a DETERMINISTIC guarantee on training data. Under LOOCV, a
+  held-out healthy user at the extreme may violate this (edge effect).
+
+ACTION WEIGHT (Line 19):
+  r_{o|h} = P(B̂ < b_min | h) + P(B̂ > b_max | h)
+
+  Meaning: What fraction of disease-h users have feature values OUTSIDE
+  the healthy range? High r → feature strongly discriminates disease h.
+
+  Computed from DISCRETIZED probabilities (bin-level), not raw counts.
+  This provides a natural buffer: disease users in the same bin as
+  healthy-edge users don't count as "outside."
+
+REWEIGHING (Fairness Extension):
+  W(S=s, Y=y) = P(S) × P(Y) / P(S,Y)
+
+  Applied to instance weights when computing P(B̂|h). Effect: if females
+  are under-represented in disease class h, their contribution is up-weighted,
+  making the action weight less sex-dependent.
+
+
+6.3 ALGORITHM 3: SET COVER THEORY
+-----------------------------------
+
+THEORETICAL BASIS:
+  Algorithm 3 implements a GREEDY WEIGHTED SET COVER approximation.
+
+  Universe: set of all users in the node
+  Sets: for each feature o, the set of users with values outside [b_min, b_max]
+  Weight: r_{o|h} (importance of the feature for disease h)
+
+  Processing features in DECREASING weight order and retaining only those that
+  ADD new users to the cumulative coverage is the standard greedy set-cover
+  strategy (Chvatal 1979). Guaranteed O(ln n) approximation ratio.
+
+  PAPER DEPARTURE: The paper processes across ALL disease classes with shared
+  state (buffer/newinf), making it a MULTI-CLASS set cover where a single
+  feature can contribute coverage for ANY disease class.
+
+  Consequence: First few high-weight features dominate (flag many users),
+  then most remaining features are pruned (their users are already flagged).
+  Typical retention rate: 10-30% of original actions.
+
+FA=0 PRESERVATION:
+  Pruning can only REMOVE actions; it never creates new ones. Since Algorithm 2
+  already ensures FA=0 (healthy range covers all healthy users), and Algorithm 3
+  only retains a subset, FA=0 is preserved.
+
+
+6.4 ALGORITHM 4: REINFORCEMENT LEARNING THEORY
+-------------------------------------------------
+
+THEORETICAL BASIS:
+  The RL component implements a GREEDY ONE-STEP LOOKAHEAD policy (not full RL).
+
+  State: (current AF_real, node, disease_class)
+  Action space: C_buf (remaining refined actions for current disease)
+  Reward proxy: rw_sim = 1 - (AF_sim_increment + AF_real)
+  Policy: J = argmin rw_sim (select action that minimizes residual uncertainty)
+
+  This is equivalent to selecting the action with the HIGHEST AF increment:
+    argmin(1 - (delta + AF)) = argmax(delta)
+    delta = P(h,f) × r_{j|h} / P(h>1,f)
+
+  Since P(h,f) and P(h>1,f) are constant for a given (node, h), this
+  reduces to: argmax r_{j|h} — simply pick the highest-weight action.
+
+  The RL "lookahead" is therefore NOT providing additional intelligence
+  beyond sorting by action weight (which Algorithm 3 already does).
+  It exists for architectural fidelity to the paper's cognitive model.
+
+ASSURANCE FACTOR (AF):
+  AF accumulates evidence that the user's health status has been adequately
+  assessed. Each action (sensor reading) contributes:
+    delta_AF = P(h,f) × r_{j|h} / P(h>1,f)
+
+  Interpretation: How much "assurance" does testing feature j for disease h
+  provide? Proportional to disease prevalence × feature discriminating power,
+  normalized by total disease probability.
+
+  AF → 1 means full confidence; rw = 1 - AF → 0 means negligible residual.
+  Threshold check: if rw ≤ 0.025, enough evidence accumulated → HEALTHY.
+
+TERMINATION CONDITIONS:
+  1. ALARM (V outside range): UNHEALTHY immediately (short-circuit)
+  2. rw ≤ threshold after all diseases checked: HEALTHY
+  3. Focus can increase (child nodes exist with ≥ u_min users): escalate
+  4. Cannot escalate: SCREENING (insufficient confidence)
+
+
+6.5 FAIRNESS THEORY
+---------------------
+
+PROBLEM: The CDS algorithm may exhibit disparate performance across sexes
+because:
+  1. Healthy ranges learned from sex-combined data may be wider/narrower
+     for one sex (sex-correlated feature distributions)
+  2. Action weights reflect overall disease prevalence, which differs by sex
+  3. Some diseases are sex-exclusive (classes 3,7,8 = all male in dataset)
+
+MITIGATION 1: Reweighing (Algorithm 2)
+  Kamiran & Calders (2012): pre-processing that assigns instance weights
+  W(s,y) = P(S=s)×P(Y=y)/P(S=s,Y=y) so the weighted joint P_w(S,Y) equals
+  the product of marginals P(S)×P(Y). Removes statistical dependence
+  between sex and outcome in the training data.
+
+MITIGATION 2: Fairness-constrained RL (Algorithm 4)
+  Modified reward: rw_modified = rw + λ × |AF_male - AF_female|
+  Where AF_male/female are sex-stratified AF contributions for the candidate
+  action. Actions with equal diagnostic value across sexes get lower rw
+  (better). Actions with sex-dependent value get penalized.
+
+METRICS COMPUTED:
+  - SPD (Statistical Parity Difference): P(Ŷ=UNHEALTHY|male) - P(Ŷ=UNHEALTHY|female)
+  - DI (Disparate Impact): P(Ŷ=UNHEALTHY|female) / P(Ŷ=UNHEALTHY|male)
+  - Equalized Odds: max(|TPR_m - TPR_f|, |FPR_m - FPR_f|)
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 7: DATA FLOW ANALYSIS
+████████████████████████████████████████████████████████████████████████████████
+
+TRAINING DATA FLOW:
+  arrhythmia.data → load_dataset() → (data: ndarray, labels: ndarray)
+       │
+       ├─→ classify_features(data) → kinds: Dict[int, FeatureKind]
+       │
+       ├─→ build_decision_tree(data, labels) → DecisionTree
+       │        │
+       │        └─→ For each node: user_indices, feature_indices, health_dist
+       │
+       ├─→ run_algorithm2(tree, data, labels) → Algorithm2Output
+       │        │
+       │        ├─→ For each (node, feature):
+       │        │     compute_discretization() → bin_edges, bin_assignments
+       │        │     compute_bayesian_tables() → P(B̂|h), P(h,f), P(B̂), P(h|B̂)
+       │        │     compute_healthy_range() → [b_min, b_max]
+       │        │     compute_executive_actions() → r_{o|h} per disease
+       │        │
+       │        └─→ PerceptorModelEntry + ExecutiveActionEntry per (node, feat, h)
+       │
+       └─→ run_algorithm3(alg2_output, tree, data, labels) → Algorithm3Output
+                │
+                └─→ Subset of ExecutiveActionEntry (refined/retained only)
+
+PREDICTION DATA FLOW:
+  test_user[i] → run_algorithm4(i, data, labels, tree, alg2, alg3)
+       │
+       ├─→ INIT: random action → read V → compute AF_0 → check alarm
+       │
+       ├─→ FOCUS LOOP: _find_applicable_node() → active_node
+       │        │
+       │        └─→ DISEASE LOOP: _get_sorted_disease_actions() → C_buf
+       │                │
+       │                └─→ WHILE: _rl_select_best_action() → J
+       │                         _get_raw_value() → V_j
+       │                         _compute_AF_increment() → delta
+       │                         _is_outside_healthy_range() → alarm?
+       │
+       └─→ PredictionRecord (decision, af_trace, node_records)
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 8: STATE MANAGEMENT ANALYSIS
+████████████████████████████████████████████████████████████████████████████████
+
+ALGORITHM 1: Stateless pure functions. Tree built incrementally but no
+mutable state beyond the tree structure itself.
+
+ALGORITHM 2: Stateless per-node computation. Each (node, feature) is
+independent. No cross-node state.
+
+ALGORITHM 3: CRITICAL STATE:
+  - `newinf`: boolean array (node-local user indexing)
+    - Only ever SET (True), never reset to False
+    - Accumulates across disease classes (global mode)
+  - `buffer`: integer, tracks running max of newinf.sum()
+    - Only ever increases (monotone)
+  - Both reset at node boundaries (each node independent)
+
+ALGORITHM 4: CRITICAL STATE:
+  - `AF_real`: float, monotonically increasing, capped at 1.0
+    - Persists across focus levels (not reset)
+    - Updated after every non-NaN sensor reading
+  - `consumed_pairs`: Set[Tuple[int,int]], grows monotonically
+    - Prevents double-counting across focus levels
+  - `C_buf`: List, shrinks as actions are applied (J removed each iteration)
+  - `pac_counter`: mutable int[0], reset per (k,f) per paper line 4
+
+INVARIANTS:
+  1. AF_real ∈ [0, 1] (enforced by _update_AF with min/max clamping)
+  2. rw_real = 1 - AF_real ∈ [0, 1] (monotonically decreasing)
+  3. newinf can only grow (set-only semantics)
+  4. buffer ≤ newinf.sum() (because buffer = s at each step, s = newinf.sum())
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 9: FAILURE MODES AND EDGE CASES
+████████████████████████████████████████████████████████████████████████████████
+
+9.1 MISSING VALUES (NaN)
+  - Branching: users with NaN excluded from both branches (unassigned)
+  - Algorithm 2: NaN users excluded from bin counts → don't affect ranges
+  - Algorithm 3: NaN users not flagged (cannot assert abnormality)
+  - Algorithm 4: NaN sensor reading → skip (no PAC update, no alarm)
+
+  RISK: User with many NaN features gets very few PAC updates →
+  AF stays low → rw stays high → SCREENING decision. This is correct
+  behavior (insufficient data = send for screening).
+
+9.2 LOOCV EDGE EFFECTS
+  When the held-out user has a feature value that was the unique min or max
+  of healthy users in the full dataset:
+  - Training healthy range shrinks (without that extreme user)
+  - Held-out user's value now falls outside training range
+  - → FALSE ALARM (healthy user classified UNHEALTHY)
+
+  This violates the FA=0 goal on individual folds but is the honest LOOCV
+  evaluation. The code documents this in validate_specificity_invariant().
+
+9.3 EMPTY ACTION TABLES
+  Some disease classes have 0 examples in one sex (e.g., classes 3,7,8 are
+  all-male). For female users, there are no refined actions for these diseases.
+  → Algorithm 4 skips these h values → can't detect these diseases in females.
+
+  This is a FUNDAMENTAL dataset limitation, not an algorithm bug.
+
+9.4 NUMERICAL STABILITY
+  - P(h>1,f) can be 0 if node has only healthy users → protected by 1e-9 epsilon
+  - P(B̂) can be 0 for empty bins → uniform posterior fallback
+  - AF increment can be arbitrarily large (if P(h>1,f) is tiny) → capped at 1.0
+  - Laplace smoothing disabled (LAPLACE_EPSILON=0) → zero likelihoods possible
+    but handled by evidence normalization
+
+9.5 DETERMINISM
+  Algorithm 4 has ONE random element: initial action selection.
+  With fixed rng_seed, results are reproducible.
+  The RL lookahead is DETERMINISTIC (argmin over fixed candidates).
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 10: PERFORMANCE ANALYSIS
+████████████████████████████████████████████████████████████████████████████████
+
+LOOCV COMPUTATIONAL COST:
+  Per fold: Alg1 + Alg2 + Alg3 + Alg4
+  - Alg1: O(F × N) = O(279 × 451) ≈ 126K per fold → total: 57M
+  - Alg2: O(nodes × F × N) = O(3 × 279 × 451) ≈ 377K → total: 170M
+  - Alg3: O(nodes × H × F × N) = O(3 × 12 × 279 × 451) ≈ 4.5M → total: 2B
+  - Alg4: O(H × F) per user = O(12 × 279) ≈ 3.3K → total: 1.5M (negligible)
+
+  Total: ~2 billion operations × 452 folds ≈ CPU-bound, takes several minutes.
+
+BOTTLENECK: Algorithm 2's discretization and Bayesian table computation for
+every (node, feature) combination, repeated 452 times.
+
+OPTIMIZATION OPPORTUNITIES:
+  1. Alg1 tree structure barely changes between folds (removing 1 of 451 users).
+     Could use incremental updates instead of full rebuild.
+  2. Alg2 healthy ranges: only change if the removed user was the min/max.
+     Could precompute "second min/max" for O(1) per-fold updates.
+  3. Alg3: vectorized NumPy (already done for inner loop).
+  4. Parallelization: each LOOCV fold is independent → trivially parallelizable.
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 11: DEVIATIONS FROM PAPER / SPECIFICATION
+████████████████████████████████████████████████████████████████████████████████
+
+11.1 STATED DEVIATIONS (documented in code):
+  [AMBIG-1] Buffer/newinf scope: global accumulation (paper ambiguous)
+  [AMBIG-2] Feature iteration scope: only features with r>0 (paper unclear)
+  [AMBIG-3] Strict inequalities in range check (matches paper notation)
+  [ENGR-1]  NaN handling (paper silent; conservative choice)
+  [ENGR-2]  Node independence in Alg3 (paper describes single-node formula)
+  [ENGR-3]  Deep copy to avoid mutating Alg2 output
+  [ENGR-4]  Bin count via Sturges' rule (+18 offset — unusual choice)
+  [ENGR-5]  AF capped at 1.0 (paper's fuzzy logic semantics)
+
+11.2 POTENTIAL MISMATCHES WITH MATLAB IMPLEMENTATION:
+  - Bin count formula: Sturges + 18 gives ~28 bins; MATLAB may differ
+  - Median split: paper's Fig. 6b shows age split at "≤45/>45" (near median ~47)
+  - Missing value handling: MATLAB may interpolate; Python excludes
+  - Random seed for initial action: different across implementations
+  - P(h,f) denominator: code uses N_total (full dataset); paper notation ambiguous
+
+11.3 RL LOOKAHEAD SIMPLIFICATION:
+  Paper lines 11-17 describe the RL as iterating over "features extracted from c"
+  per action. Since each action maps to exactly ONE feature, the "inner loop"
+  is trivially one iteration. The RL reduces to: pick the action with highest
+  P(h,f)×r/P(h>1,f) — equivalent to highest r (since other terms are constant).
+
+11.4 LINE 13 TYPO CORRECTION:
+  Paper's printed line 13 has "+AF^cj" (self-reference). Code treats this as a
+  typo per user override §8.9. The corrected form: AF^cj = P(h,f)*r_{j|h}/P(h>1,f)
+  (no self-addition). Each candidate evaluated independently.
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 12: REFACTORING OPPORTUNITIES
+████████████████████████████████████████████████████████████████████████████████
+
+12.1 CODE QUALITY:
+  (+) Excellent documentation (every function annotated with [PAPER]/[INFER]/[ENGR])
+  (+) Comprehensive validation suites per algorithm
+  (+) Clear separation of concerns across files
+  (+) Vectorized NumPy for performance-critical inner loops
+
+  (-) Algorithm4Output._recompute_stats() is 140+ lines of repetitive list
+      comprehensions — could use pandas groupby or vectorize with masks
+  (-) Algorithm 2 file exceeds 1000 lines; could split Sections 4-7 into modules
+  (-) Logging mixes print() and log.info() inconsistently
+  (-) Some TODO-level code left as commented blocks (old filter_users_by_branch)
+
+12.2 ARCHITECTURAL:
+  (-) No dependency injection: hard-coded imports between Alg1→2→3→4
+  (-) Global mutable logger state (_build_logger checks for existing handlers)
+  (-) LOOCV loop is serial; no built-in parallelism
+  (-) Gender analysis code interleaved with core algorithm (could be separate)
+
+12.3 CORRECTNESS RISKS:
+  (-) _n_bins_for_node() adds +18 to Sturges' rule with no documented rationale
+  (-) LAPLACE_EPSILON = 0 means zero-probability bins can occur; while handled
+      by the uniform fallback, this creates discontinuous posteriors
+  (-) consumed_pairs tracks (feature, h) but not node — theoretically a feature
+      could appear in different nodes with different healthy ranges
+
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 13: FULL SYSTEM MENTAL MODEL SUMMARY
+████████████████████████████████████████████████████████████████████████████████
+
+THINK OF IT AS: A brain-inspired diagnostic protocol.
+
+1. ORGANIZE PATIENTS (Alg 1): Group patients by demographics (sex, age, etc.)
+   so each group is homogeneous enough for reliable statistics.
+
+2. LEARN WHAT'S NORMAL (Alg 2): For each patient group and each sensor:
+   "What values do healthy people show?" → healthy range [b_min, b_max].
+   "How often do diseased people fall outside this range?" → action weight r.
+
+3. FOCUS ON WHAT MATTERS (Alg 3): Many features are redundant. Keep only those
+   that reveal NEW unhealthy patients not already identifiable by better features.
+
+4. DIAGNOSE NEW PATIENT (Alg 4): Like a doctor:
+   a. Pick a test to run (RL selects based on expected information gain)
+   b. Run the test, read the result
+   c. If result is clearly abnormal → ALARM → refer to specialist
+   d. If confidence is high enough (AF ≈ 1) → HEALTHY
+   e. If still unsure → refine by checking more specific group models (level 2)
+   f. If exhausted all tests and still unsure → send for SCREENING
+
+THE KEY INSIGHT: The system achieves FA=0 (zero false alarms on training data)
+by construction — healthy ranges are defined as the full extent of healthy users'
+values. Any value outside this range MUST belong to a diseased user. The cost
+is sensitivity: diseased users whose values happen to overlap the healthy range
+are missed (sent to SCREENING or declared HEALTHY).
+
+THE FAIRNESS CHALLENGE: When groups have different sizes or disease distributions,
+the "one range fits all" approach can systematically disadvantage the smaller group.
+The reweighing + RL modifications attempt to equalize diagnostic power across sexes.
+
+████████████████████████████████████████████████████████████████████████████████
+ PART 14: RESEARCH METHODOLOGY IMPLEMENTATION — WEEK-BY-WEEK MAPPING
+████████████████████████████████████████████████████████████████████████████████
+
+This section maps each research plan week to its concrete implementation in
+the codebase, providing reimplementation-level detail on how each deliverable
+is produced.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ WEEK 2: ALGORITHM UNDERSTANDING
+═══════════════════════════════════════════════════════════════════════════════
+
+14.1 CDS ALGORITHMS 1-4 IMPLEMENTATION IN PYTHON
+-------------------------------------------------
+
+The four CDS algorithms are implemented across four Python files:
+
+  File                           Lines   Algorithm   Paper Section
+  ──────────────────────────────────────────────────────────────────
+  CDS_Paper_Algorithms.py        ~600    Alg 1       §III-A, Fig. 5
+  Algorithm2.py                  ~1000   Alg 2       §III-B, Fig. 6
+  Algorithm3.py                  ~400    Alg 3       §III-C
+  Algorithm4.py                  ~2000   Alg 4       §III-D, Fig. 8
+
+Each file is self-contained with respect to its algorithm but imports from
+predecessors.  The dependency chain is:
+
+  CDS_Paper_Algorithms → Algorithm2 → Algorithm3 → Algorithm4
+
+All four are executed within the LOOCV loop in Algorithm4.py::run_loocv().
+Per fold: Alg1 builds a tree, Alg2 trains perceptor+executive, Alg3 prunes
+actions, Alg4 predicts the held-out user.
+
+Key implementation choices that deviate from a textbook MATLAB version:
+  • NumPy vectorization for inner loops (bin assignment, coverage counting)
+  • Dataclass-based outputs for type safety (not raw dicts)
+  • Explicit [PAPER]/[INFER]/[ENGR] annotations on every design choice
+  • Python logging (CDS.Alg1, CDS.Alg2, etc.) vs MATLAB's disp()
+
+
+14.2 REPRODUCING THE 95.4% ACCURACY
+------------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/reproducibilityReport.py
+
+Execution path:
+  1. load_dataset() → (452, 279) array + (452,) labels
+  2. run_loocv(data, labels, max_users=None, rng_seed=42,
+              n_bins=DEFAULT_N_BINS, nodes_filter=["root","root|k1_f1","root|k1_f2"])
+     → Algorithm4Output with 452 PredictionRecords
+  3. compute_metrics(output) → overall_acc, sensitivity, specificity, fa_rate
+
+Accuracy computation (reproducibilityReport.py:107-138):
+  n_correct = count of records where record.is_correct == True
+  overall_acc = n_correct / N (N=452)
+
+  record.is_correct logic (Algorithm4.py):
+    • If true_is_healthy: correct if decision != UNHEALTHY (no false alarm)
+    • If true_is_diseased: correct if decision == UNHEALTHY (detected)
+
+  The paper's reported 95.4% counts:
+    • Healthy users (class 1, n=245): never produce false alarms → all correct
+    • Diseased users (classes 2-16, n=207): detected via range violations
+    • Total correct = 245 + (207 × sensitivity) / 452
+
+  Critical factor: FA=0 policy guarantees 245/245 healthy users are correct.
+  The accuracy bottleneck is entirely sensitivity on diseased users.
+
+nodes_filter parameter:
+  ["root", "root|k1_f1", "root|k1_f2"] specifies which tree levels to use.
+  This limits Algorithm 4 to root (focus level 1) + two sex-branch children
+  at focus level 2. The paper uses max_focus=2.
+
+RNG seed:
+  rng_seed=42 controls the initial random action selection in Algorithm 4.
+  With a fixed seed, results are deterministic and reproducible across runs.
+
+
+14.3 DOCUMENTING THE GENDER-SPECIFIC PERFORMANCE GAP
+------------------------------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/reproducibilityReport.py
+
+The gender gap is computed in compute_metrics() (lines 143-169):
+
+  def _gender_block(sex_code):
+    m = [r for r in records if data[r.user_global_idx, SEX_COL] == sex_code]
+    ...
+    error_rate = d_wrong / len(diseased)
+
+  Male error rate: ~5% (paper reported)
+  Female error rate: ~14% (paper reported)
+
+  Gender attribution uses column 1 of the data matrix:
+    SEX_COL = 1
+    MALE_CODE = 0
+    FEMALE_CODE = 1
+
+Report output (build_report() lines 287-310):
+  Generates a formatted ASCII table with columns:
+    Metric | Male | Female | Diff (M-F)
+  Including: accuracy, sensitivity, specificity, diseased error rate,
+  healthy correct, diseased correct, screening count.
+
+Confusion matrix breakdown (lines 316-327):
+  For diseased users only: male detected/missed vs female detected/missed.
+
+Per-class error table (lines 347-388):
+  For each arrhythmia class (2-16), counts:
+    female_wrong, female_total, female_error_pct
+    male_wrong, male_total, male_error_pct
+  Sorted by female error count to identify problematic classes.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ WEEK 3: BIAS DETECTION FRAMEWORK
+═══════════════════════════════════════════════════════════════════════════════
+
+14.4 FAIRNESS METRICS IMPLEMENTATION
+--------------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/reproducibilityReport.py (lines 171-192)
+ALSO: Algorithm4.py::_recompute_stats() contains equivalent calculations.
+
+Reference: Mehrabi et al. (2021) "A Survey on Bias and Fairness in ML"
+
+────────────────────────────────────────────────────────────────────────────
+METRIC 1: Statistical Parity Difference (SPD)
+────────────────────────────────────────────────────────────────────────────
+
+  Definition: SPD = P(Ŷ=UNHEALTHY | S=male) - P(Ŷ=UNHEALTHY | S=female)
+
+  Implementation (reproducibilityReport.py:173-183):
+    n_male_pred_unhealthy = count(decision==UNHEALTHY AND sex==MALE)
+    n_female_pred_unhealthy = count(decision==UNHEALTHY AND sex==FEMALE)
+    p_unhealthy_male = n_male_pred_unhealthy / n_male_total
+    p_unhealthy_female = n_female_pred_unhealthy / n_female_total
+    spd = p_unhealthy_male - p_unhealthy_female
+
+  Interpretation:
+    • SPD = 0: demographic parity (both groups classified at same rate)
+    • |SPD| < 0.1: considered "fair" (standard threshold)
+    • SPD > 0: males classified as UNHEALTHY more often (higher detection)
+    • SPD < 0: females classified as UNHEALTHY more often
+
+────────────────────────────────────────────────────────────────────────────
+METRIC 2: Disparate Impact (DI)
+────────────────────────────────────────────────────────────────────────────
+
+  Definition: DI = P(Ŷ=UNHEALTHY | S=female) / P(Ŷ=UNHEALTHY | S=male)
+
+  Implementation (reproducibilityReport.py:184):
+    di = p_unhealthy_female / p_unhealthy_male
+
+  Interpretation:
+    • DI >= 0.8: passes the "80% rule" (EEOC guideline)
+    • DI < 0.8: BIASED — disadvantaged group receives favorable outcome
+      at less than 80% the rate of the advantaged group
+    • DI = 1.0: perfect parity
+
+────────────────────────────────────────────────────────────────────────────
+METRIC 3: Equalized Odds (EO)
+────────────────────────────────────────────────────────────────────────────
+
+  Definition: max(|TPR_male - TPR_female|, |FPR_male - FPR_female|)
+
+  Implementation (reproducibilityReport.py:186-192):
+    tpr_m = male_blk["sensitivity"]       # = d_correct / n_diseased (male)
+    fpr_m = 1.0 - male_blk["specificity"] # = 1 - h_correct/n_healthy (male)
+    tpr_f = female_blk["sensitivity"]
+    fpr_f = 1.0 - female_blk["specificity"]
+    eo_tpr_diff = tpr_m - tpr_f
+    eo_fpr_diff = fpr_m - fpr_f
+    eo_diff = max(abs(eo_tpr_diff), abs(eo_fpr_diff))
+
+  Interpretation:
+    • EO < 0.1: considered "fair"
+    • EO >= 0.1: BIASED — TPR or FPR differs significantly between groups
+    • In the CDS system, FPR is always 0 (FA=0 policy), so EO reduces to
+      |TPR_male - TPR_female| = |sensitivity_male - sensitivity_female|
+
+
+14.5 PER-GENDER CONFUSION MATRICES
+------------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/reproducibilityReport.py (lines 143-169)
+VISUALIZATION: genderPlottingAlgorithms/plot_algorithm4_results.py
+
+The confusion matrix is 2×3 for the CDS system (not the standard 2×2):
+
+  True\Predicted    HEALTHY    UNHEALTHY    SCREENING
+  ───────────────────────────────────────���─────────────
+  Healthy (cls=1)   TP_h       FP (FA)      [screening]
+  Diseased (2-16)   FN (miss)  TP_d         [screening]
+
+Per-gender matrices computed by filtering records on data[user, SEX_COL].
+
+plot_algorithm4_results.py generates 3x3 confusion matrix heatmaps as PNG:
+  confusion_matrix_info(records, gender_mask, gender_name) → cm (2×3 array)
+  plot_confusion_matrix(cm, labels, title, filename) → saves to graphs/
+
+
+14.6 IDENTIFYING PROBLEMATIC ARRHYTHMIA CLASSES
+-------------------------------------------------
+
+IMPLEMENTATION: reproducibilityReport.py (lines 195-209, 372-388)
+
+Per-class error tracking:
+  class_errors = defaultdict(lambda: {female_wrong, male_wrong, female_total, male_total})
+
+  For each prediction record:
+    if record.true_is_diseased:
+      cls = record.true_label
+      sex = data[record.user_global_idx, SEX_COL]
+      if not record.is_correct:
+        class_errors[cls][f"{sex_name}_wrong"] += 1
+      class_errors[cls][f"{sex_name}_total"] += 1
+
+Report Section 6 (lines 372-388):
+  Ranks arrhythmia classes by female misclassification count (descending).
+  Expected problematic classes:
+    • Classes 3, 7, 8: zero female training examples → 100% female error
+    • Classes with small female counts: unstable action weights → high error
+
+CLASS_NAMES mapping (lines 82-96):
+  1:  Normal                    14: LV Hypertrophy
+  2:  Coronary Artery Disease   15: Atrial Fibrillation
+  3:  Old Anterior MI           16: Others
+  4:  Old Inferior MI
+  5:  Sinus Tachycardia
+  6:  Sinus Bradycardia
+  7:  PVC
+  8:  Supraventricular PC
+  9:  Left Bundle Branch Block
+  10: Right Bundle Branch Block
+
+DELIVERABLE AT WEEK 3:
+  Running `python reproducibilityReport.py` produces:
+    • reproducibility_report.txt — full formatted report with all sections above
+    • per_class_errors.csv — machine-readable per-class breakdown
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ MONTH 2: ROOT CAUSE ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+
+14.7 WEEK 4: FEATURE ANALYSIS
+-------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/technicalReport.py (run_week4(), lines 150-274)
+ALSO: genderPlottingAlgorithms/featureImportanceByGender.py (CDS-native approach)
+
+Two complementary approaches are implemented:
+
+──────────────────────────────────��─────────────────────────────────────────
+APPROACH A: CDS-NATIVE (featureImportanceByGender.py)
+Uses Algorithm 3's own action weights as importance metric
+────────────────────────────────────────────────────────────────────────────
+
+Method:
+  1. Run Algorithms 1-3 on male-only sub-population → alg3_male
+  2. Run Algorithms 1-3 on female-only sub-population → alg3_female
+  3. For each feature, extract max r_{o|h} across retained disease classes
+     r_{o|h} = P(B̂ < b_min | h) + P(B̂ > b_max | h)
+  4. Compute |male_max_r - female_max_r| as the importance difference
+
+Key function: extract_importance(alg3_output) (lines 181-202):
+  For each action in alg3_output.refined_actions:
+    importance[action.feature_idx].max_weight = max(existing, action.action_weight)
+    importance[action.feature_idx].n_diseases += 1
+
+Significance threshold: |male_max_r - female_max_r| > 0.05 (IMPORTANCE_THRESHOLD)
+
+Features flagged as "male_only" or "female_only":
+  A feature retained by Algorithm 3 for one gender but not the other represents
+  a gender-specific diagnostic pathway that a unified model misses.
+
+────────────────────────────────────────────────────────────────────────────
+APPROACH B: PERMUTATION IMPORTANCE (technicalReport.py, Breiman 2001)
+Uses Random Forest + permutation importance as external validation
+────────────────────────────────────────────────────────────────────────────
+
+Method (run_week4(), lines 172-196):
+  1. Split each gender's data: 75% train, 25% test (stratified by class)
+  2. Train RandomForestClassifier(n_estimators=200, random_state=42)
+  3. permutation_importance(rf, X_test, y_test, n_repeats=30)
+     → importances shape (n_features, 30) — 30 random permutations per feature
+  4. For each feature: compute Welch t-test across 30 male vs 30 female repeats
+  5. Apply Benjamini-Hochberg FDR correction (q < 0.05)
+
+Parameters:
+  N_ESTIMATORS = 200       # RF trees
+  N_REPEATS    = 30        # permutation shuffles per feature
+  TEST_SIZE    = 0.25      # train/test split
+  FDR_ALPHA    = 0.05      # Benjamini-Hochberg threshold
+
+BH correction implementation (_bh_correction, lines 109-120):
+  Sort p-values ascending → compute q_i = p_i * n / rank → running min backward
+
+────────────────────────────────────────────────────────────────────────────
+NORMAL RANGES BY GENDER (Figure 7, Paper Eq. 5)
+────────────────────────────────────────────────────────────────────────────
+
+Both scripts compute per-gender healthy ranges:
+
+  featureImportanceByGender.py (lines 282-344):
+    healthy_male_mask = (labels == HEALTHY_CLASS) & male_mask
+    For each feature:
+      m_vals = data[healthy_male_mask, feat_idx]  (remove NaN)
+      b_min_male = m_vals.min()
+      b_max_male = m_vals.max()
+    Identifies features where male/female healthy ranges do NOT overlap
+    (ranges_overlap = False → a value normal for one gender triggers alarm for other)
+
+  technicalReport.py (lines 241-272):
+    Same computation with additional output:
+      range_delta = |range_male - range_female|
+      Top 10 features with largest range difference
+
+Outputs:
+  feature_importance_by_gender.csv    — full 279-feature importance table
+  significant_gender_differences.csv  — features where |delta| > threshold
+  normal_ranges_male.csv              — b_min, b_max for healthy males
+  normal_ranges_female.csv            — b_min, b_max for healthy females
+  normal_ranges_combined.csv          — side-by-side with overlap flag
+
+
+14.8 WEEK 5: MISSING DATA ANALYSIS
+------------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/dataAnalysis.py
+ALSO: genderPlottingAlgorithms/technicalReport.py (run_week5(), lines 280-429)
+
+────────────────────────────────────────────────────────────────────────────
+5a. MISSING DATA PATTERNS BY GENDER
+────────────────────────────────────────────────────────────────────────────
+
+The UCI Arrhythmia dataset uses '?' for missing values (loaded as NaN).
+
+dataAnalysis.py (lines 66-115):
+  For each feature column (excluding Sex and class label):
+    female_missing = count NaN in column among females
+    male_missing = count NaN in column among males
+    female_missing_pct = female_missing / total_females
+    male_missing_pct = male_missing / total_males
+
+Output: missingness_by_gender.csv sorted by total_missing descending.
+
+────────────────────────────────────────────────────────────────────────────
+5b. INFORMATIVE MISSINGNESS TESTING
+────────────────────────────────────────────────────────────────────────────
+
+Tests whether missingness is dependent on gender (MAR vs MCAR).
+
+dataAnalysis.py (lines 120-220):
+  For each feature with missing values:
+    Build 2×2 contingency table:
+                    missing   observed
+      Female    [   a          b      ]
+      Male      [   c          d      ]
+
+    Decision rule (Fisher 1922 / Cochran 1954):
+      if ALL expected cell counts >= 5:
+        chi-square test (asymptotic) → chi2, p_value
+      else:
+        Fisher's exact test → p_value
+
+    significant = (p_value < 0.05)
+
+  A significant result means missingness is NOT random with respect to gender
+  (Missing At Random, not Missing Completely At Random).
+
+technicalReport.py implements identical logic (lines 336-378) with additional
+  diff_m_minus_f = male_missing_rate - female_missing_rate
+  Positive → males miss this feature more; negative → females miss more.
+
+────────────────────────────────────────────────────────────────────────────
+5c. MULTIPLE IMPUTATION (Rubin, 1987)
+────────────────────────────────────────────────────────────────────────────
+
+IMPLEMENTATION: dataAnalysis.py (lines 225-360)
+
+Method: MICE (Multivariate Imputation by Chained Equations)
+  van Buuren & Groothuis-Oudshoorn (2011), JSS 45(3).
+
+  Uses sklearn.impute.IterativeImputer:
+    - For each feature with missing values: fit a regression model using
+      all OTHER features as predictors
+    - Fill missing values with draws from posterior predictive distribution
+    - Iterate 10 rounds until convergence
+    - Repeat M=5 times with different random seeds
+
+Parameters:
+  N_IMPUTATIONS = 5
+  max_iter = 10
+  initial_strategy = 'mean'
+  imputation_order = 'roman' (left-to-right)
+  random_state = 42 + iteration_index (42, 43, 44, 45, 46)
+
+Rubin's combination rules (dataAnalysis.py:279-331):
+  Q̄  = (1/M) Σ Q̂_i                     — pooled point estimate
+  Ū  = (1/M) Σ Û_i                       — within-imputation variance
+  B  = 1/(M-1) Σ (Q̂_i - Q̄)²            — between-imputation variance
+  T  = Ū + (1 + 1/M) × B                — total variance
+
+  Large B relative to Ū signals that the missing-data mechanism introduces
+  substantial uncertainty — imputed values vary widely across runs.
+
+technicalReport.py (lines 393-429):
+  Same MICE approach but reports "top 10 features with highest between-
+  imputation variance" as those most unstable under imputation.
+
+Outputs:
+  missingness_by_gender.csv           — per-feature missing counts
+  informative_missingness_tests.csv   — chi2/Fisher test results
+  multiple_imputation_impact.csv      — Rubin combination rule results
+
+
+14.9 WEEK 6: FOCUS LEVEL ANALYSIS
+-----------------------------------
+
+IMPLEMENTATION: genderPlottingAlgorithms/technicalReport.py (run_week6(), lines 436-637)
+ALSO: Algorithm1_forcedBranch.py (ForcedSexForest)
+ALSO: genderPlottingAlgorithms/dataAugmentation.py (augmentation study)
+
+────────────────────────────────────────────────────────────────────────────
+6a. FORCED BRANCH RE-RUN WITH GENDER AT ALL FOCUS LEVELS
+────────────────────────────────────────────────────────────────────────────
+
+Algorithm1_forcedBranch.py implements ForcedSexForest:
+  • Pre-routes ALL users by sex at Level 0 (before tree construction)
+  • Builds independent male_tree and female_tree
+  • Each tree: root = same-sex users only, features exclude Sex column
+  • Effectively forces gender as the FIRST branching criterion
+
+technicalReport.py (lines 440-479):
+  forest = build_forced_sex_forest(data, labels, max_m=2)
+  Counts: male_tree nodes, female_tree nodes, users per route.
+
+Key insight on focus level depth:
+  u_min = ceil(5 / 0.025) = 200
+  Female population: ~249 (in one sub-analysis)
+  At Level 2: 249 / 2 = ~125 per branch → BELOW u_min threshold
+  Therefore: female tree CANNOT expand beyond Level 2 (max_m=2)
+  Male population: ~203 → same constraint applies
+
+  This is the structural limitation: with u_min=200 and N<500 per gender,
+  the forced-sex tree is limited to depth 2. Focus Level 3 is impossible
+  without more data or a reduced u_min threshold.
+
+────────────────────────────────────────────────────────────────────────────
+6b. FOCUS LEVEL 3 SIMULATION VIA DATA AUGMENTATION
+────────────────────────────────────────────────────────────────────────────
+
+Since Focus Level 3 requires more data than exists for the female sub-population,
+the codebase simulates what Level 3 performance WOULD look like by:
+  1. Augmenting the female training set with synthetic samples
+  2. Training a Random Forest (as a proxy for a deeper CDS tree)
+  3. Measuring if the male/female accuracy gap closes
+
+dataAugmentation.py implements 6 augmentation strategies:
+
+STRATEGY 1: baseline (no augmentation)
+  Returns training data unchanged. Establishes the gap baseline.
+
+STRATEGY 2: random_oversample (lines 155-194)
+  Duplicates female minority-class samples with replacement until each
+  female disease class matches the majority female class count.
+  Only female samples are duplicated; male data unchanged.
+
+STRATEGY 3: perturbation (lines 197-231)
+  For each real female sample, generates PERTURB_COPIES=3 synthetic copies:
+    X_syn = X_original + N(0, 0.05 × feature_std)
+  Binary wave-shape flags (72 columns) are copied exactly (noise zeroed).
+  Sex column forced to FEMALE_CODE=1.
+
+STRATEGY 4: smotenc (lines 234-291)
+  SMOTE-NC (Chawla 2002) for mixed nominal/continuous features.
+  Uses imblearn.over_sampling.SMOTENC:
+    - categorical_features = 72 binary wave-shape flag columns
+    - k_neighbors = min(5, min_class_count - 1)
+  Operates on female sub-population only.
+  Post-processes: snap binary cols to 0/1, force Sex=female.
+
+STRATEGY 5: cross_gender (lines 294-361)
+  THE ONLY STRATEGY THAT CAN CREATE FEMALE SAMPLES FOR ALL-MALE CLASSES.
+  For each disease class where females have fewer samples than males:
+    - Select male donors from that class
+    - Perturb continuous features with N(0, 0.05 × donor_std)
+    - Set Sex = FEMALE_CODE (relabel as female)
+    - Copy binary flags from donor exactly
+  This creates female-like samples for Classes 3, 7, 8 (zero female examples).
+  CAVEAT: not biologically grounded — tests whether having ANY female data helps.
+
+STRATEGY 6: combined (line 364-367)
+  Stacks random_oversample then perturbation (both effects).
+
+Evaluation (dataAugmentation.py:374-399):
+  5-fold StratifiedKFold CV on binary task (healthy vs diseased).
+  For each fold × strategy:
+    1. Augment training set
+    2. Train RF(n_estimators=200)
+    3. Predict test set
+    4. Compute male_acc, female_acc, gap = female_acc - male_acc
+
+  Output: augmentation_results.csv (per-fold) and augmentation_summary.csv (means)
+
+createAugmentedDataset.py:
+  Generates arrhythmia_augmented.data (952 rows = 452 original + 500 synthetic):
+    - Proportional stratified perturbation preserving (class, gender) distribution
+    - Gaussian noise σ=5% of per-feature std on continuous features
+    - Binary flags copied exactly from donor
+
+DELIVERABLE AT WEEK 6:
+  Running `python technicalReport.py` produces:
+    • technical_report.txt — consolidated root-cause report
+    • importance.csv, significant.csv — Week 4 feature analysis
+    • missingness.csv, informative.csv — Week 5 missing data
+    • augmentation.csv — Week 6 augmentation gap results
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ MONTH 3: BIAS MITIGATION DEVELOPMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+
+14.10 WEEK 7: PRE-PROCESSING — REWEIGHING (Kamiran & Calders, 2012)
+---------------------------------------------------------------------
+
+IMPLEMENTATION: Algorithm2.py (lines 125-180, applied at lines 909-922)
+
+────────────────────────────────────────────────────────────────────────────
+THEORY
+────────────────────────────────────────────────────────────────────────────
+
+Reweighing assigns instance-level weights to achieve statistical independence
+between the protected attribute S (sex) and outcome Y (healthy/diseased):
+
+  W(S=s, Y=y) = P(S=s) × P(Y=y) / P(S=s, Y=y)
+
+This ensures the weighted joint distribution P_w(S,Y) = P(S)×P(Y), removing
+any correlation between sex and diagnosis outcome in the training data.
+
+────────────────────────────────────────────────────────────────────────────
+IMPLEMENTATION: compute_reweighing_weights()  (Algorithm2.py:132-180)
+────────────────────────────────────────────────────────────────────────────
+
+  Input:
+    labels_valid: np.ndarray — class labels for valid users in this node
+    sex_valid: np.ndarray — sex attribute (0=male, 1=female) for same users
+    protected_value: int = 1 (female is the protected group)
+
+  Algorithm:
+    1. Binarize outcome: y_binary = (labels == HEALTHY_CLASS).astype(int)
+       Y=1 → healthy, Y=0 → diseased
+
+    2. Compute marginals:
+       p_s1 = count(sex == female) / n        # P(S=protected)
+       p_s0 = 1 - p_s1                         # P(S=unprotected)
+       p_y1 = count(y == healthy) / n          # P(Y=healthy)
+       p_y0 = 1 - p_y1                         # P(Y=diseased)
+
+    3. For each (s_val, y_val) combination:
+       mask = (sex == s_val) & (y_binary == y_val)
+       p_sy = count(mask) / n                   # P(S=s, Y=y)
+       weights[mask] = (p_s × p_y) / p_sy       # Kamiran & Calders formula
+
+  Output: weights array shape (n_valid,)
+
+────────────────────────────────────────────────────────────────────────────
+APPLICATION WITHIN CDS PIPELINE
+────────────────────────────────────────────────────────────────────────────
+
+Toggled by: ENABLE_REWEIGHING = True (Algorithm2.py:130)
+
+Applied at: Algorithm2.py:909-922 (within compute_executive_actions):
+  After computing healthy ranges and before building Bayesian tables,
+  instance weights are injected into the P(B̂|h) computation:
+
+    if ENABLE_REWEIGHING and data is not None:
+        sex_valid = data[global_valid, SEX_FEATURE_INDEX]
+        instance_weights = compute_reweighing_weights(labels_valid, sex_valid)
+
+  The weights modify how P(B̂|h) is estimated: instead of uniform 1/N per user,
+  each user contributes their reweighing weight to the likelihood estimate.
+  This upweights under-represented (sex, outcome) combinations and downweights
+  over-represented ones.
+
+  Effect on action weights r_{o|h}:
+    r_{o|h} = P_w(B̂ < b_min | h) + P_w(B̂ > b_max | h)
+    where P_w uses reweighted counts → more equitable across genders.
+
+────────────────────────────────────────────────────────────────────────────
+OPTIMIZED PRE-PROCESSING (Calders et al., 2009)
+────────────────────────────────────────────────────────────────────────────
+
+The reweighing implementation is the "optimized" variant adapted for the CDS
+tree structure:
+  • Weights are computed PER NODE (not globally), because each tree node has
+    a different (sex, outcome) distribution.
+  • Re-computed each LOOCV fold since the training population changes.
+  • Applied at the Bayesian table construction level (Algorithm 2), not
+    at the tree construction level (Algorithm 1).
+
+This is a deliberate choice: modifying Algorithm 1's branching thresholds
+would change the tree structure; instead, reweighing preserves the tree
+topology and only adjusts the statistical models within each node.
+
+
+14.11 WEEK 8: IN-PROCESSING — FAIRNESS-CONSTRAINED RL
+-------------------------------------------------------
+
+IMPLEMENTATION: Algorithm4.py (lines 142-151, 780-892)
+
+────────────────────────────────────────────────────────────────────────────
+MODIFIED RL REWARD STRUCTURE
+────────────────────────────────────────────────────────────────────────────
+
+  Original reward (Paper Eq. 8):
+    rw = 1 - AF_real
+
+  Modified reward (Algorithm4.py:148):
+    rw_modified = rw_original + λ × |AF_male_contribution - AF_female_contribution|
+
+  Note: The SIGN is ADDITIVE (not subtractive as in the research plan notation).
+  Lower rw is better (means higher AF → more confident diagnosis). The penalty
+  INCREASES rw for actions with high gender disparity, making them LESS LIKELY
+  to be selected by the RL argmin. This is mathematically equivalent to:
+    rw_modified = rw_original - λ × (-|AF_male - AF_female|)
+
+Configuration (Algorithm4.py:145-151):
+  ENABLE_FAIRNESS_RL: bool = True
+  FAIRNESS_LAMBDA: float = 0.1
+  SEX_FEATURE_INDEX_ALG4: int = 1
+
+────────────────────────────────────────────────────────────────────────────
+FAIRNESS PENALTY COMPUTATION (Algorithm4.py:803-858)
+────────────────────────────────────────────────────────────────────────────
+
+For the RL lookahead function _rl_select_best_action():
+
+  1. Get node's training population:
+     node_users = node.user_indices
+     node_sex = data[node_users, SEX_FEATURE_INDEX_ALG4]
+     node_labels = labels[node_users]
+
+  2. For each candidate action j (feature_idx):
+     a. Get action weight for males vs females SEPARATELY:
+        male_users_in_node = node_users where sex == MALE_CODE
+        female_users_in_node = node_users where sex == FEMALE_CODE
+
+     b. For the current disease class h:
+        Compute how many male users have values outside healthy range:
+          r_male = count(male_disease_h with value outside [b_min,b_max]) / count(male_disease_h)
+        Compute same for females:
+          r_female = count(female_disease_h with value outside [b_min,b_max]) / count(female_disease_h)
+
+     c. Compute AF contribution disparity:
+        AF_male = p_h_f × r_male / p_h_gt1_f
+        AF_female = p_h_f × r_female / p_h_gt1_f
+        fairness_penalties[j] = |AF_male - AF_female|
+
+  3. During RL selection (Algorithm4.py:880-885):
+     For each candidate action j:
+       rw_sim_cj = 1.0 - (AF_sim_cj + AF_real_current)
+       if ENABLE_FAIRNESS_RL and j in fairness_penalties:
+           rw_sim_cj += FAIRNESS_LAMBDA × fairness_penalties[j]
+       # Select j with MINIMUM rw_sim_cj (highest confidence + fairness)
+
+────────────────────────────────────────────────────────────────────────────
+LAMBDA (λ) GRID SEARCH (Algorithm4.py:2640-2690)
+────────────────────────────────────────────────────────────────────────────
+
+Function: grid_search_fairness_lambda()
+
+  Parameters:
+    lambda_values: default [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+    data, labels: full dataset
+    max_users: optional limit for faster evaluation
+
+  Method:
+    For each λ:
+      1. Set global FAIRNESS_LAMBDA = λ
+      2. Run full LOOCV (run_loocv)
+      3. Compute: accuracy, SPD, DI, EO_diff, sensitivity, specificity
+      4. Store results
+
+  Returns: List of dicts for Pareto analysis (accuracy vs fairness trade-off)
+
+  Typical range: λ ∈ [0.01, 1.0]
+    λ = 0.0: original algorithm (no fairness constraint)
+    λ = 0.1: moderate fairness pressure (default)
+    λ = 1.0: strong fairness constraint (may sacrifice accuracy)
+
+────────────────────────────────────────────────────────────────────────────
+ADVERSARIAL DEBIASING (Zhang et al., 2018) — ARCHITECTURAL NOTE
+────────────────────────────────────────────────────────────────────────────
+
+The codebase does not implement a separate adversarial debiasing network.
+Instead, the fairness-constrained RL reward serves an analogous function:
+  • The standard adversarial approach: train classifier + adversary that predicts
+    protected attribute from predictions; gradient reversal minimizes adversary's
+    ability to infer sex from outputs.
+  • The CDS adaptation: the fairness penalty in RL reward selection penalizes
+    actions whose diagnostic contribution DIFFERS between sexes, forcing the
+    action sequence to be sex-invariant in its AF accumulation pattern.
+
+The RL penalty is adapted specifically for the CDS architecture because:
+  1. CDS is not gradient-based (no backpropagation)
+  2. Actions are discrete (sensor activations, not continuous predictions)
+  3. The "adversary" is implicit in the |AF_male - AF_female| disparity metric
+
+This is closer to "fairness through awareness" (Dwork et al., 2012) than
+classical adversarial debiasing, but the research plan labels it as adversarial
+debiasing adapted for CDS architecture.
+
+
+════════════════════════════════════════════════════════════════════════════════
+ PART 15: CODEBASE COMPLETENESS VERIFICATION
+════════════════════════════════════════════════════════════════════════════════
+
+Final sweep confirming all files are accounted for in this analysis:
+
+FILE                                      COVERED IN SECTION(S)
+────────────────────────────────────────────────────────────────────────────────
+CDS_Paper_Algorithms.py                   Parts 3-5, 14.1
+Algorithm1_forcedBranch.py                Parts 3.2, 5, 14.9 (Week 6)
+Algorithm2.py                             Parts 3-5, 14.10 (Week 7)
+Algorithm3.py                             Parts 3-5, 14.7 (CDS-native importance)
+Algorithm4.py                             Parts 3-6, 14.2, 14.11 (Week 8)
+dataplot.py                               Part 2 (scatter plot utility)
+
+genderPlottingAlgorithms/
+  reproducibilityReport.py                14.2-14.6 (Weeks 2-3)
+  featureImportanceByGender.py            14.7 (Week 4, CDS-native approach)
+  dataAnalysis.py                         14.8 (Week 5)
+  technicalReport.py                      14.7-14.9 (Weeks 4-6 consolidated)
+  dataAugmentation.py                     14.9 (Week 6, augmentation study)
+  createAugmentedDataset.py               14.9 (augmented dataset generation)
+  machineLearningImplementation.py        Part 2 (MLP baseline comparison)
+  plot_algorithm4_results.py              14.5 (confusion matrix visualization)
+
+Supporting files:
+  arrhythmia.data                         UCI dataset (452×280 CSV)
+  arrhythmia.names                        UCI documentation
+  genderPlottingAlgorithms/
+    arrhythmia_augmented.data             Output of createAugmentedDataset.py
+    *.csv                                 Analysis outputs (per script above)
+  graphs/                                 Confusion matrix PNGs
+  featureGraphs/                          Per-feature scatter plots
+
+────────────────────────────────────────────────────────────────────────────────
+ADDITIONAL DETAILS ON PREVIOUSLY UNELABORATED FILES:
+────────────────────────────────────────────────────────────────────────────────
+
+genderPlottingAlgorithms/machineLearningImplementation.py:
+  Implements an MLP (Multi-Layer Perceptron) neural network as a baseline
+  comparison against the CDS algorithm. Uses sklearn.neural_network.MLPClassifier.
+  Trains on the same UCI Arrhythmia dataset with identical train/test splits.
+  Purpose: establish that the gender gap is CDS-specific (not inherent to the data).
+
+genderPlottingAlgorithms/plot_algorithm4_results.py:
+  Visualization script that:
+    1. Runs the full Algorithm 4 pipeline (imports Algorithm4.main)
+    2. Splits results by gender using data[:, SEX_COL]
+    3. Generates confusion matrix heatmaps (3×3: HEALTHY/UNHEALTHY/SCREENING)
+    4. Saves to graphs/ directory as 300 DPI PNG files
+  Functions:
+    confusion_matrix_info(records, gender_mask, gender_name) → (cm, label_names)
+    plot_confusion_matrix(cm, labels, title, filename) → saves PNG
+
+dataplot.py:
+  Simple scatter plot generator that plots each of 279 features:
+    - X-axis: feature index (or user index)
+    - Y-axis: feature value
+    - Color: healthy (blue) vs diseased (red)
+  Saves to featureGraphs/ directory. Used for visual inspection of
+  feature distributions and identifying obviously sex-dimorphic patterns.
+
+────────────────────────────────────────────────────────────────────────────────
+CROSS-REFERENCES: How files map to research plan deliverables
+────────────────────────────────────────────────────────────────────────────────
+
+  Deliverable                    Primary File(s)
+  ──────────────────────────────────────────────────────────────────────────
+  Week 3 Reproducibility Report  reproducibilityReport.py
+  Week 6 Technical Report        technicalReport.py (consolidates 4-6)
+  Feature importance analysis    featureImportanceByGender.py + technicalReport.py
+  Missing data analysis          dataAnalysis.py + technicalReport.py
+  Focus level / augmentation     dataAugmentation.py + technicalReport.py
+  Pre-processing (reweighing)    Algorithm2.py (ENABLE_REWEIGHING)
+  In-processing (fairness RL)    Algorithm4.py (ENABLE_FAIRNESS_RL)
+  Augmented dataset              createAugmentedDataset.py
+  Visualizations                 plot_algorithm4_results.py + dataplot.py
+  ML baseline comparison         machineLearningImplementation.py
+
+================================================================================
+END OF ANALYSIS
+================================================================================

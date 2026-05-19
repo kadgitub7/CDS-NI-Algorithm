@@ -121,6 +121,62 @@ LAPLACE_EPSILON: float = 0.0
 ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 ALL_CLASSES: Tuple[int, ...] = (1,) + ALL_DISEASE_CLASSES
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FAIRNESS: REWEIGHING PRE-PROCESSING (Kamiran & Calders, 2012)
+# ─────────────────────────────────────────────────────────────────────────────
+# Controlled by fairness_config.py — the centralized toggle file.
+from fairness_config import ENABLE_REWEIGHING
+
+def compute_reweighing_weights(
+    labels_valid: np.ndarray,
+    sex_valid: np.ndarray,
+    protected_value: int = 1,
+) -> np.ndarray:
+    """
+    Compute Kamiran & Calders (2012) reweighing weights for demographic parity.
+
+    W(S=s, Y=y) = P(S=s) * P(Y=y) / P(S=s, Y=y)
+
+    where S is the protected attribute (sex), Y is the outcome label
+    (healthy=1 vs diseased=any other class).
+
+    This ensures the weighted joint distribution P_w(S,Y) = P(S)*P(Y),
+    removing statistical dependence between protected attribute and outcome.
+
+    Parameters
+    ----------
+    labels_valid : class labels for valid (non-NaN) users in this node.
+    sex_valid    : sex attribute (0=male, 1=female) for same users.
+    protected_value : value of the protected group (default=1, female).
+
+    Returns
+    -------
+    weights : shape (n_valid,) instance weights achieving demographic parity.
+    """
+    n = len(labels_valid)
+    if n == 0:
+        return np.ones(0)
+
+    # Binary outcome: healthy (Y=1) vs diseased (Y=0)
+    y_binary = (labels_valid == HEALTHY_CLASS).astype(int)
+
+    # Marginals
+    p_s1 = (sex_valid == protected_value).sum() / n  # P(S=protected)
+    p_s0 = 1.0 - p_s1                                # P(S=unprotected)
+    p_y1 = y_binary.sum() / n                         # P(Y=healthy)
+    p_y0 = 1.0 - p_y1                                # P(Y=diseased)
+
+    weights = np.ones(n, dtype=float)
+
+    for s_val, p_s in [(protected_value, p_s1), (1 - protected_value, p_s0)]:
+        for y_val, p_y in [(1, p_y1), (0, p_y0)]:
+            mask = (sex_valid == s_val) & (y_binary == y_val)
+            p_sy = mask.sum() / n  # P(S=s, Y=y)
+            if p_sy > 0:
+                weights[mask] = (p_s * p_y) / p_sy
+
+    return weights
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – DATA STRUCTURES
@@ -132,7 +188,7 @@ class DiscretizationResult:
     Result of discretizing one feature for one tree node.
 
     Produced by lines 4-7 of Algorithm 2:
-        Line 4:  B_m^k = BD_m^k(o, U)  →  raw feature values for node users
+        Line 4:  B_m^k = BD_m^k(o, U)  ->  raw feature values for node users
         Line 5:  B_min, B_max computed from B_m^k
         Line 6:  ΔB = (B_max - B_min) / N_bins  [ENGR: we choose N_bins]
         Line 7:  B̂_m^k = discretized bin assignments for each user
@@ -345,7 +401,7 @@ class ExecutiveActionEntry:
                 f"p_below={self.p_below_normal:.4f}  "
                 f"p_above={self.p_above_normal:.4f}  "
                 f"prev={self.p_h_and_f:.4f}  "
-                f"→ {self.action_label}")
+                f"-> {self.action_label}")
 
 
 @dataclass
@@ -364,10 +420,10 @@ class Algorithm2Output:
     executive_library:  List[ExecutiveActionEntry]  = field(default_factory=list)
 
     # ── Fast-lookup indices ──────────────────────────────────────────────────
-    # (node_id, feature_idx) → PerceptorModelEntry
+    # (node_id, feature_idx) -> PerceptorModelEntry
     perceptor_index:    Dict[Tuple[str,int], PerceptorModelEntry] = \
                             field(default_factory=dict)
-    # (node_id, feature_idx, disease_h) → ExecutiveActionEntry
+    # (node_id, feature_idx, disease_h) -> ExecutiveActionEntry
     executive_index:    Dict[Tuple[str,int,int], ExecutiveActionEntry] = \
                             field(default_factory=dict)
 
@@ -577,7 +633,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     n_classes = len(class_labels)
     n_bins    = disc.n_bins
 
-    # ── Map: node-local valid-user row → global label ─────────────────────────
+    # ── Map: node-local valid-user row -> global label ─────────────────────────
     # valid_user_rows are node-local indices into node.user_indices
     # global_idx = node.user_indices[local_row]
     global_indices_valid = node.user_indices[disc.valid_user_rows]
@@ -605,7 +661,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     for ci, cls in enumerate(class_labels):
         n_cls = users_per_class[ci]
         if n_cls == 0:
-            # No users of this class in node → uniform likelihood
+            # No users of this class in node -> uniform likelihood
             p_bin_given_h[:, ci] = 1.0 / n_bins
         else:
             raw = counts_per_class_bin[ci] + laplace_eps
@@ -637,7 +693,7 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     for b in range(n_bins):
         denom = p_bin[b]
         if denom < 1e-300:
-            # Degenerate bin (no evidence) → uniform posterior
+            # Degenerate bin (no evidence) -> uniform posterior
             p_h_given_bin[b] = 1.0 / n_classes
         else:
             p_h_given_bin[b] = (p_bin_given_h[b] * p_h_and_f) / denom
@@ -776,7 +832,8 @@ def compute_executive_actions(disc:          DiscretizationResult,
                                healthy_range: HealthyRangeResult,
                                bayes:         BayesianTables,
                                node:          TreeNode,
-                               labels:        np.ndarray
+                               labels:        np.ndarray,
+                               data:          Optional[np.ndarray] = None,
                                ) -> List[ExecutiveActionEntry]:
     """
     Compute executive action weights for one (node, feature) pair.
@@ -847,6 +904,21 @@ def compute_executive_actions(disc:          DiscretizationResult,
     min_healthy_bin = int(healthy_bins.min())
     max_healthy_bin = int(healthy_bins.max())
 
+    # ── FAIRNESS: Compute reweighing weights (Kamiran & Calders, 2012) ────────
+    # When enabled, instance weights adjust P(B̂|h) to remove statistical
+    # dependence between the protected attribute (sex) and the outcome,
+    # achieving demographic parity in the action weight computation.
+    instance_weights = None
+    if ENABLE_REWEIGHING and data is not None:
+        sex_valid = data[global_valid, SEX_FEATURE_INDEX]
+        instance_weights = compute_reweighing_weights(labels_valid, sex_valid)
+
+    # # ── ORIGINAL (uncomment to disable reweighing): ─────────────────────────
+    # # The original algorithm uses unweighted P(B̂|h) from Bayesian tables.
+    # # To revert: set ENABLE_REWEIGHING = False at the top of this file,
+    # # or comment out the reweighing block above and uncomment this section.
+    # instance_weights = None
+
     # ── [PAPER] Line 16: "for h = 2 to H do" ─────────────────────────────────
     for cls in bayes.class_labels:
         if cls == HEALTHY_CLASS:
@@ -861,10 +933,31 @@ def compute_executive_actions(disc:          DiscretizationResult,
         # ── [PAPER] Line 19: r_{o|h} via DISCRETIZED bin probabilities ──────
         # P(B̂ < b_min | h) = sum of P(B̂ = j | h) for bins j < min_healthy_bin
         # P(B̂ > b_max | h) = sum of P(B̂ = j | h) for bins j > max_healthy_bin
-        p_bin_h = bayes.p_bin_given_class(cls)  # shape (n_bins,)
 
-        p_below = float(p_bin_h[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
-        p_above = float(p_bin_h[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
+        if instance_weights is not None:
+            # ── FAIRNESS: Reweighted r_{o|h} computation ─────────────────────
+            # Instead of raw counts, use weighted counts per (class, bin) to
+            # compute P_w(B̂|h). This adjusts action weights so features that
+            # discriminate differently across sex groups get equalized influence.
+            class_mask = (labels_valid == cls)
+            class_weights = instance_weights[class_mask]
+            class_bins = disc.bin_assignments[class_mask]
+            w_total = class_weights.sum()
+            if w_total <= 0:
+                continue
+            # Weighted bin counts for this class
+            w_bin_counts = np.zeros(disc.n_bins, dtype=float)
+            for b_idx in range(disc.n_bins):
+                bin_mask = (class_bins == b_idx)
+                w_bin_counts[b_idx] = class_weights[bin_mask].sum()
+            p_bin_h_weighted = w_bin_counts / w_total
+            p_below = float(p_bin_h_weighted[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
+            p_above = float(p_bin_h_weighted[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
+        else:
+            # ── ORIGINAL: unweighted P(B̂|h) from Bayesian tables ─────────────
+            p_bin_h = bayes.p_bin_given_class(cls)  # shape (n_bins,)
+            p_below = float(p_bin_h[:min_healthy_bin].sum()) if min_healthy_bin > 0 else 0.0
+            p_above = float(p_bin_h[max_healthy_bin + 1:].sum()) if max_healthy_bin < disc.n_bins - 1 else 0.0
 
         r_o_h = p_below + p_above
 
@@ -1006,6 +1099,7 @@ def run_algorithm2_for_node(node:          TreeNode,
             bayes         = bayes,
             node          = node,
             labels        = labels,
+            data          = data,
         )
         executive_entries.extend(act_entries)
 
@@ -1095,7 +1189,7 @@ def run_algorithm2(tree:          DecisionTree,
 
             nodes_processed += 1
 
-        log.info(f"  Level m={m}: cumulative entries → "
+        log.info(f"  Level m={m}: cumulative entries -> "
                  f"perceptor={len(output.perceptor_library)}  "
                  f"executive={len(output.executive_library)}")
 
@@ -1472,10 +1566,10 @@ def print_executive_summary_by_disease(output:   Algorithm2Output,
 # SECTION 12 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main(data_path: str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+def main(data_path: str = "arrhythmia.data",
          run_full:  bool = False) -> Algorithm2Output:
     """
-    End-to-end execution: Algorithm 1 → Algorithm 2 → Validation → Reports.
+    End-to-end execution: Algorithm 1 -> Algorithm 2 -> Validation -> Reports.
 
     Parameters
     ----------
@@ -1503,9 +1597,9 @@ def main(data_path: str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\
         log.info("Step 3: Processing ALL nodes in the tree")
     else:
         # [PAPER] Key nodes for the Arrhythmia case study:
-        #   root   → Focus Level 1 (all users)
-        #   k=1,f=1 → male branch (Focus Level 2)
-        #   k=1,f=2 → female branch (Focus Level 2)
+        #   root   -> Focus Level 1 (all users)
+        #   k=1,f=1 -> male branch (Focus Level 2)
+        #   k=1,f=2 -> female branch (Focus Level 2)
         key_nodes = ["root", "root|k1_f1", "root|k1_f2"]
         nodes_filter = [n for n in key_nodes if n in tree.all_nodes]
         log.info(f"Step 3: Processing {len(nodes_filter)} key nodes: {nodes_filter}")
@@ -1759,6 +1853,6 @@ def run_gender_feature_analysis_once(
 
 if __name__ == "__main__":
     import sys as _sys
-    path    = _sys.argv[1] if len(_sys.argv) > 1 else "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data"
+    path    = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "arrhythmia.data")
     full    = "--full" in _sys.argv
     output  = main(data_path=path, run_full=full)

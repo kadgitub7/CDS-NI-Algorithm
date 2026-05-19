@@ -31,8 +31,8 @@ The pseudocode iterates over:
     • s = Σ_u newinf_u  (cumulative across ALL h and o processed so far)
 
   Retention criterion [PAPER line 11]:
-    if  s ≤ Buffer  →  remove action (c_{mh|o} ← {}, r_{o|h} = 0)
-    else            →  retain action
+    if  s ≤ Buffer  ->  remove action (c_{mh|o} ← {}, r_{o|h} = 0)
+    else            ->  retain action
     Buffer = s  (always updated to latest s, line 15)
 
   Initialisation [PAPER]:  buffer = 0,  newinf = ∅  (BEFORE both loops)
@@ -53,7 +53,7 @@ EQUATIONS
   Line 2 :  r_buf       = r_{O_m^{kf}|h}         (action weights for disease h)
   Line 6 :  BD(o, u) > b_max_{km}(f, o)  OR  BD(o, u) < b_min_{km}(f, o)
   Line 10:  s           = Σ_u  newinf_u
-  Line 11:  if s ≤ Buffer → prune feature o for class h
+  Line 11:  if s ≤ Buffer -> prune feature o for class h
   Line 15:  Buffer      = s
 
 INTEGRATION
@@ -214,7 +214,7 @@ class NodeRefinementSummary:
     retention_rate    : n_retained / n_before  (fraction kept).
     final_buffer      : final value of Buffer after all iterations in this node.
     n_users_flagged   : total users in newinf (cumulative unique count across all h,o).
-    per_disease       : Dict[h → (n_before, n_retained)] per disease class.
+    per_disease       : Dict[h -> (n_before, n_retained)] per disease class.
     """
     node_id:             str
     focus_level:         int
@@ -225,7 +225,7 @@ class NodeRefinementSummary:
     retention_rate:      float
     final_buffer:        int
     n_users_flagged:     int
-    per_disease:         Dict[int, Tuple[int, int]]   # h → (before, retained)
+    per_disease:         Dict[int, Tuple[int, int]]   # h -> (before, retained)
 
 
 @dataclass
@@ -369,7 +369,7 @@ def validate_output_consistency(
     """
     issues: List[str] = []
 
-    # Build Algorithm 2 action lookup: (node_id, feat, h) → action_weight
+    # Build Algorithm 2 action lookup: (node_id, feat, h) -> action_weight
     alg2_index: Dict[Tuple[str, int, int], float] = {
         (e.node_id, e.feature_idx, e.disease_class): e.action_weight
         for e in alg2_output.executive_library
@@ -424,7 +424,7 @@ def validate_newinf_monotonicity(log_records: List[RefinementRecord]) -> List[st
         if rec.s_cumulative < prev_s:
             issues.append(
                 f"Monotonicity violated at log position {i}: "
-                f"s_cumulative went from {prev_s} → {rec.s_cumulative} "
+                f"s_cumulative went from {prev_s} -> {rec.s_cumulative} "
                 f"(node={rec.node_id!r}, h={rec.disease_class}, "
                 f"feat={rec.feature_idx})"
             )
@@ -516,11 +516,11 @@ def run_all_validations(
                 )
             all_ok = False
     if all_ok and verbose:
-        print(f"  [PASS] Coverage sanity: flagged users ≤ node size")
+        print(f"  [PASS] Coverage sanity: flagged users <= node size")
 
     if verbose:
         status = "[ALL PASS]" if all_ok else "[SOME FAILURES]"
-        print(f"\n  → Validation result: {status}")
+        print(f"\n  -> Validation result: {status}")
         print(separator)
 
     return all_ok
@@ -562,7 +562,7 @@ def _is_outside_range(value: float, b_min: float, b_max: float) -> bool:
     A value exactly at the boundary is considered within range.
     """
     if np.isnan(value):
-        return False                    # [ENGR] NaN → not flagged
+        return False                    # [ENGR] NaN -> not flagged
     return (value > b_max) or (value < b_min)
 
 
@@ -608,7 +608,7 @@ def _refine_one_node(
     )
 
     if not disease_classes:
-        log.debug(f"  Node {nid!r}: no disease classes present → skip")
+        log.debug(f"  Node {nid!r}: no disease classes present -> skip")
         return [], [], []
 
     log.debug(
@@ -640,7 +640,7 @@ def _refine_one_node(
             buffer = 0
             newinf = np.zeros(len(node.user_indices), dtype=bool)
             if verbose:
-                log.debug(f"    [per-h reset] h={h}: buffer→0, newinf→∅")
+                log.debug(f"    [per-h reset] h={h}: buffer->0, newinf->empty")
 
         # ── Line 2: r_buf = r_{O_m^{kf}|h} ───────────────────────────────
         # Get ALL executive actions for (node, h) from Algorithm 2.
@@ -652,14 +652,14 @@ def _refine_one_node(
         ]
 
         if not h_actions:
-            log.debug(f"    h={h}: no actions in executive library → skip")
+            log.debug(f"    h={h}: no actions in executive library -> skip")
             continue
 
         # ── Line 3: Sort r_buf descending, remove 0-value elements ─────────
         # [PAPER] "Sort the r_buf in descending order and remove 0 value elements"
         # [INFER] Sorting by action weight (r_{o|h}) descending ensures we
         #         process the most informative features first.  Features with
-        #         r=0 carry no probabilistic signal → removed immediately.
+        #         r=0 carry no probabilistic signal -> removed immediately.
         h_actions_sorted: List[ExecutiveActionEntry] = sorted(
             [a for a in h_actions if a.action_weight > 0.0],
             key=lambda e: e.action_weight,
@@ -680,7 +680,7 @@ def _refine_one_node(
                     removed.append(a_copy)
 
         if not h_actions_sorted:
-            log.debug(f"    h={h}: all actions have r=0 after filtering → skip")
+            log.debug(f"    h={h}: all actions have r=0 after filtering -> skip")
             continue
 
         log.debug(
@@ -704,10 +704,10 @@ def _refine_one_node(
 
             if model_entry is None:
                 # [INFER] If Algorithm 2 has no model for this (node, feature),
-                #         we cannot determine the healthy range → skip.
+                #         we cannot determine the healthy range -> skip.
                 #         This handles features that were all-NaN in this node.
                 log.debug(
-                    f"      o={o}({o_name}): no perceptor model → skip "
+                    f"      o={o}({o_name}): no perceptor model -> skip "
                     f"(all-NaN in node?)"
                 )
                 removed.append(action)
@@ -737,7 +737,7 @@ def _refine_one_node(
             #       newinf_u = 1
             # [ENGR]  newinf is indexed by node-local position i; the global
             #         user index is node.user_indices[i].
-            # [ENGR]  NaN values → not flagged (cannot assert abnormality).
+            # [ENGR]  NaN values -> not flagged (cannot assert abnormality).
             # ─────────────────────────────────────────────────────────────────
             n_newly_flagged_this_iter = 0     # newly flagged by THIS feature
 
@@ -758,11 +758,12 @@ def _refine_one_node(
             # ── Line 11: if summation of s <= Buffer then ────────────────────
             # [PAPER] "If the cumulative count of flagged users does not exceed
             #         the current Buffer, this feature does not add new
-            #         information → remove it."
+            #         information -> remove it."
             if s <= buffer:
                 # ── Lines 12-13: remove action ───────────────────────────────
                 # [PAPER] "c_{mh|o^k_m}(f_m^k, FA=0) ← {}"
                 # [PAPER] "r_{o^{kf}_m|h} = 0"
+                orig_weight = action.action_weight
                 action.action_weight = 0.0    # mark as removed
                 removed.append(action)
 
@@ -776,8 +777,8 @@ def _refine_one_node(
                 was_retained = False
                 log.debug(
                     f"      PRUNE  h={h:2d} o={o:3d}({o_name[:15]:15s}) "
-                    f"r={action.action_weight:.4f}  "
-                    f"s={s:3d}  buffer={buffer:3d}  → {prune_reason}"
+                    f"r={orig_weight:.4f}  "
+                    f"s={s:3d}  buffer={buffer:3d}  -> {prune_reason}"
                 )
             else:
                 # Action is retained: s > buffer
@@ -867,7 +868,7 @@ def _compute_node_summary(
         h_retained = len([e for e in retained          if e.disease_class == h])
         per_disease[h] = (h_before, h_retained)
 
-    # With reset_per_h=Falsee, buffer and s_cumulative reset each h, so
+    # With reset_per_h=True, buffer and s_cumulative reset each h, so
     # the last record only reflects the final disease class. Take the max across
     # all log records for this node to get the true peak coverage and buffer.
     # With reset_per_h=False this is also correct (max == running final value).
@@ -948,7 +949,7 @@ def run_algorithm3(
     if nodes_filter is not None:
         nodes_to_process = [nid for nid in nodes_filter if nid in nodes_with_actions]
         log.info(
-            f"  nodes_filter={nodes_filter} → "
+            f"  nodes_filter={nodes_filter} -> "
             f"processing {len(nodes_to_process)} nodes"
         )
     else:
@@ -977,7 +978,7 @@ def run_algorithm3(
             log.warning(f"  Prerequisite issues for node {nid!r}:")
             for iss in issues:
                 log.warning(f"    {iss}")
-            log.warning(f"  → Skipping node {nid!r}")
+            log.warning(f"  -> Skipping node {nid!r}")
             continue
 
         # ── Run core Algorithm 3 for this node ───────────────────────────────
@@ -1002,7 +1003,7 @@ def run_algorithm3(
         all_summaries[nid] = summary
 
         log.info(
-            f"  → Node {nid!r}: retained={summary.n_actions_retained}/"
+            f"  -> Node {nid!r}: retained={summary.n_actions_retained}/"
             f"{summary.n_actions_before}  "
             f"({summary.retention_rate*100:.1f}%)  "
             f"flagged_users={summary.n_users_flagged}/{node.n_users}"
@@ -1205,7 +1206,7 @@ def analyse_coverage(
       - n_diseased_total  : total users of class h in the node with non-NaN values
       - sensitivity       : n_diseased_flagged / n_diseased_total
 
-    Returns Dict[node_id → {h → {feat → {sensitivity, n_flag, n_total}}}]
+    Returns Dict[node_id -> {h -> {feat -> {sensitivity, n_flag, n_total}}}]
 
     [ENGR] This is a post-hoc diagnostic to measure how well the retained
     actions identify diseased users.
@@ -1301,45 +1302,45 @@ def assess_paper_fidelity(output: Algorithm3Output) -> None:
     print("""
 ALGORITHM 3 PSEUDOCODE COVERAGE
 ─────────────────────────────────
-[PAPER → Code] Mapping:
+[PAPER -> Code] Mapping:
 
   Line 1  for h = 2 to H do
-            → disease_classes = sorted([h for h in node.health_dist if h != 1])
-            → for h in disease_classes:
+            -> disease_classes = sorted([h for h in node.health_dist if h != 1])
+            -> for h in disease_classes:
             FIDELITY: ✓ Exact. Only disease classes present in the node.
 
   Line 2  r_buf = r_{O_m^{kf}|h}
-            → h_actions = [copy(e) for e in alg2_output.executive_library
+            -> h_actions = [copy(e) for e in alg2_output.executive_library
                            if e.node_id==nid and e.disease_class==h]
             FIDELITY: ✓ Exact lookup from Algorithm 2 executive library.
 
   Line 3  Sort r_buf descending, remove 0-value elements
-            → h_actions_sorted = sorted(
+            -> h_actions_sorted = sorted(
                 [a for a in h_actions if a.action_weight > 0],
                 key=lambda e: e.action_weight, reverse=True)
             FIDELITY: ✓ Exact.
 
-  Lines 4-9  for o in features; for u in users: if outside → newinf_u = 1
-            → for action in h_actions_sorted: (ordered by r desc)
+  Lines 4-9  for o in features; for u in users: if outside -> newinf_u = 1
+            -> for action in h_actions_sorted: (ordered by r desc)
                   for local_i, global_u in enumerate(node.user_indices):
                       val = data[global_u, o]
                       if val > b_max or val < b_min: newinf[local_i] = True
-            FIDELITY: ✓ Exact. NaN → not flagged [ENGR].
+            FIDELITY: ✓ Exact. NaN -> not flagged [ENGR].
 
   Line 10  s = summation of newinf
-            → s = int(newinf.sum())
+            -> s = int(newinf.sum())
             FIDELITY: ✓ Exact cumulative sum.
 
   Line 11  if summation of s <= Buffer then
-            → if s <= buffer:
+            -> if s <= buffer:
             FIDELITY: ✓ Exact (≤ as written in paper).
 
   Lines 12-13  c_{mh|o} ← {}; r_{o|h} = 0
-            → action.action_weight = 0.0; removed.append(action)
+            -> action.action_weight = 0.0; removed.append(action)
             FIDELITY: ✓ Action removed from active library; weight zeroed.
 
   Line 15  Buffer = s
-            → buffer = s
+            -> buffer = s
             FIDELITY: ✓ Exact.
 
 AMBIGUITIES AND RESOLUTIONS
@@ -1360,7 +1361,7 @@ AMBIGUITIES AND RESOLUTIONS
 
   [ENGR-1] NaN handling.
     Paper does not address missing values.
-    Implementation: NaN raw value → user not flagged (cannot assert abnormality).
+    Implementation: NaN raw value -> user not flagged (cannot assert abnormality).
 
   [ENGR-2] Node independence.
     Paper describes Algorithm 3 in terms of a single (m, k, f) node.
@@ -1388,8 +1389,8 @@ COMPLEXITY ANALYSIS
       H = number of disease classes (up to 12 in Arrhythmia dataset)
       F = number of features with r>0 per disease class (up to 279)
       N = number of users in node (up to 452)
-  For the 3 key nodes: O(3 × 12 × 279 × 452) ≈ 4.5M operations → <1 second.
-  For all 207 nodes: O(207 × 12 × 279 × 452) ≈ 313M operations → ~few seconds.
+  For the 3 key nodes: O(3 × 12 × 279 × 452) ≈ 4.5M operations -> <1 second.
+  For all 207 nodes: O(207 × 12 × 279 × 452) ≈ 313M operations -> ~few seconds.
 """)
     print(sep)
 
@@ -1399,13 +1400,13 @@ COMPLEXITY ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:    str   = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+    data_path:    str   = "arrhythmia.data",
     run_full:     bool  = False,
     reset_per_h:  bool  = False,     # [PAPER]
     verbose_alg3: bool  = False,
 ) -> Algorithm3Output:
     """
-    End-to-end pipeline: Algorithm 1 → Algorithm 2 → Algorithm 3 → Reports.
+    End-to-end pipeline: Algorithm 1 -> Algorithm 2 -> Algorithm 3 -> Reports.
 
     Parameters
     ----------
@@ -1537,9 +1538,9 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 if __name__ == "__main__":
     import sys as _sys
-    path     = _sys.argv[1] if len(_sys.argv) > 1 else get_arrhythmia_path("arrhythmia.data") 
+    path     = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "arrhythmia.data")
     full     = "--full"     in _sys.argv
     per_h    = "--per-h"    in _sys.argv
     verbose  = "--verbose"  in _sys.argv
     alg3_out = main(data_path=path, run_full=full,
-                    reset_per_h=False, verbose_alg3=verbose)
+                    reset_per_h=per_h, verbose_alg3=verbose)

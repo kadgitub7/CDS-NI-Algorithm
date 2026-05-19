@@ -585,7 +585,9 @@ def route_user(
         return 'unknown', None
     if sex == MALE_VALUE:
         return 'male', forest.male_tree
-    return 'female', forest.female_tree
+    elif sex == FEMALE_VALUE:
+        return 'female', forest.female_tree
+    return 'unknown', None
 
 
 def get_nodes_for_user(
@@ -766,11 +768,11 @@ def main_forced(data_path: str) -> ForcedSexForest:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
+        _base = Path(__file__).parent
         _candidates = [
-            "genderPlottingAlgorithms/arrhythmia_augmented.data",
-            "arrhythmia.data",
-            r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\genderPlottingAlgorithms\arrhythmia_augmented.data",
-            r"C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\arrhythmia.data",
+            str(_base / "genderPlottingAlgorithms" / "arrhythmia_augmented.data"),
+            str(_base / "arrhythmia_augmented.data"),
+            str(_base / "arrhythmia.data"),
         ]
         _path = next((p for p in _candidates if Path(p).exists()), None)
         if _path is None:
