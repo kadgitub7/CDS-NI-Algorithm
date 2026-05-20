@@ -112,6 +112,8 @@ def augment_perturbation(
 def augment_smotenc(
     X_tr: np.ndarray, y_tr: np.ndarray, rng: np.random.Generator,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    from fairness_config import AUGMENTATION_TARGET_N
+
     try:
         from imblearn.over_sampling import SMOTENC
     except ImportError:
@@ -129,8 +131,6 @@ def augment_smotenc(
     keep_mask = np.isin(y_f, valid_cls)
     X_f_v, y_f_v = X_f[keep_mask], y_f[keep_mask]
 
-    # Impute NaN with per-column median so SMOTE can run.
-    # Original rows keep their NaN; only synthetic rows use imputed values.
     nan_mask = np.isnan(X_f_v)
     has_nan = nan_mask.any()
     if has_nan:
@@ -143,14 +143,31 @@ def augment_smotenc(
 
     cat_cols = sorted(BINARY_COLS)
 
-    # Cap each class at the median class count to avoid extreme oversampling
-    # from tiny classes (e.g., 4 samples -> 160 would be 39x multiplication).
     valid_counts = Counter(y_f_v.tolist())
-    median_count = int(np.median(list(valid_counts.values())))
-    sampling_strategy = {
-        cls: max(cnt, median_count)
-        for cls, cnt in valid_counts.items()
-    }
+    n_existing = sum(valid_counts.values())
+
+    # Distribute AUGMENTATION_TARGET_N new samples proportionally across classes.
+    # Each class gets new samples proportional to its current share, with at
+    # least 1 new sample per class so every class benefits from augmentation.
+    target_n = max(AUGMENTATION_TARGET_N, len(valid_counts))
+    sampling_strategy = {}
+    allocated = 0
+    sorted_cls = sorted(valid_counts.keys())
+    for cls in sorted_cls:
+        cnt = valid_counts[cls]
+        share = cnt / n_existing
+        n_new = max(1, int(round(target_n * share)))
+        sampling_strategy[cls] = cnt + n_new
+        allocated += n_new
+
+    # Adjust the largest class to hit the exact target total
+    if allocated != target_n and sorted_cls:
+        largest_cls = max(valid_counts, key=valid_counts.get)
+        diff = target_n - allocated
+        sampling_strategy[largest_cls] = max(
+            valid_counts[largest_cls] + 1,
+            sampling_strategy[largest_cls] + diff,
+        )
 
     try:
         sm = SMOTENC(

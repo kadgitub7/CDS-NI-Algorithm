@@ -72,6 +72,8 @@ from Algorithm4 import (
     Algorithm4Output,
     HealthDecision,
     DEFAULT_N_BINS,
+    fairness_lambda_grid_search,
+    select_best_lambda,
 )
 import fairness_config
 from adversarial_debiasing import run_adversarial_debiasing
@@ -272,7 +274,8 @@ def compute_metrics(output: Algorithm4Output):
 # REPORT FORMATTER
 # ---------------------------------------------------------------------------
 
-def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None):
+def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
+                  grid_results=None):
     lines = []
     W = 72
 
@@ -493,8 +496,27 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None)
         else:
             lines.append("  Adversary close to chance -> CDS outputs carry little gender signal.")
 
-    # ---- 9. active configuration summary ----
-    h2("9. ACTIVE FAIRNESS CONFIGURATION")
+    # ---- 9. RL fairness grid search results ----
+    if grid_results is not None:
+        h2("9. RL FAIRNESS LAMBDA GRID SEARCH RESULTS")
+        lines.append(f"  {'Lambda':>8}  {'Accuracy':>9}  {'M err%':>7}  {'F err%':>7}  "
+                     f"{'Gap':>7}  {'SPD':>8}  {'EO':>8}")
+        lines.append("  " + "-" * 62)
+        best_gap = min(r["gender_gap"] for r in grid_results)
+        for r in grid_results:
+            marker = " <-- best" if r["gender_gap"] == best_gap else ""
+            lines.append(
+                f"  {r['lambda']:>8.3f}  {r['accuracy']*100:>8.1f}%  "
+                f"{r['male_error_rate']*100:>6.1f}%  {r['female_error_rate']*100:>6.1f}%  "
+                f"{r['gender_gap']*100:>6.1f}%  {r['spd']:>+8.4f}  "
+                f"{r['eo_diff']:>8.4f}{marker}"
+            )
+        lines.append("")
+        lines.append(f"  Selected lambda = {fairness_config.FAIRNESS_LAMBDA} "
+                     f"(minimises gender gap while maintaining accuracy)")
+
+    # ---- 10. active configuration summary ----
+    h2("10. ACTIVE FAIRNESS CONFIGURATION")
     lines.append(f"  {fairness_config.summary()}")
     lines.append("")
     lines.append(f"  ENABLE_REWEIGHING            = {fairness_config.ENABLE_REWEIGHING}")
@@ -506,6 +528,7 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None)
     lines.append(f"  ENABLE_DATA_AUGMENTATION     = {fairness_config.ENABLE_DATA_AUGMENTATION}")
     if fairness_config.ENABLE_DATA_AUGMENTATION:
         lines.append(f"    AUGMENTATION_STRATEGY      = {fairness_config.AUGMENTATION_STRATEGY}")
+        lines.append(f"    AUGMENTATION_TARGET_N      = {fairness_config.AUGMENTATION_TARGET_N}")
 
     lines.append("")
     lines.append("=" * W)
@@ -549,6 +572,8 @@ def main():
     parser.add_argument("--max_users", type=int, default=None,
                         help="Limit LOOCV to first N users (default: all 452)")
     parser.add_argument("--rng_seed",  type=int, default=42)
+    parser.add_argument("--skip_grid_search", action="store_true",
+                        help="Skip lambda grid search even if ENABLE_FAIRNESS_RL is True")
     args = parser.parse_args()
 
     import time
@@ -566,7 +591,44 @@ def main():
     print(f"Dataset: {data.shape[0]} users  |  "
           f"Male={int((sex==MALE_CODE).sum())}  "
           f"Female={int((sex==FEMALE_CODE).sum())}")
-    print(f"Running LOOCV on {n_run} user(s) ... (this takes several minutes)")
+
+    # ── RL Fairness: Grid search for optimal lambda ──────────────────────────
+    grid_results = None
+    if fairness_config.ENABLE_FAIRNESS_RL and not args.skip_grid_search:
+        print()
+        print("=" * 72)
+        print("FAIRNESS RL: Running lambda grid search ...")
+        print("  This runs LOOCV for each lambda value to find the optimal tradeoff.")
+        print("=" * 72)
+
+        t_grid = time.time()
+        grid_results = fairness_lambda_grid_search(
+            data=data,
+            labels=labels,
+            max_users=args.max_users,
+            rng_seed=args.rng_seed,
+        )
+        t_grid_elapsed = time.time() - t_grid
+
+        best = select_best_lambda(grid_results)
+
+        print(f"\nGrid search complete in {t_grid_elapsed:.0f}s.")
+        print(f"\n  {'Lambda':>8}  {'Accuracy':>9}  {'M err%':>7}  {'F err%':>7}  {'Gap':>7}  {'SPD':>8}  {'EO':>8}")
+        print(f"  {'-'*62}")
+        for r in grid_results:
+            marker = " <-- best" if r["lambda"] == best["lambda"] else ""
+            print(f"  {r['lambda']:>8.3f}  {r['accuracy']*100:>8.1f}%  "
+                  f"{r['male_error_rate']*100:>6.1f}%  {r['female_error_rate']*100:>6.1f}%  "
+                  f"{r['gender_gap']*100:>6.1f}%  {r['spd']:>+8.4f}  {r['eo_diff']:>8.4f}{marker}")
+
+        print(f"\n  Selected lambda={best['lambda']} for final run.")
+
+        # Apply the best lambda for the final LOOCV run
+        import Algorithm4 as _alg4_mod
+        fairness_config.FAIRNESS_LAMBDA = best["lambda"]
+        _alg4_mod.FAIRNESS_LAMBDA = best["lambda"]
+
+    print(f"\nRunning LOOCV on {n_run} user(s) ... (this takes several minutes)")
     print()
 
     t0 = time.time()
@@ -597,7 +659,8 @@ def main():
             diagnostic_threshold=DIAGNOSTIC_THRESHOLD_ALG4,
         )
 
-    report  = build_report(metrics, data, labels, args.max_users, elapsed, adv_result)
+    report  = build_report(metrics, data, labels, args.max_users, elapsed,
+                           adv_result, grid_results)
     csv_df  = build_class_csv(metrics, labels)
 
     # --- print to console ---

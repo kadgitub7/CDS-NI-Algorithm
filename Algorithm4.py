@@ -2692,21 +2692,25 @@ def fairness_lambda_grid_search(
     lambda_values: Optional[List[float]] = None,
     max_users: Optional[int] = None,
     rng_seed: int = 42,
+    data: Optional[np.ndarray] = None,
+    labels: Optional[np.ndarray] = None,
 ) -> List[Dict]:
     """
     Grid search over FAIRNESS_LAMBDA to find the accuracy-fairness tradeoff.
 
     For each lambda value, runs the full LOOCV pipeline and reports accuracy
-    and fairness metrics. Use this to tune λ for your desired balance.
+    and fairness metrics including per-gender diseased error rates.
 
     Parameters
     ----------
     lambda_values : list of λ values to test. Default: [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
     max_users     : limit LOOCV to first N users (for faster iteration).
+    data, labels  : pre-loaded dataset (avoids reloading per call).
 
     Returns
     -------
-    List of dicts with keys: lambda, accuracy, spd, di, eo_diff, sensitivity, specificity
+    List of dicts with keys: lambda, accuracy, sensitivity, specificity,
+    spd, di, eo_diff, male_error_rate, female_error_rate, gender_gap
     """
     import fairness_config as _fc
     global FAIRNESS_LAMBDA
@@ -2715,7 +2719,8 @@ def fairness_lambda_grid_search(
         lambda_values = [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
 
     saved_lambda = FAIRNESS_LAMBDA
-    data, labels = load_dataset(data_path)
+    if data is None or labels is None:
+        data, labels = load_dataset(data_path)
     results = []
 
     for lam in lambda_values:
@@ -2727,6 +2732,10 @@ def fairness_lambda_grid_search(
 
         output = run_loocv(data, labels, max_users=max_users, rng_seed=rng_seed)
 
+        male_err = output.error_rate_abnormal_males
+        female_err = output.error_rate_abnormal_females
+        gender_gap = abs(male_err - female_err)
+
         result = {
             "lambda": lam,
             "accuracy": output.overall_accuracy,
@@ -2735,16 +2744,49 @@ def fairness_lambda_grid_search(
             "spd": output.fairness_spd,
             "di": output.fairness_di,
             "eo_diff": output.fairness_eo_diff,
+            "male_error_rate": male_err,
+            "female_error_rate": female_err,
+            "gender_gap": gender_gap,
         }
         results.append(result)
         log.info(f"  lambda={lam:.3f}  acc={output.overall_accuracy*100:.1f}%  "
-                 f"SPD={output.fairness_spd:.4f}  DI={output.fairness_di:.4f}  "
-                 f"EO={output.fairness_eo_diff:.4f}")
+                 f"male_err={male_err*100:.1f}%  female_err={female_err*100:.1f}%  "
+                 f"gap={gender_gap*100:.1f}%  "
+                 f"SPD={output.fairness_spd:.4f}  EO={output.fairness_eo_diff:.4f}")
 
     _fc.FAIRNESS_LAMBDA = saved_lambda
     FAIRNESS_LAMBDA = saved_lambda
 
     return results
+
+
+def select_best_lambda(
+    grid_results: List[Dict],
+    min_accuracy: float = 0.70,
+) -> Dict:
+    """
+    Select the best lambda from grid search results.
+
+    Picks the lambda that minimises the gender gap in diseased error rates
+    while keeping overall accuracy above `min_accuracy`.
+
+    Returns the best result dict, or the baseline (lambda=0) if none qualify.
+    """
+    candidates = [r for r in grid_results if r["accuracy"] >= min_accuracy]
+    if not candidates:
+        candidates = grid_results
+
+    best = min(candidates, key=lambda r: r["gender_gap"])
+
+    log.info(f"\n{'='*50}")
+    log.info(f"BEST LAMBDA: {best['lambda']}")
+    log.info(f"  accuracy={best['accuracy']*100:.1f}%  "
+             f"male_err={best['male_error_rate']*100:.1f}%  "
+             f"female_err={best['female_error_rate']*100:.1f}%  "
+             f"gap={best['gender_gap']*100:.1f}%")
+    log.info(f"{'='*50}")
+
+    return best
 
 
 # ─────────────────────────────────────────────────────────────────────────────

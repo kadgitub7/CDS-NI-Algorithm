@@ -3,19 +3,19 @@
 ========================================================================
   Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  Runtime : 5505s
+  Runtime : 521s
   Paper target: 95.4% overall accuracy
-  Config  : Reweigh
+  Config  : FairnessRL(lambda=0.05)
 
 1. OVERALL PERFORMANCE
 ----------------------
   Total users evaluated : 452
-  Correct predictions   : 344 / 452
-  Overall accuracy      : 76.11%
+  Correct predictions   : 343 / 452
+  Overall accuracy      : 75.88%
   Sensitivity (diseased detection)     : 84.54%
-  Specificity (1 - false alarm rate)   : 68.98%
-  False alarm rate                     : 31.02%
-  Users sent to SCREENING              : 75
+  Specificity (1 - false alarm rate)   : 68.57%
+  False alarm rate                     : 31.43%
+  Users sent to SCREENING              : 0
   Healthy users  : 245  |  Diseased users : 207
 
 2. GENDER-DISAGGREGATED ACCURACY
@@ -23,13 +23,13 @@
   Metric                                 Male     Female  Diff (M-F)
   --------------------------------  ---------  ---------  ----------
   Total users                             203        249            
-  Overall accuracy                     76.85%     75.50%      +1.35%
+  Overall accuracy                     76.35%     75.50%      +0.85%
   Sensitivity                          88.98%     78.65%     +10.33%
-  Specificity                          60.00%     73.75%     -13.75%
+  Specificity                          58.82%     73.75%     -14.93%
   Diseased error rate                  11.02%     21.35%     -10.33%
-  Healthy correct                       51/85    118/160            
+  Healthy correct                       50/85    118/160            
   Diseased correct                    105/118      70/89            
-  Sent to SCREENING                        63         12            
+  Sent to SCREENING                         0          0            
 
   Paper reported: 5% male diseased error, 14% female diseased error
 
@@ -44,13 +44,13 @@
 -------------------------------------------
   Metric                        Value    Interpretation
   ------------------------------------------------------------
-  Statistical Parity Diff (SPD) +0.2349  BIASED (|SPD|>=0.1)
-  Disparate Impact (DI)          0.6569  BIASED (DI<0.8)
-  Equalized Odds diff (EO)       0.1375  BIASED (EO>=0.1)
-  Subgroup Disparity Cal. Err    0.0722  BIASED (SDCE>=0.05)
-    Precision (male UNHEALTHY)   0.7554
+  Statistical Parity Diff (SPD) +0.2399  BIASED (|SPD|>=0.1)
+  Disparate Impact (DI)          0.6522  BIASED (DI<0.8)
+  Equalized Odds diff (EO)       0.1493  BIASED (EO>=0.1)
+  Subgroup Disparity Cal. Err    0.0694  BIASED (SDCE>=0.05)
+    Precision (male UNHEALTHY)   0.7500
     Precision (female UNHEALTHY) 0.6250
-    Precision (overall)          0.6972
+    Precision (overall)          0.6944
 
   SPD > 0 means males get UNHEALTHY predictions more often.
   DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
@@ -104,10 +104,11 @@
 
 9. ACTIVE FAIRNESS CONFIGURATION
 --------------------------------
-  Reweigh
+  FairnessRL(lambda=0.05)
 
-  ENABLE_REWEIGHING            = True
-  ENABLE_FAIRNESS_RL           = False
+  ENABLE_REWEIGHING            = False
+  ENABLE_FAIRNESS_RL           = True
+    FAIRNESS_LAMBDA            = 0.05
   ENABLE_ADVERSARIAL_DEBIASING = False
   ENABLE_FORCED_SEX_BRANCHING  = False
   ENABLE_DATA_AUGMENTATION     = False

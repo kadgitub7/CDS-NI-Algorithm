@@ -31,7 +31,7 @@ Algorithm2 and Algorithm4 import these values at startup.
 # Assigns instance weights W(S=s, Y=y) = P(S)*P(Y) / P(S,Y) to training
 # examples so that the weighted joint distribution is independent of the
 # protected attribute.  Applied in Algorithm 2's action weight computation.
-ENABLE_REWEIGHING: bool = True
+ENABLE_REWEIGHING: bool = False
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IN-PROCESSING: Fairness-constrained RL reward (modified Algorithm 4)
@@ -42,7 +42,7 @@ ENABLE_REWEIGHING: bool = True
 ENABLE_FAIRNESS_RL: bool = False
 
 # Lambda: fairness penalty weight.  Grid search range: 0.01 to 1.0.
-FAIRNESS_LAMBDA: float = 0.1
+FAIRNESS_LAMBDA: float = 0.05
 
 # ─────────────────────────────────────────────────────────────────────────────
 # POST-PROCESSING: Adversarial Debiasing (Zhang et al., 2018 adapted)
@@ -75,7 +75,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # When True, uses Algorithm1_forcedBranch.py which routes users to
 # sex-specific sub-trees BEFORE any other branching.  This gives each
 # gender its own CDS decision tree with gender-specific healthy ranges.
-ENABLE_FORCED_SEX_BRANCHING: bool = False
+ENABLE_FORCED_SEX_BRANCHING: bool = True
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA: Augmentation strategy for female sub-population
@@ -83,11 +83,14 @@ ENABLE_FORCED_SEX_BRANCHING: bool = False
 # When enabled, augments the female training data before building the CDS
 # tree.  Only meaningful when ENABLE_FORCED_SEX_BRANCHING is also True
 # (augmentation targets the female sub-tree).
-ENABLE_DATA_AUGMENTATION: bool = False
+ENABLE_DATA_AUGMENTATION: bool = True
 
 # Strategy: one of "none", "random_oversample", "perturbation",
 #           "smotenc", "cross_gender", "combined"
 AUGMENTATION_STRATEGY: str = "smotenc"
+
+# Target number of synthetic female users to generate.
+AUGMENTATION_TARGET_N: int = 200
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SHARED CONSTANTS (do not change unless the dataset changes)
@@ -109,5 +112,5 @@ def summary() -> str:
     if ENABLE_FORCED_SEX_BRANCHING:
         flags.append("ForcedSexBranch")
     if ENABLE_DATA_AUGMENTATION:
-        flags.append(f"Augment({AUGMENTATION_STRATEGY})")
+        flags.append(f"Augment({AUGMENTATION_STRATEGY}, n={AUGMENTATION_TARGET_N})")
     return " + ".join(flags) if flags else "Baseline (no modifications)"
