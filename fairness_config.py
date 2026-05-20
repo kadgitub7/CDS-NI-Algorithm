@@ -31,7 +31,7 @@ Algorithm2 and Algorithm4 import these values at startup.
 # Assigns instance weights W(S=s, Y=y) = P(S)*P(Y) / P(S,Y) to training
 # examples so that the weighted joint distribution is independent of the
 # protected attribute.  Applied in Algorithm 2's action weight computation.
-ENABLE_REWEIGHING: bool = False
+ENABLE_REWEIGHING: bool = True
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IN-PROCESSING: Fairness-constrained RL reward (modified Algorithm 4)
@@ -75,7 +75,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # When True, uses Algorithm1_forcedBranch.py which routes users to
 # sex-specific sub-trees BEFORE any other branching.  This gives each
 # gender its own CDS decision tree with gender-specific healthy ranges.
-ENABLE_FORCED_SEX_BRANCHING: bool = True
+ENABLE_FORCED_SEX_BRANCHING: bool = False
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA: Augmentation strategy for female sub-population
@@ -83,7 +83,7 @@ ENABLE_FORCED_SEX_BRANCHING: bool = True
 # When enabled, augments the female training data before building the CDS
 # tree.  Only meaningful when ENABLE_FORCED_SEX_BRANCHING is also True
 # (augmentation targets the female sub-tree).
-ENABLE_DATA_AUGMENTATION: bool = True
+ENABLE_DATA_AUGMENTATION: bool = False
 
 # Strategy: one of "none", "random_oversample", "perturbation",
 #           "smotenc", "cross_gender", "combined"

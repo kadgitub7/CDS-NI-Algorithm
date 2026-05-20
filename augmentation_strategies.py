@@ -128,19 +128,42 @@ def augment_smotenc(
 
     keep_mask = np.isin(y_f, valid_cls)
     X_f_v, y_f_v = X_f[keep_mask], y_f[keep_mask]
+
+    # Impute NaN with per-column median so SMOTE can run.
+    # Original rows keep their NaN; only synthetic rows use imputed values.
+    nan_mask = np.isnan(X_f_v)
+    has_nan = nan_mask.any()
+    if has_nan:
+        col_medians = np.nanmedian(X_f_v, axis=0)
+        X_f_imputed = X_f_v.copy()
+        nan_locs = np.where(nan_mask)
+        X_f_imputed[nan_locs] = col_medians[nan_locs[1]]
+    else:
+        X_f_imputed = X_f_v
+
     cat_cols = sorted(BINARY_COLS)
+
+    # Cap each class at the median class count to avoid extreme oversampling
+    # from tiny classes (e.g., 4 samples -> 160 would be 39x multiplication).
+    valid_counts = Counter(y_f_v.tolist())
+    median_count = int(np.median(list(valid_counts.values())))
+    sampling_strategy = {
+        cls: max(cnt, median_count)
+        for cls, cnt in valid_counts.items()
+    }
 
     try:
         sm = SMOTENC(
             categorical_features=cat_cols,
             random_state=int(rng.integers(0, 2**31)),
-            k_neighbors=min(5, min(Counter(y_f_v.tolist()).values()) - 1),
+            k_neighbors=min(5, min(valid_counts.values()) - 1),
+            sampling_strategy=sampling_strategy,
         )
-        X_res, y_res = sm.fit_resample(X_f_v, y_f_v)
+        X_res, y_res = sm.fit_resample(X_f_imputed, y_f_v)
     except Exception:
         return X_tr.copy(), y_tr.copy()
 
-    X_new = X_res[len(X_f_v):]
+    X_new = X_res[len(X_f_imputed):]
     y_new = y_res[len(y_f_v):]
     X_new[:, SEX_COL] = FEMALE_CODE
     for bc in BINARY_COLS:

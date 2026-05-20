@@ -19,7 +19,10 @@
       "Bash(Select-String -NotMatch \"DEBUG|PRUNED|VALID|Expanding|candidates\")",
       "PowerShell(python test_tree_diag.py 2>&1)",
       "Bash(python -c \"import sys; sys.path.insert\\(0, '.'\\); from Algorithm2 import compute_healthy_range, compute_executive_actions, compute_discretization, compute_bayesian_tables, DiscretizationResult, BayesianTables, HealthyRangeResult; print\\('OK'\\)\")",
-      "Bash(Select-Object -First 5)"
+      "Bash(Select-Object -First 5)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\kadhi\\\\OneDrive\\\\Desktop\\\\amux\\\\verilogLearning\\\\CDS-NI-Algorithm\\\\genderPlottingAlgorithms\")",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Recurse -File -Filter \"*.py\")"
     ]
   }
 }
