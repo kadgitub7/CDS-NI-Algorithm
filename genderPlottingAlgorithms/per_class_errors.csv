@@ -3,11 +3,11 @@ class,name,female_wrong,female_total,female_error_pct,male_wrong,male_total,male
 3,Old Anterior MI,0,0,,0,15,0.0
 4,Old Inferior MI,1,4,25.0,1,11,9.090909090909092
 5,Sinus Tachycardia,1,9,11.11111111111111,0,4,0.0
-6,Sinus Bradycardia,0,11,0.0,2,14,14.285714285714285
+6,Sinus Bradycardia,0,11,0.0,3,14,21.428571428571427
 7,PVC,0,0,,1,3,33.33333333333333
 8,Supraventricular PC,0,0,,0,2,0.0
 9,Left Bundle Branch Block,0,5,0.0,0,4,0.0
-10,Right Bundle Branch Block,7,22,31.818181818181817,5,28,17.857142857142858
-14,LV Hypertrophy,0,1,0.0,1,3,33.33333333333333
-15,Atrial Fibrillation,1,4,25.0,0,1,0.0
-16,Others,3,7,42.857142857142854,2,15,13.333333333333334
+10,Right Bundle Branch Block,5,22,22.727272727272727,3,28,10.714285714285714
+14,LV Hypertrophy,0,1,0.0,0,3,0.0
+15,Atrial Fibrillation,0,4,0.0,0,1,0.0
+16,Others,2,7,28.57142857142857,4,15,26.666666666666668
