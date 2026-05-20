@@ -2513,7 +2513,7 @@ def run_test_cases(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:  str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+    data_path:  str = str(Path(__file__).parent / "data" / "arrhythmia.data"),
     run_loocv_flag: bool = True,
     max_users:  Optional[int] = None,
     run_tests:  bool = True,
@@ -2625,7 +2625,7 @@ def main(
             print(f"\n  No false-alarm users (FA=0%).")
 
         # Dump full diagnostic trace for all misclassified users
-        wrong_data_path = str(Path(data_path).parent / "wrongUserData.txt")
+        wrong_data_path = str(Path(__file__).parent / "data" / "wrongUserData.txt")
         dump_wrong_user_data(output, filepath=wrong_data_path)
 
     return output

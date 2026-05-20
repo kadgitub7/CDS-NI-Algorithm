@@ -60,8 +60,8 @@ ENABLE_TEST_8_SCREENING_SEPARATION   = True   # Separate screening from false al
 
 # ──────────────────────────────────────────────────────────────────────────────
 
-# Add parent directory to path so we can import the algorithm modules
-PROJ_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Add project root to path so we can import the algorithm modules
+PROJ_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, PROJ_ROOT)
 
 import numpy as np
@@ -89,7 +89,7 @@ from Algorithm4 import (
 from Algorithm1_forcedBranch import build_sex_specific_tree
 
 RESULTS_FILE = os.path.join(os.path.dirname(__file__), "results.txt")
-DATA_PATH = os.path.join(PROJ_ROOT, "arrhythmia.data")
+DATA_PATH = os.path.join(PROJ_ROOT, "data", "arrhythmia.data")
 
 RNG_SEED = 42
 

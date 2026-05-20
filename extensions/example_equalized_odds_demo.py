@@ -28,9 +28,11 @@ from pathlib import Path
 
 import numpy as np
 
-# Add project root to path
-project_root = Path(__file__).parent
+# Add project root and extensions dir to path
+project_root = Path(__file__).parent.parent
+extensions_dir = Path(__file__).parent
 sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(extensions_dir))
 
 from CDS_Paper_Algorithms import (
     load_dataset,
@@ -52,8 +54,8 @@ log = build_logger_alg4("DEMO")
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Dataset path (adjust to your environment)
-DATA_PATH = r"C:\Users\Javad\Documents\GitHub\CDS-NI-Algorithm\arrhythmia.data"
+# Dataset path
+DATA_PATH = str(project_root / "data" / "arrhythmia.data")
 
 # Number of users for quick demo (set to None for full LOOCV)
 MAX_USERS = 50  # Set to None to run full LOOCV (slower)

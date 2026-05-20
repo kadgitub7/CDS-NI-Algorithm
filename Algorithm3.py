@@ -1400,7 +1400,7 @@ COMPLEXITY ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:    str   = "arrhythmia.data",
+    data_path:    str   = str(__import__("pathlib").Path(__file__).parent / "data" / "arrhythmia.data"),
     run_full:     bool  = False,
     reset_per_h:  bool  = False,     # [PAPER]
     verbose_alg3: bool  = False,
@@ -1538,7 +1538,7 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 if __name__ == "__main__":
     import sys as _sys
-    path     = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "arrhythmia.data")
+    path     = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "data" / "arrhythmia.data")
     full     = "--full"     in _sys.argv
     per_h    = "--per-h"    in _sys.argv
     verbose  = "--verbose"  in _sys.argv

@@ -46,10 +46,19 @@ USAGE EXAMPLE
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+_EXT_DIR = str(Path(__file__).parent)
+_PROJECT_ROOT = str(Path(__file__).parent.parent)
+if _EXT_DIR not in sys.path:
+    sys.path.insert(0, _EXT_DIR)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 # ── Import fairness module ─────────────────────────────────────────────────────
 from Fairness_EqualizedOdds import (

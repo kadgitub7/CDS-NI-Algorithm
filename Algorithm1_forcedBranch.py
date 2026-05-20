@@ -770,9 +770,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         _base = Path(__file__).parent
         _candidates = [
-            str(_base / "genderPlottingAlgorithms" / "arrhythmia_augmented.data"),
-            str(_base / "arrhythmia_augmented.data"),
-            str(_base / "arrhythmia.data"),
+            str(_base / "data" / "arrhythmia_augmented.data"),
+            str(_base / "data" / "arrhythmia.data"),
         ]
         _path = next((p for p in _candidates if Path(p).exists()), None)
         if _path is None:

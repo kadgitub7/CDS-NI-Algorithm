@@ -18,13 +18,12 @@ _HERE     = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
 DATA_PATH = next(
     (p for p in [
-        os.path.join(_REPO_ROOT, "arrhythmia.data"),
-        os.path.join(_HERE, "arrhythmia.data"),
+        os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
     ] if os.path.exists(p)),
     None,
 )
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found. Place it in the repo root.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 N_IMPUTATIONS = 5
 RANDOM_STATE = 42
 ALPHA = 0.05   # significance level for informative-missingness tests
@@ -355,9 +354,11 @@ print()
 # 5. SAVE OUTPUTS
 # ============================================================
 
-missing_df.to_csv(os.path.join(_HERE, 'missingness_by_gender.csv'), index=False)
-informative_df.to_csv(os.path.join(_HERE, 'informative_missingness_tests.csv'), index=False)
-impact_df.to_csv(os.path.join(_HERE, 'multiple_imputation_impact.csv'), index=False)
+_OUT_CSV = os.path.join(_REPO_ROOT, "output", "csv")
+os.makedirs(_OUT_CSV, exist_ok=True)
+missing_df.to_csv(os.path.join(_OUT_CSV, 'missingness_by_gender.csv'), index=False)
+informative_df.to_csv(os.path.join(_OUT_CSV, 'informative_missingness_tests.csv'), index=False)
+impact_df.to_csv(os.path.join(_OUT_CSV, 'multiple_imputation_impact.csv'), index=False)
 
 print("=" * 80)
 print("OUTPUT FILES GENERATED")

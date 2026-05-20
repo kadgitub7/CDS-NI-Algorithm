@@ -57,14 +57,14 @@ if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
 _DATA_CANDIDATES = [
-    os.path.join(_REPO_ROOT, "arrhythmia.data"),
-    os.path.join(_HERE, "arrhythmia.data"),
+    os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found. Check _DATA_CANDIDATES.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 
-OUT_DIR = _HERE
+OUT_DIR_CSV     = os.path.join(_REPO_ROOT, "output", "csv")
+OUT_DIR_REPORTS = os.path.join(_REPO_ROOT, "output", "reports")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -834,30 +834,32 @@ def main():
     report_lines.append("=" * 72)
 
     # Save report
-    report_path = os.path.join(OUT_DIR, "technical_report.txt")
+    os.makedirs(OUT_DIR_REPORTS, exist_ok=True)
+    report_path = os.path.join(OUT_DIR_REPORTS, "technical_report.txt")
     with open(report_path, "w", encoding="ascii", errors="replace") as fh:
         fh.write("\n".join(report_lines))
     print(f"\nReport saved: {report_path}")
 
     # Save CSVs
+    os.makedirs(OUT_DIR_CSV, exist_ok=True)
     if not importance_df.empty:
-        p = os.path.join(OUT_DIR, "importance.csv")
+        p = os.path.join(OUT_DIR_CSV, "importance.csv")
         importance_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not sig_df.empty:
-        p = os.path.join(OUT_DIR, "significant.csv")
+        p = os.path.join(OUT_DIR_CSV, "significant.csv")
         sig_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not miss_df.empty:
-        p = os.path.join(OUT_DIR, "missingness.csv")
+        p = os.path.join(OUT_DIR_CSV, "missingness.csv")
         miss_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not inf_df.empty:
-        p = os.path.join(OUT_DIR, "informative.csv")
+        p = os.path.join(OUT_DIR_CSV, "informative.csv")
         inf_df.to_csv(p, index=False)
         print(f"Saved: {p}")
     if not aug_summary_df.empty:
-        p = os.path.join(OUT_DIR, "augmentation.csv")
+        p = os.path.join(OUT_DIR_CSV, "augmentation.csv")
         aug_summary_df.to_csv(p, index=False)
         print(f"Saved: {p}")
 

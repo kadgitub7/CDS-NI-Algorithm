@@ -3,7 +3,7 @@ augmentation_strategies.py
 ==========================
 Importable augmentation functions for the CDS LOOCV pipeline.
 
-These mirror the strategies in genderPlottingAlgorithms/dataAugmentation.py
+These mirror the strategies in analysis/dataAugmentation.py
 but are structured as pure functions (no top-level script execution) so they
 can be imported by Algorithm4.run_loocv without side effects.
 

@@ -1648,6 +1648,9 @@ def run_loocv(
     if _fc.ENABLE_FORCED_SEX_BRANCHING:
         from Algorithm1_forcedBranch import build_forced_sex_forest, build_sex_specific_tree, route_user
     if _fc.ENABLE_DATA_AUGMENTATION:
+        _ext_dir = str(Path(__file__).parent / "extensions")
+        if _ext_dir not in sys.path:
+            sys.path.insert(0, _ext_dir)
         from augmentation_strategies import apply_augmentation
 
     output = Algorithm4Output(data=data)
@@ -2685,7 +2688,7 @@ def run_test_cases(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fairness_lambda_grid_search(
-    data_path: str = "arrhythmia.data",
+    data_path: str = str(Path(__file__).parent / "data" / "arrhythmia.data"),
     lambda_values: Optional[List[float]] = None,
     max_users: Optional[int] = None,
     rng_seed: int = 42,
@@ -2749,7 +2752,7 @@ def fairness_lambda_grid_search(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main(
-    data_path:  str = "arrhythmia.data",
+    data_path:  str = str(Path(__file__).parent / "data" / "arrhythmia.data"),
     run_loocv_flag: bool = True,
     max_users:  Optional[int] = None,
     run_tests:  bool = True,
@@ -2861,7 +2864,7 @@ def main(
             print(f"\n  No false-alarm users (FA=0%).")
 
         # Dump full diagnostic trace for all misclassified users
-        wrong_data_path = str(Path(data_path).parent / "wrongUserData.txt")
+        wrong_data_path = str(Path(__file__).parent / "data" / "wrongUserData.txt")
         dump_wrong_user_data(output, filepath=wrong_data_path)
 
     return output
@@ -2909,7 +2912,7 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 if __name__ == "__main__":
     import sys as _sys
-    _default_path = str(Path(__file__).parent / "arrhythmia.data")
+    _default_path = str(Path(__file__).parent / "data" / "arrhythmia.data")
     path = _sys.argv[1] if len(_sys.argv) > 1 else _default_path
     # For quick test: limit users; remove max_users for full LOOCV
     n = int(_sys.argv[2]) if len(_sys.argv) > 2 else None

@@ -1566,7 +1566,7 @@ def print_executive_summary_by_disease(output:   Algorithm2Output,
 # SECTION 12 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main(data_path: str = "arrhythmia.data",
+def main(data_path: str = str(__import__("pathlib").Path(__file__).parent / "data" / "arrhythmia.data"),
          run_full:  bool = False) -> Algorithm2Output:
     """
     End-to-end execution: Algorithm 1 -> Algorithm 2 -> Validation -> Reports.
@@ -1853,6 +1853,6 @@ def run_gender_feature_analysis_once(
 
 if __name__ == "__main__":
     import sys as _sys
-    path    = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "arrhythmia.data")
+    path    = _sys.argv[1] if len(_sys.argv) > 1 else str(__import__("pathlib").Path(__file__).parent / "data" / "arrhythmia.data")
     full    = "--full" in _sys.argv
     output  = main(data_path=path, run_full=full)

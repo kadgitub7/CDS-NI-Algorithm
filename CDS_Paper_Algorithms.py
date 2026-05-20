@@ -1236,7 +1236,7 @@ def validate_feature_exclusion(tree: DecisionTree) -> None:
 # SECTION 15 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main(data_path: str = "/arrhythmia.data") -> DecisionTree:
+def main(data_path: str = str(Path(__file__).parent / "data" / "arrhythmia.data")) -> DecisionTree:
     """
     End-to-end execution of Algorithm 1.
 
@@ -1318,5 +1318,5 @@ def get_arrhythmia_path(filename: str = "arrhythmia.data") -> Path:
 
 
 if __name__ == "__main__":
-    path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).parent / "arrhythmia.data")
+    path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).parent / "data" / "arrhythmia.data")
     tree = main(path)

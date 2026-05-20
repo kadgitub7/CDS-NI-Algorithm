@@ -45,13 +45,16 @@ _REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
+_EXT_DIR = os.path.join(_REPO_ROOT, "extensions")
+if _EXT_DIR not in sys.path:
+    sys.path.insert(0, _EXT_DIR)
+
 _DATA_CANDIDATES = [
-    os.path.join(_REPO_ROOT, "arrhythmia.data"),
-    os.path.join(_HERE, "arrhythmia.data"),
+    os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 
 # ---------------------------------------------------------------------------
 # SUPPRESS ALL CDS LOGGING -- keep output clean
@@ -97,7 +100,8 @@ CLASS_NAMES = {
     16: "Others",
 }
 
-OUT_DIR = _HERE
+OUT_DIR_CSV     = os.path.join(_REPO_ROOT, "output", "csv")
+OUT_DIR_REPORTS = os.path.join(_REPO_ROOT, "output", "reports")
 
 
 # ---------------------------------------------------------------------------
@@ -601,8 +605,10 @@ def main():
     print(report)
 
     # --- save files ---
-    report_path = os.path.join(OUT_DIR, "reproducibility_report.txt")
-    csv_path    = os.path.join(OUT_DIR, "per_class_errors.csv")
+    os.makedirs(OUT_DIR_REPORTS, exist_ok=True)
+    os.makedirs(OUT_DIR_CSV, exist_ok=True)
+    report_path = os.path.join(OUT_DIR_REPORTS, "reproducibility_report.txt")
+    csv_path    = os.path.join(OUT_DIR_CSV, "per_class_errors.csv")
 
     with open(report_path, "w", encoding="utf-8") as fh:
         fh.write(report + "\n")

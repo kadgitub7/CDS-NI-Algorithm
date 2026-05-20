@@ -36,14 +36,13 @@ _HERE      = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
 
 _CANDIDATES = [
-    os.path.join(_REPO_ROOT, "arrhythmia.data"),
-    os.path.join(_HERE,      "arrhythmia.data"),
+    os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 
-OUT_PATH = os.path.join(_HERE, "arrhythmia_augmented.data")
+OUT_PATH = os.path.join(_REPO_ROOT, "data", "arrhythmia_augmented.data")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS

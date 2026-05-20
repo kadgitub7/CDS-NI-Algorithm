@@ -65,18 +65,17 @@ for _name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3"):
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 _DATA_CANDIDATES = [
-    os.path.join(_REPO_ROOT, "arrhythmia.data"),
-    os.path.join(_HERE, "arrhythmia.data"),
+    os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found. Check _DATA_CANDIDATES.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 
 SEX_COL        = 1
 MALE_CODE      = 0
 FEMALE_CODE    = 1
 IMPORTANCE_THRESHOLD = 0.05  # flag features with |male - female| > threshold
-OUTPUT_DIR     = _HERE
+OUTPUT_DIR     = os.path.join(_REPO_ROOT, "output", "csv")
 
 
 def _feature_name(idx: int) -> str:
@@ -353,6 +352,7 @@ def main():
 
 
     def _save(df: pd.DataFrame, name: str):
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
         path = os.path.join(OUTPUT_DIR, name)
         df.to_csv(path, index=False, float_format="%.6f")
         print(f"  Saved: {path}  ({len(df)} rows)")

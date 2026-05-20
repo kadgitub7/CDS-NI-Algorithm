@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 # Configuration
 # ============================================================
 
-DATASET_PATH = "arrhythmia.data"
-OUTPUT_FOLDER = "featureGraphs"
+DATASET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "arrhythmia.data")
+OUTPUT_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "featureGraphs")
 
 # Healthy class = 1
 # Unhealthy classes = 2-16

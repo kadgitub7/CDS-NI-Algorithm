@@ -58,14 +58,13 @@ _HERE      = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.normpath(os.path.join(_HERE, ".."))
 
 _DATA_CANDIDATES = [
-    os.path.join(_REPO_ROOT, "arrhythmia.data"),
-    os.path.join(_HERE, "arrhythmia.data"),
+    os.path.join(_REPO_ROOT, "data", "arrhythmia.data"),
 ]
 DATA_PATH = next((p for p in _DATA_CANDIDATES if os.path.exists(p)), None)
 if DATA_PATH is None:
-    raise FileNotFoundError("arrhythmia.data not found. Check _DATA_CANDIDATES.")
+    raise FileNotFoundError("arrhythmia.data not found. Place it in the data/ directory.")
 
-OUT_DIR = _HERE
+OUT_DIR = os.path.join(_REPO_ROOT, "output", "csv")
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -504,6 +503,7 @@ print("classes); it can only address cause B (sparse Level-2 statistics).")
 # ---------------------------------------------------------------------------
 # SAVE
 # ---------------------------------------------------------------------------
+os.makedirs(OUT_DIR, exist_ok=True)
 results_path = os.path.join(OUT_DIR, "augmentation_results.csv")
 summary_path = os.path.join(OUT_DIR, "augmentation_summary.csv")
 results_df.to_csv(results_path, index=False)

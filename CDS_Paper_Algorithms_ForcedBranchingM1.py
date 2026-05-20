@@ -1348,7 +1348,7 @@ def validate_feature_exclusion(tree: DecisionTree) -> None:
 # SECTION 15 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main(data_path: str = "/arrhythmia.data") -> DecisionTree:
+def main(data_path: str = str(Path(__file__).parent / "data" / "arrhythmia.data")) -> DecisionTree:
     """
     End-to-end execution of Algorithm 1.
 

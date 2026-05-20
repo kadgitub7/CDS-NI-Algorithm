@@ -29,11 +29,17 @@ Toggles are in fairness_config.py (ENABLE_ADVERSARIAL_DEBIASING).
 from __future__ import annotations
 
 import logging
+import sys
 import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+_PROJECT_ROOT = str(Path(__file__).parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 from fairness_config import (
     ADVERSARIAL_EPOCHS,

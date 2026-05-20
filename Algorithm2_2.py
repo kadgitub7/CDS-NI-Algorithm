@@ -1473,7 +1473,7 @@ def print_executive_summary_by_disease(output:   Algorithm2Output,
 # SECTION 12 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main(data_path: str = "C:\\Users\\kadhi\\OneDrive\\Desktop\\CDS_Algorithms\\arrhythmia.data",
+def main(data_path: str = str(__import__("pathlib").Path(__file__).parent / "data" / "arrhythmia.data"),
          run_full:  bool = True) -> Algorithm2Output:
     """
     End-to-end execution: Algorithm 1 → Algorithm 2 → Validation → Reports.
