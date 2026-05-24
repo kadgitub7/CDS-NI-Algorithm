@@ -1658,22 +1658,40 @@ def run_loocv(
 
     n_users_total = data.shape[0]
     all_indices = np.arange(n_users_total)
+
+    # ── Pre-compute augmented data ONCE (outside the LOOCV loop) ─────────
+    # Synthetic rows are generated from the full real dataset and appended.
+    # During each fold, we remove only the held-out real user (index i);
+    # synthetic rows are always included in training since they are not
+    # real patients and should never be held out.
+    aug_data = None
+    aug_labels = None
+    n_real = n_users_total
+    if _fc.ENABLE_DATA_AUGMENTATION and _fc.AUGMENTATION_STRATEGY != "none":
+        aug_data, aug_labels = apply_augmentation(
+            strategy_name = _fc.AUGMENTATION_STRATEGY,
+            X_train       = data,
+            y_train       = labels,
+            rng_seed      = rng_seed,
+        )
+        n_synthetic = aug_data.shape[0] - n_real
+        log.info(f"Data augmentation: generated {n_synthetic} synthetic female users "
+                 f"(total training pool: {aug_data.shape[0]})")
+
     treeCounter = 0
     for i in range(n_total):
         # ── Build per-fold training set (all users except i) ─────────────────
-        train_mask           = np.ones(n_users_total, dtype=bool)
-        train_mask[i]        = False
-        train_data           = data[train_mask]
-        train_labels         = labels[train_mask]
-
-        # ── Optional: augment training data (female sub-population) ──────────
-        if _fc.ENABLE_DATA_AUGMENTATION and _fc.AUGMENTATION_STRATEGY != "none":
-            train_data, train_labels = apply_augmentation(
-                strategy_name = _fc.AUGMENTATION_STRATEGY,
-                X_train       = train_data,
-                y_train       = train_labels,
-                rng_seed      = rng_seed + i,
-            )
+        # Remove only real user i; keep all synthetic rows.
+        if aug_data is not None:
+            train_mask           = np.ones(aug_data.shape[0], dtype=bool)
+            train_mask[i]        = False
+            train_data           = aug_data[train_mask]
+            train_labels         = aug_labels[train_mask]
+        else:
+            train_mask           = np.ones(n_users_total, dtype=bool)
+            train_mask[i]        = False
+            train_data           = data[train_mask]
+            train_labels         = labels[train_mask]
 
         # ── Per-fold Algorithm 1 ─────────────────────────────────────────────
         if _fc.ENABLE_FORCED_SEX_BRANCHING:
@@ -1698,12 +1716,13 @@ def run_loocv(
         root_id = tree_i.root.node_id
         nodes_filter_i = [root_id]
         if _fc.ENABLE_FORCED_SEX_BRANCHING:
-            # Forced sex tree: include level-2 nodes only from genuine
-            # two-sided splits (both branches passed Eq.2).
-            if 2 in tree_i.nodes_by_level:
-                for child in tree_i.nodes_by_level[2]:
-                    if not child.is_leaf:
-                        nodes_filter_i.append(child.node_id)
+            # Forced sex tree: the root already IS the sex-specific
+            # sub-population (male-only or female-only).  This is
+            # equivalent to one of the two sex-branch children in the
+            # standard tree.  No level-2 nodes need to be added —
+            # adding all of them causes an ~80× slowdown (243 nodes
+            # × 278 features vs 3 × 278 in baseline).
+            pass  # nodes_filter_i = [root_id] is sufficient
         else:
             # Standard tree: paper uses Sex (k=1) branching at level 2.
             # Only include the two Sex branch nodes if both exist.

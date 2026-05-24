@@ -361,6 +361,7 @@ def compute_roc_curves_by_gender(
     scores: np.ndarray,
     labels: np.ndarray,
     data: np.ndarray,
+    n_points: int = 100,
 ) -> Tuple[ROCCurve, ROCCurve]:
     """
     Compute separate ROC curves for male and female groups.
@@ -388,14 +389,14 @@ def compute_roc_curves_by_gender(
         scores[male_mask],
         labels[male_mask],
         group_name="Male",
-        n_points=100,
+        n_points=n_points,
     )
 
     roc_female = compute_roc_curve(
         scores[female_mask],
         labels[female_mask],
         group_name="Female",
-        n_points=100,
+        n_points=n_points,
     )
 
     return roc_male, roc_female
@@ -592,6 +593,7 @@ def compute_bayes_optimal_predictor(
     data: np.ndarray,
     baseline_threshold: float = 0.025,
     verbose: bool = True,
+    n_roc_points: int = 100,
 ) -> EqualizedOddsResult:
     """
     Compute gender-specific thresholds that satisfy equalized odds.
@@ -641,7 +643,7 @@ def compute_bayes_optimal_predictor(
     log.info(f"Dataset composition: {n_male} males, {n_female} females")
 
     # Compute ROC curves by gender
-    roc_male, roc_female = compute_roc_curves_by_gender(scores, labels, data)
+    roc_male, roc_female = compute_roc_curves_by_gender(scores, labels, data, n_points=n_roc_points)
 
     # Find convex hull
     hull = compute_convex_hull(roc_male, roc_female)

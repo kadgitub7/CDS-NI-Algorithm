@@ -3,9 +3,9 @@
 ========================================================================
   Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  Runtime : 521s
+  Runtime : 888s
   Paper target: 95.4% overall accuracy
-  Config  : FairnessRL(lambda=0.05)
+  Config  : AdvDebiasing
 
 1. OVERALL PERFORMANCE
 ----------------------
@@ -102,14 +102,36 @@
   9      3       Old Anterior MI                   0       15     0.0%
   10     5       Sinus Tachycardia                 0        4     0.0%
 
-9. ACTIVE FAIRNESS CONFIGURATION
---------------------------------
-  FairnessRL(lambda=0.05)
+8. ADVERSARIAL DEBIASING (Zhang et al., 2018 adapted)
+-----------------------------------------------------
+  Adversary architecture : MLP (16 hidden units)
+  Training epochs        : 100
+  Learning rate          : 0.01
+
+  Adversary accuracy (before)  : 62.17%
+  Adversary accuracy (after)   : 62.17%
+  Chance baseline              : 50.00%
+
+  Threshold offset (male)      : -0.0500
+  Threshold offset (female)    : -0.0500
+  Predictions changed          : 200
+
+  Metric                             Before      After      Delta
+  --------------------------------------------------------------
+  Overall accuracy                   75.88%     75.88%     +0.00%
+  Male accuracy                      76.35%     76.35%     +0.00%
+  Female accuracy                    75.50%     75.50%     +0.00%
+  Gender accuracy gap                 0.85%      0.85%     +0.00%
+
+  Adversary could predict sex from CDS outputs -> gender signal exists.
+
+10. ACTIVE FAIRNESS CONFIGURATION
+---------------------------------
+  AdvDebiasing
 
   ENABLE_REWEIGHING            = False
-  ENABLE_FAIRNESS_RL           = True
-    FAIRNESS_LAMBDA            = 0.05
-  ENABLE_ADVERSARIAL_DEBIASING = False
+  ENABLE_FAIRNESS_RL           = False
+  ENABLE_ADVERSARIAL_DEBIASING = True
   ENABLE_FORCED_SEX_BRANCHING  = False
   ENABLE_DATA_AUGMENTATION     = False
 

@@ -77,6 +77,7 @@ from Algorithm4 import (
 )
 import fairness_config
 from adversarial_debiasing import run_adversarial_debiasing
+from Fairness_EqualizedOdds import compute_bayes_optimal_predictor
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -275,7 +276,7 @@ def compute_metrics(output: Algorithm4Output):
 # ---------------------------------------------------------------------------
 
 def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
-                  grid_results=None):
+                  grid_results=None, eo_result=None):
     lines = []
     W = 72
 
@@ -515,8 +516,42 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
         lines.append(f"  Selected lambda = {fairness_config.FAIRNESS_LAMBDA} "
                      f"(minimises gender gap while maintaining accuracy)")
 
-    # ---- 10. active configuration summary ----
-    h2("10. ACTIVE FAIRNESS CONFIGURATION")
+    # ---- 10. equalized odds post-processing (if results provided) ----
+    if eo_result is not None:
+        h2("10. EQUALIZED ODDS POST-PROCESSING (Hardt et al., 2016)")
+        lines.append(f"  Method: Gender-specific decision thresholds via ROC convex hull")
+        lines.append(f"  ROC sample points per group  : {fairness_config.EQUALIZED_ODDS_ROC_POINTS}")
+        lines.append("")
+        lines.append(f"  Original threshold (all)     : {eo_result.original_threshold:.6f}")
+        lines.append(f"  Optimised threshold (male)   : {eo_result.threshold_male:.6f}")
+        lines.append(f"  Optimised threshold (female) : {eo_result.threshold_female:.6f}")
+        lines.append("")
+        lines.append(f"  {'Metric':<30}  {'Male':>9}  {'Female':>9}  {'Delta':>9}")
+        lines.append("  " + "-" * 62)
+        lines.append(f"  {'True Positive Rate (TPR)':<30}  "
+                     f"{eo_result.tpr_male:>8.4f}   "
+                     f"{eo_result.tpr_female:>8.4f}   "
+                     f"{abs(eo_result.tpr_male - eo_result.tpr_female):>8.4f}")
+        lines.append(f"  {'False Positive Rate (FPR)':<30}  "
+                     f"{eo_result.fpr_male:>8.4f}   "
+                     f"{eo_result.fpr_female:>8.4f}   "
+                     f"{abs(eo_result.fpr_male - eo_result.fpr_female):>8.4f}")
+        lines.append(f"  {'Equalized TPR':<30}  {eo_result.tpr_equalized:>8.4f}")
+        lines.append("")
+        lines.append(f"  Utility loss vs. single threshold : {eo_result.utility_loss:+.6f}")
+        lines.append(f"  Dataset: {eo_result.n_male} male, {eo_result.n_female} female users")
+        lines.append("")
+        diag = eo_result.diagnostics
+        lines.append(f"  Pareto frontier candidates        : {diag.get('hull_points_count', 'N/A')}")
+        lines.append(f"  ROC points (male / female)        : "
+                     f"{diag.get('roc_male_points_count', 'N/A')} / "
+                     f"{diag.get('roc_female_points_count', 'N/A')}")
+        if eo_result.threshold_male == eo_result.threshold_female == eo_result.original_threshold:
+            lines.append("")
+            lines.append("  No equalized-odds improvement found; thresholds unchanged.")
+
+    # ---- 11. active configuration summary ----
+    h2("11. ACTIVE FAIRNESS CONFIGURATION")
     lines.append(f"  {fairness_config.summary()}")
     lines.append("")
     lines.append(f"  ENABLE_REWEIGHING            = {fairness_config.ENABLE_REWEIGHING}")
@@ -524,6 +559,7 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
     if fairness_config.ENABLE_FAIRNESS_RL:
         lines.append(f"    FAIRNESS_LAMBDA            = {fairness_config.FAIRNESS_LAMBDA}")
     lines.append(f"  ENABLE_ADVERSARIAL_DEBIASING = {fairness_config.ENABLE_ADVERSARIAL_DEBIASING}")
+    lines.append(f"  ENABLE_EQUALIZED_ODDS        = {fairness_config.ENABLE_EQUALIZED_ODDS}")
     lines.append(f"  ENABLE_FORCED_SEX_BRANCHING  = {fairness_config.ENABLE_FORCED_SEX_BRANCHING}")
     lines.append(f"  ENABLE_DATA_AUGMENTATION     = {fairness_config.ENABLE_DATA_AUGMENTATION}")
     if fairness_config.ENABLE_DATA_AUGMENTATION:
@@ -659,8 +695,31 @@ def main():
             diagnostic_threshold=DIAGNOSTIC_THRESHOLD_ALG4,
         )
 
+    # Run equalized odds post-processing if enabled
+    eo_result = None
+    if fairness_config.ENABLE_EQUALIZED_ODDS:
+        print("Running equalized odds post-processing (Hardt et al., 2016) ...")
+        from Algorithm4 import DIAGNOSTIC_THRESHOLD_ALG4
+        records = output.records
+
+        rw_scores = np.array([
+            r.af_trace[-1].rw_real if r.af_trace else 1.0
+            for r in records
+        ])
+        user_labels = np.array([r.true_label for r in records])
+        user_data = data[np.array([r.user_global_idx for r in records])]
+
+        eo_result = compute_bayes_optimal_predictor(
+            scores=rw_scores,
+            labels=user_labels,
+            data=user_data,
+            baseline_threshold=DIAGNOSTIC_THRESHOLD_ALG4,
+            verbose=False,
+            n_roc_points=fairness_config.EQUALIZED_ODDS_ROC_POINTS,
+        )
+
     report  = build_report(metrics, data, labels, args.max_users, elapsed,
-                           adv_result, grid_results)
+                           adv_result, grid_results, eo_result)
     csv_df  = build_class_csv(metrics, labels)
 
     # --- print to console ---
