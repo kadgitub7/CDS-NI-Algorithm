@@ -82,7 +82,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # minimising overall error.
 #
 # Uses extensions/Fairness_EqualizedOdds.py (compute_bayes_optimal_predictor).
-ENABLE_EQUALIZED_ODDS: bool = False
+ENABLE_EQUALIZED_ODDS: bool = True
 
 # Number of points to sample on each group's ROC curve.
 EQUALIZED_ODDS_ROC_POINTS: int = 100

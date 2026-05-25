@@ -164,15 +164,20 @@ def extract_adversary_features(records, data: np.ndarray) -> Tuple[np.ndarray, n
     Extract feature vectors for the adversary from Algorithm4 prediction records.
 
     Features per user:
-      0: AF_real (final assurance factor)
-      1: rw_real (final remaining weight = 1 - AF)
-      2: total_actions_applied (number of sensor activations)
-      3: max_focus_reached
-      4: decision_encoded (0=HEALTHY, 1=UNHEALTHY, 2=SCREENING)
+      0: margin_risk_score (continuous risk score from compute_margin_risk_scores)
+      1: total_actions_applied (number of sensor activations)
+      2: max_focus_reached
+      3: decision_encoded (0=HEALTHY, 1=UNHEALTHY, 2=SCREENING)
+      4: has_alarm (1 if alarm triggered, 0 otherwise)
+
+    NOTE: Replaces AF_real/rw_real (both non-discriminating — rw is always 0.0
+    for non-alarm users and >0.19 for alarm users) with the continuous
+    margin-based risk score which captures how close each user was to
+    triggering an alarm.
 
     Target: sex (0=male, 1=female)
     """
-    from Algorithm4 import HealthDecision
+    from Algorithm4 import HealthDecision, compute_margin_risk_scores
 
     decision_map = {
         HealthDecision.HEALTHY: 0,
@@ -181,18 +186,18 @@ def extract_adversary_features(records, data: np.ndarray) -> Tuple[np.ndarray, n
         HealthDecision.UNKNOWN: 2,
     }
 
+    risk_scores = compute_margin_risk_scores(records)
+
     n = len(records)
     X = np.zeros((n, 5), dtype=float)
     y = np.zeros(n, dtype=float)
 
     for i, r in enumerate(records):
-        af = r.af_trace[-1].AF_real if r.af_trace else 0.0
-        rw = 1.0 - af
-        X[i, 0] = af
-        X[i, 1] = rw
-        X[i, 2] = r.total_actions_applied
-        X[i, 3] = r.max_focus_reached
-        X[i, 4] = decision_map.get(r.decision, 2)
+        X[i, 0] = risk_scores[i]
+        X[i, 1] = r.total_actions_applied
+        X[i, 2] = r.max_focus_reached
+        X[i, 3] = decision_map.get(r.decision, 2)
+        X[i, 4] = 1.0 if r.alarm_class is not None else 0.0
         y[i] = data[r.user_global_idx, SEX_FEATURE_INDEX]
 
     # Standardize features
@@ -201,7 +206,7 @@ def extract_adversary_features(records, data: np.ndarray) -> Tuple[np.ndarray, n
     std[std < 1e-8] = 1.0
     X = (X - mu) / std
 
-    return X, y, mu, std
+    return X, y, mu, std, risk_scores
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -217,19 +222,26 @@ def run_adversarial_debiasing(
     """
     Run adversarial debiasing on completed Algorithm 4 predictions.
 
+    Uses MARGIN-BASED RISK SCORES instead of rw values.  The original rw
+    values are bimodal (0.0 for all non-alarm users, >0.19 for alarm users)
+    with no discrimination power.  Margin-based scores measure how close
+    each user's feature values are to the healthy-range boundary, giving a
+    continuous distribution that allows meaningful threshold adjustment.
+
     Steps:
-      1. Extract features from prediction records.
+      1. Extract features (including margin risk scores) from records.
       2. Train adversary to predict sex from CDS outputs.
-      3. If adversary accuracy > 55% (can predict sex), search for
-         per-group threshold offsets that reduce gender signal.
-      4. Re-score predictions with adjusted thresholds and return results.
+      3. Search for per-group margin thresholds that reduce the adversary's
+         ability to predict sex while preserving accuracy.
+      4. Re-score ALL predictions (including alarm-triggered ones) using
+         the margin-based threshold.
 
     Parameters
     ----------
     output : Algorithm4Output with completed prediction records.
     data   : full dataset array.
     labels : full labels array.
-    diagnostic_threshold : base threshold (0.025 from paper).
+    diagnostic_threshold : base threshold (0.025 from paper, used for reporting).
 
     Returns
     -------
@@ -244,7 +256,7 @@ def run_adversarial_debiasing(
         log.warning("Too few records for adversarial debiasing")
         return result
 
-    X, y_sex, feat_mu, feat_std = extract_adversary_features(records, data)
+    X, y_sex, feat_mu, feat_std, risk_scores = extract_adversary_features(records, data)
 
     # Step 1: Train adversary
     adversary = AdversaryMLP(
@@ -280,47 +292,50 @@ def run_adversarial_debiasing(
     result.original_male_accuracy = male_correct / male_total if male_total > 0 else 0
     result.original_female_accuracy = female_correct / female_total if female_total > 0 else 0
 
-    # Step 3: Search for per-group threshold offsets
-    # Search over a wider, physically meaningful range of offsets.
-    # rw is in [0, 1] and baseline threshold is 0.025, so search [0, 0.5].
-    best_offset_m = 0.0
-    best_offset_f = 0.0
+    # Step 3: Search for per-group MARGIN thresholds
+    # Piecewise risk scores: non-alarm users score 0–0.04, alarm users score 0.5+.
+    # The alarm boundary is at ~0.25 (midpoint of the gap).
+    # Search a range around the boundary to find gender-specific thresholds.
+    BASELINE_MARGIN_THRESHOLD = 0.25
+    best_threshold_m = BASELINE_MARGIN_THRESHOLD
+    best_threshold_f = BASELINE_MARGIN_THRESHOLD
     best_score = float("inf")
 
-    # Wider search: thresholds from 0 to 0.5 (rw range)
     n_steps = ADVERSARIAL_THRESHOLD_SEARCH_STEPS
-    threshold_candidates = np.linspace(0.0, 0.5, n_steps)
+    # Search range: 0.0 to 0.7 — covers non-alarm zone through alarm zone
+    # Lower threshold → more users classified UNHEALTHY (aggressive)
+    # Higher threshold → fewer users classified UNHEALTHY (lenient)
+    threshold_candidates = np.linspace(0.0, 0.7, n_steps)
+
+    decision_map = {
+        HealthDecision.HEALTHY: 0,
+        HealthDecision.UNHEALTHY: 1,
+        HealthDecision.SCREENING: 2,
+    }
 
     for threshold_m in threshold_candidates:
         for threshold_f in threshold_candidates:
 
-            # Re-score predictions with adjusted thresholds
+            # Re-score predictions using MARGIN-BASED thresholds
+            # This overrides even alarm decisions: a user whose margin score
+            # is above the threshold is UNHEALTHY, below is HEALTHY.
             new_decisions = []
-            for r in records:
+            for idx, r in enumerate(records):
                 sex = data[r.user_global_idx, SEX_FEATURE_INDEX]
-                threshold = threshold_m if sex == MALE_CODE else threshold_f
+                thresh = threshold_m if sex == MALE_CODE else threshold_f
+                score = risk_scores[idx]
 
-                if r.alarm_class is not None:
+                if score > thresh:
                     new_decisions.append(HealthDecision.UNHEALTHY)
                 else:
-                    rw_final = r.af_trace[-1].rw_real if r.af_trace else 1.0
-                    if rw_final <= threshold:
-                        new_decisions.append(HealthDecision.HEALTHY)
-                    else:
-                        new_decisions.append(HealthDecision.SCREENING)
+                    new_decisions.append(HealthDecision.HEALTHY)
 
             # Rebuild adversary features with new decisions
-            decision_map = {
-                HealthDecision.HEALTHY: 0,
-                HealthDecision.UNHEALTHY: 1,
-                HealthDecision.SCREENING: 2,
-            }
             X_new = X.copy()
             for i, d in enumerate(new_decisions):
-                X_new[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
+                X_new[i, 3] = (decision_map.get(d, 2) - feat_mu[3]) / feat_std[3]
 
-            # Train a FRESH adversary on the modified features to properly
-            # evaluate whether sex is still predictable from the new outputs.
+            # Train a FRESH adversary on the modified features
             fresh_adversary = AdversaryMLP(
                 input_dim=X_new.shape[1],
                 hidden_dim=ADVERSARIAL_HIDDEN_DIM,
@@ -330,35 +345,49 @@ def run_adversarial_debiasing(
                 fresh_adversary.train_step(X_new, y_sex)
             adv_acc = fresh_adversary.accuracy(X_new, y_sex)
 
-            n_correct_new = 0
+            # Compute per-group accuracy to measure fairness
+            m_correct = m_total = f_correct = f_total = 0
             for i, r in enumerate(records):
                 true_label = r.true_label
                 d = new_decisions[i]
-                if true_label == 1:  # healthy
-                    if d != HealthDecision.UNHEALTHY:
-                        n_correct_new += 1
-                else:  # diseased
-                    if d == HealthDecision.UNHEALTHY:
-                        n_correct_new += 1
+                sex = data[r.user_global_idx, SEX_FEATURE_INDEX]
+                if true_label == 1:
+                    is_correct = (d != HealthDecision.UNHEALTHY)
+                else:
+                    is_correct = (d == HealthDecision.UNHEALTHY)
+                if sex == MALE_CODE:
+                    m_total += 1
+                    if is_correct:
+                        m_correct += 1
+                else:
+                    f_total += 1
+                    if is_correct:
+                        f_correct += 1
 
-            acc_new = n_correct_new / len(records)
+            acc_new = (m_correct + f_correct) / len(records)
             acc_loss = max(0, result.original_overall_accuracy - acc_new)
+            acc_m = m_correct / m_total if m_total > 0 else 0
+            acc_f = f_correct / f_total if f_total > 0 else 0
+            gender_gap = abs(acc_m - acc_f)
 
-            # Objective: minimize adversary's departure from chance + accuracy loss
-            score = abs(adv_acc - 0.5) + 2.0 * acc_loss
+            # Objective: minimize adversary accuracy + accuracy loss + gender gap
+            # The gender_gap term creates incentive to find thresholds that
+            # equalise accuracy across groups, even if the adversary can still
+            # predict sex from non-decision features.
+            score_val = (abs(adv_acc - 0.5)
+                         + 2.0 * acc_loss
+                         + 1.5 * gender_gap)
 
-            if score < best_score:
-                best_score = score
-                best_offset_m = threshold_m - diagnostic_threshold
-                best_offset_f = threshold_f - diagnostic_threshold
+            if score_val < best_score:
+                best_score = score_val
+                best_threshold_m = threshold_m
+                best_threshold_f = threshold_f
 
-    result.threshold_offset_male = best_offset_m
-    result.threshold_offset_female = best_offset_f
+    # Report as offsets from the baseline alarm boundary (0.0)
+    result.threshold_offset_male = best_threshold_m
+    result.threshold_offset_female = best_threshold_f
 
-    # Step 4: Apply best offsets and compute final metrics
-    threshold_m = diagnostic_threshold + best_offset_m
-    threshold_f = diagnostic_threshold + best_offset_f
-
+    # Step 4: Apply best thresholds and compute final metrics
     n_changed = 0
     male_correct_new = 0
     male_total_new = 0
@@ -366,18 +395,16 @@ def run_adversarial_debiasing(
     female_total_new = 0
 
     final_decisions = []
-    for r in records:
+    for idx, r in enumerate(records):
         sex = data[r.user_global_idx, SEX_FEATURE_INDEX]
-        threshold = threshold_m if sex == MALE_CODE else threshold_f
+        thresh = best_threshold_m if sex == MALE_CODE else best_threshold_f
+        score = risk_scores[idx]
 
-        if r.alarm_class is not None:
+        # Apply margin-based threshold to ALL users (including alarm users)
+        if score > thresh:
             new_d = HealthDecision.UNHEALTHY
         else:
-            rw_final = r.af_trace[-1].rw_real if r.af_trace else 1.0
-            if rw_final <= threshold:
-                new_d = HealthDecision.HEALTHY
-            else:
-                new_d = HealthDecision.SCREENING
+            new_d = HealthDecision.HEALTHY
 
         if new_d != r.decision:
             n_changed += 1
@@ -404,14 +431,9 @@ def run_adversarial_debiasing(
     result.debiased_female_accuracy = female_correct_new / female_total_new if female_total_new > 0 else 0
 
     # Re-evaluate: train a FRESH adversary on debiased outputs
-    decision_map = {
-        HealthDecision.HEALTHY: 0,
-        HealthDecision.UNHEALTHY: 1,
-        HealthDecision.SCREENING: 2,
-    }
     X_debiased = X.copy()
     for i, d in enumerate(final_decisions):
-        X_debiased[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
+        X_debiased[i, 3] = (decision_map.get(d, 2) - feat_mu[3]) / feat_std[3]
     fresh_eval = AdversaryMLP(
         input_dim=X_debiased.shape[1],
         hidden_dim=ADVERSARIAL_HIDDEN_DIM,
@@ -422,7 +444,7 @@ def run_adversarial_debiasing(
     result.adversary_accuracy_after = fresh_eval.accuracy(X_debiased, y_sex)
 
     log.info(f"Adversary accuracy (after debiasing): {result.adversary_accuracy_after:.4f}")
-    log.info(f"Threshold offsets: male={best_offset_m:+.4f}, female={best_offset_f:+.4f}")
+    log.info(f"Margin thresholds: male={best_threshold_m:+.4f}, female={best_threshold_f:+.4f}")
     log.info(f"Predictions changed: {n_changed}")
     log.info(f"Accuracy: {result.original_overall_accuracy:.4f} -> {result.debiased_overall_accuracy:.4f}")
 

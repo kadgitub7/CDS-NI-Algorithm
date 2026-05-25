@@ -1,35 +1,35 @@
 ========================================================================
                 CDS ALGORITHM -- REPRODUCIBILITY REPORT                 
 ========================================================================
-  Dataset : UCI Arrhythmia (n=10 users)
+  Dataset : UCI Arrhythmia (n=50 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  NOTE    : Limited run (max_users=10 of 452)
-  Runtime : 123s
+  NOTE    : Limited run (max_users=50 of 452)
+  Runtime : 160s
   Paper target: 95.4% overall accuracy
-  Config  : AdvDebiasing
+  Config  : EqualizedOdds
 
 1. OVERALL PERFORMANCE
 ----------------------
-  Total users evaluated : 10
-  Correct predictions   : 8 / 10
-  Overall accuracy      : 80.00%
-  Sensitivity (diseased detection)     : 83.33%
-  Specificity (1 - false alarm rate)   : 75.00%
-  False alarm rate                     : 25.00%
+  Total users evaluated : 50
+  Correct predictions   : 42 / 50
+  Overall accuracy      : 84.00%
+  Sensitivity (diseased detection)     : 90.91%
+  Specificity (1 - false alarm rate)   : 78.57%
+  False alarm rate                     : 21.43%
   Users sent to SCREENING              : 0
-  Healthy users  : 4  |  Diseased users : 6
+  Healthy users  : 28  |  Diseased users : 22
 
 2. GENDER-DISAGGREGATED ACCURACY
 --------------------------------
   Metric                                 Male     Female  Diff (M-F)
   --------------------------------  ---------  ---------  ----------
-  Total users                               6          4            
-  Overall accuracy                     83.33%     75.00%      +8.33%
-  Sensitivity                         100.00%     50.00%     +50.00%
-  Specificity                          50.00%    100.00%     -50.00%
-  Diseased error rate                   0.00%     50.00%     -50.00%
-  Healthy correct                         1/2        2/2            
-  Diseased correct                        4/4        1/2            
+  Total users                              17         33            
+  Overall accuracy                     82.35%     84.85%      -2.50%
+  Sensitivity                         100.00%     80.00%     +20.00%
+  Specificity                          40.00%     86.96%     -46.96%
+  Diseased error rate                   0.00%     20.00%     -20.00%
+  Healthy correct                         2/5      20/23            
+  Diseased correct                      12/12       8/10            
   Sent to SCREENING                         0          0            
 
   Paper reported: 5% male diseased error, 14% female diseased error
@@ -38,20 +38,20 @@
 ----------------------------------------------------
   Decision     | Male correct / total  | Female correct / total
   --------------------------------------------------------
-  Detected     |     4 / 4     (100.0%)  |     1 / 2     ( 50.0%)
-  Missed       |     0 / 4     (  0.0%)  |     1 / 2     ( 50.0%)
+  Detected     |    12 / 12    (100.0%)  |     8 / 10    ( 80.0%)
+  Missed       |     0 / 12    (  0.0%)  |     2 / 10    ( 20.0%)
 
 4. FAIRNESS METRICS  (Mehrabi et al., 2021)
 -------------------------------------------
   Metric                        Value    Interpretation
   ------------------------------------------------------------
-  Statistical Parity Diff (SPD) +0.5833  BIASED (|SPD|>=0.1)
-  Disparate Impact (DI)          0.3000  BIASED (DI<0.8)
-  Equalized Odds diff (EO)       0.5000  BIASED (EO>=0.1)
-  Subgroup Disparity Cal. Err    0.1667  BIASED (SDCE>=0.05)
+  Statistical Parity Diff (SPD) +0.5490  BIASED (|SPD|>=0.1)
+  Disparate Impact (DI)          0.3778  BIASED (DI<0.8)
+  Equalized Odds diff (EO)       0.4696  BIASED (EO>=0.1)
+  Subgroup Disparity Cal. Err    0.0420  fair (SDCE<0.05)
     Precision (male UNHEALTHY)   0.8000
-    Precision (female UNHEALTHY) 1.0000
-    Precision (overall)          0.8333
+    Precision (female UNHEALTHY) 0.7273
+    Precision (overall)          0.7692
 
   SPD > 0 means males get UNHEALTHY predictions more often.
   DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
@@ -61,66 +61,71 @@
 ---------------------------------------------------
   Class   Name                         F wrong   F total   F err%   M wrong   M total   M err%
   ----------------------------------------------------------------------------------
-  2       Coronary Artery Disease            0         0     n/a          0         0     n/a 
-  3       Old Anterior MI                    0         0     n/a          0         0     n/a 
-  4       Old Inferior MI                    0         0     n/a          0         0     n/a 
-  5       Sinus Tachycardia                  0         0     n/a          0         0     n/a 
-  6       Sinus Bradycardia                  0         1     0.0%         0         0     n/a 
+  2       Coronary Artery Disease            0         2     0.0%         0         0     n/a 
+  3       Old Anterior MI                    0         0     n/a          0         1     0.0%
+  4       Old Inferior MI                    0         1     0.0%         0         1     0.0%
+  5       Sinus Tachycardia                  0         1     0.0%         0         0     n/a 
+  6       Sinus Bradycardia                  0         2     0.0%         0         3     0.0%
   7       PVC                                0         0     n/a          0         1     0.0%
   8       Supraventricular PC                0         0     n/a          0         1     0.0%
   9       Left Bundle Branch Block           0         0     n/a          0         0     n/a 
-  10      Right Bundle Branch Block          1         1   100.0%         0         1     0.0%
-  14      LV Hypertrophy                     0         0     n/a          0         1     0.0%
+  10      Right Bundle Branch Block          2         4    50.0%         0         2     0.0%
+  14      LV Hypertrophy                     0         0     n/a          0         2     0.0%
   15      Atrial Fibrillation                0         0     n/a          0         0     n/a 
-  16      Others                             0         0     n/a          0         0     n/a 
+  16      Others                             0         0     n/a          0         1     0.0%
 
 6. CLASSES CONTRIBUTING MOST TO FEMALE MISCLASSIFICATION
 --------------------------------------------------------
   Rank   Class   Name                          Wrong    Total     Err%
   -----------------------------------------------------------------
-  1      10      Right Bundle Branch Block         1        1   100.0%
-  2      6       Sinus Bradycardia                 0        1     0.0%
+  1      10      Right Bundle Branch Block         2        4    50.0%
+  2      6       Sinus Bradycardia                 0        2     0.0%
+  3      2       Coronary Artery Disease           0        2     0.0%
+  4      4       Old Inferior MI                   0        1     0.0%
+  5      5       Sinus Tachycardia                 0        1     0.0%
 
 7. CLASSES CONTRIBUTING MOST TO MALE MISCLASSIFICATION
 ------------------------------------------------------
   Rank   Class   Name                          Wrong    Total     Err%
   -----------------------------------------------------------------
   1      8       Supraventricular PC               0        1     0.0%
-  2      10      Right Bundle Branch Block         0        1     0.0%
-  3      7       PVC                               0        1     0.0%
-  4      14      LV Hypertrophy                    0        1     0.0%
+  2      6       Sinus Bradycardia                 0        3     0.0%
+  3      10      Right Bundle Branch Block         0        2     0.0%
+  4      7       PVC                               0        1     0.0%
+  5      14      LV Hypertrophy                    0        2     0.0%
+  6      3       Old Anterior MI                   0        1     0.0%
+  7      16      Others                            0        1     0.0%
+  8      4       Old Inferior MI                   0        1     0.0%
 
-8. ADVERSARIAL DEBIASING (Zhang et al., 2018 adapted)
------------------------------------------------------
-  Adversary architecture : MLP (16 hidden units)
-  Training epochs        : 100
-  Learning rate          : 0.01
+10. EQUALIZED ODDS POST-PROCESSING (Hardt et al., 2016)
+-------------------------------------------------------
+  Method: Gender-specific decision thresholds via ROC convex hull
+  ROC sample points per group  : 100
 
-  Adversary accuracy (before)  : 80.00%
-  Adversary accuracy (after)   : 80.00%
-  Chance baseline              : 50.00%
+  Original threshold (all)     : 0.250000
+  Optimised threshold (male)   : 0.557222
+  Optimised threshold (female) : 0.500000
 
-  Threshold offset (male)      : -0.0250
-  Threshold offset (female)    : -0.0250
-  Predictions changed          : 0
-
-  Metric                             Before      After      Delta
+  Metric                               Male     Female      Delta
   --------------------------------------------------------------
-  Overall accuracy                   80.00%     80.00%     +0.00%
-  Male accuracy                      83.33%     83.33%     +0.00%
-  Female accuracy                    75.00%     75.00%     +0.00%
-  Gender accuracy gap                 8.33%      8.33%     +0.00%
+  True Positive Rate (TPR)          0.7500     0.7000     0.0500
+  False Positive Rate (FPR)         0.6000     0.1304     0.4696
+  Equalized TPR                     0.7000
 
-  Adversary could predict sex from CDS outputs -> gender signal exists.
+  Utility loss vs. single threshold : +0.024534
+  Dataset: 17 male, 33 female users
+
+  Pareto frontier candidates        : 218
+  ROC points (male / female)        : 18 / 34
 
 11. ACTIVE FAIRNESS CONFIGURATION
 ---------------------------------
-  AdvDebiasing
+  EqualizedOdds
 
   ENABLE_REWEIGHING            = False
   ENABLE_FAIRNESS_RL           = False
-  ENABLE_ADVERSARIAL_DEBIASING = True
-  ENABLE_EQUALIZED_ODDS        = False
+  ENABLE_ADVERSARIAL_DEBIASING = False
+  ENABLE_EQUALIZED_ODDS        = True
   ENABLE_FORCED_SEX_BRANCHING  = False
   ENABLE_DATA_AUGMENTATION     = False
 

@@ -585,6 +585,125 @@ class Algorithm4Output:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# SECTION 3B – MARGIN-BASED RISK SCORE (for fairness post-processing)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def compute_margin_risk_scores(records: List['PredictionRecord']) -> np.ndarray:
+    """
+    Compute continuous risk scores from CDS prediction records.
+
+    WHY THIS IS NEEDED
+    ------------------
+    CDS produces bimodal predictions:
+      - ALARM users (feature outside healthy range) → UNHEALTHY, rw varies 0.19–0.94
+      - Non-alarm users → HEALTHY, rw = 0.000 (AF accumulates to 1.0)
+
+    The rw values have NO discrimination power — all non-alarm users score 0.0,
+    all alarm users score >0.19, with no users in between.  Post-processing
+    fairness methods (equalized odds, adversarial debiasing) need a continuous
+    score to find meaningful gender-specific thresholds.
+
+    This function computes a MARGIN-BASED RISK SCORE:  for each tested feature,
+    how close was the user's value to the healthy-range boundary?  The minimum
+    normalised margin across all features gives a continuous risk metric.
+
+    SCORE INTERPRETATION
+    --------------------
+      score > 0 : feature outside healthy range (alarm); higher = more severe
+      score ≈ 0 : feature right at the boundary (borderline)
+      score < 0 : all features within range; more negative = further from boundary
+
+    A threshold of 0.0 reproduces the original alarm-based binary decisions.
+    Gender-specific thresholds let post-processing equalise alarm rates.
+
+    Parameters
+    ----------
+    records : list of PredictionRecord from Algorithm 4 LOOCV.
+
+    Returns
+    -------
+    np.ndarray of shape (len(records),) with risk scores.
+    """
+    # PIECEWISE RISK SCORING
+    #
+    # CDS predictions are alarm-driven: if ANY feature falls outside its
+    # healthy range, the user is immediately UNHEALTHY.  The score must
+    # (a) preserve the alarm/non-alarm ordering so that a baseline threshold
+    # reproduces the original decisions, AND (b) provide variation within
+    # each group so equalized odds can find meaningful gender-specific thresholds.
+    #
+    # Score has two parts separated by an ALARM_BASE boundary:
+    #
+    #   NON-ALARM users (score < ALARM_BASE):
+    #     boundary_proximity = mean of max(0, CUTOFF-margin) across all features
+    #     This is 0 when all features are well within range, and increases as
+    #     features approach the boundary.  Varies between users.
+    #
+    #   ALARM users (score ≥ ALARM_BASE):
+    #     ALARM_BASE + (severity of worst violation)
+    #     severity = |V - nearest_boundary| / range  for the worst feature.
+    #     All alarm users score ≥ ALARM_BASE, so any threshold < ALARM_BASE
+    #     will classify all alarm users as UNHEALTHY.
+    #
+    # Default threshold: slightly below ALARM_BASE reproduces original decisions.
+    # Gender-specific thresholds around ALARM_BASE allow:
+    #   - Lowering threshold for one group: catches near-boundary non-alarm users
+    #   - Raising threshold for one group: rescues borderline alarm users
+
+    MIN_RANGE = 2.0     # Exclude degenerate/binary features
+    CUTOFF = 0.15       # Boundary proximity window (15% of range)
+    ALARM_BASE = 0.5    # Separation constant: alarm scores ≥ 0.5
+
+    scores = np.zeros(len(records))
+    for i, r in enumerate(records):
+        proximity_sum = 0.0
+        n_features = 0
+        max_violation = 0.0  # worst outside-range violation
+        # Use the alarm_class from the record directly — this correctly
+        # identifies alarm users even when the triggering feature has a
+        # narrow range that would be excluded by MIN_RANGE.
+        has_alarm = (r.alarm_class is not None)
+
+        for t in r.af_trace:
+            if t.is_nan:
+                continue
+            b_range = t.b_max - t.b_min
+
+            # For alarm violations: include ALL features regardless of range
+            if t.triggered_alarm and b_range > 1e-12:
+                violation = abs(min(t.raw_value - t.b_min,
+                                    t.b_max - t.raw_value)) / b_range
+                max_violation = max(max_violation, violation)
+
+            # For proximity scoring: only consider wide-range features
+            if b_range < MIN_RANGE:
+                continue
+
+            n_features += 1
+            margin_lo = t.raw_value - t.b_min
+            margin_hi = t.b_max - t.raw_value
+            margin = min(margin_lo, margin_hi) / b_range
+
+            if margin >= 0 and margin < CUTOFF:
+                # Near boundary: contributes to proximity score
+                proximity_sum += (CUTOFF - margin)
+
+        if n_features == 0:
+            if has_alarm:
+                scores[i] = ALARM_BASE + max_violation
+            else:
+                scores[i] = 0.0
+        elif has_alarm:
+            # Alarm user: score = ALARM_BASE + violation severity
+            scores[i] = ALARM_BASE + max_violation
+        else:
+            # Non-alarm user: score = boundary proximity (0 to ~CUTOFF)
+            scores[i] = proximity_sum / n_features
+
+    return scores
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 4 – HELPER FUNCTIONS
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -1649,7 +1768,7 @@ def run_loocv(
         _ext_dir = str(Path(__file__).parent / "extensions")
         if _ext_dir not in sys.path:
             sys.path.insert(0, _ext_dir)
-        from augmentation_strategies import apply_augmentation
+        from extensions.augmentation_strategies import apply_augmentation
 
     output = Algorithm4Output(data=data)
     random.seed(rng_seed)

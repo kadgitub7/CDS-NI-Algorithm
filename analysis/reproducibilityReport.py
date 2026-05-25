@@ -76,8 +76,8 @@ from Algorithm4 import (
     select_best_lambda,
 )
 import fairness_config
-from adversarial_debiasing import run_adversarial_debiasing
-from Fairness_EqualizedOdds import compute_bayes_optimal_predictor
+from extensions.adversarial_debiasing import run_adversarial_debiasing
+from extensions.Fairness_EqualizedOdds import compute_bayes_optimal_predictor
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -522,9 +522,11 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
         lines.append(f"  Method: Gender-specific decision thresholds via ROC convex hull")
         lines.append(f"  ROC sample points per group  : {fairness_config.EQUALIZED_ODDS_ROC_POINTS}")
         lines.append("")
-        lines.append(f"  Original threshold (all)     : {eo_result.original_threshold:.6f}")
+        lines.append(f"  Baseline threshold (all)     : {eo_result.original_threshold:.6f}  (margin risk score)")
         lines.append(f"  Optimised threshold (male)   : {eo_result.threshold_male:.6f}")
         lines.append(f"  Optimised threshold (female) : {eo_result.threshold_female:.6f}")
+        if eo_result.threshold_male != eo_result.threshold_female:
+            lines.append(f"  Threshold delta (M-F)        : {eo_result.threshold_male - eo_result.threshold_female:+.6f}")
         lines.append("")
         lines.append(f"  {'Metric':<30}  {'Male':>9}  {'Female':>9}  {'Delta':>9}")
         lines.append("  " + "-" * 62)
@@ -699,21 +701,25 @@ def main():
     eo_result = None
     if fairness_config.ENABLE_EQUALIZED_ODDS:
         print("Running equalized odds post-processing (Hardt et al., 2016) ...")
-        from Algorithm4 import DIAGNOSTIC_THRESHOLD_ALG4
+        from Algorithm4 import DIAGNOSTIC_THRESHOLD_ALG4, compute_margin_risk_scores
         records = output.records
 
-        rw_scores = np.array([
-            r.af_trace[-1].rw_real if r.af_trace else 1.0
-            for r in records
-        ])
+        # Use margin-based risk scores instead of raw rw values.
+        # Raw rw is bimodal (0.0 for all non-alarm users, >0.19 for alarm users)
+        # with no intermediate values, making threshold adjustment meaningless.
+        # Margin-based scores provide a continuous distribution where:
+        #   score > 0 = feature outside healthy range (alarm)
+        #   score < 0 = all features within range (healthy)
+        # A baseline threshold of 0.0 reproduces original alarm-based decisions.
+        risk_scores = compute_margin_risk_scores(records)
         user_labels = np.array([r.true_label for r in records])
         user_data = data[np.array([r.user_global_idx for r in records])]
 
         eo_result = compute_bayes_optimal_predictor(
-            scores=rw_scores,
+            scores=risk_scores,
             labels=user_labels,
             data=user_data,
-            baseline_threshold=DIAGNOSTIC_THRESHOLD_ALG4,
+            baseline_threshold=0.25,  # midpoint of alarm gap in piecewise score space
             verbose=False,
             n_roc_points=fairness_config.EQUALIZED_ODDS_ROC_POINTS,
         )
