@@ -796,6 +796,8 @@ def _rl_select_best_action(
     # ── FAIRNESS: Precompute sex-stratified AF contributions for penalty ──────
     # For each candidate action, compute how differently it contributes to AF
     # for male vs female subpopulations in the training data at this node.
+    # Uses FULLY sex-stratified P(h,f) and P(h>1,f) so the penalty captures
+    # true group-level AF contribution disparities.
     fairness_penalties: Dict[int, float] = {}
     if ENABLE_FAIRNESS_RL and data is not None and labels is not None:
         fair_data = train_data if train_data is not None else data
@@ -805,21 +807,22 @@ def _rl_select_best_action(
         node_labels = fair_labels[node_users]
         male_mask = (node_sex == 0)
         female_mask = (node_sex == 1)
-        n_male_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & male_mask).sum()
-        n_female_diseased = ((node_labels != HEALTHY_CLASS_ALG4) & female_mask).sum()
-        n_male_node = male_mask.sum()
-        n_female_node = female_mask.sum()
+        n_male_node = int(male_mask.sum())
+        n_female_node = int(female_mask.sum())
+
+        # Sex-stratified P(h, f) and P(h>1, f)
+        male_labels = node_labels[male_mask]
+        female_labels = node_labels[female_mask]
+        p_h_f_male = (male_labels == disease_h).sum() / n_male_node if n_male_node > 0 else 0.0
+        p_h_f_female = (female_labels == disease_h).sum() / n_female_node if n_female_node > 0 else 0.0
+        p_h_gt1_f_male = (male_labels != HEALTHY_CLASS_ALG4).sum() / n_male_node if n_male_node > 0 else 0.0
+        p_h_gt1_f_female = (female_labels != HEALTHY_CLASS_ALG4).sum() / n_female_node if n_female_node > 0 else 0.0
 
         for action in candidate_actions:
             j = action.feature_idx
-            # Compute AF contribution separately for male and female subgroups
-            # AF_increment ∝ P(h,f) * r_{j|h} / P(h>1,f)
-            # The sex-specific version uses sex-stratified disease prevalence
-            # and sex-stratified action weight (fraction outside healthy range)
             vals = fair_data[node_users, j]
             valid_mask = ~np.isnan(vals)
 
-            # Get healthy range for this feature at this node
             model = alg2_output.get_model(node.node_id, j)
             if model is None:
                 fairness_penalties[j] = 0.0
@@ -827,35 +830,30 @@ def _rl_select_best_action(
             b_min_h = model.healthy_range.b_min_healthy
             b_max_h = model.healthy_range.b_max_healthy
 
-            # r_{j|h} stratified by sex: fraction of disease-h users outside range
+            # r_{j|h} stratified by sex
             disease_mask = (node_labels == disease_h)
             male_disease = disease_mask & male_mask & valid_mask
             female_disease = disease_mask & female_mask & valid_mask
 
-            n_male_d = male_disease.sum()
-            n_female_d = female_disease.sum()
+            n_male_d = int(male_disease.sum())
+            n_female_d = int(female_disease.sum())
 
             if n_male_d > 0:
                 male_vals = vals[male_disease]
-                r_male = ((male_vals < b_min_h) | (male_vals > b_max_h)).sum() / n_male_d
+                r_male = float(((male_vals < b_min_h) | (male_vals > b_max_h)).sum()) / n_male_d
             else:
                 r_male = 0.0
 
             if n_female_d > 0:
                 female_vals = vals[female_disease]
-                r_female = ((female_vals < b_min_h) | (female_vals > b_max_h)).sum() / n_female_d
+                r_female = float(((female_vals < b_min_h) | (female_vals > b_max_h)).sum()) / n_female_d
             else:
                 r_female = 0.0
 
-            # AF contribution disparity: |AF_male - AF_female|
-            # Using simplified AF formula: AF ∝ P(h,f) * r / P(h>1,f)
-            AF_male = p_h_f * r_male / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
-            AF_female = p_h_f * r_female / p_h_gt1_f if p_h_gt1_f > 0 else 0.0
+            # Sex-stratified AF increment: AF_g = P(h,f|g) * r_g / P(h>1,f|g)
+            AF_male = p_h_f_male * r_male / p_h_gt1_f_male if p_h_gt1_f_male > 0 else 0.0
+            AF_female = p_h_f_female * r_female / p_h_gt1_f_female if p_h_gt1_f_female > 0 else 0.0
             fairness_penalties[j] = abs(AF_male - AF_female)
-
-    # # ── ORIGINAL (uncomment to disable fairness RL): ─────────────────────────
-    # # To revert: set ENABLE_FAIRNESS_RL = False at the top of this file.
-    # fairness_penalties = {}
 
     rl_entries: List[RLLookaheadEntry] = []
     best_action: Optional[ExecutiveActionEntry] = None

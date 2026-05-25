@@ -165,8 +165,12 @@ class ROCCurve:
         """
         Compute TPR, FPR at a specific threshold.
 
-        [HARDT] Classification rule: ŷ = 1 if score ≤ threshold, else 0.
-                (Lower rw = higher confidence in healthy, but we want ≤ for unhealthy)
+        [HARDT] Classification rule for CDS:
+            In CDS, rw = 1 - AF.  Lower rw = higher confidence in HEALTHY.
+            rw <= threshold  =>  HEALTHY  (negative prediction)
+            rw >  threshold  =>  UNHEALTHY / SCREENING  (positive prediction)
+
+            So: predict unhealthy (positive) when rw > threshold.
 
         Parameters
         ----------
@@ -176,8 +180,9 @@ class ROCCurve:
         -------
         ROCPoint at this threshold.
         """
-        # Prediction: unhealthy if rw <= threshold
-        predictions = (self.scores <= threshold).astype(int)  # 1 = unhealthy (positive)
+        # Prediction: unhealthy (positive) if rw > threshold
+        # (higher rw = less assurance = more likely diseased)
+        predictions = (self.scores > threshold).astype(int)  # 1 = unhealthy (positive)
         
         # Separate by true label
         # In CDS: label=1 is healthy (negative), label≥2 is diseased (positive)
@@ -406,20 +411,74 @@ def compute_roc_curves_by_gender(
 # SECTION 5 – CORE FUNCTIONS: CONVEX HULL COMPUTATION
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _interpolate_roc_at_tpr(roc: ROCCurve, target_tpr: float) -> Optional[Tuple[float, float, float]]:
+    """
+    Interpolate along an ROC curve to find the threshold and FPR at a target TPR.
+
+    [HARDT] Section 4: Uses randomized classifiers — for any target TPR, we
+    interpolate between two adjacent ROC points. The ROC curve is a step function
+    (discrete users), so we find the two adjacent points that bracket the target
+    TPR and linearly interpolate the threshold and FPR.
+
+    Returns (threshold, fpr, tpr) or None if target_tpr is outside achievable range.
+    """
+    # Sort points by TPR ascending for interpolation
+    sorted_pts = sorted(roc.points, key=lambda p: (p.tpr, -p.fpr))
+
+    # Remove duplicate TPR values, keeping lowest FPR (Pareto-optimal)
+    unique_pts = []
+    seen_tpr = set()
+    for pt in sorted_pts:
+        tpr_key = round(pt.tpr, 10)
+        if tpr_key not in seen_tpr:
+            seen_tpr.add(tpr_key)
+            unique_pts.append(pt)
+
+    if not unique_pts:
+        return None
+
+    # Check bounds
+    min_tpr = unique_pts[0].tpr
+    max_tpr = unique_pts[-1].tpr
+
+    if target_tpr < min_tpr - 1e-9 or target_tpr > max_tpr + 1e-9:
+        return None
+
+    # Exact match
+    for pt in unique_pts:
+        if abs(pt.tpr - target_tpr) < 1e-9:
+            return (pt.threshold, pt.fpr, pt.tpr)
+
+    # Find bracketing points and interpolate
+    for i in range(len(unique_pts) - 1):
+        pt_lo = unique_pts[i]
+        pt_hi = unique_pts[i + 1]
+        if pt_lo.tpr <= target_tpr <= pt_hi.tpr:
+            if abs(pt_hi.tpr - pt_lo.tpr) < 1e-12:
+                alpha = 0.5
+            else:
+                alpha = (target_tpr - pt_lo.tpr) / (pt_hi.tpr - pt_lo.tpr)
+            interp_fpr = pt_lo.fpr + alpha * (pt_hi.fpr - pt_lo.fpr)
+            interp_threshold = pt_lo.threshold + alpha * (pt_hi.threshold - pt_lo.threshold)
+            return (interp_threshold, interp_fpr, target_tpr)
+
+    return None
+
+
 def compute_convex_hull(
     roc_male: ROCCurve,
     roc_female: ROCCurve,
 ) -> ConvexHullResult:
     """
-    Compute convex hull (Pareto frontier) of ROC curves.
+    Compute Pareto frontier of achievable (TPR, FPR) pairs with equalized TPR.
 
-    [HARDT] Section 4: "The set of achievable false positive and false negative
-    rates is the set of all points in the convex hull of individual group ROC curves."
+    [HARDT] Section 4: For equalized odds, we search for target TPR values where
+    both groups can achieve the same TPR via threshold adjustment (with interpolation
+    for randomized classifiers).
 
-    For equalized odds, we search for points (t_A, t_B) such that:
-      TPR_A(t_A) = TPR_B(t_B)
-
-    This finds all feasible (TPR, FPR, FNR) triples where the constraint is satisfied.
+    For each candidate TPR value, we interpolate both groups' ROC curves to find
+    the threshold and FPR that achieves that TPR. This produces feasible operating
+    points where TPR_male = TPR_female by construction.
 
     Parameters
     ----------
@@ -430,37 +489,64 @@ def compute_convex_hull(
     -------
     ConvexHullResult with candidate operating points.
     """
-    log.info("Computing convex hull of ROC curves...")
+    log.info("Computing Pareto frontier with ROC interpolation...")
 
-    # Generate all possible (t_A, t_B) pairs and their (FPR_A, FPR_B, TPR_A, TPR_B)
+    # Collect all unique TPR values from both curves as candidate targets
+    all_tpr_values = set()
+    for pt in roc_male.points:
+        all_tpr_values.add(pt.tpr)
+    for pt in roc_female.points:
+        all_tpr_values.add(pt.tpr)
+
+    # Also add finely spaced targets for better resolution
+    n_fine = 200
+    male_tprs = [pt.tpr for pt in roc_male.points]
+    female_tprs = [pt.tpr for pt in roc_female.points]
+    tpr_lo = max(min(male_tprs), min(female_tprs))
+    tpr_hi = min(max(male_tprs), max(female_tprs))
+    if tpr_lo < tpr_hi:
+        for t in np.linspace(tpr_lo, tpr_hi, n_fine):
+            all_tpr_values.add(float(t))
+
     hull_points: List[Tuple[float, float, float, float, float]] = []
 
-    for pt_male in roc_male.points:
-        for pt_female in roc_female.points:
-            # Check equalized odds constraint: TPR must match
-            if abs(pt_male.tpr - pt_female.tpr) < 1e-6:  # Allow small tolerance
-                # Compute aggregate FPR and FNR (weighted by group size)
-                total_n = roc_male.n_positive + roc_male.n_negative + \
-                          roc_female.n_positive + roc_female.n_negative
-                fpr_agg = (pt_male.fp + pt_female.fp) / (
-                    roc_male.n_negative + roc_female.n_negative
-                ) if (roc_male.n_negative + roc_female.n_negative) > 0 else 0.0
-                fnr_agg = (pt_male.fn + pt_female.fn) / (
-                    roc_male.n_positive + roc_female.n_positive
-                ) if (roc_male.n_positive + roc_female.n_positive) > 0 else 0.0
+    for target_tpr in sorted(all_tpr_values):
+        male_interp = _interpolate_roc_at_tpr(roc_male, target_tpr)
+        female_interp = _interpolate_roc_at_tpr(roc_female, target_tpr)
 
-                hull_points.append((
-                    pt_male.threshold,
-                    pt_female.threshold,
-                    fpr_agg,
-                    pt_male.tpr,  # both should be equal
-                    fnr_agg,
-                ))
+        if male_interp is None or female_interp is None:
+            continue
 
-    log.info(f"  Found {len(hull_points)} candidate points satisfying equalized TPR")
+        t_male, fpr_male, _ = male_interp
+        t_female, fpr_female, _ = female_interp
 
-    # Sort by FPR (operating points along Pareto frontier)
-    hull_points = sorted(hull_points, key=lambda x: x[2])  # sort by fpr_agg
+        # Compute aggregate FPR and FNR weighted by group size
+        total_neg = roc_male.n_negative + roc_female.n_negative
+        total_pos = roc_male.n_positive + roc_female.n_positive
+        fpr_agg = (fpr_male * roc_male.n_negative + fpr_female * roc_female.n_negative) / total_neg if total_neg > 0 else 0.0
+        fnr_agg = (1.0 - target_tpr)
+
+        hull_points.append((
+            t_male,
+            t_female,
+            fpr_agg,
+            target_tpr,
+            fnr_agg,
+        ))
+
+    log.info(f"  Found {len(hull_points)} candidate points with interpolated equalized TPR")
+
+    # Sort by FPR
+    hull_points = sorted(hull_points, key=lambda x: x[2])
+
+    # Prune to Pareto-optimal (non-dominated in FPR vs FNR)
+    pareto = []
+    best_fnr = float('inf')
+    for pt in hull_points:
+        if pt[4] < best_fnr - 1e-9:
+            best_fnr = pt[4]
+            pareto.append(pt)
+    hull_points = pareto if pareto else hull_points
 
     result = ConvexHullResult(
         roc_male=roc_male,
@@ -746,9 +832,10 @@ def apply_equalized_odds_thresholds(
     female_mask = (gender_col == FEMALE_VALUE)
 
     # Apply gender-specific thresholds
-    predictions[male_mask] = (scores[male_mask] <= fairness_result.threshold_male).astype(int)
+    # In CDS: rw > threshold => unhealthy (positive), rw <= threshold => healthy (negative)
+    predictions[male_mask] = (scores[male_mask] > fairness_result.threshold_male).astype(int)
     predictions[female_mask] = (
-        scores[female_mask] <= fairness_result.threshold_female
+        scores[female_mask] > fairness_result.threshold_female
     ).astype(int)
 
     return predictions

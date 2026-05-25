@@ -576,7 +576,8 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
                              labels:        np.ndarray,
                              class_labels:  Optional[List[int]] = None,
                              N_total:     int = 0,
-                             laplace_eps:   float = LAPLACE_EPSILON
+                             laplace_eps:   float = LAPLACE_EPSILON,
+                             instance_weights: Optional[np.ndarray] = None,
                              ) -> BayesianTables:
     """
     Compute the four Bayesian probability tables for one (node, feature) pair.
@@ -640,18 +641,27 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     labels_valid         = labels[global_indices_valid]   # shape (n_valid,)
 
     # ── Build user counts per class × bin ──────────────────────────────────
-    # counts_per_class_bin[c, b] = number of class-c users in bin b
+    # counts_per_class_bin[c, b] = number (or weighted count) of class-c users in bin b
     counts_per_class_bin = np.zeros((n_classes, n_bins), dtype=float)
     users_per_class      = np.zeros(n_classes, dtype=int)
 
     for ci, cls in enumerate(class_labels):
-        
+
         class_mask = (labels_valid == cls)
         users_per_class[ci] = int(class_mask.sum())
         if users_per_class[ci] == 0:
             continue
         class_bins = disc.bin_assignments[class_mask]
-        counts_per_class_bin[ci] = np.bincount(class_bins, minlength=n_bins)
+        if instance_weights is not None:
+            # [FAIRNESS] Use weighted bin counts for P(B̂|h)
+            class_weights = instance_weights[class_mask]
+            w_bin_counts = np.zeros(n_bins, dtype=float)
+            for b_idx in range(n_bins):
+                bin_mask = (class_bins == b_idx)
+                w_bin_counts[b_idx] = class_weights[bin_mask].sum()
+            counts_per_class_bin[ci] = w_bin_counts
+        else:
+            counts_per_class_bin[ci] = np.bincount(class_bins, minlength=n_bins)
 
     # ── P(B̂|h): shape (n_bins, n_classes) ──────────────────────────────────
     # [PAPER] Line 9: "Calculate P(B̂_m^k(o)|h)"
@@ -661,7 +671,6 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
     for ci, cls in enumerate(class_labels):
         n_cls = users_per_class[ci]
         if n_cls == 0:
-            # No users of this class in node -> uniform likelihood
             p_bin_given_h[:, ci] = 1.0 / n_bins
         else:
             raw = counts_per_class_bin[ci] + laplace_eps
@@ -721,7 +730,8 @@ def compute_bayesian_tables(disc:          DiscretizationResult,
 
 def compute_healthy_range(disc:   DiscretizationResult,
                            node:   TreeNode,
-                           labels: np.ndarray
+                           labels: np.ndarray,
+                           data:   Optional[np.ndarray] = None,
                            ) -> HealthyRangeResult:
     """
     Extract the healthy feature range [b_min, b_max] for one (node, feature).
@@ -1032,6 +1042,14 @@ def run_algorithm2_for_node(node:          TreeNode,
         f"classes={list(class_labels)}"
     )
 
+    # ── FAIRNESS: Compute node-level reweighing weights once ────────────────
+    node_reweigh_weights = None
+    if ENABLE_REWEIGHING and data is not None:
+        node_global_indices = node.user_indices
+        node_labels = labels[node_global_indices]
+        node_sex = data[node_global_indices, SEX_FEATURE_INDEX]
+        node_reweigh_weights = compute_reweighing_weights(node_labels, node_sex)
+
     # ── [PAPER] Line 3: "for o = set of O_m^k(f_m^k) do" ────────────────────
     for feature_o in node.feature_indices:
 
@@ -1054,12 +1072,17 @@ def run_algorithm2_for_node(node:          TreeNode,
         disc._raw_values_valid = raw_values_valid
 
         # ── Lines 8-10: Bayesian probability tables ──────────────────────────
+        # Subset reweighing weights to valid (non-NaN) users for this feature
+        valid_weights = None
+        if node_reweigh_weights is not None:
+            valid_weights = node_reweigh_weights[disc.valid_user_rows]
         bayes = compute_bayesian_tables(
             disc         = disc,
             node         = node,
             labels       = labels,
             N_total = len(labels),
             class_labels = list(class_labels),
+            instance_weights = valid_weights,
         )
 
         # ── Lines 11-14: Healthy range ────────────────────────────────────────

@@ -281,19 +281,18 @@ def run_adversarial_debiasing(
     result.original_female_accuracy = female_correct / female_total if female_total > 0 else 0
 
     # Step 3: Search for per-group threshold offsets
-    # The idea: adjust the rw threshold separately for males and females
-    # so that the adversary can no longer distinguish them.
-    # We search over offsets in [-0.05, +0.05] for each group.
+    # Search over a wider, physically meaningful range of offsets.
+    # rw is in [0, 1] and baseline threshold is 0.025, so search [0, 0.5].
     best_offset_m = 0.0
     best_offset_f = 0.0
     best_score = float("inf")
 
-    offsets = np.linspace(-0.05, 0.05, ADVERSARIAL_THRESHOLD_SEARCH_STEPS)
+    # Wider search: thresholds from 0 to 0.5 (rw range)
+    n_steps = ADVERSARIAL_THRESHOLD_SEARCH_STEPS
+    threshold_candidates = np.linspace(0.0, 0.5, n_steps)
 
-    for off_m in offsets:
-        for off_f in offsets:
-            threshold_m = diagnostic_threshold + off_m
-            threshold_f = diagnostic_threshold + off_f
+    for threshold_m in threshold_candidates:
+        for threshold_f in threshold_candidates:
 
             # Re-score predictions with adjusted thresholds
             new_decisions = []
@@ -320,14 +319,16 @@ def run_adversarial_debiasing(
             for i, d in enumerate(new_decisions):
                 X_new[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
 
-            # Score: adversary accuracy on new features (want close to 0.5)
-            # Mask non-decision features (cols 0-3) to zero so the adversary
-            # can only exploit the decision column for sex prediction.
-            # This ensures threshold search targets decision-level parity.
-            X_eval = X_new.copy()
-            X_eval[:, :4] = 0.0
-            # + penalty for accuracy loss
-            adv_acc = adversary.accuracy(X_eval, y_sex)
+            # Train a FRESH adversary on the modified features to properly
+            # evaluate whether sex is still predictable from the new outputs.
+            fresh_adversary = AdversaryMLP(
+                input_dim=X_new.shape[1],
+                hidden_dim=ADVERSARIAL_HIDDEN_DIM,
+                lr=ADVERSARIAL_LR,
+            )
+            for _ in range(ADVERSARIAL_EPOCHS):
+                fresh_adversary.train_step(X_new, y_sex)
+            adv_acc = fresh_adversary.accuracy(X_new, y_sex)
 
             n_correct_new = 0
             for i, r in enumerate(records):
@@ -348,8 +349,8 @@ def run_adversarial_debiasing(
 
             if score < best_score:
                 best_score = score
-                best_offset_m = off_m
-                best_offset_f = off_f
+                best_offset_m = threshold_m - diagnostic_threshold
+                best_offset_f = threshold_f - diagnostic_threshold
 
     result.threshold_offset_male = best_offset_m
     result.threshold_offset_female = best_offset_f
@@ -402,7 +403,7 @@ def run_adversarial_debiasing(
     result.debiased_male_accuracy = male_correct_new / male_total_new if male_total_new > 0 else 0
     result.debiased_female_accuracy = female_correct_new / female_total_new if female_total_new > 0 else 0
 
-    # Re-evaluate adversary on debiased outputs
+    # Re-evaluate: train a FRESH adversary on debiased outputs
     decision_map = {
         HealthDecision.HEALTHY: 0,
         HealthDecision.UNHEALTHY: 1,
@@ -411,7 +412,14 @@ def run_adversarial_debiasing(
     X_debiased = X.copy()
     for i, d in enumerate(final_decisions):
         X_debiased[i, 4] = (decision_map.get(d, 2) - feat_mu[4]) / feat_std[4]
-    result.adversary_accuracy_after = adversary.accuracy(X_debiased, y_sex)
+    fresh_eval = AdversaryMLP(
+        input_dim=X_debiased.shape[1],
+        hidden_dim=ADVERSARIAL_HIDDEN_DIM,
+        lr=ADVERSARIAL_LR,
+    )
+    for _ in range(ADVERSARIAL_EPOCHS):
+        fresh_eval.train_step(X_debiased, y_sex)
+    result.adversary_accuracy_after = fresh_eval.accuracy(X_debiased, y_sex)
 
     log.info(f"Adversary accuracy (after debiasing): {result.adversary_accuracy_after:.4f}")
     log.info(f"Threshold offsets: male={best_offset_m:+.4f}, female={best_offset_f:+.4f}")

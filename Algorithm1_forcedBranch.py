@@ -741,8 +741,11 @@ def main_forced(data_path: str) -> ForcedSexForest:
     # 1. Load
     data, labels = load_dataset_flexible(data_path)
 
-    # 2. Build (max_m=2 is the effective limit given u_min=200 with ~426/526 users)
-    forest = build_forced_sex_forest(data, labels, max_m=2)
+    # 2. Build with max_m=4 to allow deeper trees when data supports it.
+    # With u_min=200 and ~203/249 users, Level 3 requires 400+ users in a
+    # Level 2 node which is unlikely — but with augmented data (952 rows,
+    # ~426 male / ~526 female) Level 3 becomes feasible for some splits.
+    forest = build_forced_sex_forest(data, labels, max_m=4)
 
     # 3. Summary
     print_forest_summary(forest)
