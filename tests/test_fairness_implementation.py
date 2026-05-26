@@ -38,7 +38,7 @@ from Fairness_EqualizedOdds import (
     compute_roc_curves_by_gender,
     compute_bayes_optimal_predictor,
     apply_equalized_odds_thresholds,
-    _roc_to_convex_hull_points,
+    _upper_concave_envelope,
     _find_feasible_region,
     _realize_operating_point,
     _apply_randomized_threshold,
@@ -129,18 +129,28 @@ def test_roc_curve_tpr_fpr_bounds(result: TestResult):
 # TEST 2: CONVEX HULL AND FEASIBLE REGION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def test_convex_hull_points(result: TestResult):
-    """Test convex hull computation from ROC curve."""
+def test_concave_envelope(result: TestResult):
+    """Test upper concave envelope of ROC curve."""
     scores = np.array([0.1, 0.2, 0.3, 0.8, 0.9])
     labels = np.array([1,   1,   1,   2,   2])
 
     roc = compute_roc_curve(scores, labels, "Test", n_points=20)
-    hull = _roc_to_convex_hull_points(roc)
+    envelope = _upper_concave_envelope(roc)
 
-    assert len(hull) > 0, "Hull should have points"
-    assert all(hull[:, 1] >= hull[:, 0] - 1e-9), "Hull points should be above diagonal"
+    assert len(envelope) >= 2, "Envelope should have at least (0,0) and (1,1)"
+    assert all(envelope[:, 1] >= envelope[:, 0] - 1e-9), "Envelope should be above diagonal"
+    # Check concavity: slopes should be non-increasing
+    for i in range(1, len(envelope) - 1):
+        dx1 = envelope[i, 0] - envelope[i-1, 0]
+        dy1 = envelope[i, 1] - envelope[i-1, 1]
+        dx2 = envelope[i+1, 0] - envelope[i, 0]
+        dy2 = envelope[i+1, 1] - envelope[i, 1]
+        if dx1 > 1e-12 and dx2 > 1e-12:
+            slope1 = dy1 / dx1
+            slope2 = dy2 / dx2
+            assert slope2 <= slope1 + 1e-6, "Envelope should be concave"
 
-    result.message = f"Convex hull has {len(hull)} points"
+    result.message = f"Concave envelope has {len(envelope)} vertices"
 
 
 def test_feasible_region_identical_groups(result: TestResult):
@@ -151,11 +161,14 @@ def test_feasible_region_identical_groups(result: TestResult):
     roc_a = compute_roc_curve(scores.copy(), labels.copy(), "A", n_points=20)
     roc_b = compute_roc_curve(scores.copy(), labels.copy(), "B", n_points=20)
 
-    hull_a = _roc_to_convex_hull_points(roc_a)
-    hull_b = _roc_to_convex_hull_points(roc_b)
-    feasible = _find_feasible_region(hull_a, hull_b)
+    env_a = _upper_concave_envelope(roc_a)
+    env_b = _upper_concave_envelope(roc_b)
+    feasible = _find_feasible_region(env_a, env_b)
 
     assert len(feasible) > 0, "Identical groups must have non-empty intersection"
+    # All feasible points should be above diagonal
+    for fpr, tpr in feasible:
+        assert tpr > fpr - 1e-9, f"Point ({fpr}, {tpr}) should be above diagonal"
     result.message = f"Found {len(feasible)} feasible (FPR, TPR) points"
 
 
@@ -170,9 +183,9 @@ def test_feasible_region_different_groups(result: TestResult):
     roc_a = compute_roc_curve(scores_a, labels_a, "A", n_points=20)
     roc_b = compute_roc_curve(scores_b, labels_b, "B", n_points=20)
 
-    hull_a = _roc_to_convex_hull_points(roc_a)
-    hull_b = _roc_to_convex_hull_points(roc_b)
-    feasible = _find_feasible_region(hull_a, hull_b)
+    env_a = _upper_concave_envelope(roc_a)
+    env_b = _upper_concave_envelope(roc_b)
+    feasible = _find_feasible_region(env_a, env_b)
 
     result.message = f"Feasible region: {len(feasible)} points (may be 0 for very different groups)"
 
@@ -461,7 +474,7 @@ def main():
         ("ROC Curve - Basic", test_roc_curve_basic),
         ("ROC Curve - Extreme Thresholds", test_roc_curve_extremes),
         ("ROC Curve - TPR/FPR Bounds", test_roc_curve_tpr_fpr_bounds),
-        ("Convex Hull - Points", test_convex_hull_points),
+        ("Concave Envelope", test_concave_envelope),
         ("Feasible Region - Identical Groups", test_feasible_region_identical_groups),
         ("Feasible Region - Different Groups", test_feasible_region_different_groups),
         ("Randomized Threshold - Deterministic Detection", test_randomized_threshold_deterministic),

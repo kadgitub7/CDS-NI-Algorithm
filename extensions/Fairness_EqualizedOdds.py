@@ -11,7 +11,7 @@ Implements equalized odds post-processing following Hardt et al. (2016):
 Equalized Odds (Definition 2.1) requires that BOTH the True Positive Rate (TPR)
 AND the False Positive Rate (FPR) are equal across protected groups:
 
-    Pr{Ŷ=1 | A=a, Y=y} is the same for all groups a, for BOTH y=0 and y=1.
+    Pr{Y_hat=1 | A=a, Y=y} is the same for all groups a, for BOTH y=0 and y=1.
 
 This means:
     TPR_male = TPR_female   (equal true positive rates)
@@ -20,30 +20,30 @@ This means:
 METHODOLOGY (Section 4.2 of Hardt et al.)
 ------------------------------------------
   1. Compute per-group ROC curves C_a(t) in (FPR, TPR) space.
-  2. Compute the convex hull D_a = convhull{C_a(t)} for each group.
-  3. Find the intersection region ∩_a D_a where both groups can achieve
-     the SAME (FPR, TPR) point.
-  4. Optimize over the upper-left boundary of this intersection to find
-     the operating point that minimizes expected loss.
+  2. Compute the upper concave envelope of each ROC curve — this is the
+     boundary of D_a = convhull{C_a(t)}, the set of achievable (FPR, TPR)
+     points via randomized classifiers.
+  3. Find the intersection region where both groups can achieve the SAME
+     (FPR, TPR) point: the upper boundary is min(envelope_a, envelope_b).
+  4. Optimize over this boundary using prevalence-weighted expected loss:
+         L = P(Y=0) * FPR + P(Y=1) * (1 - TPR)
   5. For each group, realize the chosen (FPR, TPR) point using a RANDOMIZED
-     classifier — a mixture of two threshold predictors. This is necessary
-     because the chosen point may not lie exactly on either group's ROC curve.
+     classifier — a mixture of two threshold predictors.
 
 RANDOMIZED CLASSIFIERS (Section 4.2)
 --------------------------------------
   For each group a, the derived predictor is:
-      Ŷ = I{R > T_a}
+      Y_hat = I{R > T_a}
   where T_a is a random threshold:
-      T_a = t_a   with probability p_a
-      T_a = t̄_a  with probability 1 - p_a
-  Equivalently: if R < t_a → predict 0; if R > t̄_a → predict 1;
-  if t_a < R < t̄_a → predict 1 with probability p_a.
+      T_a = t_lo with probability p, t_hi with probability (1-p)
+  Equivalently: if R < t_lo -> predict 0; if R > t_hi -> predict 1;
+  if t_lo <= R <= t_hi -> predict 1 with probability p.
 
 PAPER FIDELITY TAGS
 -------------------
-  [HARDT]  – directly from Hardt et al. (2016) framework
-  [INFER]  – required interpretation not explicitly in paper
-  [ENGR]   – engineering choice with justification
+  [HARDT]  - directly from Hardt et al. (2016) framework
+  [INFER]  - required interpretation not explicitly in paper
+  [ENGR]   - engineering choice with justification
 
 ================================================================================
 """
@@ -56,8 +56,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from scipy.optimize import linprog
-from scipy.spatial import ConvexHull
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 – LOGGING
@@ -163,9 +161,9 @@ class RandomizedThreshold:
 
     The predictor uses threshold t_lo with probability p and t_hi with
     probability (1-p). Equivalently:
-        R < t_lo  → predict 0
-        R > t_hi  → predict 1
-        t_lo <= R <= t_hi → predict 1 with probability p
+        R > t_hi  -> predict 1
+        R < t_lo  -> predict 0
+        t_lo <= R <= t_hi -> predict 1 with probability p
     """
     t_lo: float
     t_hi: float
@@ -225,11 +223,14 @@ def compute_roc_curve(
         thresholds = np.concatenate([
             np.array([-np.inf, np.inf]),
             unique_scores,
+            # Add midpoints between consecutive unique scores for finer resolution
+            (unique_scores[:-1] + unique_scores[1:]) / 2.0 if len(unique_scores) > 1 else np.array([]),
         ])
     else:
         thresholds = np.concatenate([
             np.array([-np.inf, np.inf]),
             np.linspace(scores.min(), scores.max(), n_points),
+            unique_scores,  # always include exact score values
         ])
 
     roc = ROCCurve(
@@ -278,129 +279,144 @@ def compute_roc_curves_by_gender(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 5 – CONVEX HULL OF ROC CURVES
+# SECTION 5 – UPPER CONCAVE ENVELOPE OF ROC CURVE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _roc_to_convex_hull_points(roc: ROCCurve) -> np.ndarray:
+def _upper_concave_envelope(roc: ROCCurve) -> np.ndarray:
     """
-    [HARDT] Equation 4.4: D_a = convhull{C_a(t): t in [0,1]}
+    [HARDT] Compute the upper concave envelope of the ROC curve.
 
-    Extract the (FPR, TPR) points from the ROC curve and compute the upper
-    boundary of their convex hull (points above the main diagonal).
+    D_a = convhull{C_a(t): t in [0,1]}  (Equation 4.4)
 
-    Returns array of shape (K, 2) with columns [fpr, tpr].
+    The upper boundary of D_a is the concave envelope of the ROC curve.
+    Any (FPR, TPR) point below this envelope and above the diagonal can be
+    achieved by a randomized classifier mixing two thresholds.
+
+    Returns array of shape (K, 2) with [fpr, tpr] sorted by FPR ascending,
+    forming a concave curve from (0,0) to (1,1).
     """
-    pts = np.array([[p.fpr, p.tpr] for p in roc.points])
+    # Collect all ROC (fpr, tpr) points
+    pts = [[p.fpr, p.tpr] for p in roc.points]
+    pts.append([0.0, 0.0])  # always include origin
+    pts.append([1.0, 1.0])  # always include (1,1)
 
-    pts = np.vstack([pts, [0.0, 0.0], [1.0, 1.0]])
-
+    # Remove duplicates and sort by FPR
+    pts = np.array(pts)
     pts = np.unique(pts, axis=0)
+    pts = pts[pts[:, 0].argsort()]
 
-    above_diag = pts[:, 1] >= pts[:, 0] - 1e-9
-    pts = pts[above_diag]
+    # Build upper concave hull using Andrew's monotone chain (upper hull).
+    # The upper hull of ROC points is the concave envelope: for every FPR
+    # value, it gives the maximum achievable TPR.
+    #
+    # We walk left-to-right and keep only points that maintain concavity
+    # (i.e., the slope is non-increasing).
+    upper = []
+    for pt in pts:
+        # Remove points that create a convex (upward) turn
+        while len(upper) >= 2:
+            # Cross product of vectors (upper[-1] - upper[-2]) x (pt - upper[-2])
+            # If positive, the three points make a left (convex) turn -> remove middle
+            o = upper[-2]
+            a = upper[-1]
+            cross = (a[0] - o[0]) * (pt[1] - o[1]) - (a[1] - o[1]) * (pt[0] - o[0])
+            if cross >= -1e-12:  # left turn or collinear -> remove
+                upper.pop()
+            else:
+                break
+        upper.append(pt.tolist())
 
-    return pts
+    envelope = np.array(upper)
+
+    # Ensure all points are above or on the diagonal (TPR >= FPR).
+    # Points below the diagonal are worse than random and never optimal.
+    above = envelope[:, 1] >= envelope[:, 0] - 1e-9
+    if not np.all(above):
+        # Keep all points but clip TPR to diagonal
+        envelope[:, 1] = np.maximum(envelope[:, 1], envelope[:, 0])
+
+    return envelope
 
 
-def _upper_boundary(hull_pts: np.ndarray) -> np.ndarray:
+def _interpolate_envelope(envelope: np.ndarray, target_fpr: float) -> Optional[float]:
     """
-    Extract the upper-left boundary of a convex hull in (FPR, TPR) space.
+    Linearly interpolate the concave envelope to find TPR at a given FPR.
 
-    [HARDT] The optimal equalized odds predictor lies on the upper-left
-    boundary of the intersection region (Figure 2, middle panel).
-
-    Returns points sorted by FPR ascending, forming a concave curve from
-    (0,0) toward (1,1).
+    Returns TPR or None if target_fpr is outside the envelope's range.
     """
-    if len(hull_pts) < 3:
-        return hull_pts[hull_pts[:, 1].argsort()[::-1]]
-
-    try:
-        ch = ConvexHull(hull_pts)
-        vertices = hull_pts[ch.vertices]
-    except Exception:
-        return hull_pts[hull_pts[:, 0].argsort()]
-
-    sorted_v = vertices[vertices[:, 0].argsort()]
-
-    upper = [sorted_v[0]]
-    for pt in sorted_v[1:]:
-        if pt[1] >= upper[-1][1] - 1e-9 or pt[0] >= upper[-1][0]:
-            upper.append(pt)
-
-    upper = np.array(upper)
-
-    boundary = []
-    best_tpr = -1.0
-    for pt in upper[upper[:, 0].argsort()]:
-        if pt[1] > best_tpr - 1e-9:
-            boundary.append(pt)
-            best_tpr = max(best_tpr, pt[1])
-
-    return np.array(boundary)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 6 – INTERPOLATION ON ROC CONVEX HULL
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _interpolate_on_hull(hull_pts: np.ndarray, target_fpr: float) -> Optional[float]:
-    """
-    Interpolate the upper boundary of a convex hull to find TPR at a given FPR.
-    """
-    sorted_pts = hull_pts[hull_pts[:, 0].argsort()]
-
-    if target_fpr < sorted_pts[0, 0] - 1e-9 or target_fpr > sorted_pts[-1, 0] + 1e-9:
+    if len(envelope) == 0:
         return None
 
-    for pt in sorted_pts:
-        if abs(pt[0] - target_fpr) < 1e-9:
-            return float(pt[1])
+    if target_fpr < envelope[0, 0] - 1e-9 or target_fpr > envelope[-1, 0] + 1e-9:
+        return None
 
-    for i in range(len(sorted_pts) - 1):
-        if sorted_pts[i, 0] <= target_fpr <= sorted_pts[i + 1, 0]:
-            alpha = (target_fpr - sorted_pts[i, 0]) / (sorted_pts[i + 1, 0] - sorted_pts[i, 0])
-            return float(sorted_pts[i, 1] + alpha * (sorted_pts[i + 1, 1] - sorted_pts[i, 1]))
+    # Exact match
+    for i in range(len(envelope)):
+        if abs(envelope[i, 0] - target_fpr) < 1e-9:
+            return float(envelope[i, 1])
+
+    # Linear interpolation between bracketing points
+    for i in range(len(envelope) - 1):
+        if envelope[i, 0] <= target_fpr <= envelope[i + 1, 0]:
+            span = envelope[i + 1, 0] - envelope[i, 0]
+            if span < 1e-12:
+                return float(max(envelope[i, 1], envelope[i + 1, 1]))
+            alpha = (target_fpr - envelope[i, 0]) / span
+            return float(envelope[i, 1] + alpha * (envelope[i + 1, 1] - envelope[i, 1]))
 
     return None
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6 – FEASIBLE REGION (INTERSECTION OF CONVEX HULLS)
+# ─────────────────────────────────────────────────────────────────────────────
+
 def _find_feasible_region(
-    hull_male: np.ndarray,
-    hull_female: np.ndarray,
+    envelope_male: np.ndarray,
+    envelope_female: np.ndarray,
+    n_sample: int = 1000,
 ) -> np.ndarray:
     """
-    [HARDT] Section 4.2: Find the intersection ∩_a D_a of the convex hulls.
+    [HARDT] Section 4.2: Find the intersection of achievable (FPR, TPR) regions.
 
-    The feasible set of (FPR, TPR) for equalized odds predictors is the
-    intersection of the areas under the A-conditional ROC curves (and above
-    the main diagonal).
+    The feasible set for equalized odds is the set of (FPR, TPR) points
+    achievable by BOTH groups simultaneously. Its upper boundary is:
 
-    Returns array of feasible (fpr, tpr) points on the upper-left boundary
-    of the intersection.
+        TPR_feasible(fpr) = min(envelope_male(fpr), envelope_female(fpr))
+
+    We sample this boundary densely and return only points that lie ABOVE
+    the main diagonal (TPR > FPR), since points on or below the diagonal
+    are never optimal for any reasonable loss function.
+
+    Returns array of shape (K, 2) with columns [fpr, tpr].
     """
-    fpr_min = max(hull_male[:, 0].min(), hull_female[:, 0].min())
-    fpr_max = min(hull_male[:, 0].max(), hull_female[:, 0].max())
+    # Determine FPR range where both envelopes are defined
+    fpr_min = max(envelope_male[0, 0], envelope_female[0, 0])
+    fpr_max = min(envelope_male[-1, 0], envelope_female[-1, 0])
 
     if fpr_min > fpr_max + 1e-9:
         return np.array([])
 
-    n_sample = 500
-    fpr_candidates = np.linspace(fpr_min, fpr_max, n_sample)
-
-    all_fpr_vals = np.concatenate([
-        hull_male[:, 0], hull_female[:, 0], fpr_candidates
-    ])
-    all_fpr_vals = np.unique(all_fpr_vals)
-    all_fpr_vals = all_fpr_vals[(all_fpr_vals >= fpr_min - 1e-9) & (all_fpr_vals <= fpr_max + 1e-9)]
+    # Collect candidate FPR values: envelope vertices + uniform samples
+    candidate_fprs = set()
+    for pt in envelope_male:
+        if fpr_min - 1e-9 <= pt[0] <= fpr_max + 1e-9:
+            candidate_fprs.add(float(pt[0]))
+    for pt in envelope_female:
+        if fpr_min - 1e-9 <= pt[0] <= fpr_max + 1e-9:
+            candidate_fprs.add(float(pt[0]))
+    for f in np.linspace(fpr_min, fpr_max, n_sample):
+        candidate_fprs.add(float(f))
 
     feasible = []
-    for fpr in all_fpr_vals:
-        tpr_m = _interpolate_on_hull(hull_male, fpr)
-        tpr_f = _interpolate_on_hull(hull_female, fpr)
+    for fpr in sorted(candidate_fprs):
+        tpr_m = _interpolate_envelope(envelope_male, fpr)
+        tpr_f = _interpolate_envelope(envelope_female, fpr)
         if tpr_m is not None and tpr_f is not None:
+            # Intersection upper boundary: min of both envelopes
             tpr = min(tpr_m, tpr_f)
-            if tpr >= fpr - 1e-9:
+            # Only keep points strictly above the diagonal
+            if tpr > fpr + 1e-9:
                 feasible.append([fpr, tpr])
 
     if not feasible:
@@ -419,39 +435,55 @@ def _realize_operating_point(
     target_tpr: float,
 ) -> RandomizedThreshold:
     """
-    [HARDT] Section 4.2: Realize a target (FPR, TPR) point on one group's
-    convex hull using a randomized mixture of two threshold predictors.
+    [HARDT] Section 4.2: Realize a target (FPR, TPR) on one group's convex
+    hull using a randomized mixture of two threshold predictors.
 
-    Any point in D_a = convhull{C_a(t)} can be achieved as a convex
-    combination of two points on the ROC curve. We find the two ROC points
-    that bracket the target and compute the mixing probability.
+    Searches all pairs of ROC curve points for the convex combination
+    alpha * pt1 + (1-alpha) * pt2 that best matches the target.
+
+    The resulting randomized predictor:
+        - Uses threshold t_lo with probability p
+        - Uses threshold t_hi with probability (1-p)
     """
-    pts = sorted(roc.points, key=lambda p: (p.fpr, p.tpr))
-
-    unique_pts = []
+    # Collect unique (fpr, tpr, threshold) triples, sorted by FPR
     seen = set()
-    for p in pts:
+    unique_pts = []
+    for p in sorted(roc.points, key=lambda p: (p.fpr, p.tpr)):
         key = (round(p.fpr, 10), round(p.tpr, 10))
         if key not in seen:
             seen.add(key)
             unique_pts.append(p)
 
-    best_dist = float('inf')
-    best_threshold = RandomizedThreshold(t_lo=unique_pts[0].threshold, t_hi=unique_pts[0].threshold, p=1.0)
+    # Filter to finite thresholds only — avoid -inf/+inf as actual thresholds.
+    # The ROC points at -inf and +inf are the trivial classifiers (all positive
+    # or all negative). We only use them if absolutely necessary.
+    finite_pts = [p for p in unique_pts if np.isfinite(p.threshold)]
+    if not finite_pts:
+        finite_pts = unique_pts  # fallback if all are non-finite
 
-    for p in unique_pts:
+    # Try to find an exact match first (deterministic threshold)
+    best_dist = float('inf')
+    best_result = RandomizedThreshold(
+        t_lo=finite_pts[0].threshold, t_hi=finite_pts[0].threshold, p=1.0
+    )
+
+    for p in finite_pts:
         dist = math.sqrt((p.fpr - target_fpr) ** 2 + (p.tpr - target_tpr) ** 2)
         if dist < best_dist:
             best_dist = dist
-            best_threshold = RandomizedThreshold(t_lo=p.threshold, t_hi=p.threshold, p=1.0)
+            best_result = RandomizedThreshold(t_lo=p.threshold, t_hi=p.threshold, p=1.0)
 
     if best_dist < 1e-6:
-        return best_threshold
+        return best_result
 
-    for i in range(len(unique_pts)):
-        for j in range(i + 1, len(unique_pts)):
-            p1 = unique_pts[i]
-            p2 = unique_pts[j]
+    # Search all pairs for the best convex combination
+    # [HARDT] Any point in D_a can be expressed as alpha*C_a(t1) + (1-alpha)*C_a(t2)
+    all_pts = finite_pts if len(finite_pts) >= 2 else unique_pts
+
+    for i in range(len(all_pts)):
+        for j in range(i + 1, len(all_pts)):
+            p1 = all_pts[i]
+            p2 = all_pts[j]
 
             dfpr = p2.fpr - p1.fpr
             dtpr = p2.tpr - p1.tpr
@@ -459,31 +491,42 @@ def _realize_operating_point(
             if abs(dfpr) < 1e-12 and abs(dtpr) < 1e-12:
                 continue
 
-            if abs(dfpr) > abs(dtpr):
+            # Solve for alpha: target = alpha * p2 + (1-alpha) * p1
+            # target_fpr = p1.fpr + alpha * dfpr
+            # target_tpr = p1.tpr + alpha * dtpr
+            # Use the axis with larger range for numerical stability
+            if abs(dfpr) >= abs(dtpr):
                 alpha = (target_fpr - p1.fpr) / dfpr
             else:
                 alpha = (target_tpr - p1.tpr) / dtpr
 
-            if alpha < -1e-9 or alpha > 1 + 1e-9:
+            if alpha < -0.01 or alpha > 1.01:
                 continue
 
-            alpha = np.clip(alpha, 0, 1)
+            alpha = float(np.clip(alpha, 0.0, 1.0))
             achieved_fpr = p1.fpr + alpha * dfpr
             achieved_tpr = p1.tpr + alpha * dtpr
-            dist = math.sqrt((achieved_fpr - target_fpr) ** 2 + (achieved_tpr - target_tpr) ** 2)
+            dist = math.sqrt((achieved_fpr - target_fpr) ** 2 +
+                             (achieved_tpr - target_tpr) ** 2)
 
             if dist < best_dist:
                 best_dist = dist
-                if p1.threshold > p2.threshold:
-                    best_threshold = RandomizedThreshold(
-                        t_lo=p2.threshold, t_hi=p1.threshold, p=1.0 - alpha,
+                # Convention: t_lo <= t_hi.
+                # Mixing: use t_lo with prob p, t_hi with prob (1-p).
+                # p1 corresponds to (1-alpha), p2 corresponds to alpha.
+                if p1.threshold <= p2.threshold:
+                    # p1 is the lower threshold, p2 is the higher threshold
+                    # p1 gives MORE positives (lower threshold -> more R > t)
+                    # alpha controls weight on p2 (fewer positives)
+                    best_result = RandomizedThreshold(
+                        t_lo=p1.threshold, t_hi=p2.threshold, p=1.0 - alpha,
                     )
                 else:
-                    best_threshold = RandomizedThreshold(
-                        t_lo=p1.threshold, t_hi=p2.threshold, p=alpha,
+                    best_result = RandomizedThreshold(
+                        t_lo=p2.threshold, t_hi=p1.threshold, p=alpha,
                     )
 
-    return best_threshold
+    return best_result
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -492,21 +535,22 @@ def _realize_operating_point(
 
 def _optimize_over_feasible_region(
     feasible: np.ndarray,
-    roc_male: ROCCurve,
-    roc_female: ROCCurve,
-    baseline_threshold: float,
+    prevalence_neg: float,
+    prevalence_pos: float,
     cost_fp: float = 1.0,
     cost_fn: float = 1.0,
 ) -> Tuple[float, float, float]:
     """
-    [HARDT] Equation 4.5: Find the point on the upper-left boundary of the
-    feasible region that minimizes expected loss.
+    [HARDT] Find the point on the upper-left boundary of the feasible region
+    that minimizes the prevalence-weighted expected loss:
 
-        min  gamma_0 * l(1,0) + (1 - gamma_1) * l(0,1)
-        s.t. gamma in ∩_a D_a
+        L = P(Y=0) * cost_fp * FPR  +  P(Y=1) * cost_fn * (1 - TPR)
 
-    where gamma = (FPR, TPR) and l(1,0), l(0,1) are the costs of false
-    positives and false negatives respectively.
+    This is the standard expected error rate when cost_fp = cost_fn = 1:
+        L = P(Y=0) * FPR + P(Y=1) * FNR
+
+    The prevalence weighting ensures the optimizer doesn't select degenerate
+    operating points (e.g., FPR=1.0) when negatives far outnumber positives.
 
     Returns (best_fpr, best_tpr, best_loss).
     """
@@ -516,8 +560,9 @@ def _optimize_over_feasible_region(
 
     for fpr, tpr in feasible:
         fnr = 1.0 - tpr
-        loss = cost_fp * fpr + cost_fn * fnr
-        if loss < best_loss:
+        loss = prevalence_neg * cost_fp * fpr + prevalence_pos * cost_fn * fnr
+        # Tiebreak: prefer lower FPR (clinically, false alarms are costly)
+        if loss < best_loss - 1e-12 or (abs(loss - best_loss) < 1e-12 and fpr < best_fpr):
             best_loss = loss
             best_fpr = fpr
             best_tpr = tpr
@@ -526,41 +571,7 @@ def _optimize_over_feasible_region(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 9 – LINEAR PROGRAM FORMULATION (BINARY PREDICTOR CASE)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _solve_equalized_odds_lp(
-    roc_male: ROCCurve,
-    roc_female: ROCCurve,
-    baseline_threshold: float,
-    cost_fp: float = 1.0,
-    cost_fn: float = 1.0,
-) -> Optional[Tuple[float, float]]:
-    """
-    [HARDT] Proposition 4.4: Solve the equalized odds optimization as a
-    linear program when the convex hull intersection approach does not yield
-    a clean solution.
-
-    This is a fallback that searches for the best (FPR, TPR) operating point
-    by directly scanning feasible points where both groups' convex hulls overlap.
-
-    Returns (optimal_fpr, optimal_tpr) or None if infeasible.
-    """
-    hull_m = _roc_to_convex_hull_points(roc_male)
-    hull_f = _roc_to_convex_hull_points(roc_female)
-
-    feasible = _find_feasible_region(hull_m, hull_f)
-    if len(feasible) == 0:
-        return None
-
-    best_fpr, best_tpr, _ = _optimize_over_feasible_region(
-        feasible, roc_male, roc_female, baseline_threshold, cost_fp, cost_fn
-    )
-    return (best_fpr, best_tpr)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 10 – MAIN ENTRY POINT
+# SECTION 9 – MAIN ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
 def compute_bayes_optimal_predictor(
@@ -598,7 +609,8 @@ def compute_bayes_optimal_predictor(
     log.info("=" * 80)
     log.info("EQUALIZED ODDS POST-PROCESSING (Hardt et al. 2016)")
     log.info("  Constraint: BOTH TPR and FPR equalized across groups")
-    log.info("  Method: Convex hull intersection + randomized thresholds")
+    log.info("  Method: Concave envelope intersection + randomized thresholds")
+    log.info("  Loss: prevalence-weighted expected error rate")
     log.info("=" * 80)
 
     if len(scores) != len(labels) or len(scores) != len(data):
@@ -611,67 +623,71 @@ def compute_bayes_optimal_predictor(
     n_male = int(np.sum(gender_col == MALE_VALUE))
     n_female = int(np.sum(gender_col == FEMALE_VALUE))
 
-    log.info(f"Dataset composition: {n_male} males, {n_female} females")
+    # Compute overall prevalence for loss weighting
+    n_total = len(labels)
+    n_pos = int(np.sum(labels != 1))  # diseased
+    n_neg = int(np.sum(labels == 1))  # healthy
+    prevalence_pos = n_pos / n_total if n_total > 0 else 0.5
+    prevalence_neg = n_neg / n_total if n_total > 0 else 0.5
+
+    log.info(f"Dataset: {n_male} males, {n_female} females, "
+             f"{n_neg} healthy ({prevalence_neg:.1%}), "
+             f"{n_pos} diseased ({prevalence_pos:.1%})")
 
     # Step 1: Compute per-group ROC curves
     roc_male, roc_female = compute_roc_curves_by_gender(
         scores, labels, data, n_points=n_roc_points
     )
 
-    # Step 2: Compute convex hulls D_a for each group
-    hull_m = _roc_to_convex_hull_points(roc_male)
-    hull_f = _roc_to_convex_hull_points(roc_female)
+    # Step 2: Compute upper concave envelopes (boundary of D_a)
+    envelope_m = _upper_concave_envelope(roc_male)
+    envelope_f = _upper_concave_envelope(roc_female)
 
-    log.info(f"  Male convex hull: {len(hull_m)} points")
-    log.info(f"  Female convex hull: {len(hull_f)} points")
+    log.info(f"  Male envelope: {len(envelope_m)} vertices")
+    log.info(f"  Female envelope: {len(envelope_f)} vertices")
 
-    # Step 3: Find intersection of convex hulls
-    feasible = _find_feasible_region(hull_m, hull_f)
+    # Step 3: Find intersection of achievable regions
+    feasible = _find_feasible_region(envelope_m, envelope_f)
 
     if len(feasible) == 0:
         log.warning("No feasible equalized odds solution found. Falling back to baseline.")
         return _fallback_result(roc_male, roc_female, baseline_threshold, n_male, n_female)
 
-    log.info(f"  Feasible region: {len(feasible)} points")
+    log.info(f"  Feasible region: {len(feasible)} points above diagonal")
 
-    # Step 4: Optimize over feasible region
+    # Step 4: Optimize using prevalence-weighted loss
     best_fpr, best_tpr, best_loss = _optimize_over_feasible_region(
-        feasible, roc_male, roc_female, baseline_threshold
+        feasible, prevalence_neg, prevalence_pos
     )
 
     log.info(f"  Optimal operating point: FPR={best_fpr:.4f}, TPR={best_tpr:.4f}")
+    log.info(f"  Prevalence-weighted loss: {best_loss:.6f}")
 
-    # Step 5: Realize the operating point via randomized thresholds for each group
+    # Step 5: Realize via randomized thresholds for each group
     rand_thresh_male = _realize_operating_point(roc_male, best_fpr, best_tpr)
     rand_thresh_female = _realize_operating_point(roc_female, best_fpr, best_tpr)
 
-    log.info(f"  Male randomized threshold: t_lo={rand_thresh_male.t_lo:.6f}, "
+    log.info(f"  Male threshold: t_lo={rand_thresh_male.t_lo:.6f}, "
              f"t_hi={rand_thresh_male.t_hi:.6f}, p={rand_thresh_male.p:.4f}"
              f" (deterministic={rand_thresh_male.is_deterministic})")
-    log.info(f"  Female randomized threshold: t_lo={rand_thresh_female.t_lo:.6f}, "
+    log.info(f"  Female threshold: t_lo={rand_thresh_female.t_lo:.6f}, "
              f"t_hi={rand_thresh_female.t_hi:.6f}, p={rand_thresh_female.p:.4f}"
              f" (deterministic={rand_thresh_female.is_deterministic})")
 
-    # Use the midpoint of each group's randomized threshold range as
-    # the representative deterministic threshold (for backward compatibility)
-    if rand_thresh_male.is_deterministic:
-        threshold_male = rand_thresh_male.t_lo
-    else:
-        threshold_male = rand_thresh_male.t_lo * rand_thresh_male.p + \
-                         rand_thresh_male.t_hi * (1.0 - rand_thresh_male.p)
+    # Compute representative deterministic thresholds for backward compatibility
+    threshold_male = _representative_threshold(rand_thresh_male)
+    threshold_female = _representative_threshold(rand_thresh_female)
 
-    if rand_thresh_female.is_deterministic:
-        threshold_female = rand_thresh_female.t_lo
-    else:
-        threshold_female = rand_thresh_female.t_lo * rand_thresh_female.p + \
-                           rand_thresh_female.t_hi * (1.0 - rand_thresh_female.p)
-
-    # Compute baseline loss for comparison
+    # Compute baseline loss for utility comparison
     baseline_pt_m = roc_male.compute_point_at_threshold(baseline_threshold)
     baseline_pt_f = roc_female.compute_point_at_threshold(baseline_threshold)
-    baseline_loss = (baseline_pt_m.fpr + baseline_pt_m.fnr +
-                     baseline_pt_f.fpr + baseline_pt_f.fnr) / 4.0
-    utility_loss = best_loss / 2.0 - baseline_loss
+    # Weighted average baseline FPR/FNR across both groups
+    baseline_fpr = (baseline_pt_m.fpr * roc_male.n_negative +
+                    baseline_pt_f.fpr * roc_female.n_negative) / n_neg if n_neg > 0 else 0
+    baseline_fnr = (baseline_pt_m.fnr * roc_male.n_positive +
+                    baseline_pt_f.fnr * roc_female.n_positive) / n_pos if n_pos > 0 else 0
+    baseline_loss = prevalence_neg * baseline_fpr + prevalence_pos * baseline_fnr
+    utility_loss = best_loss - baseline_loss
 
     result = EqualizedOddsResult(
         threshold_male=threshold_male,
@@ -690,11 +706,15 @@ def compute_bayes_optimal_predictor(
         diagnostics={
             "roc_male_points_count": len(roc_male.points),
             "roc_female_points_count": len(roc_female.points),
-            "hull_male_points_count": len(hull_m),
-            "hull_female_points_count": len(hull_f),
+            "envelope_male_vertices": len(envelope_m),
+            "envelope_female_vertices": len(envelope_f),
             "feasible_region_points_count": len(feasible),
             "optimal_fpr": best_fpr,
             "optimal_tpr": best_tpr,
+            "prevalence_pos": prevalence_pos,
+            "prevalence_neg": prevalence_neg,
+            "prevalence_weighted_loss": best_loss,
+            "baseline_loss": baseline_loss,
             "randomized_male": not rand_thresh_male.is_deterministic,
             "randomized_female": not rand_thresh_female.is_deterministic,
         },
@@ -705,6 +725,14 @@ def compute_bayes_optimal_predictor(
     log.info("=" * 80)
 
     return result
+
+
+def _representative_threshold(rt: RandomizedThreshold) -> float:
+    """Compute a single representative threshold for backward compatibility."""
+    if rt.is_deterministic:
+        return rt.t_lo
+    # Weighted average of the two thresholds
+    return rt.t_lo * rt.p + rt.t_hi * (1.0 - rt.p)
 
 
 def _fallback_result(
@@ -760,13 +788,13 @@ def _print_equalized_odds_summary(result: EqualizedOddsResult) -> None:
     else:
         log.info(f"Female: deterministic threshold = {result.threshold_female:.6f}")
     log.info("-" * 80)
-    log.info(f"Utility Loss (accuracy change):  {result.utility_loss:.6f}")
+    log.info(f"Utility Loss (vs baseline):      {result.utility_loss:+.6f}")
     log.info(f"Dataset: {result.n_male} male, {result.n_female} female users")
     log.info("-" * 80)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 11 – APPLY THRESHOLDS TO PREDICTIONS
+# SECTION 10 – APPLY THRESHOLDS TO PREDICTIONS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _apply_randomized_threshold(
@@ -778,9 +806,9 @@ def _apply_randomized_threshold(
     [HARDT] Section 4.2: Apply a randomized threshold predictor.
 
     For each score R:
-        R > t_hi  → predict 1 (always)
-        R < t_lo  → predict 0 (always)
-        t_lo <= R <= t_hi → predict 1 with probability p
+        R > t_hi  -> predict 1 (always positive)
+        R < t_lo  -> predict 0 (always negative)
+        t_lo <= R <= t_hi -> predict 1 with probability p
     """
     predictions = np.zeros(len(scores), dtype=int)
 
@@ -789,14 +817,15 @@ def _apply_randomized_threshold(
 
     if abs(rt.t_lo - rt.t_hi) > 1e-12:
         between = (scores >= rt.t_lo) & (scores <= rt.t_hi)
-        n_between = np.sum(between)
+        n_between = int(np.sum(between))
         if n_between > 0:
             coin_flips = rng.random(n_between) < rt.p
             predictions[between] = coin_flips.astype(int)
     else:
+        # Deterministic with possible coin flip at the exact threshold
         at_threshold = np.abs(scores - rt.t_lo) < 1e-12
-        n_at = np.sum(at_threshold)
-        if n_at > 0:
+        n_at = int(np.sum(at_threshold))
+        if n_at > 0 and 0 < rt.p < 1:
             coin_flips = rng.random(n_at) < rt.p
             predictions[at_threshold] = coin_flips.astype(int)
 
@@ -861,7 +890,7 @@ def apply_equalized_odds_thresholds(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 12 – MAIN EXECUTION
+# SECTION 11 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -870,6 +899,7 @@ def main() -> None:
     log.info("Implements full equalized odds (Hardt et al. 2016):")
     log.info("  - Constrains BOTH TPR and FPR to be equal across groups")
     log.info("  - Supports randomized classifiers (mixture of two thresholds)")
+    log.info("  - Uses prevalence-weighted expected loss for optimization")
 
 
 if __name__ == "__main__":

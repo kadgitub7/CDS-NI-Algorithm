@@ -1,36 +1,35 @@
 ========================================================================
                 CDS ALGORITHM -- REPRODUCIBILITY REPORT                 
 ========================================================================
-  Dataset : UCI Arrhythmia (n=50 users)
+  Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  NOTE    : Limited run (max_users=50 of 452)
-  Runtime : 177s
+  Runtime : 819s
   Paper target: 95.4% overall accuracy
-  Config  : ForcedSexBranch
+  Config  : EqualizedOdds
 
 1. OVERALL PERFORMANCE
 ----------------------
-  Total users evaluated : 50
-  Correct predictions   : 40 / 50
-  Overall accuracy      : 80.00%
-  Sensitivity (diseased detection)     : 81.82%
-  Specificity (1 - false alarm rate)   : 78.57%
-  False alarm rate                     : 21.43%
-  Users sent to SCREENING              : 22
-  Healthy users  : 28  |  Diseased users : 22
+  Total users evaluated : 452
+  Correct predictions   : 343 / 452
+  Overall accuracy      : 75.88%
+  Sensitivity (diseased detection)     : 84.54%
+  Specificity (1 - false alarm rate)   : 68.57%
+  False alarm rate                     : 31.43%
+  Users sent to SCREENING              : 0
+  Healthy users  : 245  |  Diseased users : 207
 
 2. GENDER-DISAGGREGATED ACCURACY
 --------------------------------
   Metric                                 Male     Female  Diff (M-F)
   --------------------------------  ---------  ---------  ----------
-  Total users                              17         33            
-  Overall accuracy                     82.35%     78.79%      +3.57%
-  Sensitivity                          91.67%     70.00%     +21.67%
-  Specificity                          60.00%     82.61%     -22.61%
-  Diseased error rate                   8.33%     30.00%     -21.67%
-  Healthy correct                         3/5      19/23            
-  Diseased correct                      11/12       7/10            
-  Sent to SCREENING                         0         22            
+  Total users                             203        249            
+  Overall accuracy                     76.35%     75.50%      +0.85%
+  Sensitivity                          88.98%     78.65%     +10.33%
+  Specificity                          58.82%     73.75%     -14.93%
+  Diseased error rate                  11.02%     21.35%     -10.33%
+  Healthy correct                       50/85    118/160            
+  Diseased correct                    105/118      70/89            
+  Sent to SCREENING                         0          0            
 
   Paper reported: 5% male diseased error, 14% female diseased error
 
@@ -38,20 +37,20 @@
 ----------------------------------------------------
   Decision     | Male correct / total  | Female correct / total
   --------------------------------------------------------
-  Detected     |    11 / 12    ( 91.7%)  |     7 / 10    ( 70.0%)
-  Missed       |     1 / 12    (  8.3%)  |     3 / 10    ( 30.0%)
+  Detected     |   105 / 118   ( 89.0%)  |    70 / 89    ( 78.7%)
+  Missed       |    13 / 118   ( 11.0%)  |    19 / 89    ( 21.3%)
 
 4. FAIRNESS METRICS  (Mehrabi et al., 2021)
 -------------------------------------------
   Metric                        Value    Interpretation
   ------------------------------------------------------------
-  Statistical Parity Diff (SPD) +0.4314  BIASED (|SPD|>=0.1)
-  Disparate Impact (DI)          0.4359  BIASED (DI<0.8)
-  Equalized Odds diff (EO)       0.2261  BIASED (EO>=0.1)
-  Subgroup Disparity Cal. Err    0.1136  BIASED (SDCE>=0.05)
-    Precision (male UNHEALTHY)   0.8462
-    Precision (female UNHEALTHY) 0.6364
-    Precision (overall)          0.7500
+  Statistical Parity Diff (SPD) +0.2399  BIASED (|SPD|>=0.1)
+  Disparate Impact (DI)          0.6522  BIASED (DI<0.8)
+  Equalized Odds diff (EO)       0.1493  BIASED (EO>=0.1)
+  Subgroup Disparity Cal. Err    0.0694  BIASED (SDCE>=0.05)
+    Precision (male UNHEALTHY)   0.7500
+    Precision (female UNHEALTHY) 0.6250
+    Precision (overall)          0.6944
 
   SPD > 0 means males get UNHEALTHY predictions more often.
   DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
@@ -61,51 +60,108 @@
 ---------------------------------------------------
   Class   Name                         F wrong   F total   F err%   M wrong   M total   M err%
   ----------------------------------------------------------------------------------
-  2       Coronary Artery Disease            0         2     0.0%         0         0     n/a 
-  3       Old Anterior MI                    0         0     n/a          0         1     0.0%
-  4       Old Inferior MI                    0         1     0.0%         0         1     0.0%
-  5       Sinus Tachycardia                  0         1     0.0%         0         0     n/a 
-  6       Sinus Bradycardia                  0         2     0.0%         0         3     0.0%
-  7       PVC                                0         0     n/a          0         1     0.0%
-  8       Supraventricular PC                0         0     n/a          0         1     0.0%
-  9       Left Bundle Branch Block           0         0     n/a          0         0     n/a 
-  10      Right Bundle Branch Block          3         4    75.0%         0         2     0.0%
-  14      LV Hypertrophy                     0         0     n/a          1         2    50.0%
-  15      Atrial Fibrillation                0         0     n/a          0         0     n/a 
-  16      Others                             0         0     n/a          0         1     0.0%
+  2       Coronary Artery Disease           10        26    38.5%         1        18     5.6%
+  3       Old Anterior MI                    0         0     n/a          0        15     0.0%
+  4       Old Inferior MI                    1         4    25.0%         1        11     9.1%
+  5       Sinus Tachycardia                  1         9    11.1%         0         4     0.0%
+  6       Sinus Bradycardia                  0        11     0.0%         3        14    21.4%
+  7       PVC                                0         0     n/a          1         3    33.3%
+  8       Supraventricular PC                0         0     n/a          0         2     0.0%
+  9       Left Bundle Branch Block           0         5     0.0%         0         4     0.0%
+  10      Right Bundle Branch Block          5        22    22.7%         3        28    10.7%
+  14      LV Hypertrophy                     0         1     0.0%         0         3     0.0%
+  15      Atrial Fibrillation                0         4     0.0%         0         1     0.0%
+  16      Others                             2         7    28.6%         4        15    26.7%
 
 6. CLASSES CONTRIBUTING MOST TO FEMALE MISCLASSIFICATION
 --------------------------------------------------------
   Rank   Class   Name                          Wrong    Total     Err%
   -----------------------------------------------------------------
-  1      10      Right Bundle Branch Block         3        4    75.0%
-  2      6       Sinus Bradycardia                 0        2     0.0%
-  3      2       Coronary Artery Disease           0        2     0.0%
-  4      4       Old Inferior MI                   0        1     0.0%
-  5      5       Sinus Tachycardia                 0        1     0.0%
+  1      2       Coronary Artery Disease          10       26    38.5%
+  2      10      Right Bundle Branch Block         5       22    22.7%
+  3      16      Others                            2        7    28.6%
+  4      4       Old Inferior MI                   1        4    25.0%
+  5      5       Sinus Tachycardia                 1        9    11.1%
+  6      6       Sinus Bradycardia                 0       11     0.0%
+  7      14      LV Hypertrophy                    0        1     0.0%
+  8      9       Left Bundle Branch Block          0        5     0.0%
+  9      15      Atrial Fibrillation               0        4     0.0%
 
 7. CLASSES CONTRIBUTING MOST TO MALE MISCLASSIFICATION
 ------------------------------------------------------
   Rank   Class   Name                          Wrong    Total     Err%
   -----------------------------------------------------------------
-  1      14      LV Hypertrophy                    1        2    50.0%
-  2      8       Supraventricular PC               0        1     0.0%
-  3      6       Sinus Bradycardia                 0        3     0.0%
-  4      10      Right Bundle Branch Block         0        2     0.0%
-  5      7       PVC                               0        1     0.0%
-  6      3       Old Anterior MI                   0        1     0.0%
-  7      16      Others                            0        1     0.0%
-  8      4       Old Inferior MI                   0        1     0.0%
+  1      16      Others                            4       15    26.7%
+  2      6       Sinus Bradycardia                 3       14    21.4%
+  3      10      Right Bundle Branch Block         3       28    10.7%
+  4      7       PVC                               1        3    33.3%
+  5      2       Coronary Artery Disease           1       18     5.6%
+  6      4       Old Inferior MI                   1       11     9.1%
+  7      8       Supraventricular PC               0        2     0.0%
+  8      14      LV Hypertrophy                    0        3     0.0%
+  9      3       Old Anterior MI                   0       15     0.0%
+  10     5       Sinus Tachycardia                 0        4     0.0%
+
+10. EQUALIZED ODDS POST-PROCESSING (Hardt et al., 2016)
+-------------------------------------------------------
+  Method: Concave envelope intersection + randomized thresholds
+  Constraint: BOTH TPR and FPR equalized across groups
+  Loss: prevalence-weighted expected error rate
+  ROC sample points per group  : 100
+
+  Baseline threshold (all)     : 0.250000
+  Optimised threshold (male)   : 0.177247
+  Optimised threshold (female) : 0.036177
+
+  Male classifier   : RANDOMIZED  t_lo=0.0327  t_hi=0.5625  p=0.7271
+  Female classifier : RANDOMIZED  t_lo=0.0347  t_hi=0.0377  p=0.5027
+
+  Metric                               Male     Female    |Delta|
+  --------------------------------------------------------------
+  True Positive Rate (TPR)          0.8482     0.8482     0.0000
+  False Positive Rate (FPR)         0.3754     0.3754     0.0000
+
+  Utility loss vs. baseline        : +0.031839
+  Feasible region candidates        : 1015
+  ROC points (male / female)        : 271 / 323
+
+10b. BASELINE vs EQUALIZED ODDS -- SIDE-BY-SIDE COMPARISON
+----------------------------------------------------------
+
+  Metric                              Baseline    Eq. Odds       Delta
+  --------------------------------------------------------------------
+  Overall accuracy                      75.88%      73.01%      -2.88%
+  Sensitivity (TPR)                     84.54%      84.54%      +0.00%
+  Specificity (1-FPR)                   68.57%      63.27%      -5.31%
+  --------------------------------------------------------------------
+  Male accuracy                         76.35%      75.86%      -0.49%
+  Male sensitivity                      88.98%      83.90%      -5.08%
+  Male specificity                      58.82%      64.71%      +5.88%
+  Male error rate                       11.02%      16.10%      +5.08%
+  --------------------------------------------------------------------
+  Female accuracy                       75.50%      70.68%      -4.82%
+  Female sensitivity                    78.65%      85.39%      +6.74%
+  Female specificity                    73.75%      62.50%     -11.25%
+  Female error rate                     21.35%      14.61%      -6.74%
+  --------------------------------------------------------------------
+  Gender error gap                      10.33%       1.49%      -8.84%
+  TPR gap (|M-F|)                       10.33%       1.49%      -8.84%
+  FPR gap (|M-F|)                       14.93%       2.21%     -12.72%
+
+  Interpretation:
+    TPR gap reduced: 10.33% -> 1.49%
+    FPR gap reduced: 14.93% -> 2.21%
+    Accuracy change: -2.88%
 
 11. ACTIVE FAIRNESS CONFIGURATION
 ---------------------------------
-  ForcedSexBranch
+  EqualizedOdds
 
   ENABLE_REWEIGHING            = False
   ENABLE_FAIRNESS_RL           = False
   ENABLE_ADVERSARIAL_DEBIASING = False
-  ENABLE_EQUALIZED_ODDS        = False
-  ENABLE_FORCED_SEX_BRANCHING  = True
+  ENABLE_EQUALIZED_ODDS        = True
+  ENABLE_FORCED_SEX_BRANCHING  = False
   ENABLE_DATA_AUGMENTATION     = False
 
 ========================================================================

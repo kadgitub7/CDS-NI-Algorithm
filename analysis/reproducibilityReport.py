@@ -276,7 +276,7 @@ def compute_metrics(output: Algorithm4Output):
 # ---------------------------------------------------------------------------
 
 def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
-                  grid_results=None, eo_result=None):
+                  grid_results=None, eo_result=None, eo_comparison=None):
     lines = []
     W = 72
 
@@ -519,16 +519,30 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
     # ---- 10. equalized odds post-processing (if results provided) ----
     if eo_result is not None:
         h2("10. EQUALIZED ODDS POST-PROCESSING (Hardt et al., 2016)")
-        lines.append(f"  Method: Gender-specific decision thresholds via ROC convex hull")
+        lines.append(f"  Method: Concave envelope intersection + randomized thresholds")
+        lines.append(f"  Constraint: BOTH TPR and FPR equalized across groups")
+        lines.append(f"  Loss: prevalence-weighted expected error rate")
         lines.append(f"  ROC sample points per group  : {fairness_config.EQUALIZED_ODDS_ROC_POINTS}")
         lines.append("")
-        lines.append(f"  Baseline threshold (all)     : {eo_result.original_threshold:.6f}  (margin risk score)")
+        lines.append(f"  Baseline threshold (all)     : {eo_result.original_threshold:.6f}")
         lines.append(f"  Optimised threshold (male)   : {eo_result.threshold_male:.6f}")
         lines.append(f"  Optimised threshold (female) : {eo_result.threshold_female:.6f}")
-        if eo_result.threshold_male != eo_result.threshold_female:
-            lines.append(f"  Threshold delta (M-F)        : {eo_result.threshold_male - eo_result.threshold_female:+.6f}")
         lines.append("")
-        lines.append(f"  {'Metric':<30}  {'Male':>9}  {'Female':>9}  {'Delta':>9}")
+
+        # Randomized classifier info
+        rt_m = eo_result.randomized_threshold_male
+        rt_f = eo_result.randomized_threshold_female
+        if rt_m and not rt_m.is_deterministic:
+            lines.append(f"  Male classifier   : RANDOMIZED  t_lo={rt_m.t_lo:.4f}  t_hi={rt_m.t_hi:.4f}  p={rt_m.p:.4f}")
+        else:
+            lines.append(f"  Male classifier   : deterministic  threshold={eo_result.threshold_male:.6f}")
+        if rt_f and not rt_f.is_deterministic:
+            lines.append(f"  Female classifier : RANDOMIZED  t_lo={rt_f.t_lo:.4f}  t_hi={rt_f.t_hi:.4f}  p={rt_f.p:.4f}")
+        else:
+            lines.append(f"  Female classifier : deterministic  threshold={eo_result.threshold_female:.6f}")
+        lines.append("")
+
+        lines.append(f"  {'Metric':<30}  {'Male':>9}  {'Female':>9}  {'|Delta|':>9}")
         lines.append("  " + "-" * 62)
         lines.append(f"  {'True Positive Rate (TPR)':<30}  "
                      f"{eo_result.tpr_male:>8.4f}   "
@@ -538,19 +552,70 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
                      f"{eo_result.fpr_male:>8.4f}   "
                      f"{eo_result.fpr_female:>8.4f}   "
                      f"{abs(eo_result.fpr_male - eo_result.fpr_female):>8.4f}")
-        lines.append(f"  {'Equalized TPR':<30}  {eo_result.tpr_equalized:>8.4f}")
         lines.append("")
-        lines.append(f"  Utility loss vs. single threshold : {eo_result.utility_loss:+.6f}")
-        lines.append(f"  Dataset: {eo_result.n_male} male, {eo_result.n_female} female users")
-        lines.append("")
+        lines.append(f"  Utility loss vs. baseline        : {eo_result.utility_loss:+.6f}")
+
         diag = eo_result.diagnostics
-        lines.append(f"  Pareto frontier candidates        : {diag.get('hull_points_count', 'N/A')}")
+        lines.append(f"  Feasible region candidates        : {diag.get('feasible_region_points_count', 'N/A')}")
         lines.append(f"  ROC points (male / female)        : "
                      f"{diag.get('roc_male_points_count', 'N/A')} / "
                      f"{diag.get('roc_female_points_count', 'N/A')}")
-        if eo_result.threshold_male == eo_result.threshold_female == eo_result.original_threshold:
-            lines.append("")
-            lines.append("  No equalized-odds improvement found; thresholds unchanged.")
+
+    # ---- 10b. BASELINE vs EQUALIZED ODDS COMPARISON ----
+    if eo_comparison is not None:
+        bl = eo_comparison["baseline"]
+        eo = eo_comparison["equalized_odds"]
+
+        h2("10b. BASELINE vs EQUALIZED ODDS -- SIDE-BY-SIDE COMPARISON")
+        lines.append("")
+        lines.append(f"  {'Metric':<32}  {'Baseline':>10}  {'Eq. Odds':>10}  {'Delta':>10}")
+        lines.append("  " + "-" * 68)
+
+        def _cmp_row(label, bv, ev):
+            bs = f"{bv*100:.2f}%"
+            es = f"{ev*100:.2f}%"
+            ds = f"{(ev-bv)*100:+.2f}%"
+            lines.append(f"  {label:<32}  {bs:>10}  {es:>10}  {ds:>10}")
+
+        _cmp_row("Overall accuracy",   bl["accuracy"],    eo["accuracy"])
+        _cmp_row("Sensitivity (TPR)",  bl["sensitivity"],  eo["sensitivity"])
+        _cmp_row("Specificity (1-FPR)", bl["specificity"], eo["specificity"])
+        lines.append("  " + "-" * 68)
+        _cmp_row("Male accuracy",      bl["male_accuracy"],   eo["male_accuracy"])
+        _cmp_row("Male sensitivity",   bl["male_sensitivity"], eo["male_sensitivity"])
+        _cmp_row("Male specificity",   bl["male_specificity"], eo["male_specificity"])
+        _cmp_row("Male error rate",    bl["male_error_rate"],  eo["male_error_rate"])
+        lines.append("  " + "-" * 68)
+        _cmp_row("Female accuracy",    bl["female_accuracy"],   eo["female_accuracy"])
+        _cmp_row("Female sensitivity", bl["female_sensitivity"], eo["female_sensitivity"])
+        _cmp_row("Female specificity", bl["female_specificity"], eo["female_specificity"])
+        _cmp_row("Female error rate",  bl["female_error_rate"],  eo["female_error_rate"])
+        lines.append("  " + "-" * 68)
+
+        bl_gap = abs(bl["male_error_rate"] - bl["female_error_rate"])
+        eo_gap = abs(eo["male_error_rate"] - eo["female_error_rate"])
+        _cmp_row("Gender error gap",   bl_gap, eo_gap)
+
+        bl_tpr_gap = abs(bl["male_sensitivity"] - bl["female_sensitivity"])
+        eo_tpr_gap = abs(eo["male_sensitivity"] - eo["female_sensitivity"])
+        _cmp_row("TPR gap (|M-F|)",    bl_tpr_gap, eo_tpr_gap)
+
+        bl_fpr_gap = abs((1-bl["male_specificity"]) - (1-bl["female_specificity"]))
+        eo_fpr_gap = abs((1-eo["male_specificity"]) - (1-eo["female_specificity"]))
+        _cmp_row("FPR gap (|M-F|)",    bl_fpr_gap, eo_fpr_gap)
+
+        lines.append("")
+        lines.append("  Interpretation:")
+        if eo_tpr_gap < bl_tpr_gap:
+            lines.append(f"    TPR gap reduced: {bl_tpr_gap*100:.2f}% -> {eo_tpr_gap*100:.2f}%")
+        else:
+            lines.append(f"    TPR gap unchanged/increased: {bl_tpr_gap*100:.2f}% -> {eo_tpr_gap*100:.2f}%")
+        if eo_fpr_gap < bl_fpr_gap:
+            lines.append(f"    FPR gap reduced: {bl_fpr_gap*100:.2f}% -> {eo_fpr_gap*100:.2f}%")
+        else:
+            lines.append(f"    FPR gap unchanged/increased: {bl_fpr_gap*100:.2f}% -> {eo_fpr_gap*100:.2f}%")
+        acc_delta = eo["accuracy"] - bl["accuracy"]
+        lines.append(f"    Accuracy change: {acc_delta*100:+.2f}%")
 
     # ---- 11. active configuration summary ----
     h2("11. ACTIVE FAIRNESS CONFIGURATION")
@@ -699,9 +764,11 @@ def main():
 
     # Run equalized odds post-processing if enabled
     eo_result = None
+    eo_comparison = None
     if fairness_config.ENABLE_EQUALIZED_ODDS:
         print("Running equalized odds post-processing (Hardt et al., 2016) ...")
         from Algorithm4 import DIAGNOSTIC_THRESHOLD_ALG4, compute_margin_risk_scores
+        from extensions.Fairness_EqualizedOdds import apply_equalized_odds_thresholds
         records = output.records
 
         # Use margin-based risk scores instead of raw rw values.
@@ -724,8 +791,85 @@ def main():
             n_roc_points=fairness_config.EQUALIZED_ODDS_ROC_POINTS,
         )
 
+        # ── Build baseline vs equalized odds comparison ───────────────────
+        # Baseline predictions: original CDS decisions
+        # Equalized odds: re-classify using fair thresholds
+        fair_preds = apply_equalized_odds_thresholds(
+            risk_scores, user_data, eo_result, seed=42,
+        )
+
+        # Compute baseline metrics from original predictions
+        baseline_preds = np.array([
+            1 if r.decision == HealthDecision.UNHEALTHY else 0
+            for r in records
+        ])
+        true_binary = (user_labels != 1).astype(int)  # 1=diseased, 0=healthy
+        sex_col = user_data[:, SEX_COL]
+
+        def _compute_group_metrics(preds, truth, sex, sex_code=None):
+            """Compute accuracy/sensitivity/specificity/error_rate for a group."""
+            if sex_code is not None:
+                mask = sex == sex_code
+                preds = preds[mask]
+                truth = truth[mask]
+            n = len(truth)
+            if n == 0:
+                return {"accuracy": 0, "sensitivity": 0, "specificity": 0, "error_rate": 0}
+            n_pos = int(truth.sum())          # diseased
+            n_neg = n - n_pos                 # healthy
+            tp = int(((preds == 1) & (truth == 1)).sum())
+            tn = int(((preds == 0) & (truth == 0)).sum())
+            fp = int(((preds == 1) & (truth == 0)).sum())
+            fn = int(((preds == 0) & (truth == 1)).sum())
+            return {
+                "accuracy":    (tp + tn) / n if n else 0,
+                "sensitivity": tp / n_pos if n_pos else 0,
+                "specificity": tn / n_neg if n_neg else 0,
+                "error_rate":  fn / n_pos if n_pos else 0,
+            }
+
+        bl_all = _compute_group_metrics(baseline_preds, true_binary, sex_col)
+        bl_m   = _compute_group_metrics(baseline_preds, true_binary, sex_col, MALE_CODE)
+        bl_f   = _compute_group_metrics(baseline_preds, true_binary, sex_col, FEMALE_CODE)
+
+        eo_all = _compute_group_metrics(fair_preds, true_binary, sex_col)
+        eo_m   = _compute_group_metrics(fair_preds, true_binary, sex_col, MALE_CODE)
+        eo_f   = _compute_group_metrics(fair_preds, true_binary, sex_col, FEMALE_CODE)
+
+        eo_comparison = {
+            "baseline": {
+                "accuracy":           bl_all["accuracy"],
+                "sensitivity":        bl_all["sensitivity"],
+                "specificity":        bl_all["specificity"],
+                "male_accuracy":      bl_m["accuracy"],
+                "male_sensitivity":   bl_m["sensitivity"],
+                "male_specificity":   bl_m["specificity"],
+                "male_error_rate":    bl_m["error_rate"],
+                "female_accuracy":    bl_f["accuracy"],
+                "female_sensitivity": bl_f["sensitivity"],
+                "female_specificity": bl_f["specificity"],
+                "female_error_rate":  bl_f["error_rate"],
+            },
+            "equalized_odds": {
+                "accuracy":           eo_all["accuracy"],
+                "sensitivity":        eo_all["sensitivity"],
+                "specificity":        eo_all["specificity"],
+                "male_accuracy":      eo_m["accuracy"],
+                "male_sensitivity":   eo_m["sensitivity"],
+                "male_specificity":   eo_m["specificity"],
+                "male_error_rate":    eo_m["error_rate"],
+                "female_accuracy":    eo_f["accuracy"],
+                "female_sensitivity": eo_f["sensitivity"],
+                "female_specificity": eo_f["specificity"],
+                "female_error_rate":  eo_f["error_rate"],
+            },
+        }
+
+        n_changed = int((fair_preds != baseline_preds).sum())
+        print(f"  Equalized odds re-classified {n_changed} / {len(records)} predictions")
+
     report  = build_report(metrics, data, labels, args.max_users, elapsed,
-                           adv_result, grid_results, eo_result)
+                           adv_result, grid_results, eo_result, eo_comparison)
     csv_df  = build_class_csv(metrics, labels)
 
     # --- print to console ---
