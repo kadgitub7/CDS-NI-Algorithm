@@ -141,9 +141,17 @@ ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 # FAIRNESS: IN-PROCESSING RL REWARD MODIFICATION (Zhang et al., 2018 adapted)
 # ─────────────────────────────────────────────────────────────────────────────
 # Controlled by fairness_config.py — the centralized toggle file.
-from fairness_config import ENABLE_FAIRNESS_RL, FAIRNESS_LAMBDA, SEX_FEATURE_INDEX
+import fairness_config as _fairness_cfg
 
-SEX_FEATURE_INDEX_ALG4: int = SEX_FEATURE_INDEX
+SEX_FEATURE_INDEX_ALG4: int = _fairness_cfg.SEX_FEATURE_INDEX
+
+# Read fairness settings via the module reference so that runtime changes
+# (e.g. by the lambda grid search) are always reflected.  The previous
+# ``from fairness_config import ENABLE_FAIRNESS_RL, FAIRNESS_LAMBDA``
+# copied the VALUES at import time, so later mutations to fairness_config
+# were invisible — the root cause of the grid search producing identical
+# results for every lambda.
+FAIRNESS_LAMBDA: float = _fairness_cfg.FAIRNESS_LAMBDA  # initial default
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -918,7 +926,7 @@ def _rl_select_best_action(
     # Uses FULLY sex-stratified P(h,f) and P(h>1,f) so the penalty captures
     # true group-level AF contribution disparities.
     fairness_penalties: Dict[int, float] = {}
-    if ENABLE_FAIRNESS_RL and data is not None and labels is not None:
+    if _fairness_cfg.ENABLE_FAIRNESS_RL and data is not None and labels is not None:
         fair_data = train_data if train_data is not None else data
         fair_labels = train_labels if train_labels is not None else labels
         node_users = node.user_indices
@@ -994,8 +1002,8 @@ def _rl_select_best_action(
         # rw_modified = rw_original + λ * |AF_male - AF_female|
         # Lower rw_sim is better (means higher AF). The penalty INCREASES rw_sim
         # for actions with high disparity, making them less likely to be selected.
-        if ENABLE_FAIRNESS_RL and j in fairness_penalties:
-            rw_sim_cj += FAIRNESS_LAMBDA * fairness_penalties[j]
+        if _fairness_cfg.ENABLE_FAIRNESS_RL and j in fairness_penalties:
+            rw_sim_cj += _fairness_cfg.FAIRNESS_LAMBDA * fairness_penalties[j]
 
         is_sel = False
         if rw_sim_cj < best_rw_sim:
@@ -2856,6 +2864,8 @@ def fairness_lambda_grid_search(
         lambda_values = [0.0, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
 
     saved_lambda = FAIRNESS_LAMBDA
+    saved_enable = _fc.ENABLE_FAIRNESS_RL
+    _fc.ENABLE_FAIRNESS_RL = True          # enable RL fairness for grid search
     if data is None or labels is None:
         data, labels = load_dataset(data_path)
     results = []
@@ -2892,6 +2902,7 @@ def fairness_lambda_grid_search(
                  f"SPD={output.fairness_spd:.4f}  EO={output.fairness_eo_diff:.4f}")
 
     _fc.FAIRNESS_LAMBDA = saved_lambda
+    _fc.ENABLE_FAIRNESS_RL = saved_enable  # restore original setting
     FAIRNESS_LAMBDA = saved_lambda
 
     return results

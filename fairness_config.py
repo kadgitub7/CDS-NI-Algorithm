@@ -32,7 +32,7 @@ Algorithm2 and Algorithm4 import these values at startup.
 # Assigns instance weights W(S=s, Y=y) = P(S)*P(Y) / P(S,Y) to training
 # examples so that the weighted joint distribution is independent of the
 # protected attribute.  Applied in Algorithm 2's action weight computation.
-ENABLE_REWEIGHING: bool = False
+ENABLE_REWEIGHING: bool = True
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IN-PROCESSING: Fairness-constrained RL reward (modified Algorithm 4)
@@ -82,7 +82,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # minimising overall error.
 #
 # Uses extensions/Fairness_EqualizedOdds.py (compute_bayes_optimal_predictor).
-ENABLE_EQUALIZED_ODDS: bool = True
+ENABLE_EQUALIZED_ODDS: bool = False
 
 # Number of points to sample on each group's ROC curve.
 EQUALIZED_ODDS_ROC_POINTS: int = 100
