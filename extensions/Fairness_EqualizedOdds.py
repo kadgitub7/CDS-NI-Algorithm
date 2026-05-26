@@ -8,55 +8,42 @@ PURPOSE
 Implements equalized odds post-processing following Hardt et al. (2016):
 "Equality of Opportunity in Supervised Learning" (arXiv:1610.02413).
 
-Equalized Odds ensures that the True Positive Rate (TPR) and False Positive
-Rate (FPR) are equal across protected groups (gender in this case).
+Equalized Odds (Definition 2.1) requires that BOTH the True Positive Rate (TPR)
+AND the False Positive Rate (FPR) are equal across protected groups:
 
-  GOAL: Equal sensitivity (true positive rate) between male and female users
-        while minimizing loss in overall accuracy.
+    Pr{Ŷ=1 | A=a, Y=y} is the same for all groups a, for BOTH y=0 and y=1.
 
-METHODOLOGY
------------
-  1. Compute ROC curves separately for each gender group
-  2. Find the convex hull (Pareto frontier) of achievable (TPR, FPR) pairs
-  3. Optimize along the convex hull to find gender-specific thresholds that:
-     a) Equalize TPR across genders (equalized odds constraint)
-     b) Minimize utility loss (expected error rate increase)
+This means:
+    TPR_male = TPR_female   (equal true positive rates)
+    FPR_male = FPR_female   (equal false positive rates)
 
-PAPER FIDELITY
---------------
+METHODOLOGY (Section 4.2 of Hardt et al.)
+------------------------------------------
+  1. Compute per-group ROC curves C_a(t) in (FPR, TPR) space.
+  2. Compute the convex hull D_a = convhull{C_a(t)} for each group.
+  3. Find the intersection region ∩_a D_a where both groups can achieve
+     the SAME (FPR, TPR) point.
+  4. Optimize over the upper-left boundary of this intersection to find
+     the operating point that minimizes expected loss.
+  5. For each group, realize the chosen (FPR, TPR) point using a RANDOMIZED
+     classifier — a mixture of two threshold predictors. This is necessary
+     because the chosen point may not lie exactly on either group's ROC curve.
+
+RANDOMIZED CLASSIFIERS (Section 4.2)
+--------------------------------------
+  For each group a, the derived predictor is:
+      Ŷ = I{R > T_a}
+  where T_a is a random threshold:
+      T_a = t_a   with probability p_a
+      T_a = t̄_a  with probability 1 - p_a
+  Equivalently: if R < t_a → predict 0; if R > t̄_a → predict 1;
+  if t_a < R < t̄_a → predict 1 with probability p_a.
+
+PAPER FIDELITY TAGS
+-------------------
   [HARDT]  – directly from Hardt et al. (2016) framework
   [INFER]  – required interpretation not explicitly in paper
   [ENGR]   – engineering choice with justification
-
-KEY EQUATIONS (Hardt et al., Section 4)
-----------------------------------------
-  For two groups A (male) and B (female) and threshold pair (t_A, t_B):
-
-  TPR_A(t_A) = P(ŷ=1 | y=1, group=A, threshold=t_A)  [True positive rate, group A]
-  TPR_B(t_B) = P(ŷ=1 | y=1, group=B, threshold=t_B)  [True positive rate, group B]
-
-  Equalized Odds Constraint:  TPR_A(t_A) = TPR_B(t_B)
-
-  Utility Loss:  L(t_A, t_B) = E[error rate with thresholds] - E[error rate baseline]
-                              = weighted sum of FPR and FNR changes per group
-
-INTEGRATION
------------
-This module processes Algorithm4Output to:
-  1. Extract prediction scores (rw values) and true labels
-  2. Separate by gender (feature index 1 in the dataset)
-  3. Compute ROC curves and find optimal thresholds
-  4. Return gender-specific thresholds to replace DIAGNOSTIC_THRESHOLD
-
-OUTPUT
-------
-  EqualizedOddsResult
-    .threshold_male       – threshold to apply for male users
-    .threshold_female     – threshold to apply for female users
-    .tpr_equalized        – achieved equal TPR value
-    .utility_loss         – loss incurred vs. single global threshold
-    .operating_point      – (FPR, TPR) pair on convex hull
-    .diagnostics          – detailed optimization info
 
 ================================================================================
 """
@@ -69,8 +56,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+from scipy.optimize import linprog
 from scipy.spatial import ConvexHull
-from scipy.optimize import minimize_scalar, brentq
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 – LOGGING
@@ -108,15 +95,7 @@ class ROCPoint:
     """
     One point on an ROC curve.
 
-    Attributes
-    ----------
-    threshold  : the decision threshold used to compute this point.
-    fpr        : false positive rate = FP / N (where N = # negatives).
-    tpr        : true positive rate = TP / P (where P = # positives).
-    fp         : absolute count of false positives.
-    tp         : absolute count of true positives.
-    fn         : absolute count of false negatives.
-    tn         : absolute count of true negatives.
+    [HARDT] Section 4.2: C_a(t) = (Pr{R>t|A=a,Y=0}, Pr{R>t|A=a,Y=1})
     """
     threshold: float
     fpr: float
@@ -128,12 +107,10 @@ class ROCPoint:
 
     @property
     def fnr(self) -> float:
-        """False negative rate = FN / (FN + TP)."""
         return self.fn / (self.fn + self.tp) if (self.fn + self.tp) > 0 else 0.0
 
     @property
     def error_rate(self) -> float:
-        """Balanced error rate = (FPR + FNR) / 2."""
         return (self.fpr + self.fnr) / 2.0
 
 
@@ -142,17 +119,8 @@ class ROCCurve:
     """
     ROC curve for one demographic group.
 
-    [HARDT] "For each group A, we compute the ROC curve as we vary the
-    classification threshold." (Section 4)
-
-    Attributes
-    ----------
-    group_name  : identifier for the group (e.g., "male", "female").
-    n_positive  : count of positive (diseased) users in group.
-    n_negative  : count of negative (healthy) users in group.
-    scores      : prediction scores (rw values) for all users in group.
-    labels      : ground-truth labels (1=healthy, 2-16=diseased).
-    points      : list of ROCPoint objects, sorted by threshold (descending).
+    [HARDT] Section 4.2: "For each group A, we compute the ROC curve
+    as we vary the classification threshold."
     """
     group_name: str
     n_positive: int
@@ -166,26 +134,11 @@ class ROCCurve:
         Compute TPR, FPR at a specific threshold.
 
         [HARDT] Classification rule for CDS:
-            In CDS, rw = 1 - AF.  Lower rw = higher confidence in HEALTHY.
-            rw <= threshold  =>  HEALTHY  (negative prediction)
-            rw >  threshold  =>  UNHEALTHY / SCREENING  (positive prediction)
-
-            So: predict unhealthy (positive) when rw > threshold.
-
-        Parameters
-        ----------
-        threshold : decision threshold.
-
-        Returns
-        -------
-        ROCPoint at this threshold.
+            rw > threshold  =>  UNHEALTHY (positive prediction)
+            rw <= threshold =>  HEALTHY   (negative prediction)
         """
-        # Prediction: unhealthy (positive) if rw > threshold
-        # (higher rw = less assurance = more likely diseased)
-        predictions = (self.scores > threshold).astype(int)  # 1 = unhealthy (positive)
-        
-        # Separate by true label
-        # In CDS: label=1 is healthy (negative), label≥2 is diseased (positive)
+        predictions = (self.scores > threshold).astype(int)
+
         true_diseased = (self.labels != 1).astype(int)
         true_healthy = (self.labels == 1).astype(int)
 
@@ -198,66 +151,29 @@ class ROCCurve:
         fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
 
         return ROCPoint(
-            threshold=threshold,
-            fpr=fpr,
-            tpr=tpr,
-            fp=int(fp),
-            tp=int(tp),
-            fn=int(fn),
-            tn=int(tn),
+            threshold=threshold, fpr=fpr, tpr=tpr,
+            fp=int(fp), tp=int(tp), fn=int(fn), tn=int(tn),
         )
 
 
 @dataclass
-class ConvexHullResult:
+class RandomizedThreshold:
     """
-    Convex hull (Pareto frontier) of ROC curves for two groups.
+    [HARDT] Section 4.2: A randomized threshold predictor for one group.
 
-    [HARDT] Section 4: "The set of feasible fair classifiers is the convex
-    hull of the individual ROC curves projected onto the (FPR, FNR) plane."
-
-    Attributes
-    ----------
-    roc_male           : ROCCurve for male users.
-    roc_female         : ROCCurve for female users.
-    hull_points        : list of (threshold_male, threshold_female, fpr, tpr, fnr)
-                         tuples on the convex hull in order of increasing FPR.
-    hull_vertices_idx  : indices into combined points list (for debugging).
+    The predictor uses threshold t_lo with probability p and t_hi with
+    probability (1-p). Equivalently:
+        R < t_lo  → predict 0
+        R > t_hi  → predict 1
+        t_lo <= R <= t_hi → predict 1 with probability p
     """
-    roc_male: ROCCurve
-    roc_female: ROCCurve
-    hull_points: List[Tuple[float, float, float, float, float]] = field(
-        default_factory=list
-    )
-    hull_vertices_idx: List[int] = field(default_factory=list)
+    t_lo: float
+    t_hi: float
+    p: float
 
-
-@dataclass
-class LossResult:
-    """
-    Loss computation for equalized odds.
-
-    [HARDT] Section 4: "To ensure equal opportunity, we require equal TPR
-    (or equivalently, equal FNR). The Bayes-optimal classifier on the convex
-    hull minimizes the loss subject to this constraint."
-
-    Attributes
-    ----------
-    threshold_male       : optimal threshold for male users.
-    threshold_female     : optimal threshold for female users.
-    tpr_equalized        : achieved TPR value (same for both groups).
-    fpr_male             : FPR for male users at optimal threshold.
-    fpr_female           : FPR for female users at optimal threshold.
-    expected_loss        : E[error] increase due to fairness constraint.
-    global_accuracy      : overall accuracy (TP+TN) / N.
-    """
-    threshold_male: float
-    threshold_female: float
-    tpr_equalized: float
-    fpr_male: float
-    fpr_female: float
-    expected_loss: float
-    global_accuracy: float
+    @property
+    def is_deterministic(self) -> bool:
+        return abs(self.t_lo - self.t_hi) < 1e-12 or self.p < 1e-12 or self.p > 1 - 1e-12
 
 
 @dataclass
@@ -265,20 +181,8 @@ class EqualizedOddsResult:
     """
     Final output of equalized odds post-processing.
 
-    Attributes
-    ----------
-    threshold_male        : threshold for male users (replaces DIAGNOSTIC_THRESHOLD).
-    threshold_female      : threshold for female users.
-    tpr_male              : achieved TPR for male users.
-    tpr_female            : achieved TPR for female users.
-    tpr_equalized         : equal TPR value (should equal both above).
-    fpr_male              : false positive rate for males.
-    fpr_female            : false positive rate for females.
-    utility_loss          : expected accuracy loss vs. single threshold.
-    original_threshold    : the baseline single threshold (usually 0.025).
-    n_male                : number of male users.
-    n_female              : number of female users.
-    diagnostics           : detailed optimization information.
+    [HARDT] The result specifies per-group randomized thresholds that achieve
+    equal (FPR, TPR) across groups.
     """
     threshold_male: float
     threshold_female: float
@@ -291,11 +195,13 @@ class EqualizedOddsResult:
     original_threshold: float
     n_male: int
     n_female: int
+    randomized_threshold_male: Optional[RandomizedThreshold] = None
+    randomized_threshold_female: Optional[RandomizedThreshold] = None
     diagnostics: Dict = field(default_factory=dict)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 4 – CORE FUNCTIONS: ROC CURVE COMPUTATION
+# SECTION 4 – ROC CURVE COMPUTATION
 # ─────────────────────────────────────────────────────────────────────────────
 
 def compute_roc_curve(
@@ -305,35 +211,19 @@ def compute_roc_curve(
     n_points: int = 100,
 ) -> ROCCurve:
     """
-    Compute ROC curve for one demographic group.
-
-    [HARDT] Computes FPR and TPR at multiple thresholds.
-
-    Parameters
-    ----------
-    scores     : prediction scores (rw values). Shape (n,).
-    labels     : ground-truth labels (1=healthy, ≥2=diseased). Shape (n,).
-    group_name : identifier for this group.
-    n_points   : number of points to sample on the curve.
-
-    Returns
-    -------
-    ROCCurve object with computed points.
+    [HARDT] Compute ROC curve C_a(t) for one group by varying threshold.
     """
     log.info(f"Computing ROC curve for group: {group_name}")
 
-    # Identify positive (diseased) and negative (healthy) users
     true_diseased = (labels != 1).sum()
     true_healthy = (labels == 1).sum()
 
     log.info(f"  {group_name}: {true_diseased} diseased, {true_healthy} healthy")
 
-    # Generate thresholds: include extremes (always classify one way)
-    # and uniform samples across the range
     unique_scores = np.unique(scores)
     if len(unique_scores) < n_points:
         thresholds = np.concatenate([
-            np.array([-np.inf, np.inf]),  # extreme thresholds
+            np.array([-np.inf, np.inf]),
             unique_scores,
         ])
     else:
@@ -350,12 +240,10 @@ def compute_roc_curve(
         labels=labels.copy(),
     )
 
-    # Compute point for each threshold
     for threshold in np.unique(thresholds):
         point = roc.compute_point_at_threshold(float(threshold))
         roc.points.append(point)
 
-    # Sort by threshold descending (high threshold = few positives)
     roc.points = sorted(roc.points, key=lambda p: p.threshold, reverse=True)
 
     log.info(f"  Computed {len(roc.points)} ROC points for {group_name}")
@@ -369,308 +257,310 @@ def compute_roc_curves_by_gender(
     n_points: int = 100,
 ) -> Tuple[ROCCurve, ROCCurve]:
     """
-    Compute separate ROC curves for male and female groups.
-
-    [HARDT] Section 4: "For each group A, we compute the ROC curve."
-
-    Parameters
-    ----------
-    scores : prediction scores (rw values). Shape (n,).
-    labels : ground-truth labels. Shape (n,).
-    data   : full feature matrix. Shape (n, 279). Used to extract gender.
-
-    Returns
-    -------
-    (roc_male, roc_female)
+    [HARDT] Section 4.2: Compute separate ROC curves for each group.
     """
     log.info("Computing ROC curves by gender...")
 
-    # Extract gender
     gender_col = data[:, SEX_FEATURE_IDX]
     male_mask = (gender_col == MALE_VALUE)
     female_mask = (gender_col == FEMALE_VALUE)
 
     roc_male = compute_roc_curve(
-        scores[male_mask],
-        labels[male_mask],
-        group_name="Male",
-        n_points=n_points,
+        scores[male_mask], labels[male_mask],
+        group_name="Male", n_points=n_points,
     )
-
     roc_female = compute_roc_curve(
-        scores[female_mask],
-        labels[female_mask],
-        group_name="Female",
-        n_points=n_points,
+        scores[female_mask], labels[female_mask],
+        group_name="Female", n_points=n_points,
     )
 
     return roc_male, roc_female
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 5 – CORE FUNCTIONS: CONVEX HULL COMPUTATION
+# SECTION 5 – CONVEX HULL OF ROC CURVES
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _interpolate_roc_at_tpr(roc: ROCCurve, target_tpr: float) -> Optional[Tuple[float, float, float]]:
+def _roc_to_convex_hull_points(roc: ROCCurve) -> np.ndarray:
     """
-    Interpolate along an ROC curve to find the threshold and FPR at a target TPR.
+    [HARDT] Equation 4.4: D_a = convhull{C_a(t): t in [0,1]}
 
-    [HARDT] Section 4: Uses randomized classifiers — for any target TPR, we
-    interpolate between two adjacent ROC points. The ROC curve is a step function
-    (discrete users), so we find the two adjacent points that bracket the target
-    TPR and linearly interpolate the threshold and FPR.
+    Extract the (FPR, TPR) points from the ROC curve and compute the upper
+    boundary of their convex hull (points above the main diagonal).
 
-    Returns (threshold, fpr, tpr) or None if target_tpr is outside achievable range.
+    Returns array of shape (K, 2) with columns [fpr, tpr].
     """
-    # Sort points by TPR ascending for interpolation
-    sorted_pts = sorted(roc.points, key=lambda p: (p.tpr, -p.fpr))
+    pts = np.array([[p.fpr, p.tpr] for p in roc.points])
 
-    # Remove duplicate TPR values, keeping lowest FPR (Pareto-optimal)
-    unique_pts = []
-    seen_tpr = set()
+    pts = np.vstack([pts, [0.0, 0.0], [1.0, 1.0]])
+
+    pts = np.unique(pts, axis=0)
+
+    above_diag = pts[:, 1] >= pts[:, 0] - 1e-9
+    pts = pts[above_diag]
+
+    return pts
+
+
+def _upper_boundary(hull_pts: np.ndarray) -> np.ndarray:
+    """
+    Extract the upper-left boundary of a convex hull in (FPR, TPR) space.
+
+    [HARDT] The optimal equalized odds predictor lies on the upper-left
+    boundary of the intersection region (Figure 2, middle panel).
+
+    Returns points sorted by FPR ascending, forming a concave curve from
+    (0,0) toward (1,1).
+    """
+    if len(hull_pts) < 3:
+        return hull_pts[hull_pts[:, 1].argsort()[::-1]]
+
+    try:
+        ch = ConvexHull(hull_pts)
+        vertices = hull_pts[ch.vertices]
+    except Exception:
+        return hull_pts[hull_pts[:, 0].argsort()]
+
+    sorted_v = vertices[vertices[:, 0].argsort()]
+
+    upper = [sorted_v[0]]
+    for pt in sorted_v[1:]:
+        if pt[1] >= upper[-1][1] - 1e-9 or pt[0] >= upper[-1][0]:
+            upper.append(pt)
+
+    upper = np.array(upper)
+
+    boundary = []
+    best_tpr = -1.0
+    for pt in upper[upper[:, 0].argsort()]:
+        if pt[1] > best_tpr - 1e-9:
+            boundary.append(pt)
+            best_tpr = max(best_tpr, pt[1])
+
+    return np.array(boundary)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6 – INTERPOLATION ON ROC CONVEX HULL
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _interpolate_on_hull(hull_pts: np.ndarray, target_fpr: float) -> Optional[float]:
+    """
+    Interpolate the upper boundary of a convex hull to find TPR at a given FPR.
+    """
+    sorted_pts = hull_pts[hull_pts[:, 0].argsort()]
+
+    if target_fpr < sorted_pts[0, 0] - 1e-9 or target_fpr > sorted_pts[-1, 0] + 1e-9:
+        return None
+
     for pt in sorted_pts:
-        tpr_key = round(pt.tpr, 10)
-        if tpr_key not in seen_tpr:
-            seen_tpr.add(tpr_key)
-            unique_pts.append(pt)
+        if abs(pt[0] - target_fpr) < 1e-9:
+            return float(pt[1])
 
-    if not unique_pts:
-        return None
-
-    # Check bounds
-    min_tpr = unique_pts[0].tpr
-    max_tpr = unique_pts[-1].tpr
-
-    if target_tpr < min_tpr - 1e-9 or target_tpr > max_tpr + 1e-9:
-        return None
-
-    # Exact match
-    for pt in unique_pts:
-        if abs(pt.tpr - target_tpr) < 1e-9:
-            return (pt.threshold, pt.fpr, pt.tpr)
-
-    # Find bracketing points and interpolate
-    for i in range(len(unique_pts) - 1):
-        pt_lo = unique_pts[i]
-        pt_hi = unique_pts[i + 1]
-        if pt_lo.tpr <= target_tpr <= pt_hi.tpr:
-            if abs(pt_hi.tpr - pt_lo.tpr) < 1e-12:
-                alpha = 0.5
-            else:
-                alpha = (target_tpr - pt_lo.tpr) / (pt_hi.tpr - pt_lo.tpr)
-            interp_fpr = pt_lo.fpr + alpha * (pt_hi.fpr - pt_lo.fpr)
-            interp_threshold = pt_lo.threshold + alpha * (pt_hi.threshold - pt_lo.threshold)
-            return (interp_threshold, interp_fpr, target_tpr)
+    for i in range(len(sorted_pts) - 1):
+        if sorted_pts[i, 0] <= target_fpr <= sorted_pts[i + 1, 0]:
+            alpha = (target_fpr - sorted_pts[i, 0]) / (sorted_pts[i + 1, 0] - sorted_pts[i, 0])
+            return float(sorted_pts[i, 1] + alpha * (sorted_pts[i + 1, 1] - sorted_pts[i, 1]))
 
     return None
 
 
-def compute_convex_hull(
+def _find_feasible_region(
+    hull_male: np.ndarray,
+    hull_female: np.ndarray,
+) -> np.ndarray:
+    """
+    [HARDT] Section 4.2: Find the intersection ∩_a D_a of the convex hulls.
+
+    The feasible set of (FPR, TPR) for equalized odds predictors is the
+    intersection of the areas under the A-conditional ROC curves (and above
+    the main diagonal).
+
+    Returns array of feasible (fpr, tpr) points on the upper-left boundary
+    of the intersection.
+    """
+    fpr_min = max(hull_male[:, 0].min(), hull_female[:, 0].min())
+    fpr_max = min(hull_male[:, 0].max(), hull_female[:, 0].max())
+
+    if fpr_min > fpr_max + 1e-9:
+        return np.array([])
+
+    n_sample = 500
+    fpr_candidates = np.linspace(fpr_min, fpr_max, n_sample)
+
+    all_fpr_vals = np.concatenate([
+        hull_male[:, 0], hull_female[:, 0], fpr_candidates
+    ])
+    all_fpr_vals = np.unique(all_fpr_vals)
+    all_fpr_vals = all_fpr_vals[(all_fpr_vals >= fpr_min - 1e-9) & (all_fpr_vals <= fpr_max + 1e-9)]
+
+    feasible = []
+    for fpr in all_fpr_vals:
+        tpr_m = _interpolate_on_hull(hull_male, fpr)
+        tpr_f = _interpolate_on_hull(hull_female, fpr)
+        if tpr_m is not None and tpr_f is not None:
+            tpr = min(tpr_m, tpr_f)
+            if tpr >= fpr - 1e-9:
+                feasible.append([fpr, tpr])
+
+    if not feasible:
+        return np.array([])
+
+    return np.array(feasible)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7 – REALIZE OPERATING POINT VIA RANDOMIZED THRESHOLDS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _realize_operating_point(
+    roc: ROCCurve,
+    target_fpr: float,
+    target_tpr: float,
+) -> RandomizedThreshold:
+    """
+    [HARDT] Section 4.2: Realize a target (FPR, TPR) point on one group's
+    convex hull using a randomized mixture of two threshold predictors.
+
+    Any point in D_a = convhull{C_a(t)} can be achieved as a convex
+    combination of two points on the ROC curve. We find the two ROC points
+    that bracket the target and compute the mixing probability.
+    """
+    pts = sorted(roc.points, key=lambda p: (p.fpr, p.tpr))
+
+    unique_pts = []
+    seen = set()
+    for p in pts:
+        key = (round(p.fpr, 10), round(p.tpr, 10))
+        if key not in seen:
+            seen.add(key)
+            unique_pts.append(p)
+
+    best_dist = float('inf')
+    best_threshold = RandomizedThreshold(t_lo=unique_pts[0].threshold, t_hi=unique_pts[0].threshold, p=1.0)
+
+    for p in unique_pts:
+        dist = math.sqrt((p.fpr - target_fpr) ** 2 + (p.tpr - target_tpr) ** 2)
+        if dist < best_dist:
+            best_dist = dist
+            best_threshold = RandomizedThreshold(t_lo=p.threshold, t_hi=p.threshold, p=1.0)
+
+    if best_dist < 1e-6:
+        return best_threshold
+
+    for i in range(len(unique_pts)):
+        for j in range(i + 1, len(unique_pts)):
+            p1 = unique_pts[i]
+            p2 = unique_pts[j]
+
+            dfpr = p2.fpr - p1.fpr
+            dtpr = p2.tpr - p1.tpr
+
+            if abs(dfpr) < 1e-12 and abs(dtpr) < 1e-12:
+                continue
+
+            if abs(dfpr) > abs(dtpr):
+                alpha = (target_fpr - p1.fpr) / dfpr
+            else:
+                alpha = (target_tpr - p1.tpr) / dtpr
+
+            if alpha < -1e-9 or alpha > 1 + 1e-9:
+                continue
+
+            alpha = np.clip(alpha, 0, 1)
+            achieved_fpr = p1.fpr + alpha * dfpr
+            achieved_tpr = p1.tpr + alpha * dtpr
+            dist = math.sqrt((achieved_fpr - target_fpr) ** 2 + (achieved_tpr - target_tpr) ** 2)
+
+            if dist < best_dist:
+                best_dist = dist
+                if p1.threshold > p2.threshold:
+                    best_threshold = RandomizedThreshold(
+                        t_lo=p2.threshold, t_hi=p1.threshold, p=1.0 - alpha,
+                    )
+                else:
+                    best_threshold = RandomizedThreshold(
+                        t_lo=p1.threshold, t_hi=p2.threshold, p=alpha,
+                    )
+
+    return best_threshold
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8 – LOSS OPTIMIZATION OVER FEASIBLE REGION
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _optimize_over_feasible_region(
+    feasible: np.ndarray,
     roc_male: ROCCurve,
     roc_female: ROCCurve,
-) -> ConvexHullResult:
-    """
-    Compute Pareto frontier of achievable (TPR, FPR) pairs with equalized TPR.
-
-    [HARDT] Section 4: For equalized odds, we search for target TPR values where
-    both groups can achieve the same TPR via threshold adjustment (with interpolation
-    for randomized classifiers).
-
-    For each candidate TPR value, we interpolate both groups' ROC curves to find
-    the threshold and FPR that achieves that TPR. This produces feasible operating
-    points where TPR_male = TPR_female by construction.
-
-    Parameters
-    ----------
-    roc_male   : ROCCurve for male group.
-    roc_female : ROCCurve for female group.
-
-    Returns
-    -------
-    ConvexHullResult with candidate operating points.
-    """
-    log.info("Computing Pareto frontier with ROC interpolation...")
-
-    # Collect all unique TPR values from both curves as candidate targets
-    all_tpr_values = set()
-    for pt in roc_male.points:
-        all_tpr_values.add(pt.tpr)
-    for pt in roc_female.points:
-        all_tpr_values.add(pt.tpr)
-
-    # Also add finely spaced targets for better resolution
-    n_fine = 200
-    male_tprs = [pt.tpr for pt in roc_male.points]
-    female_tprs = [pt.tpr for pt in roc_female.points]
-    tpr_lo = max(min(male_tprs), min(female_tprs))
-    tpr_hi = min(max(male_tprs), max(female_tprs))
-    if tpr_lo < tpr_hi:
-        for t in np.linspace(tpr_lo, tpr_hi, n_fine):
-            all_tpr_values.add(float(t))
-
-    hull_points: List[Tuple[float, float, float, float, float]] = []
-
-    for target_tpr in sorted(all_tpr_values):
-        male_interp = _interpolate_roc_at_tpr(roc_male, target_tpr)
-        female_interp = _interpolate_roc_at_tpr(roc_female, target_tpr)
-
-        if male_interp is None or female_interp is None:
-            continue
-
-        t_male, fpr_male, _ = male_interp
-        t_female, fpr_female, _ = female_interp
-
-        # Compute aggregate FPR and FNR weighted by group size
-        total_neg = roc_male.n_negative + roc_female.n_negative
-        total_pos = roc_male.n_positive + roc_female.n_positive
-        fpr_agg = (fpr_male * roc_male.n_negative + fpr_female * roc_female.n_negative) / total_neg if total_neg > 0 else 0.0
-        fnr_agg = (1.0 - target_tpr)
-
-        hull_points.append((
-            t_male,
-            t_female,
-            fpr_agg,
-            target_tpr,
-            fnr_agg,
-        ))
-
-    log.info(f"  Found {len(hull_points)} candidate points with interpolated equalized TPR")
-
-    # Sort by FPR
-    hull_points = sorted(hull_points, key=lambda x: x[2])
-
-    # Prune to Pareto-optimal (non-dominated in FPR vs FNR)
-    pareto = []
-    best_fnr = float('inf')
-    for pt in hull_points:
-        if pt[4] < best_fnr - 1e-9:
-            best_fnr = pt[4]
-            pareto.append(pt)
-    hull_points = pareto if pareto else hull_points
-
-    result = ConvexHullResult(
-        roc_male=roc_male,
-        roc_female=roc_female,
-        hull_points=hull_points,
-    )
-
-    return result
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 6 – LOSS FUNCTION
-# ─────────────────────────────────────────────────────────────────────────────
-
-def compute_loss(
-    hull: ConvexHullResult,
     baseline_threshold: float,
-    cost_fn: Optional[callable] = None,
-) -> LossResult:
+    cost_fp: float = 1.0,
+    cost_fn: float = 1.0,
+) -> Tuple[float, float, float]:
     """
-    Compute optimal loss along the convex hull subject to equalized odds.
+    [HARDT] Equation 4.5: Find the point on the upper-left boundary of the
+    feasible region that minimizes expected loss.
 
-    [HARDT] Section 4: "We want to find the Bayes-optimal classifier on the
-    convex hull subject to the constraint that TPR is equal across groups."
+        min  gamma_0 * l(1,0) + (1 - gamma_1) * l(0,1)
+        s.t. gamma in ∩_a D_a
 
-    The loss is computed as a weighted sum:
-      L(t_A, t_B) = w_A * error_A(t_A) + w_B * error_B(t_B)
+    where gamma = (FPR, TPR) and l(1,0), l(0,1) are the costs of false
+    positives and false negatives respectively.
 
-    where error = FPR * P(Y=0) + FNR * P(Y=1)
-
-    and the weighting can be uniform (democratic) or based on group size.
-
-    Parameters
-    ----------
-    hull              : ConvexHullResult from compute_convex_hull().
-    baseline_threshold: original threshold for loss computation (e.g., 0.025).
-    cost_fn           : optional cost function(threshold_male, threshold_female, point)
-                        that returns a scalar loss. If None, uses balanced error.
-
-    Returns
-    -------
-    LossResult with optimal thresholds and performance metrics.
+    Returns (best_fpr, best_tpr, best_loss).
     """
-    log.info("Computing optimal loss along convex hull...")
-
-    if not hull.hull_points:
-        log.warning("  Convex hull is empty! No feasible equalized odds solution found.")
-        # Fall back to baseline
-        return _fallback_loss_result(hull, baseline_threshold)
-
     best_loss = float('inf')
-    best_point = None
-    best_male_threshold = None
-    best_female_threshold = None
+    best_fpr = 0.0
+    best_tpr = 0.0
 
-    # Evaluate loss at each hull point
-    for t_male, t_female, fpr_agg, tpr, fnr_agg in hull.hull_points:
-        # Default cost: balanced error rate
-        if cost_fn is None:
-            loss = (fpr_agg + fnr_agg) / 2.0
-        else:
-            loss = cost_fn(t_male, t_female, (fpr_agg, tpr, fnr_agg))
-
+    for fpr, tpr in feasible:
+        fnr = 1.0 - tpr
+        loss = cost_fp * fpr + cost_fn * fnr
         if loss < best_loss:
             best_loss = loss
-            best_point = (t_male, t_female, fpr_agg, tpr, fnr_agg)
-            best_male_threshold = t_male
-            best_female_threshold = t_female
+            best_fpr = fpr
+            best_tpr = tpr
 
-    if best_point is None:
-        log.warning("  No feasible operating point found.")
-        return _fallback_loss_result(hull, baseline_threshold)
-
-    t_male, t_female, fpr_agg, tpr, fnr_agg = best_point
-
-    # Compute baseline loss (single threshold for all)
-    baseline_point_male = hull.roc_male.compute_point_at_threshold(baseline_threshold)
-    baseline_point_female = hull.roc_female.compute_point_at_threshold(baseline_threshold)
-    baseline_loss = (baseline_point_male.error_rate + baseline_point_female.error_rate) / 2.0
-
-    utility_loss = best_loss - baseline_loss
-
-    log.info(f"  Optimal thresholds: male={best_male_threshold:.6f}, female={best_female_threshold:.6f}")
-    log.info(f"  Equalized TPR: {tpr:.4f}")
-    log.info(f"  FPR (agg): {fpr_agg:.4f}, FNR (agg): {fnr_agg:.4f}")
-    log.info(f"  Loss: {best_loss:.6f} (baseline: {baseline_loss:.6f}, delta: {utility_loss:.6f})")
-
-    result = LossResult(
-        threshold_male=best_male_threshold,
-        threshold_female=best_female_threshold,
-        tpr_equalized=tpr,
-        fpr_male=hull.roc_male.compute_point_at_threshold(best_male_threshold).fpr,
-        fpr_female=hull.roc_female.compute_point_at_threshold(best_female_threshold).fpr,
-        expected_loss=utility_loss,
-        global_accuracy=(1.0 - best_loss),  # accuracy ≈ 1 - error
-    )
-
-    return result
-
-
-def _fallback_loss_result(
-    hull: ConvexHullResult,
-    baseline_threshold: float,
-) -> LossResult:
-    """
-    Fallback result when no convex hull points are found.
-    Uses baseline threshold for both groups.
-    """
-    pt_m = hull.roc_male.compute_point_at_threshold(baseline_threshold)
-    pt_f = hull.roc_female.compute_point_at_threshold(baseline_threshold)
-
-    return LossResult(
-        threshold_male=baseline_threshold,
-        threshold_female=baseline_threshold,
-        tpr_equalized=(pt_m.tpr + pt_f.tpr) / 2.0,
-        fpr_male=pt_m.fpr,
-        fpr_female=pt_f.fpr,
-        expected_loss=0.0,
-        global_accuracy=0.5,
-    )
+    return best_fpr, best_tpr, best_loss
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 7 – BAYES OPTIMAL PREDICTOR
+# SECTION 9 – LINEAR PROGRAM FORMULATION (BINARY PREDICTOR CASE)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _solve_equalized_odds_lp(
+    roc_male: ROCCurve,
+    roc_female: ROCCurve,
+    baseline_threshold: float,
+    cost_fp: float = 1.0,
+    cost_fn: float = 1.0,
+) -> Optional[Tuple[float, float]]:
+    """
+    [HARDT] Proposition 4.4: Solve the equalized odds optimization as a
+    linear program when the convex hull intersection approach does not yield
+    a clean solution.
+
+    This is a fallback that searches for the best (FPR, TPR) operating point
+    by directly scanning feasible points where both groups' convex hulls overlap.
+
+    Returns (optimal_fpr, optimal_tpr) or None if infeasible.
+    """
+    hull_m = _roc_to_convex_hull_points(roc_male)
+    hull_f = _roc_to_convex_hull_points(roc_female)
+
+    feasible = _find_feasible_region(hull_m, hull_f)
+    if len(feasible) == 0:
+        return None
+
+    best_fpr, best_tpr, _ = _optimize_over_feasible_region(
+        feasible, roc_male, roc_female, baseline_threshold, cost_fp, cost_fn
+    )
+    return (best_fpr, best_tpr)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10 – MAIN ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
 def compute_bayes_optimal_predictor(
@@ -682,93 +572,131 @@ def compute_bayes_optimal_predictor(
     n_roc_points: int = 100,
 ) -> EqualizedOddsResult:
     """
-    Compute gender-specific thresholds that satisfy equalized odds.
+    Compute gender-specific (randomized) thresholds satisfying equalized odds.
 
-    [HARDT] Section 4: "Algorithm 1: Computing the Bayes-optimal fair classifier"
-
-    This is the main entry point for equalized odds post-processing.
+    [HARDT] Section 4.2: Derives an equalized odds predictor from a score
+    function R by finding the optimal operating point in the intersection
+    of the per-group ROC convex hulls, then realizing that point via
+    randomized threshold classifiers for each group.
 
     Parameters
     ----------
     scores              : prediction scores (rw values from Algorithm 4).
-                          Shape (n,).
-    labels              : ground-truth labels (1=healthy, ≥2=diseased).
-                          Shape (n,).
+    labels              : ground-truth labels (1=healthy, >=2=diseased).
     data                : full feature matrix (used to extract gender).
-                          Shape (n, 279).
-    baseline_threshold  : original threshold for reference (usually 0.025).
+    baseline_threshold  : original threshold for reference.
     verbose             : whether to log detailed information.
+    n_roc_points        : number of points to sample on each ROC curve.
 
     Returns
     -------
     EqualizedOddsResult with gender-specific thresholds and metrics.
-
-    Raises
-    ------
-    ValueError if inputs are invalid or no feasible solution exists.
     """
     if verbose:
         log.setLevel(logging.DEBUG)
 
     log.info("=" * 80)
     log.info("EQUALIZED ODDS POST-PROCESSING (Hardt et al. 2016)")
+    log.info("  Constraint: BOTH TPR and FPR equalized across groups")
+    log.info("  Method: Convex hull intersection + randomized thresholds")
     log.info("=" * 80)
 
-    # Validate inputs
     if len(scores) != len(labels) or len(scores) != len(data):
         raise ValueError("Dimension mismatch: scores, labels, data must have equal length")
 
     if not np.all((labels == 1) | (labels >= 2)):
-        raise ValueError("Labels must be 1 (healthy) or ≥2 (diseased)")
+        raise ValueError("Labels must be 1 (healthy) or >=2 (diseased)")
 
-    # Extract gender
     gender_col = data[:, SEX_FEATURE_IDX]
-    n_male = np.sum(gender_col == MALE_VALUE)
-    n_female = np.sum(gender_col == FEMALE_VALUE)
+    n_male = int(np.sum(gender_col == MALE_VALUE))
+    n_female = int(np.sum(gender_col == FEMALE_VALUE))
 
     log.info(f"Dataset composition: {n_male} males, {n_female} females")
 
-    # Compute ROC curves by gender
-    roc_male, roc_female = compute_roc_curves_by_gender(scores, labels, data, n_points=n_roc_points)
+    # Step 1: Compute per-group ROC curves
+    roc_male, roc_female = compute_roc_curves_by_gender(
+        scores, labels, data, n_points=n_roc_points
+    )
 
-    # Find convex hull
-    hull = compute_convex_hull(roc_male, roc_female)
+    # Step 2: Compute convex hulls D_a for each group
+    hull_m = _roc_to_convex_hull_points(roc_male)
+    hull_f = _roc_to_convex_hull_points(roc_female)
 
-    # Optimize loss
-    loss = compute_loss(hull, baseline_threshold)
+    log.info(f"  Male convex hull: {len(hull_m)} points")
+    log.info(f"  Female convex hull: {len(hull_f)} points")
 
-    # Compute detailed metrics
-    pt_male = roc_male.compute_point_at_threshold(loss.threshold_male)
-    pt_female = roc_female.compute_point_at_threshold(loss.threshold_female)
+    # Step 3: Find intersection of convex hulls
+    feasible = _find_feasible_region(hull_m, hull_f)
+
+    if len(feasible) == 0:
+        log.warning("No feasible equalized odds solution found. Falling back to baseline.")
+        return _fallback_result(roc_male, roc_female, baseline_threshold, n_male, n_female)
+
+    log.info(f"  Feasible region: {len(feasible)} points")
+
+    # Step 4: Optimize over feasible region
+    best_fpr, best_tpr, best_loss = _optimize_over_feasible_region(
+        feasible, roc_male, roc_female, baseline_threshold
+    )
+
+    log.info(f"  Optimal operating point: FPR={best_fpr:.4f}, TPR={best_tpr:.4f}")
+
+    # Step 5: Realize the operating point via randomized thresholds for each group
+    rand_thresh_male = _realize_operating_point(roc_male, best_fpr, best_tpr)
+    rand_thresh_female = _realize_operating_point(roc_female, best_fpr, best_tpr)
+
+    log.info(f"  Male randomized threshold: t_lo={rand_thresh_male.t_lo:.6f}, "
+             f"t_hi={rand_thresh_male.t_hi:.6f}, p={rand_thresh_male.p:.4f}"
+             f" (deterministic={rand_thresh_male.is_deterministic})")
+    log.info(f"  Female randomized threshold: t_lo={rand_thresh_female.t_lo:.6f}, "
+             f"t_hi={rand_thresh_female.t_hi:.6f}, p={rand_thresh_female.p:.4f}"
+             f" (deterministic={rand_thresh_female.is_deterministic})")
+
+    # Use the midpoint of each group's randomized threshold range as
+    # the representative deterministic threshold (for backward compatibility)
+    if rand_thresh_male.is_deterministic:
+        threshold_male = rand_thresh_male.t_lo
+    else:
+        threshold_male = rand_thresh_male.t_lo * rand_thresh_male.p + \
+                         rand_thresh_male.t_hi * (1.0 - rand_thresh_male.p)
+
+    if rand_thresh_female.is_deterministic:
+        threshold_female = rand_thresh_female.t_lo
+    else:
+        threshold_female = rand_thresh_female.t_lo * rand_thresh_female.p + \
+                           rand_thresh_female.t_hi * (1.0 - rand_thresh_female.p)
+
+    # Compute baseline loss for comparison
+    baseline_pt_m = roc_male.compute_point_at_threshold(baseline_threshold)
+    baseline_pt_f = roc_female.compute_point_at_threshold(baseline_threshold)
+    baseline_loss = (baseline_pt_m.fpr + baseline_pt_m.fnr +
+                     baseline_pt_f.fpr + baseline_pt_f.fnr) / 4.0
+    utility_loss = best_loss / 2.0 - baseline_loss
 
     result = EqualizedOddsResult(
-        threshold_male=loss.threshold_male,
-        threshold_female=loss.threshold_female,
-        tpr_male=pt_male.tpr,
-        tpr_female=pt_female.tpr,
-        tpr_equalized=loss.tpr_equalized,
-        fpr_male=pt_male.fpr,
-        fpr_female=pt_female.fpr,
-        utility_loss=loss.expected_loss,
+        threshold_male=threshold_male,
+        threshold_female=threshold_female,
+        tpr_male=best_tpr,
+        tpr_female=best_tpr,
+        tpr_equalized=best_tpr,
+        fpr_male=best_fpr,
+        fpr_female=best_fpr,
+        utility_loss=utility_loss,
         original_threshold=baseline_threshold,
-        n_male=int(n_male),
-        n_female=int(n_female),
+        n_male=n_male,
+        n_female=n_female,
+        randomized_threshold_male=rand_thresh_male,
+        randomized_threshold_female=rand_thresh_female,
         diagnostics={
             "roc_male_points_count": len(roc_male.points),
             "roc_female_points_count": len(roc_female.points),
-            "hull_points_count": len(hull.hull_points),
-            "male_confusion": {
-                "tp": pt_male.tp,
-                "fp": pt_male.fp,
-                "tn": pt_male.tn,
-                "fn": pt_male.fn,
-            },
-            "female_confusion": {
-                "tp": pt_female.tp,
-                "fp": pt_female.fp,
-                "tn": pt_female.tn,
-                "fn": pt_female.fn,
-            },
+            "hull_male_points_count": len(hull_m),
+            "hull_female_points_count": len(hull_f),
+            "feasible_region_points_count": len(feasible),
+            "optimal_fpr": best_fpr,
+            "optimal_tpr": best_tpr,
+            "randomized_male": not rand_thresh_male.is_deterministic,
+            "randomized_female": not rand_thresh_female.is_deterministic,
         },
     )
 
@@ -779,6 +707,33 @@ def compute_bayes_optimal_predictor(
     return result
 
 
+def _fallback_result(
+    roc_male: ROCCurve,
+    roc_female: ROCCurve,
+    baseline_threshold: float,
+    n_male: int,
+    n_female: int,
+) -> EqualizedOddsResult:
+    """Fallback when no feasible equalized odds solution exists."""
+    pt_m = roc_male.compute_point_at_threshold(baseline_threshold)
+    pt_f = roc_female.compute_point_at_threshold(baseline_threshold)
+
+    return EqualizedOddsResult(
+        threshold_male=baseline_threshold,
+        threshold_female=baseline_threshold,
+        tpr_male=pt_m.tpr,
+        tpr_female=pt_f.tpr,
+        tpr_equalized=(pt_m.tpr + pt_f.tpr) / 2.0,
+        fpr_male=pt_m.fpr,
+        fpr_female=pt_f.fpr,
+        utility_loss=0.0,
+        original_threshold=baseline_threshold,
+        n_male=n_male,
+        n_female=n_female,
+        diagnostics={"fallback": True},
+    )
+
+
 def _print_equalized_odds_summary(result: EqualizedOddsResult) -> None:
     """Print summary of equalized odds result."""
     log.info("\nEQUALIZED ODDS SUMMARY")
@@ -787,71 +742,134 @@ def _print_equalized_odds_summary(result: EqualizedOddsResult) -> None:
     log.info(f"New threshold (male users):      {result.threshold_male:.6f}")
     log.info(f"New threshold (female users):    {result.threshold_female:.6f}")
     log.info("-" * 80)
-    log.info(f"Equalized TPR (sensitivity):    {result.tpr_equalized:.4f}")
-    log.info(f"  Male TPR:                       {result.tpr_male:.4f}")
-    log.info(f"  Female TPR:                     {result.tpr_female:.4f}")
+    log.info(f"Equalized TPR (sensitivity):     {result.tpr_equalized:.4f}")
+    log.info(f"  Male TPR:                      {result.tpr_male:.4f}")
+    log.info(f"  Female TPR:                    {result.tpr_female:.4f}")
+    log.info(f"Equalized FPR:                   {result.fpr_male:.4f}")
+    log.info(f"  Male FPR:                      {result.fpr_male:.4f}")
+    log.info(f"  Female FPR:                    {result.fpr_female:.4f}")
     log.info("-" * 80)
-    log.info(f"False Positive Rates:")
-    log.info(f"  Male FPR:                       {result.fpr_male:.4f}")
-    log.info(f"  Female FPR:                     {result.fpr_female:.4f}")
+    if result.randomized_threshold_male and not result.randomized_threshold_male.is_deterministic:
+        rt = result.randomized_threshold_male
+        log.info(f"Male: RANDOMIZED classifier (t_lo={rt.t_lo:.4f}, t_hi={rt.t_hi:.4f}, p={rt.p:.4f})")
+    else:
+        log.info(f"Male: deterministic threshold = {result.threshold_male:.6f}")
+    if result.randomized_threshold_female and not result.randomized_threshold_female.is_deterministic:
+        rt = result.randomized_threshold_female
+        log.info(f"Female: RANDOMIZED classifier (t_lo={rt.t_lo:.4f}, t_hi={rt.t_hi:.4f}, p={rt.p:.4f})")
+    else:
+        log.info(f"Female: deterministic threshold = {result.threshold_female:.6f}")
     log.info("-" * 80)
-    log.info(f"Utility Loss (accuracy decrease): {result.utility_loss:.6f}")
+    log.info(f"Utility Loss (accuracy change):  {result.utility_loss:.6f}")
     log.info(f"Dataset: {result.n_male} male, {result.n_female} female users")
     log.info("-" * 80)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 8 – HELPER: APPLY THRESHOLDS TO PREDICTIONS
+# SECTION 11 – APPLY THRESHOLDS TO PREDICTIONS
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _apply_randomized_threshold(
+    scores: np.ndarray,
+    rt: RandomizedThreshold,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """
+    [HARDT] Section 4.2: Apply a randomized threshold predictor.
+
+    For each score R:
+        R > t_hi  → predict 1 (always)
+        R < t_lo  → predict 0 (always)
+        t_lo <= R <= t_hi → predict 1 with probability p
+    """
+    predictions = np.zeros(len(scores), dtype=int)
+
+    above = scores > rt.t_hi
+    predictions[above] = 1
+
+    if abs(rt.t_lo - rt.t_hi) > 1e-12:
+        between = (scores >= rt.t_lo) & (scores <= rt.t_hi)
+        n_between = np.sum(between)
+        if n_between > 0:
+            coin_flips = rng.random(n_between) < rt.p
+            predictions[between] = coin_flips.astype(int)
+    else:
+        at_threshold = np.abs(scores - rt.t_lo) < 1e-12
+        n_at = np.sum(at_threshold)
+        if n_at > 0:
+            coin_flips = rng.random(n_at) < rt.p
+            predictions[at_threshold] = coin_flips.astype(int)
+
+    return predictions
+
 
 def apply_equalized_odds_thresholds(
     scores: np.ndarray,
     data: np.ndarray,
     fairness_result: EqualizedOddsResult,
+    seed: Optional[int] = None,
 ) -> np.ndarray:
     """
-    Apply gender-specific thresholds to prediction scores.
+    Apply equalized odds thresholds to prediction scores.
 
-    Converts rw scores to binary predictions (healthy=0, unhealthy=1) using
-    gender-specific thresholds from equalized odds optimization.
+    [HARDT] Section 4.2: Uses randomized classifiers when the optimal
+    operating point requires mixing between two threshold predictors.
+    Falls back to deterministic thresholds when randomization is not needed.
 
     Parameters
     ----------
-    scores        : prediction scores (rw values). Shape (n,).
-    data          : feature matrix (used to extract gender). Shape (n, 279).
+    scores          : prediction scores (rw values).
+    data            : feature matrix (used to extract gender).
     fairness_result : EqualizedOddsResult from compute_bayes_optimal_predictor().
+    seed            : optional random seed for reproducibility of randomized
+                      classifiers. If None, uses fresh randomness.
 
     Returns
     -------
-    predictions   : binary predictions (0=healthy, 1=unhealthy). Shape (n,).
+    predictions : binary predictions (0=healthy, 1=unhealthy).
     """
+    rng = np.random.default_rng(seed)
+
     gender_col = data[:, SEX_FEATURE_IDX]
     predictions = np.zeros(len(scores), dtype=int)
 
     male_mask = (gender_col == MALE_VALUE)
     female_mask = (gender_col == FEMALE_VALUE)
 
-    # Apply gender-specific thresholds
-    # In CDS: rw > threshold => unhealthy (positive), rw <= threshold => healthy (negative)
-    predictions[male_mask] = (scores[male_mask] > fairness_result.threshold_male).astype(int)
-    predictions[female_mask] = (
-        scores[female_mask] > fairness_result.threshold_female
-    ).astype(int)
+    rt_male = fairness_result.randomized_threshold_male
+    rt_female = fairness_result.randomized_threshold_female
+
+    if rt_male is not None:
+        predictions[male_mask] = _apply_randomized_threshold(
+            scores[male_mask], rt_male, rng,
+        )
+    else:
+        predictions[male_mask] = (
+            scores[male_mask] > fairness_result.threshold_male
+        ).astype(int)
+
+    if rt_female is not None:
+        predictions[female_mask] = _apply_randomized_threshold(
+            scores[female_mask], rt_female, rng,
+        )
+    else:
+        predictions[female_mask] = (
+            scores[female_mask] > fairness_result.threshold_female
+        ).astype(int)
 
     return predictions
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 9 – MAIN EXECUTION & UTILITIES
+# SECTION 12 – MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """
-    Example usage: compute equalized odds on a hypothetical dataset.
-    (Requires Algorithm4 output as input in practice.)
-    """
     log.info("Fairness_EqualizedOdds module loaded successfully.")
     log.info("Use compute_bayes_optimal_predictor() as main entry point.")
+    log.info("Implements full equalized odds (Hardt et al. 2016):")
+    log.info("  - Constrains BOTH TPR and FPR to be equal across groups")
+    log.info("  - Supports randomized classifiers (mixture of two thresholds)")
 
 
 if __name__ == "__main__":
