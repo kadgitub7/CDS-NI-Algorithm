@@ -62,7 +62,7 @@ FAIRNESS_LAMBDA: float = 0.05
 # This is a TRUE adversarial debiasing implementation, not just the RL
 # fairness penalty.  It operates as a post-processing calibration step
 # after Algorithm 4 predictions are collected.
-ENABLE_ADVERSARIAL_DEBIASING: bool = True
+ENABLE_ADVERSARIAL_DEBIASING: bool = False
 
 # Adversarial debiasing hyperparameters
 ADVERSARIAL_HIDDEN_DIM: int = 16
@@ -82,7 +82,7 @@ ADVERSARIAL_THRESHOLD_SEARCH_STEPS: int = 50
 # minimising overall error.
 #
 # Uses extensions/Fairness_EqualizedOdds.py (compute_bayes_optimal_predictor).
-ENABLE_EQUALIZED_ODDS: bool = True
+ENABLE_EQUALIZED_ODDS: bool = False
 
 # Number of points to sample on each group's ROC curve.
 EQUALIZED_ODDS_ROC_POINTS: int = 100

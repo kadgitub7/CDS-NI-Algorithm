@@ -1756,14 +1756,15 @@ def run_loocv(
     log.info(f"Config: {_fc.summary()}")
     log.info(f"{'='*65}")
 
+    # Lazy imports for optional features (BEFORE log suppression so module-level
+    # _build_logger calls don't override the suppression).
+    if _fc.ENABLE_FORCED_SEX_BRANCHING:
+        from Algorithm1_forcedBranch import build_forced_sex_forest, build_sex_specific_tree, route_user
+
     # Suppress per-fold training logs (each fold logs Algorithms 1-3 progress).
     import logging as _logging
     for name in ("CDS.Alg1", "CDS.Alg2", "CDS.Alg3", "CDS.Alg1.ForcedSex"):
         _logging.getLogger(name).setLevel(_logging.WARNING)
-
-    # Lazy imports for optional features
-    if _fc.ENABLE_FORCED_SEX_BRANCHING:
-        from Algorithm1_forcedBranch import build_forced_sex_forest, build_sex_specific_tree, route_user
     if _fc.ENABLE_DATA_AUGMENTATION:
         _ext_dir = str(Path(__file__).parent / "extensions")
         if _ext_dir not in sys.path:
