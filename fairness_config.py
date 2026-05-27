@@ -32,7 +32,7 @@ Algorithm2 and Algorithm4 import these values at startup.
 # Assigns instance weights W(S=s, Y=y) = P(S)*P(Y) / P(S,Y) to training
 # examples so that the weighted joint distribution is independent of the
 # protected attribute.  Applied in Algorithm 2's action weight computation.
-ENABLE_REWEIGHING: bool = True
+ENABLE_REWEIGHING: bool = False
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IN-PROCESSING: Fairness-constrained RL reward (modified Algorithm 4)
@@ -62,7 +62,7 @@ FAIRNESS_LAMBDA: float = 0.05
 # This is a TRUE adversarial debiasing implementation, not just the RL
 # fairness penalty.  It operates as a post-processing calibration step
 # after Algorithm 4 predictions are collected.
-ENABLE_ADVERSARIAL_DEBIASING: bool = False
+ENABLE_ADVERSARIAL_DEBIASING: bool = True
 
 # Adversarial debiasing hyperparameters
 ADVERSARIAL_HIDDEN_DIM: int = 16
