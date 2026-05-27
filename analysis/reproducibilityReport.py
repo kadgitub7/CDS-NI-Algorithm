@@ -463,16 +463,37 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
         lines.append(f"  Training epochs        : {fairness_config.ADVERSARIAL_EPOCHS}")
         lines.append(f"  Learning rate          : {fairness_config.ADVERSARIAL_LR}")
         lines.append("")
-        lines.append(f"  Adversary accuracy (before)  : {adv_result.adversary_accuracy_before*100:.2f}%")
-        lines.append(f"  Adversary accuracy (after)   : {adv_result.adversary_accuracy_after*100:.2f}%")
-        lines.append(f"  Chance baseline              : 50.00%")
+
+        # Phase 1: Detection
+        lines.append("  Phase 1 — DETECTION (adversary on continuous outputs)")
+        lines.append(f"    Adversary input          : (risk_score, Y_true)  [equalized odds]")
+        lines.append(f"    Adversary accuracy        : {adv_result.adversary_accuracy_before*100:.2f}%")
+        signal = "DETECTED" if adv_result.gender_signal_detected else "not detected"
+        lines.append(f"    Gender signal             : {signal}")
         lines.append("")
-        lines.append(f"  Threshold offset (male)      : {adv_result.threshold_offset_male:+.4f}")
-        lines.append(f"  Threshold offset (female)    : {adv_result.threshold_offset_female:+.4f}")
-        lines.append(f"  Predictions changed          : {adv_result.n_predictions_changed}")
+
+        # Phase 2: Calibration
+        lines.append("  Phase 2 — CALIBRATION (adversary-guided threshold adjustment)")
+        lines.append(f"    Iterations               : {adv_result.n_calibration_iterations}")
+        lines.append(f"    Converged                : {adv_result.calibration_converged}")
+        lines.append(f"    Threshold (male)         : {adv_result.threshold_male:.4f}")
+        lines.append(f"    Threshold (female)       : {adv_result.threshold_female:.4f}")
+        lines.append(f"    Predictions changed      : {adv_result.n_predictions_changed}")
         lines.append("")
+
+        # Phase 3: Verification
+        lines.append("  Phase 3 — VERIFICATION (fresh adversary on corrected outputs)")
+        lines.append(f"    Adversary accuracy        : {adv_result.adversary_accuracy_after*100:.2f}%")
+        lines.append(f"    Chance baseline            : 50.00%")
+        lines.append("")
+
+        # Before/after comparison table
         lines.append(f"  {'Metric':<30}  {'Before':>9}  {'After':>9}  {'Delta':>9}")
         lines.append("  " + "-" * 62)
+        lines.append(f"  {'Adversary accuracy':<30}  "
+                     f"{adv_result.adversary_accuracy_before*100:>8.2f}%  "
+                     f"{adv_result.adversary_accuracy_after*100:>8.2f}%  "
+                     f"{(adv_result.adversary_accuracy_after-adv_result.adversary_accuracy_before)*100:>+8.2f}%")
         lines.append(f"  {'Overall accuracy':<30}  "
                      f"{adv_result.original_overall_accuracy*100:>8.2f}%  "
                      f"{adv_result.debiased_overall_accuracy*100:>8.2f}%  "
@@ -491,11 +512,19 @@ def build_report(metrics, data, labels, max_users, elapsed_sec, adv_result=None,
                      f"{gap_before*100:>8.2f}%  "
                      f"{gap_after*100:>8.2f}%  "
                      f"{(gap_after-gap_before)*100:>+8.2f}%")
-        lines.append("")
-        if adv_result.adversary_accuracy_before > 0.55:
-            lines.append("  Adversary could predict sex from CDS outputs -> gender signal exists.")
-        else:
-            lines.append("  Adversary close to chance -> CDS outputs carry little gender signal.")
+        lines.append("  " + "-" * 62)
+        tpr_gap_b = abs(adv_result.original_tpr_male - adv_result.original_tpr_female)
+        tpr_gap_a = abs(adv_result.debiased_tpr_male - adv_result.debiased_tpr_female)
+        lines.append(f"  {'TPR gap (|male-female|)':<30}  "
+                     f"{tpr_gap_b*100:>8.2f}%  "
+                     f"{tpr_gap_a*100:>8.2f}%  "
+                     f"{(tpr_gap_a-tpr_gap_b)*100:>+8.2f}%")
+        fpr_gap_b = abs(adv_result.original_fpr_male - adv_result.original_fpr_female)
+        fpr_gap_a = abs(adv_result.debiased_fpr_male - adv_result.debiased_fpr_female)
+        lines.append(f"  {'FPR gap (|male-female|)':<30}  "
+                     f"{fpr_gap_b*100:>8.2f}%  "
+                     f"{fpr_gap_a*100:>8.2f}%  "
+                     f"{(fpr_gap_a-fpr_gap_b)*100:>+8.2f}%")
 
     # ---- 9. RL fairness grid search results ----
     if grid_results is not None:

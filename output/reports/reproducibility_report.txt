@@ -3,19 +3,19 @@
 ========================================================================
   Dataset : UCI Arrhythmia (n=452 users)
   Method  : Leave-One-Out Cross-Validation (per-fold retraining)
-  Runtime : 819s
+  Runtime : 13266s
   Paper target: 95.4% overall accuracy
-  Config  : EqualizedOdds
+  Config  : Reweigh
 
 1. OVERALL PERFORMANCE
 ----------------------
   Total users evaluated : 452
-  Correct predictions   : 343 / 452
-  Overall accuracy      : 75.88%
+  Correct predictions   : 344 / 452
+  Overall accuracy      : 76.11%
   Sensitivity (diseased detection)     : 84.54%
-  Specificity (1 - false alarm rate)   : 68.57%
-  False alarm rate                     : 31.43%
-  Users sent to SCREENING              : 0
+  Specificity (1 - false alarm rate)   : 68.98%
+  False alarm rate                     : 31.02%
+  Users sent to SCREENING              : 75
   Healthy users  : 245  |  Diseased users : 207
 
 2. GENDER-DISAGGREGATED ACCURACY
@@ -23,13 +23,13 @@
   Metric                                 Male     Female  Diff (M-F)
   --------------------------------  ---------  ---------  ----------
   Total users                             203        249            
-  Overall accuracy                     76.35%     75.50%      +0.85%
+  Overall accuracy                     76.85%     75.50%      +1.35%
   Sensitivity                          88.98%     78.65%     +10.33%
-  Specificity                          58.82%     73.75%     -14.93%
+  Specificity                          60.00%     73.75%     -13.75%
   Diseased error rate                  11.02%     21.35%     -10.33%
-  Healthy correct                       50/85    118/160            
+  Healthy correct                       51/85    118/160            
   Diseased correct                    105/118      70/89            
-  Sent to SCREENING                         0          0            
+  Sent to SCREENING                        63         12            
 
   Paper reported: 5% male diseased error, 14% female diseased error
 
@@ -44,13 +44,13 @@
 -------------------------------------------
   Metric                        Value    Interpretation
   ------------------------------------------------------------
-  Statistical Parity Diff (SPD) +0.2399  BIASED (|SPD|>=0.1)
-  Disparate Impact (DI)          0.6522  BIASED (DI<0.8)
-  Equalized Odds diff (EO)       0.1493  BIASED (EO>=0.1)
-  Subgroup Disparity Cal. Err    0.0694  BIASED (SDCE>=0.05)
-    Precision (male UNHEALTHY)   0.7500
+  Statistical Parity Diff (SPD) +0.2349  BIASED (|SPD|>=0.1)
+  Disparate Impact (DI)          0.6569  BIASED (DI<0.8)
+  Equalized Odds diff (EO)       0.1375  BIASED (EO>=0.1)
+  Subgroup Disparity Cal. Err    0.0722  BIASED (SDCE>=0.05)
+    Precision (male UNHEALTHY)   0.7554
     Precision (female UNHEALTHY) 0.6250
-    Precision (overall)          0.6944
+    Precision (overall)          0.6972
 
   SPD > 0 means males get UNHEALTHY predictions more often.
   DI < 0.8 is the standard 80% rule threshold (EEOC guideline).
@@ -102,65 +102,14 @@
   9      3       Old Anterior MI                   0       15     0.0%
   10     5       Sinus Tachycardia                 0        4     0.0%
 
-10. EQUALIZED ODDS POST-PROCESSING (Hardt et al., 2016)
--------------------------------------------------------
-  Method: Concave envelope intersection + randomized thresholds
-  Constraint: BOTH TPR and FPR equalized across groups
-  Loss: prevalence-weighted expected error rate
-  ROC sample points per group  : 100
-
-  Baseline threshold (all)     : 0.250000
-  Optimised threshold (male)   : 0.177247
-  Optimised threshold (female) : 0.036177
-
-  Male classifier   : RANDOMIZED  t_lo=0.0327  t_hi=0.5625  p=0.7271
-  Female classifier : RANDOMIZED  t_lo=0.0347  t_hi=0.0377  p=0.5027
-
-  Metric                               Male     Female    |Delta|
-  --------------------------------------------------------------
-  True Positive Rate (TPR)          0.8482     0.8482     0.0000
-  False Positive Rate (FPR)         0.3754     0.3754     0.0000
-
-  Utility loss vs. baseline        : +0.031839
-  Feasible region candidates        : 1015
-  ROC points (male / female)        : 271 / 323
-
-10b. BASELINE vs EQUALIZED ODDS -- SIDE-BY-SIDE COMPARISON
-----------------------------------------------------------
-
-  Metric                              Baseline    Eq. Odds       Delta
-  --------------------------------------------------------------------
-  Overall accuracy                      75.88%      73.01%      -2.88%
-  Sensitivity (TPR)                     84.54%      84.54%      +0.00%
-  Specificity (1-FPR)                   68.57%      63.27%      -5.31%
-  --------------------------------------------------------------------
-  Male accuracy                         76.35%      75.86%      -0.49%
-  Male sensitivity                      88.98%      83.90%      -5.08%
-  Male specificity                      58.82%      64.71%      +5.88%
-  Male error rate                       11.02%      16.10%      +5.08%
-  --------------------------------------------------------------------
-  Female accuracy                       75.50%      70.68%      -4.82%
-  Female sensitivity                    78.65%      85.39%      +6.74%
-  Female specificity                    73.75%      62.50%     -11.25%
-  Female error rate                     21.35%      14.61%      -6.74%
-  --------------------------------------------------------------------
-  Gender error gap                      10.33%       1.49%      -8.84%
-  TPR gap (|M-F|)                       10.33%       1.49%      -8.84%
-  FPR gap (|M-F|)                       14.93%       2.21%     -12.72%
-
-  Interpretation:
-    TPR gap reduced: 10.33% -> 1.49%
-    FPR gap reduced: 14.93% -> 2.21%
-    Accuracy change: -2.88%
-
 11. ACTIVE FAIRNESS CONFIGURATION
 ---------------------------------
-  EqualizedOdds
+  Reweigh
 
-  ENABLE_REWEIGHING            = False
+  ENABLE_REWEIGHING            = True
   ENABLE_FAIRNESS_RL           = False
   ENABLE_ADVERSARIAL_DEBIASING = False
-  ENABLE_EQUALIZED_ODDS        = True
+  ENABLE_EQUALIZED_ODDS        = False
   ENABLE_FORCED_SEX_BRANCHING  = False
   ENABLE_DATA_AUGMENTATION     = False
 
