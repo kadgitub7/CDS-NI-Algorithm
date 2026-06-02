@@ -38,10 +38,11 @@ if not log.handlers:
 
 SAMPLING_RATE = 300  # Hz
 
-LABEL_MAP = {"N": 1, "A": 2, "O": 3, "~": 4}
-LABEL_NAMES = {1: "Normal", 2: "AFib", 3: "Other", 4: "Noisy"}
+LABEL_MAP = {"N": 1, "A": 2, "O": 2}
+LABEL_NAMES = {1: "Normal", 2: "Abnormal"}
 HEALTHY_CLASS = 1
-DISEASE_CLASSES = (2, 3, 4)
+DISEASE_CLASSES = (2,)
+EXCLUDED_LABELS = {"~"}
 
 
 def _load_ecg(mat_path: str) -> np.ndarray:
@@ -214,22 +215,25 @@ FEATURE_NAMES: Dict[int, str] = {
 
 def load_physionet2017(
     data_dir: str,
-    reference_csv: str = "REFERENCE.csv",
+    reference_csv: str = "REFERENCE-original.csv",
     max_records: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
     """
     Load PhysioNet 2017 data and extract features.
 
+    Binary classification: Normal (N) -> 1, Abnormal (A+O) -> 2.
+    Noisy (~) recordings are excluded entirely.
+
     Parameters
     ----------
-    data_dir : path to directory containing .mat, .hea, and REFERENCE.csv
+    data_dir : path to directory containing .mat, .hea, and REFERENCE-original.csv
     reference_csv : name of the reference/label file
     max_records : limit number of records (for testing)
 
     Returns
     -------
     data   : np.ndarray, shape (N, 40), float64
-    labels : np.ndarray, shape (N,), int (1=Normal, 2=AFib, 3=Other, 4=Noisy)
+    labels : np.ndarray, shape (N,), int (1=Normal, 2=Abnormal)
     record_ids : list of record IDs
     """
     ref_path = os.path.join(data_dir, reference_csv)
@@ -241,6 +245,7 @@ def load_physionet2017(
     labels_list = []
     record_ids = []
     skipped = 0
+    excluded_noisy = 0
 
     for _, row in ref_df.iterrows():
         rid = row["record_id"]
@@ -248,6 +253,9 @@ def load_physionet2017(
         mat_path = os.path.join(data_dir, f"{rid}.mat")
         if not os.path.exists(mat_path):
             skipped += 1
+            continue
+        if label_str in EXCLUDED_LABELS:
+            excluded_noisy += 1
             continue
         if label_str not in LABEL_MAP:
             skipped += 1
@@ -265,7 +273,7 @@ def load_physionet2017(
 
     data = np.array(records, dtype=float)
     labels = np.array(labels_list, dtype=int)
-    log.info(f"Loaded {len(records)} records ({skipped} skipped)")
+    log.info(f"Loaded {len(records)} records ({skipped} skipped, {excluded_noisy} noisy excluded)")
     log.info(f"  Shape: {data.shape}")
     log.info(f"  Labels: { {LABEL_NAMES[c]: int((labels==c).sum()) for c in sorted(set(labels))} }")
     return data, labels, record_ids

@@ -5,11 +5,11 @@ CDS Pipeline for PhysioNet 2017 AF Classification Challenge
 
 Runs the full CDS Algorithm 1-4 pipeline on PhysioNet 2017 ECG data.
 
-The PhysioNet 2017 dataset has single-lead ECG waveforms labeled:
+Binary classification using original PhysioNet 2017 labels:
   N = Normal sinus rhythm     -> class 1 (healthy)
-  A = Atrial fibrillation     -> class 2
-  O = Other rhythm            -> class 3
-  ~ = Noisy / unclassifiable  -> class 4
+  A = Atrial fibrillation     -> class 2 (abnormal)
+  O = Other rhythm            -> class 2 (abnormal)
+  ~ = Noisy / unclassifiable  -> EXCLUDED (not a cardiac condition)
 
 This script:
   1. Extracts 40 features from raw ECG waveforms (time, frequency, HRV)
@@ -95,10 +95,18 @@ cds.classify_features = _classify_features_flexible
 import Algorithm2 as alg2_mod
 import Algorithm3 as alg3_mod
 
-# Patch Algorithm 4 disease classes
+# Percentile-based healthy ranges for large datasets.
+# With 5154 healthy users, raw [min,max] spans nearly the entire feature space
+# and only 1.5% of disease users fall outside. The paper's Eq. 5 was designed
+# for 245 healthy users where min/max are tight. A 99.5th-percentile range
+# is the statistical equivalent for large N, trimming outlier tails.
+alg2_mod.HEALTHY_RANGE_PERCENTILE = 99.5
+
+# Patch Algorithm 4 disease classes and AF normalisation
 import Algorithm4 as alg4_mod
 alg4_mod.ALL_DISEASE_CLASSES = PN_DISEASE_CLASSES
 alg4_mod.HEALTHY_CLASS_ALG4 = PN_HEALTHY_CLASS
+alg4_mod.AF_NORMALISE_TO_CAPACITY = True
 
 # Disable fairness (no sex feature in PhysioNet 2017)
 import fairness_config as _fc
@@ -164,7 +172,7 @@ def run_cds_pipeline(
     Parameters
     ----------
     data   : (N, 40) feature matrix from PhysioNet 2017
-    labels : (N,) class labels (1=Normal, 2=AFib, 3=Other, 4=Noisy)
+    labels : (N,) class labels (1=Normal, 2=Abnormal)
     max_users : limit LOOCV to first N users
     """
     import logging as _logging
@@ -242,9 +250,9 @@ def main():
     max_records = None
     max_users = None
     if len(sys.argv) > 1:
-        max_records = int(sys.argv[1])
+        max_records = int(sys.argv[1]) or None
     if len(sys.argv) > 2:
-        max_users = int(sys.argv[2])
+        max_users = int(sys.argv[2]) or None
 
     # Load / extract features
     data, labels, record_ids = load_or_extract_features(

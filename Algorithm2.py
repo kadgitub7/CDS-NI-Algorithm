@@ -115,6 +115,11 @@ DEFAULT_N_BINS: int = 10
 # Zero-evidence handling is done separately via the uniform-posterior fallback.
 LAPLACE_EPSILON: float = 0.0
 
+# Healthy range percentile. 100.0 = paper-faithful [min, max] of all healthy
+# values (Eq. 5). For large datasets where min/max extremes make ranges too
+# wide, set to e.g. 99.5 to use the 0.25th–99.75th percentile instead.
+HEALTHY_RANGE_PERCENTILE: float = 100.0
+
 # [PAPER] All present health class labels in the UCI Arrhythmia dataset.
 # Classes 11, 12, 13 are absent (0 users).
 # h=1 = healthy; h∈{2,...,16} = various arrhythmia classes.
@@ -800,9 +805,14 @@ def compute_healthy_range(disc:   DiscretizationResult,
         raw_vals_valid = disc._raw_values_valid   # raw feature values for valid users
         healthy_vals   = raw_vals_valid[healthy_mask]
 
-        # [PAPER Eq. 5] b_min/b_max = exact min/max of healthy user values
-        b_min = float(healthy_vals.min())
-        b_max = float(healthy_vals.max())
+        if HEALTHY_RANGE_PERCENTILE >= 100.0:
+            # [PAPER Eq. 5] b_min/b_max = exact min/max of healthy user values
+            b_min = float(healthy_vals.min())
+            b_max = float(healthy_vals.max())
+        else:
+            tail = (100.0 - HEALTHY_RANGE_PERCENTILE) / 2.0
+            b_min = float(np.percentile(healthy_vals, tail))
+            b_max = float(np.percentile(healthy_vals, 100.0 - tail))
 
         # N_kf = (b_max - b_min) / delta_B   [PAPER line 13]
         n_kf  = (b_max - b_min) / disc.delta_b if disc.delta_b > 0 else 1.0

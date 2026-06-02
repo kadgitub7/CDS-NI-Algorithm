@@ -137,6 +137,16 @@ HEALTHY_CLASS_ALG4: int = HEALTHY_CLASS   # = 1
 # [INFER] All disease class labels in the UCI Arrhythmia dataset
 ALL_DISEASE_CLASSES: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16)
 
+# AF accumulates across the disease-class loop (for h=2..H). When a dataset has
+# fewer disease classes than the original UCI setup (12), the total AF capacity
+# shrinks proportionally and rw can never reach the diagnostic threshold.
+# When enabled, AF_NORMALISE_TO_CAPACITY rescales AF after all actions at a node
+# are exhausted so that the raw AF sum is mapped to [0, 1] relative to the node's
+# maximum achievable AF. This preserves the relative ordering of users while
+# ensuring the threshold is reachable.
+AF_NORMALISE_TO_CAPACITY: bool = False
+AF_DISEASE_SCALE: float = 1.0  # legacy static factor, kept for backward compat
+
 # ─────────────────────────────────────────────────────────────────────────────
 # FAIRNESS: IN-PROCESSING RL REWARD MODIFICATION (Zhang et al., 2018 adapted)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -790,11 +800,13 @@ def _compute_AF_increment(p_h_f: float, r_j_h: float, p_h_gt1_f: float) -> float
     semantics: Section VI.A states "fuzzy logic ... values of variables can be a real
     number between 0 and 1", and §VI.D describes AF as the "assurance about the
     decision" (Figs. 11, 12 show AF approaching but not exceeding 1).
+
+    AF_DISEASE_SCALE applies a static multiplier when set > 1.0.
     """
     if p_h_gt1_f < 1e-12:
         return 0.0
     delta = (p_h_f * r_j_h) / p_h_gt1_f
-    return float(max(0.0, delta))
+    return float(max(0.0, delta * AF_DISEASE_SCALE))
 
 
 def _update_AF(AF_real: float, delta_AF: float) -> float:
@@ -1301,6 +1313,20 @@ def _predict_at_node(
         disease_check_rec.rw_real_at_end = 1.0 - AF_real
         node_rec.disease_checks.append(disease_check_rec)
     # end for h
+
+    # ─────────────────────────────────────────────────────────────────
+    # AF normalisation: rescale AF relative to node's max capacity
+    # ─────────────────────────────────────────────────────────────────
+    if AF_NORMALISE_TO_CAPACITY and record.total_actions_applied > 0:
+        max_af_capacity = 0.0
+        for h in disease_classes:
+            p_h_f_cap = _compute_p_h_f(node, h)
+            p_h_gt1_f_cap = _compute_p_h_gt1_f(node)
+            all_acts = _get_sorted_disease_actions(nid, h, alg3_output, consumed=None)
+            for a in all_acts:
+                max_af_capacity += _compute_AF_increment(p_h_f_cap, a.action_weight, p_h_gt1_f_cap)
+        if max_af_capacity > 1e-9:
+            AF_real = min(1.0, AF_real / max_af_capacity)
 
     # ─────────────────────────────────────────────────────────────────
     # [PAPER] Lines 35-43: Post-disease-loop decision
