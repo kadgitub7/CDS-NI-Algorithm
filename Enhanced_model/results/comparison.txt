@@ -1,0 +1,40 @@
+==========================================================================================
+  COMPARISON SUMMARY
+  Generated: 2026-06-03 11:25:11
+==========================================================================================
+
+  Mode                             Accuracy   Sensitivity   Specificity       F1      Time
+  ──────────────────────────────  ─────────  ────────────  ────────────  ───────  ────────
+  Cascade(ANN)                       100.0%        100.0%        100.0%   100.0%    173.0s
+  Vote(CDS+ANN)                      100.0%        100.0%        100.0%   100.0%     20.4s
+  Confidence(CDS+ANN)                100.0%        100.0%        100.0%   100.0%     21.6s
+  Stacked(CDS->ANN)                   20.0%          0.0%        100.0%     0.0%     19.1s
+  Selector(CDS+ANN)                  100.0%        100.0%        100.0%   100.0%     21.4s
+  Cascade(RNN)                       100.0%        100.0%        100.0%   100.0%     16.9s
+  Vote(CDS+RNN)                      100.0%        100.0%        100.0%   100.0%     37.4s
+  Confidence(CDS+RNN)                100.0%        100.0%        100.0%   100.0%     31.0s
+  Stacked(CDS->RNN)                   80.0%        100.0%          0.0%    88.9%     32.7s
+  Selector(CDS+RNN)                  100.0%        100.0%        100.0%   100.0%     33.2s
+
+  Best:   Cascade(ANN)  (100.0%)
+  Worst:  Stacked(CDS->ANN)  (20.0%)
+  Spread: 80.0%
+
+------------------------------------------------------------------------------------------
+  ERROR OVERLAP ANALYSIS
+------------------------------------------------------------------------------------------
+  Cascade(ANN)                    errors on users: (none)
+  Vote(CDS+ANN)                   errors on users: (none)
+  Confidence(CDS+ANN)             errors on users: (none)
+  Stacked(CDS->ANN)               errors on users: [0, 1, 2, 4]
+  Selector(CDS+ANN)               errors on users: (none)
+  Cascade(RNN)                    errors on users: (none)
+  Vote(CDS+RNN)                   errors on users: (none)
+  Confidence(CDS+RNN)             errors on users: (none)
+  Stacked(CDS->RNN)               errors on users: [3]
+  Selector(CDS+RNN)               errors on users: (none)
+
+  Users wrong in ALL modes: (none)
+  Users wrong in ANY mode:  [0, 1, 2, 3, 4]
+
+==========================================================================================
