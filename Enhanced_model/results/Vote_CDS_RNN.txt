@@ -1,53 +1,177 @@
 ==============================================================================
   RESULTS: Vote(CDS+RNN)
 ==============================================================================
-  Timestamp:       2026-06-03 11:23:34
+  Timestamp:       2026-06-03 20:24:11
   Mode:            Vote(CDS+RNN)
-  Users evaluated: 5
-  Total time:      37.4s  (7477ms/user)
+  Users evaluated: 452
+  Total time:      2241.0s  (4958ms/user)
 
 ------------------------------------------------------------------------------
   SUMMARY METRICS
 ------------------------------------------------------------------------------
-  Accuracy:              100.00%  (5/5)
-  Sensitivity (Recall):  100.00%  (diseased detected: 4/4)
-  Specificity:           100.00%  (healthy correct:   1/1)
-  Precision (PPV):       100.00%  (positive predictions correct: 4/4)
-  Neg Pred Value (NPV):  100.00%  (negative predictions correct: 1/1)
-  F1 Score:              100.00%
-  Misclassifications:    0
+  Accuracy:              74.56%  (337/452)
+  Sensitivity (Recall):  80.19%  (diseased detected: 166/207)
+  Specificity:           69.80%  (healthy correct:   171/245)
+  Precision (PPV):       69.17%  (positive predictions correct: 166/240)
+  Neg Pred Value (NPV):  80.66%  (negative predictions correct: 171/212)
+  F1 Score:              74.27%
+  Misclassifications:    115
 
 ------------------------------------------------------------------------------
   CONFUSION MATRIX  (binary: healthy vs unhealthy)
 ------------------------------------------------------------------------------
                           Predicted
                     Healthy    Unhealthy
-  Actual Healthy          1            0
-  Actual Unhealthy        0            4
+  Actual Healthy        171           74
+  Actual Unhealthy       41          166
 
 ------------------------------------------------------------------------------
   DECISION SOURCE BREAKDOWN
 ------------------------------------------------------------------------------
   Source                           Count        %   Accuracy
   ──────────────────────────────  ──────  ───────  ─────────
-  VOTE-AGREE-HEALTHY                   1    20.0%     100.0%
-  VOTE-AGREE-UNHEALTHY                 2    40.0%     100.0%
-  VOTE-TIE-CDS                         2    40.0%     100.0%
+  VOTE-AGREE-HEALTHY                 172    38.1%      82.6%
+  VOTE-AGREE-UNHEALTHY               130    28.8%      80.0%
+  VOTE-TIE-CDS                       150    33.2%      60.7%
 
 ------------------------------------------------------------------------------
   PER-CLASS BREAKDOWN
 ------------------------------------------------------------------------------
     Class   Correct   Total   Accuracy  Label     
   ───────  ────────  ──────  ─────────  ──────────
-        1         1       1     100.0%  Healthy   
-        6         1       1     100.0%  Disease-6 
-        7         1       1     100.0%  Disease-7 
-        8         1       1     100.0%  Disease-8 
-       10         1       1     100.0%  Disease-10
+        1       171     245      69.8%  Healthy   
+        2        33      44      75.0%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5        12      13      92.3%  Disease-5 
+        6        18      25      72.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         9       9     100.0%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        14      22      63.6%  Disease-16
 
 ------------------------------------------------------------------------------
-  MISCLASSIFICATION TRACE  (0 errors)
+  MISCLASSIFICATION TRACE  (115 errors)
 ------------------------------------------------------------------------------
-  (none — all predictions correct)
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       8       H      D2  VOTE-TIE-CDS                    0.443       -         0.126  Unhealthy         2558
+       9     D10       H  VOTE-AGREE-HEALTHY              0.968       -         0.114  Screening         2854
+      12     D10       H  VOTE-TIE-CDS                    0.959       -         0.108  Screening         2470
+      21       H     D10  VOTE-AGREE-UNHEALTHY            0.622       -         0.101  Unhealthy         2646
+      34      D4       H  VOTE-AGREE-HEALTHY              0.968       -         0.121  Screening         2580
+      37     D10       H  VOTE-AGREE-HEALTHY              1.000       -         0.179  Healthy           2379
+      38       H      D2  VOTE-TIE-CDS                    0.405       -         0.251  Unhealthy         2939
+      43       H      D6  VOTE-AGREE-UNHEALTHY            0.072       -         0.107  Unhealthy         4815
+      50       H     D10  VOTE-AGREE-UNHEALTHY            0.193       -         0.150  Unhealthy         4978
+      54     D16       H  VOTE-AGREE-HEALTHY              0.959       -         0.142  Screening         5098
+      55      D6       H  VOTE-AGREE-HEALTHY              0.968       -         0.221  Screening         5397
+      59       H      D2  VOTE-TIE-CDS                    0.873       -         0.091  Unhealthy         5076
+      61      D5       H  VOTE-AGREE-HEALTHY              1.000       -         0.190  Healthy           4837
+      68      D6       H  VOTE-AGREE-HEALTHY              1.000       -         0.169  Healthy           5208
+      71     D16       H  VOTE-AGREE-HEALTHY              1.000       -         0.129  Healthy           3585
+      72       H      D2  VOTE-TIE-CDS                    0.926       -         0.162  Unhealthy         4044
+      77      D2       H  VOTE-AGREE-HEALTHY              1.000       -         0.106  Healthy           3057
+      82      D2       H  VOTE-TIE-CDS                    0.968       -         0.104  Screening         3336
+      90       H      D3  VOTE-TIE-CDS                    0.724       -         0.144  Unhealthy         4063
+      98       H     D16  VOTE-AGREE-UNHEALTHY            0.511       -         0.093  Unhealthy         2679
+      99       H      D2  VOTE-AGREE-UNHEALTHY            0.294       -         0.128  Unhealthy         3338
+     100      D4       H  VOTE-AGREE-HEALTHY              0.968       -         0.127  Screening         2908
+     101       H      D2  VOTE-TIE-CDS                    0.579       -         0.136  Unhealthy         3065
+     102       H      D2  VOTE-TIE-CDS                    0.010       -         0.095  Unhealthy         3361
+     103       H      D2  VOTE-TIE-CDS                    0.121       -         0.130  Unhealthy         3480
+     104      D6       H  VOTE-AGREE-HEALTHY              1.000       -         0.257  Healthy           2597
+     109       H      D2  VOTE-TIE-CDS                    0.261       -         0.108  Unhealthy         4110
+     110       H      D2  VOTE-TIE-CDS                    0.829       -         0.223  Unhealthy         2374
+     113       H     D10  VOTE-AGREE-UNHEALTHY            0.564       -         0.116  Unhealthy         2131
+     114      D6       H  VOTE-AGREE-HEALTHY              1.000       -         0.116  Healthy           1907
+     126       H      D2  VOTE-AGREE-UNHEALTHY            0.603       -         0.101  Unhealthy         3001
+     129       H      D2  VOTE-TIE-CDS                    0.530       -         0.106  Unhealthy         4024
+     133       H     D10  VOTE-AGREE-UNHEALTHY            0.477       -         0.112  Unhealthy         3276
+     134     D10       H  VOTE-AGREE-HEALTHY              1.000       -         0.156  Healthy           2188
+     136       H      D2  VOTE-TIE-CDS                    0.882       -         0.185  Unhealthy         2739
+     137     D10       H  VOTE-TIE-CDS                    0.963       -         0.098  Screening         2381
+     138       H      D6  VOTE-TIE-CDS                    1.000       -         0.228  Unhealthy         2385
+     144     D10       H  VOTE-TIE-CDS                    1.000       -         0.119  Healthy           3514
+     152       H      D2  VOTE-TIE-CDS                    0.842       -         0.111  Unhealthy         1968
+     154     D16       H  VOTE-AGREE-HEALTHY              1.000       -         0.133  Healthy           4054
+     157      D2       H  VOTE-AGREE-HEALTHY              0.959       -         0.121  Screening         5437
+     158       H     D10  VOTE-AGREE-UNHEALTHY            0.574       -         0.116  Unhealthy         5233
+     160       H     D10  VOTE-AGREE-UNHEALTHY            0.010       -         0.148  Unhealthy         5403
+     162       H      D6  VOTE-AGREE-UNHEALTHY            0.784       -         0.101  Unhealthy         5444
+     170       H     D10  VOTE-AGREE-UNHEALTHY            0.991       -         0.123  Unhealthy         6494
+     171       H      D6  VOTE-AGREE-UNHEALTHY            0.530       -         0.121  Unhealthy         5373
+     172       H      D2  VOTE-TIE-CDS                    0.947       -         0.153  Unhealthy         5310
+     178       H      D5  VOTE-AGREE-UNHEALTHY            0.847       -         0.089  Unhealthy         6370
+     179      D2       H  VOTE-AGREE-HEALTHY              0.968       -         0.269  Screening         5391
+     181     D16       H  VOTE-TIE-CDS                    1.000       -         0.099  Healthy           5410
+     182       H      D2  VOTE-TIE-CDS                    0.863       -         0.111  Unhealthy         5423
+     186      D2       H  VOTE-AGREE-HEALTHY              0.968       -         0.108  Screening         5405
+     190       H      D2  VOTE-TIE-CDS                    0.501       -         0.111  Unhealthy         5200
+     199       H      D2  VOTE-TIE-CDS                    0.564       -         0.181  Unhealthy         5428
+     200      D2       H  VOTE-AGREE-HEALTHY              0.935       -         0.115  Screening         5302
+     202       H      D2  VOTE-TIE-CDS                    0.564       -         0.135  Unhealthy         5261
+     208       H      D2  VOTE-TIE-CDS                    0.554       -         0.211  Unhealthy         5713
+     211       H      D2  VOTE-TIE-CDS                    0.366       -         0.122  Unhealthy         5447
+     220       H      D2  VOTE-TIE-CDS                    0.501       -         0.106  Unhealthy         5438
+     221       H      D2  VOTE-TIE-CDS                    0.978       -         0.191  Unhealthy         5522
+     223       H      D2  VOTE-TIE-CDS                    0.535       -         0.151  Unhealthy         6496
+     228       H      D2  VOTE-TIE-CDS                    0.978       -         0.137  Unhealthy         5368
+     233       H      D2  VOTE-AGREE-UNHEALTHY            0.811       -         0.153  Unhealthy         5407
+     234       H      D2  VOTE-TIE-CDS                    0.429       -         0.328  Unhealthy         5344
+     239       H      D2  VOTE-TIE-CDS                    0.675       -         0.179  Unhealthy         5218
+     241       H      D4  VOTE-AGREE-UNHEALTHY            0.346       -         0.108  Unhealthy         5476
+     242       H      D2  VOTE-TIE-CDS                    0.646       -         0.163  Unhealthy         5417
+     246       H      D2  VOTE-TIE-CDS                    0.014       -         0.160  Unhealthy         6448
+     247       H      D2  VOTE-TIE-CDS                    0.829       -         0.195  Unhealthy         6968
+     250     D10       H  VOTE-TIE-CDS                    1.000       -         0.136  Healthy           5355
+     254       H      D2  VOTE-AGREE-UNHEALTHY            0.535       -         0.126  Unhealthy         6358
+     255       H      D2  VOTE-TIE-CDS                    0.106       -         0.136  Unhealthy         5712
+     261     D16       H  VOTE-AGREE-HEALTHY              1.000       -         0.256  Healthy           6450
+     268       H      D2  VOTE-TIE-CDS                    0.612       -         0.106  Unhealthy         5390
+     271       H      D2  VOTE-TIE-CDS                    0.516       -         0.199  Unhealthy         5470
+     275      D2       H  VOTE-AGREE-HEALTHY              0.972       -         0.135  Screening         5352
+     278     D10       H  VOTE-AGREE-HEALTHY              0.968       -         0.152  Screening         5329
+     280       H      D2  VOTE-TIE-CDS                    0.603       -         0.192  Unhealthy         5356
+     283      D6       H  VOTE-TIE-CDS                    1.000       -         0.119  Healthy           5502
+     295      D2       H  VOTE-AGREE-HEALTHY              1.000       -         0.211  Healthy           5311
+     299       H      D3  VOTE-AGREE-UNHEALTHY            0.784       -         0.102  Unhealthy         5345
+     309      D7       H  VOTE-AGREE-HEALTHY              1.000       -         0.122  Healthy           5647
+     311       H      D2  VOTE-TIE-CDS                    0.550       -         0.141  Unhealthy         5483
+     321       H      D2  VOTE-TIE-CDS                    0.569       -         0.128  Unhealthy         6464
+     326     D10       H  VOTE-AGREE-HEALTHY              0.959       -         0.101  Screening         1850
+     328       H      D2  VOTE-TIE-CDS                    0.135       -         0.151  Unhealthy         1947
+     331       H      D2  VOTE-AGREE-UNHEALTHY            0.918       -         0.110  Unhealthy         1811
+     335       H      D2  VOTE-AGREE-UNHEALTHY            0.376       -         0.114  Unhealthy         1876
+     340     D16       H  VOTE-TIE-CDS                    0.959       -         0.103  Screening         1929
+     341     D10       H  VOTE-TIE-CDS                    1.000       -         0.095  Healthy           2588
+     343      D6       H  VOTE-AGREE-HEALTHY              0.968       -         0.155  Screening         2966
+     351      D2       H  VOTE-TIE-CDS                    0.931       -         0.122  Screening         2295
+     352       H      D2  VOTE-AGREE-UNHEALTHY            0.237       -         0.124  Unhealthy         2768
+     355       H     D10  VOTE-AGREE-UNHEALTHY            0.793       -         0.098  Unhealthy         2877
+     362     D16       H  VOTE-AGREE-HEALTHY              0.968       -         0.194  Screening         3123
+     364      D6       H  VOTE-AGREE-HEALTHY              1.000       -         0.156  Healthy           2364
+     365       H      D2  VOTE-TIE-CDS                    0.366       -         0.136  Unhealthy         2816
+     367      D2       H  VOTE-AGREE-HEALTHY              0.930       -         0.172  Screening         2475
+     375      D2       H  VOTE-TIE-CDS                    0.968       -         0.130  Screening         3033
+     386     D16       H  VOTE-AGREE-HEALTHY              0.959       -         0.112  Screening         4407
+     389       H      D2  VOTE-AGREE-UNHEALTHY            0.130       -         0.101  Unhealthy         2541
+     391       H      D2  VOTE-TIE-CDS                    0.072       -         0.141  Unhealthy         2049
+     393       H      D2  VOTE-TIE-CDS                    0.376       -         0.194  Unhealthy         2220
+     394       H     D10  VOTE-AGREE-UNHEALTHY            0.385       -         0.115  Unhealthy         2491
+     400     D10       H  VOTE-AGREE-HEALTHY              0.968       -         0.305  Screening         3316
+     407       H      D2  VOTE-TIE-CDS                    0.448       -         0.207  Unhealthy         2855
+     408       H     D10  VOTE-AGREE-UNHEALTHY            0.793       -         0.103  Unhealthy         2659
+     416       H      D2  VOTE-TIE-CDS                    0.477       -         0.113  Unhealthy         2295
+     422       H      D2  VOTE-TIE-CDS                    0.501       -         0.131  Unhealthy         2295
+     434       H     D10  VOTE-AGREE-UNHEALTHY            0.957       -         0.116  Unhealthy         5441
+     439       H      D2  VOTE-TIE-CDS                    0.608       -         0.147  Unhealthy         5665
+     440       H      D3  VOTE-TIE-CDS                    0.767       -         0.126  Unhealthy         5398
+     447       H      D2  VOTE-TIE-CDS                    0.304       -         0.128  Unhealthy         5354
+     450       H      D2  VOTE-TIE-CDS                    0.535       -         0.202  Unhealthy         5531
+     451       H      D2  VOTE-TIE-CDS                    0.492       -         0.090  Unhealthy         6342
 
 ==============================================================================

@@ -1,53 +1,331 @@
 ==============================================================================
   RESULTS: Stacked(CDS->RNN)
 ==============================================================================
-  Timestamp:       2026-06-03 11:24:38
+  Timestamp:       2026-06-03 21:51:30
   Mode:            Stacked(CDS->RNN)
-  Users evaluated: 5
-  Total time:      32.7s  (6541ms/user)
+  Users evaluated: 452
+  Total time:      2408.7s  (5329ms/user)
 
 ------------------------------------------------------------------------------
   SUMMARY METRICS
 ------------------------------------------------------------------------------
-  Accuracy:              80.00%  (4/5)
-  Sensitivity (Recall):  100.00%  (diseased detected: 4/4)
-  Specificity:           0.00%  (healthy correct:   0/1)
-  Precision (PPV):       80.00%  (positive predictions correct: 4/5)
-  Neg Pred Value (NPV):  0.00%  (negative predictions correct: 0/0)
-  F1 Score:              88.89%
-  Misclassifications:    1
+  Accuracy:              40.04%  (181/452)
+  Sensitivity (Recall):  64.25%  (diseased detected: 133/207)
+  Specificity:           19.59%  (healthy correct:   48/245)
+  Precision (PPV):       40.30%  (positive predictions correct: 133/330)
+  Neg Pred Value (NPV):  39.34%  (negative predictions correct: 48/122)
+  F1 Score:              49.53%
+  Misclassifications:    271
 
 ------------------------------------------------------------------------------
   CONFUSION MATRIX  (binary: healthy vs unhealthy)
 ------------------------------------------------------------------------------
                           Predicted
                     Healthy    Unhealthy
-  Actual Healthy          0            1
-  Actual Unhealthy        0            4
+  Actual Healthy         48          197
+  Actual Unhealthy       74          133
 
 ------------------------------------------------------------------------------
   DECISION SOURCE BREAKDOWN
 ------------------------------------------------------------------------------
   Source                           Count        %   Accuracy
   ──────────────────────────────  ──────  ───────  ─────────
-  STACKED-RNN                          5   100.0%      80.0%
+  STACKED-RNN                        452   100.0%      40.0%
 
 ------------------------------------------------------------------------------
   PER-CLASS BREAKDOWN
 ------------------------------------------------------------------------------
     Class   Correct   Total   Accuracy  Label     
   ───────  ────────  ──────  ─────────  ──────────
-        1         0       1       0.0%  Healthy   
-        6         1       1     100.0%  Disease-6 
-        7         1       1     100.0%  Disease-7 
-        8         1       1     100.0%  Disease-8 
-       10         1       1     100.0%  Disease-10
+        1        48     245      19.6%  Healthy   
+        2        26      44      59.1%  Disease-2 
+        3         5      15      33.3%  Disease-3 
+        4         8      15      53.3%  Disease-4 
+        5         8      13      61.5%  Disease-5 
+        6        17      25      68.0%  Disease-6 
+        7         3       3     100.0%  Disease-7 
+        8         1       2      50.0%  Disease-8 
+        9         4       9      44.4%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         2       4      50.0%  Disease-14
+       15         3       5      60.0%  Disease-15
+       16        17      22      77.3%  Disease-16
 
 ------------------------------------------------------------------------------
-  MISCLASSIFICATION TRACE  (1 errors)
+  MISCLASSIFICATION TRACE  (271 errors)
 ------------------------------------------------------------------------------
     User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
   ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
-       3       H     D16  STACKED-RNN                     0.963       -          -     Screening         6168
+       3       H     D16  STACKED-RNN                     0.963       -          -     Screening         2738
+       5     D14       H  STACKED-RNN                     0.155       -          -     Unhealthy         2458
+       6       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4431
+       7       H     D16  STACKED-RNN                     0.963       -          -     Screening         3402
+      10      D3       H  STACKED-RNN                     0.117       -          -     Unhealthy         2559
+      11       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2598
+      14       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2331
+      15       H     D16  STACKED-RNN                     0.963       -          -     Screening         2485
+      16     D10       H  STACKED-RNN                     0.382       -          -     Unhealthy         2352
+      17       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2972
+      18       H     D16  STACKED-RNN                     0.963       -          -     Screening         3310
+      19       H     D16  STACKED-RNN                     0.963       -          -     Screening         2654
+      20       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2333
+      21       H     D16  STACKED-RNN                     0.622       -          -     Unhealthy         2037
+      22       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3056
+      23       H     D16  STACKED-RNN                     0.963       -          -     Screening         3319
+      24       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2312
+      26     D14       H  STACKED-RNN                     0.277       -          -     Unhealthy         2784
+      30      D6       H  STACKED-RNN                     0.732       -          -     Unhealthy         2793
+      31       H     D16  STACKED-RNN                     0.963       -          -     Screening         2751
+      32       H     D16  STACKED-RNN                     0.963       -          -     Screening         3279
+      33       H     D16  STACKED-RNN                     0.963       -          -     Screening         2495
+      35       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4262
+      36       H     D16  STACKED-RNN                     0.963       -          -     Screening         2961
+      39      D6       H  STACKED-RNN                     0.348       -          -     Unhealthy         3080
+      40       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3095
+      42       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2905
+      44       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2904
+      45      D4       H  STACKED-RNN                     0.703       -          -     Unhealthy         2559
+      47       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2037
+      48      D6       H  STACKED-RNN                     0.737       -          -     Unhealthy         2003
+      49       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2088
+      51       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2341
+      53     D16       H  STACKED-RNN                     0.015       -          -     Unhealthy         1974
+      56       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2336
+      57       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2234
+      59       H     D16  STACKED-RNN                     0.873       -          -     Unhealthy         2078
+      60      D5       H  STACKED-RNN                     0.577       -          -     Unhealthy         2227
+      62       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2381
+      63       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2552
+      64       H     D16  STACKED-RNN                     0.963       -          -     Screening         2429
+      67       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4152
+      68      D6       H  STACKED-RNN                     1.000       -          -     Healthy           2947
+      69       H     D16  STACKED-RNN                     0.963       -          -     Screening         2474
+      70      D6       H  STACKED-RNN                     0.737       -          -     Unhealthy         2900
+      72       H     D16  STACKED-RNN                     0.926       -          -     Unhealthy         2938
+      73       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2173
+      74       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2853
+      76      D3       H  STACKED-RNN                     0.150       -          -     Unhealthy         3235
+      78       H     D16  STACKED-RNN                     0.963       -          -     Screening         2942
+      79       H     D16  STACKED-RNN                     0.963       -          -     Screening         2448
+      80       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3100
+      81       H     D16  STACKED-RNN                     0.954       -          -     Screening         2932
+      84      D6       H  STACKED-RNN                     0.625       -          -     Unhealthy         2928
+      86      D2       H  STACKED-RNN                     0.068       -          -     Unhealthy         2536
+      89      D9       H  STACKED-RNN                     0.301       -          -     Unhealthy         2577
+      90       H     D16  STACKED-RNN                     0.724       -          -     Unhealthy         3334
+      91      D4       H  STACKED-RNN                     0.890       -          -     Unhealthy         2586
+      95       H     D16  STACKED-RNN                     0.963       -          -     Screening         2285
+      96     D10       H  STACKED-RNN                     0.611       -          -     Unhealthy         2184
+      97       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2029
+      99       H      D2  STACKED-RNN                     0.294       -          -     Unhealthy         3240
+     101       H      D4  STACKED-RNN                     0.579       -          -     Unhealthy         2883
+     103       H      D6  STACKED-RNN                     0.121       -          -     Unhealthy         3701
+     105      D4       H  STACKED-RNN                     0.509       -          -     Unhealthy         5074
+     107       H     D16  STACKED-RNN                     0.963       -          -     Screening         4724
+     108      D2       H  STACKED-RNN                     0.010       -          -     Unhealthy         4858
+     109       H     D16  STACKED-RNN                     0.261       -          -     Unhealthy         5717
+     110       H     D16  STACKED-RNN                     0.829       -          -     Unhealthy         4767
+     111       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3851
+     112       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3720
+     113       H     D16  STACKED-RNN                     0.564       -          -     Unhealthy         5086
+     117       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6272
+     118       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5435
+     119       H     D16  STACKED-RNN                     0.963       -          -     Screening         5560
+     120       H     D16  STACKED-RNN                     0.996       -          -     Healthy           5122
+     121       H     D16  STACKED-RNN                     0.963       -          -     Screening         4954
+     122       H     D16  STACKED-RNN                     0.963       -          -     Screening         5644
+     123       H     D16  STACKED-RNN                     0.963       -          -     Screening         5571
+     124       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5427
+     125       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6626
+     128       H     D16  STACKED-RNN                     0.963       -          -     Screening         5293
+     129       H     D16  STACKED-RNN                     0.530       -          -     Unhealthy         5607
+     130       H     D16  STACKED-RNN                     0.963       -          -     Screening         5616
+     131       H     D16  STACKED-RNN                     0.963       -          -     Screening         5508
+     135       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5533
+     136       H     D16  STACKED-RNN                     0.882       -          -     Unhealthy         5492
+     137     D10       H  STACKED-RNN                     0.963       -          -     Screening         5374
+     138       H     D16  STACKED-RNN                     1.000       -          -     Unhealthy         5481
+     139       H     D16  STACKED-RNN                     0.963       -          -     Screening         6327
+     140       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5541
+     141      D5       H  STACKED-RNN                     0.543       -          -     Unhealthy         5507
+     142       H     D16  STACKED-RNN                     0.963       -          -     Screening         5640
+     143       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5564
+     147       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6694
+     148       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5319
+     149     D10       H  STACKED-RNN                     0.625       -          -     Unhealthy         5490
+     151       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5507
+     152       H     D16  STACKED-RNN                     0.842       -          -     Unhealthy         5525
+     153      D6       H  STACKED-RNN                     0.382       -          -     Unhealthy         5512
+     155       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5483
+     156       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5511
+     159       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5666
+     160       H     D10  STACKED-RNN                     0.010       -          -     Unhealthy         5488
+     161       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6560
+     162       H     D16  STACKED-RNN                     0.784       -          -     Unhealthy         5544
+     164       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5561
+     165       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5604
+     166       H     D16  STACKED-RNN                     0.963       -          -     Screening         5604
+     170       H     D16  STACKED-RNN                     0.991       -          -     Unhealthy         2625
+     172       H     D16  STACKED-RNN                     0.947       -          -     Unhealthy         5960
+     176       H     D16  STACKED-RNN                     0.963       -          -     Screening         3484
+     177       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3864
+     178       H     D16  STACKED-RNN                     0.847       -          -     Unhealthy         5463
+     179      D2       H  STACKED-RNN                     0.968       -          -     Screening         6461
+     182       H     D16  STACKED-RNN                     0.863       -          -     Unhealthy         5329
+     184      D2       H  STACKED-RNN                     0.311       -          -     Unhealthy         6713
+     185      D4       H  STACKED-RNN                     0.010       -          -     Unhealthy         5247
+     189      D9       H  STACKED-RNN                     0.455       -          -     Unhealthy         5590
+     191       H     D16  STACKED-RNN                     0.963       -          -     Screening         5254
+     193      D2       H  STACKED-RNN                     0.761       -          -     Unhealthy         5170
+     194       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5237
+     195       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6453
+     196       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5376
+     199       H     D16  STACKED-RNN                     0.564       -          -     Unhealthy         5562
+     201       H     D16  STACKED-RNN                     0.963       -          -     Screening         5572
+     203       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5567
+     205       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5571
+     206       H     D16  STACKED-RNN                     0.963       -          -     Screening         5497
+     210     D10       H  STACKED-RNN                     0.024       -          -     Unhealthy         6635
+     212      D2       H  STACKED-RNN                     0.262       -          -     Unhealthy         5483
+     213      D2       H  STACKED-RNN                     0.607       -          -     Unhealthy         5318
+     214      D4       H  STACKED-RNN                     0.262       -          -     Unhealthy         5492
+     215       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5539
+     217     D15       H  STACKED-RNN                     0.664       -          -     Unhealthy         5296
+     220       H     D16  STACKED-RNN                     0.501       -          -     Unhealthy         5560
+     221       H     D16  STACKED-RNN                     0.978       -          -     Unhealthy         5514
+     225      D3       H  STACKED-RNN                     0.620       -          -     Unhealthy         6682
+     227     D16       H  STACKED-RNN                     0.630       -          -     Unhealthy         5420
+     228       H     D16  STACKED-RNN                     0.978       -          -     Unhealthy         5459
+     229       H     D16  STACKED-RNN                     0.963       -          -     Screening         5482
+     230       H     D16  STACKED-RNN                     0.963       -          -     Screening         5512
+     232       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6664
+     233       H     D16  STACKED-RNN                     0.811       -          -     Unhealthy         5572
+     236       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5491
+     238       H     D16  STACKED-RNN                     0.930       -          -     Screening         5658
+     240       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5670
+     243     D15       H  STACKED-RNN                     0.625       -          -     Unhealthy         5510
+     244       H     D16  STACKED-RNN                     0.963       -          -     Screening         5525
+     245      D2       H  STACKED-RNN                     0.344       -          -     Unhealthy         5420
+     247       H     D16  STACKED-RNN                     0.829       -          -     Unhealthy         6655
+     248      D4       H  STACKED-RNN                     0.382       -          -     Unhealthy         5614
+     249       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4014
+     251      D4       H  STACKED-RNN                     0.913       -          -     Unhealthy         1289
+     253      D3       H  STACKED-RNN                     0.654       -          -     Unhealthy         1927
+     254       H     D16  STACKED-RNN                     0.535       -          -     Unhealthy         1881
+     256      D2       H  STACKED-RNN                     0.068       -          -     Unhealthy         2407
+     257      D3       H  STACKED-RNN                     0.504       -          -     Unhealthy         2420
+     259      D2       H  STACKED-RNN                     0.509       -          -     Unhealthy         3178
+     260       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4684
+     262       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4467
+     263       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4441
+     264       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5276
+     265       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5818
+     267       H     D16  STACKED-RNN                     0.963       -          -     Screening         5273
+     268       H     D16  STACKED-RNN                     0.612       -          -     Unhealthy         6008
+     269       H     D16  STACKED-RNN                     0.963       -          -     Screening         6665
+     270       H     D16  STACKED-RNN                     0.963       -          -     Screening         3756
+     271       H     D16  STACKED-RNN                     0.516       -          -     Unhealthy         5244
+     273       H     D16  STACKED-RNN                     0.963       -          -     Screening         5872
+     274       H     D16  STACKED-RNN                     0.963       -          -     Screening         5962
+     276       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6391
+     277      D2       H  STACKED-RNN                     0.199       -          -     Unhealthy         5056
+     279       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3432
+     280       H     D16  STACKED-RNN                     0.603       -          -     Unhealthy         3837
+     281       H     D16  STACKED-RNN                     0.963       -          -     Screening         5148
+     282       H     D16  STACKED-RNN                     0.963       -          -     Screening         5988
+     283      D6       H  STACKED-RNN                     1.000       -          -     Healthy           5598
+     285      D3       H  STACKED-RNN                     0.654       -          -     Unhealthy         6263
+     286       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5246
+     287       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5630
+     288       H     D16  STACKED-RNN                     0.963       -          -     Screening         5369
+     290       H     D16  STACKED-RNN                     0.963       -          -     Screening         5336
+     292       H     D16  STACKED-RNN                     1.000       -          -     Healthy           6666
+     295      D2       H  STACKED-RNN                     1.000       -          -     Healthy           2532
+     299       H     D16  STACKED-RNN                     0.784       -          -     Unhealthy         2733
+     301       H     D16  STACKED-RNN                     0.963       -          -     Screening         2756
+     303      D3       H  STACKED-RNN                     0.630       -          -     Unhealthy         3596
+     304      D2       H  STACKED-RNN                     0.058       -          -     Unhealthy         2830
+     305       H     D16  STACKED-RNN                     1.000       -          -     Healthy           1806
+     306     D16       H  STACKED-RNN                     0.504       -          -     Unhealthy         2490
+     308      D2       H  STACKED-RNN                     0.189       -          -     Unhealthy         2175
+     310       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3060
+     314       H     D16  STACKED-RNN                     0.963       -          -     Screening         3480
+     315       H     D16  STACKED-RNN                     0.963       -          -     Screening         2815
+     316      D5       H  STACKED-RNN                     0.272       -          -     Unhealthy         2539
+     317       H     D16  STACKED-RNN                     0.963       -          -     Screening         2873
+     318       H     D16  STACKED-RNN                     0.963       -          -     Screening         2555
+     320      D5       H  STACKED-RNN                     0.010       -          -     Unhealthy         3859
+     321       H     D16  STACKED-RNN                     0.569       -          -     Unhealthy         4222
+     325       H     D16  STACKED-RNN                     0.963       -          -     Screening         2445
+     329      D2       H  STACKED-RNN                     0.262       -          -     Unhealthy         2872
+     330       H     D16  STACKED-RNN                     0.963       -          -     Screening         3094
+     331       H     D16  STACKED-RNN                     0.918       -          -     Unhealthy         3371
+     333       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3976
+     334     D10       H  STACKED-RNN                     0.518       -          -     Unhealthy         2459
+     336     D10       H  STACKED-RNN                     0.378       -          -     Unhealthy         3313
+     337       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2524
+     338       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2716
+     339       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4142
+     342       H     D16  STACKED-RNN                     0.963       -          -     Screening         5340
+     344     D10       H  STACKED-RNN                     0.615       -          -     Unhealthy         6573
+     345       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5737
+     348      D5       H  STACKED-RNN                     0.557       -          -     Unhealthy         4452
+     349       H     D16  STACKED-RNN                     0.963       -          -     Screening         5930
+     355       H     D16  STACKED-RNN                     0.793       -          -     Unhealthy         4279
+     356      D3       H  STACKED-RNN                     0.465       -          -     Unhealthy         3996
+     359      D2       H  STACKED-RNN                     0.107       -          -     Unhealthy         3712
+     360      D2       H  STACKED-RNN                     0.184       -          -     Unhealthy         4231
+     365       H     D16  STACKED-RNN                     0.366       -          -     Unhealthy         3672
+     366      D2       H  STACKED-RNN                     0.311       -          -     Unhealthy         4115
+     369       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5340
+     370      D9       H  STACKED-RNN                     0.306       -          -     Unhealthy         6543
+     371       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5138
+     373       H     D16  STACKED-RNN                     0.963       -          -     Screening         5600
+     376      D8       H  STACKED-RNN                     0.387       -          -     Unhealthy         4947
+     377       H     D16  STACKED-RNN                     0.963       -          -     Screening         4912
+     378       H     D16  STACKED-RNN                     0.963       -          -     Screening         5132
+     380     D16       H  STACKED-RNN                     0.387       -          -     Unhealthy         3271
+     381      D3       H  STACKED-RNN                     0.489       -          -     Unhealthy         3215
+     382       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3778
+     383       H     D16  STACKED-RNN                     0.963       -          -     Screening         5180
+     388      D9       H  STACKED-RNN                     0.015       -          -     Unhealthy         4251
+     389       H      D3  STACKED-RNN                     0.130       -          -     Unhealthy         3491
+     390       H     D16  STACKED-RNN                     0.963       -          -     Screening         3335
+     392       H     D16  STACKED-RNN                     0.963       -          -     Screening         5481
+     395      D9       H  STACKED-RNN                     0.150       -          -     Unhealthy         5379
+     396       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4559
+     397     D10       H  STACKED-RNN                     0.387       -          -     Unhealthy         5381
+     398      D3       H  STACKED-RNN                     0.178       -          -     Unhealthy         5006
+     399       H     D16  STACKED-RNN                     0.963       -          -     Screening         5494
+     402       H     D16  STACKED-RNN                     0.963       -          -     Screening         1847
+     404       H     D16  STACKED-RNN                     0.969       -          -     Screening         5546
+     405       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5857
+     406       H     D16  STACKED-RNN                     0.963       -          -     Screening         6808
+     407       H     D16  STACKED-RNN                     0.448       -          -     Unhealthy         5464
+     408       H     D16  STACKED-RNN                     0.793       -          -     Unhealthy         5414
+     409     D16       H  STACKED-RNN                     0.363       -          -     Unhealthy         4436
+     413       H     D16  STACKED-RNN                     0.963       -          -     Screening         4392
+     414       H     D16  STACKED-RNN                     0.918       -          -     Screening         5235
+     415       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4043
+     416       H      D2  STACKED-RNN                     0.477       -          -     Unhealthy         3759
+     418       H     D16  STACKED-RNN                     0.963       -          -     Screening         3741
+     419       H     D16  STACKED-RNN                     1.000       -          -     Healthy           4032
+     421       H     D16  STACKED-RNN                     0.963       -          -     Screening         3768
+     422       H     D16  STACKED-RNN                     0.501       -          -     Unhealthy         4378
+     423       H     D16  STACKED-RNN                     0.963       -          -     Screening         3641
+     425       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5693
+     427     D10       H  STACKED-RNN                     0.591       -          -     Unhealthy         5221
+     428       H     D16  STACKED-RNN                     0.963       -          -     Screening         5152
+     432     D10       H  STACKED-RNN                     0.092       -          -     Unhealthy         5381
+     434       H     D16  STACKED-RNN                     0.957       -          -     Unhealthy         2591
+     435       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2406
+     437       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2970
+     438       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2306
+     440       H     D16  STACKED-RNN                     0.767       -          -     Unhealthy         3983
+     442       H     D16  STACKED-RNN                     0.963       -          -     Screening         3326
+     444       H     D16  STACKED-RNN                     1.000       -          -     Healthy           5011
+     445       H     D16  STACKED-RNN                     1.000       -          -     Healthy           2927
+     446       H     D16  STACKED-RNN                     1.000       -          -     Healthy           3391
+     451       H     D16  STACKED-RNN                     0.492       -          -     Unhealthy         2764
 
 ==============================================================================
