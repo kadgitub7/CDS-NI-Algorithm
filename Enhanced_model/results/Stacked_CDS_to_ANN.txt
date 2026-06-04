@@ -1,56 +1,243 @@
 ==============================================================================
   RESULTS: Stacked(CDS->ANN)
 ==============================================================================
-  Timestamp:       2026-06-03 11:22:18
+  Timestamp:       2026-06-03 15:19:11
   Mode:            Stacked(CDS->ANN)
-  Users evaluated: 5
-  Total time:      19.1s  (3819ms/user)
+  Users evaluated: 452
+  Total time:      1387.8s  (3070ms/user)
 
 ------------------------------------------------------------------------------
   SUMMARY METRICS
 ------------------------------------------------------------------------------
-  Accuracy:              20.00%  (1/5)
-  Sensitivity (Recall):  0.00%  (diseased detected: 0/4)
-  Specificity:           100.00%  (healthy correct:   1/1)
-  Precision (PPV):       0.00%  (positive predictions correct: 0/0)
-  Neg Pred Value (NPV):  20.00%  (negative predictions correct: 1/5)
-  F1 Score:              0.00%
-  Misclassifications:    4
+  Accuracy:              59.51%  (269/452)
+  Sensitivity (Recall):  22.71%  (diseased detected: 47/207)
+  Specificity:           90.61%  (healthy correct:   222/245)
+  Precision (PPV):       67.14%  (positive predictions correct: 47/70)
+  Neg Pred Value (NPV):  58.12%  (negative predictions correct: 222/382)
+  F1 Score:              33.94%
+  Misclassifications:    183
 
 ------------------------------------------------------------------------------
   CONFUSION MATRIX  (binary: healthy vs unhealthy)
 ------------------------------------------------------------------------------
                           Predicted
                     Healthy    Unhealthy
-  Actual Healthy          1            0
-  Actual Unhealthy        4            0
+  Actual Healthy        222           23
+  Actual Unhealthy      160           47
 
 ------------------------------------------------------------------------------
   DECISION SOURCE BREAKDOWN
 ------------------------------------------------------------------------------
   Source                           Count        %   Accuracy
   ──────────────────────────────  ──────  ───────  ─────────
-  STACKED-ANN                          5   100.0%      20.0%
+  STACKED-ANN                        452   100.0%      59.5%
 
 ------------------------------------------------------------------------------
   PER-CLASS BREAKDOWN
 ------------------------------------------------------------------------------
     Class   Correct   Total   Accuracy  Label     
   ───────  ────────  ──────  ─────────  ──────────
-        1         1       1     100.0%  Healthy   
-        6         0       1       0.0%  Disease-6 
-        7         0       1       0.0%  Disease-7 
-        8         0       1       0.0%  Disease-8 
-       10         0       1       0.0%  Disease-10
+        1       222     245      90.6%  Healthy   
+        2        16      44      36.4%  Disease-2 
+        3         4      15      26.7%  Disease-3 
+        4         5      15      33.3%  Disease-4 
+        5         2      13      15.4%  Disease-5 
+        6         2      25       8.0%  Disease-6 
+        7         0       3       0.0%  Disease-7 
+        8         0       2       0.0%  Disease-8 
+        9         4       9      44.4%  Disease-9 
+       10         8      50      16.0%  Disease-10
+       14         0       4       0.0%  Disease-14
+       15         2       5      40.0%  Disease-15
+       16         4      22      18.2%  Disease-16
 
 ------------------------------------------------------------------------------
-  MISCLASSIFICATION TRACE  (4 errors)
+  MISCLASSIFICATION TRACE  (183 errors)
 ------------------------------------------------------------------------------
     User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
   ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
-       0      D8       H  STACKED-ANN                     0.761       -          -     Unhealthy         4081
-       1      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         3943
-       2     D10       H  STACKED-ANN                     0.406       -          -     Unhealthy         3724
-       4      D7       H  STACKED-ANN                     0.751       -          -     Unhealthy         3409
+       0      D8       H  STACKED-ANN                     0.761       -          -     Unhealthy        78820
+       1      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         1567
+       2     D10       H  STACKED-ANN                     0.406       -          -     Unhealthy         1888
+       4      D7       H  STACKED-ANN                     0.751       -          -     Unhealthy         1653
+       5     D14       H  STACKED-ANN                     0.155       -          -     Unhealthy         1966
+       9     D10       H  STACKED-ANN                     0.968       -          -     Screening         1845
+      10      D3       H  STACKED-ANN                     0.117       -          -     Unhealthy         1598
+      12     D10       H  STACKED-ANN                     0.959       -          -     Screening         2305
+      13      D6       H  STACKED-ANN                     0.504       -          -     Unhealthy         1698
+      16     D10       H  STACKED-ANN                     0.382       -          -     Unhealthy         1851
+      25     D16       H  STACKED-ANN                     0.543       -          -     Unhealthy         2293
+      26     D14       H  STACKED-ANN                     0.277       -          -     Unhealthy         1752
+      27     D10       H  STACKED-ANN                     0.664       -          -     Unhealthy         2232
+      28      D2       H  STACKED-ANN                     0.029       -          -     Unhealthy         1286
+      30      D6       H  STACKED-ANN                     0.732       -          -     Unhealthy         1981
+      34      D4       H  STACKED-ANN                     0.968       -          -     Screening         1957
+      37     D10       H  STACKED-ANN                     1.000       -          -     Healthy           2147
+      39      D6       H  STACKED-ANN                     0.348       -          -     Unhealthy         2363
+      45      D4       H  STACKED-ANN                     0.703       -          -     Unhealthy         1576
+      46      D5       H  STACKED-ANN                     0.601       -          -     Unhealthy         1553
+      48      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         1423
+      52     D10       H  STACKED-ANN                     0.615       -          -     Unhealthy         1881
+      53     D16       H  STACKED-ANN                     0.015       -          -     Unhealthy         2045
+      54     D16       H  STACKED-ANN                     0.959       -          -     Screening         1963
+      55      D6       H  STACKED-ANN                     0.968       -          -     Screening         1970
+      58      D6       H  STACKED-ANN                     1.000       -          -     Unhealthy         2094
+      60      D5       H  STACKED-ANN                     0.577       -          -     Unhealthy         2082
+      65       H     D16  STACKED-ANN                     1.000       -          -     Healthy           1492
+      68      D6       H  STACKED-ANN                     1.000       -          -     Healthy           1767
+      70      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         1353
+      71     D16       H  STACKED-ANN                     1.000       -          -     Healthy           1541
+      75     D10       H  STACKED-ANN                     0.611       -          -     Unhealthy         2226
+      76      D3       H  STACKED-ANN                     0.150       -          -     Unhealthy         2317
+      77      D2       H  STACKED-ANN                     1.000       -          -     Healthy           2290
+      82      D2       H  STACKED-ANN                     0.968       -          -     Screening         1391
+      83      D4       H  STACKED-ANN                     0.659       -          -     Unhealthy         2056
+      84      D6       H  STACKED-ANN                     0.625       -          -     Unhealthy         3071
+      87      D4       H  STACKED-ANN                     0.509       -          -     Unhealthy         3152
+      89      D9       H  STACKED-ANN                     0.301       -          -     Unhealthy         3156
+      91      D4       H  STACKED-ANN                     0.890       -          -     Unhealthy         3172
+      96     D10       H  STACKED-ANN                     0.611       -          -     Unhealthy         3187
+      97       H     D16  STACKED-ANN                     1.000       -          -     Healthy           2818
+     101       H     D16  STACKED-ANN                     0.579       -          -     Unhealthy         2787
+     102       H      D2  STACKED-ANN                     0.010       -          -     Unhealthy         2936
+     104      D6       H  STACKED-ANN                     1.000       -          -     Healthy           2240
+     106      D6       H  STACKED-ANN                     0.155       -          -     Unhealthy         3274
+     112       H     D16  STACKED-ANN                     1.000       -          -     Healthy           2710
+     113       H     D16  STACKED-ANN                     0.564       -          -     Unhealthy         2622
+     116     D16       H  STACKED-ANN                     0.586       -          -     Unhealthy         3246
+     127     D10       H  STACKED-ANN                     0.727       -          -     Unhealthy         2807
+     134     D10       H  STACKED-ANN                     1.000       -          -     Healthy           3177
+     137     D10       H  STACKED-ANN                     0.963       -          -     Screening         3309
+     141      D5       H  STACKED-ANN                     0.543       -          -     Unhealthy         3051
+     144     D10       H  STACKED-ANN                     1.000       -          -     Healthy           3179
+     145     D10       H  STACKED-ANN                     0.615       -          -     Unhealthy         3194
+     146     D10       H  STACKED-ANN                     0.630       -          -     Unhealthy         5816
+     149     D10       H  STACKED-ANN                     0.625       -          -     Unhealthy         2225
+     153      D6       H  STACKED-ANN                     0.382       -          -     Unhealthy         3280
+     154     D16       H  STACKED-ANN                     1.000       -          -     Healthy           3016
+     158       H     D16  STACKED-ANN                     0.574       -          -     Unhealthy         2442
+     160       H     D10  STACKED-ANN                     0.010       -          -     Unhealthy         3136
+     168      D5       H  STACKED-ANN                     0.737       -          -     Unhealthy         3110
+     169      D4       H  STACKED-ANN                     0.509       -          -     Unhealthy         3296
+     173     D10       H  STACKED-ANN                     0.887       -          -     Unhealthy         2919
+     174     D15       H  STACKED-ANN                     0.199       -          -     Unhealthy         4088
+     175      D6       H  STACKED-ANN                     0.885       -          -     Unhealthy         3078
+     179      D2       H  STACKED-ANN                     0.968       -          -     Screening         2849
+     181     D16       H  STACKED-ANN                     1.000       -          -     Healthy           2957
+     183      D4       H  STACKED-ANN                     0.788       -          -     Unhealthy         3393
+     184      D2       H  STACKED-ANN                     0.311       -          -     Unhealthy         3124
+     186      D2       H  STACKED-ANN                     0.968       -          -     Screening         3236
+     188     D14       H  STACKED-ANN                     0.063       -          -     Unhealthy         4301
+     189      D9       H  STACKED-ANN                     0.455       -          -     Unhealthy         2884
+     192      D2       H  STACKED-ANN                     0.112       -          -     Unhealthy         3332
+     193      D2       H  STACKED-ANN                     0.761       -          -     Unhealthy         3037
+     197     D16       H  STACKED-ANN                     0.737       -          -     Unhealthy         3747
+     200      D2       H  STACKED-ANN                     0.935       -          -     Screening         2873
+     201       H      D6  STACKED-ANN                     0.963       -          -     Screening         4454
+     202       H      D6  STACKED-ANN                     0.564       -          -     Unhealthy         3237
+     207      D9       H  STACKED-ANN                     0.272       -          -     Unhealthy          881
+     209     D10       H  STACKED-ANN                     0.835       -          -     Unhealthy         1219
+     212      D2       H  STACKED-ANN                     0.262       -          -     Unhealthy         1195
+     213      D2       H  STACKED-ANN                     0.607       -          -     Unhealthy         1236
+     214      D4       H  STACKED-ANN                     0.262       -          -     Unhealthy         1040
+     216      D2       H  STACKED-ANN                     0.058       -          -     Unhealthy         1541
+     220       H      D6  STACKED-ANN                     0.501       -          -     Unhealthy         2797
+     224     D10       H  STACKED-ANN                     0.625       -          -     Unhealthy         3418
+     227     D16       H  STACKED-ANN                     0.630       -          -     Unhealthy         3565
+     229       H      D6  STACKED-ANN                     0.963       -          -     Screening         3791
+     230       H      D6  STACKED-ANN                     0.963       -          -     Screening         3657
+     232       H      D6  STACKED-ANN                     1.000       -          -     Healthy           3541
+     233       H      D6  STACKED-ANN                     0.811       -          -     Unhealthy         3539
+     234       H      D6  STACKED-ANN                     0.429       -          -     Unhealthy         3674
+     236       H      D6  STACKED-ANN                     1.000       -          -     Healthy           3698
+     243     D15       H  STACKED-ANN                     0.625       -          -     Unhealthy         2852
+     245      D2       H  STACKED-ANN                     0.344       -          -     Unhealthy         2954
+     248      D4       H  STACKED-ANN                     0.382       -          -     Unhealthy         3929
+     250     D10       H  STACKED-ANN                     1.000       -          -     Healthy           3251
+     251      D4       H  STACKED-ANN                     0.913       -          -     Unhealthy         3469
+     252      D3       H  STACKED-ANN                     0.392       -          -     Unhealthy         3258
+     253      D3       H  STACKED-ANN                     0.654       -          -     Unhealthy         3217
+     257      D3       H  STACKED-ANN                     0.504       -          -     Unhealthy         3392
+     258      D5       H  STACKED-ANN                     0.737       -          -     Unhealthy         2901
+     259      D2       H  STACKED-ANN                     0.509       -          -     Unhealthy         3063
+     261     D16       H  STACKED-ANN                     1.000       -          -     Healthy           3112
+     266     D10       H  STACKED-ANN                     0.611       -          -     Unhealthy         3148
+     271       H      D6  STACKED-ANN                     0.516       -          -     Unhealthy         3284
+     272      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         2757
+     275      D2       H  STACKED-ANN                     0.972       -          -     Screening         2905
+     277      D2       H  STACKED-ANN                     0.199       -          -     Unhealthy         3247
+     278     D10       H  STACKED-ANN                     0.968       -          -     Screening         3211
+     283      D6       H  STACKED-ANN                     1.000       -          -     Healthy           3066
+     284     D10       H  STACKED-ANN                     0.596       -          -     Unhealthy         3305
+     285      D3       H  STACKED-ANN                     0.654       -          -     Unhealthy         3127
+     289       H      D6  STACKED-ANN                     0.963       -          -     Screening         3318
+     290       H      D6  STACKED-ANN                     0.963       -          -     Screening         3478
+     291     D10       H  STACKED-ANN                     0.664       -          -     Unhealthy         3161
+     295      D2       H  STACKED-ANN                     1.000       -          -     Healthy           3379
+     298     D10       H  STACKED-ANN                     0.625       -          -     Unhealthy         3217
+     299       H      D6  STACKED-ANN                     0.784       -          -     Unhealthy         4446
+     300     D15       H  STACKED-ANN                     0.178       -          -     Unhealthy         2914
+     302      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         3238
+     303      D3       H  STACKED-ANN                     0.630       -          -     Unhealthy         3103
+     305       H      D6  STACKED-ANN                     1.000       -          -     Healthy           3353
+     306     D16       H  STACKED-ANN                     0.504       -          -     Unhealthy         3277
+     307      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         3136
+     308      D2       H  STACKED-ANN                     0.189       -          -     Unhealthy         3246
+     309      D7       H  STACKED-ANN                     1.000       -          -     Healthy           3299
+     312     D10       H  STACKED-ANN                     0.238       -          -     Unhealthy         3136
+     316      D5       H  STACKED-ANN                     0.272       -          -     Unhealthy         3223
+     319     D10       H  STACKED-ANN                     0.693       -          -     Unhealthy         3215
+     320      D5       H  STACKED-ANN                     0.010       -          -     Unhealthy         3142
+     324     D10       H  STACKED-ANN                     0.625       -          -     Unhealthy         4328
+     326     D10       H  STACKED-ANN                     0.959       -          -     Screening         3228
+     327      D7       H  STACKED-ANN                     0.353       -          -     Unhealthy         2019
+     329      D2       H  STACKED-ANN                     0.262       -          -     Unhealthy         2717
+     332     D16       H  STACKED-ANN                     0.010       -          -     Unhealthy         2405
+     334     D10       H  STACKED-ANN                     0.518       -          -     Unhealthy         2176
+     336     D10       H  STACKED-ANN                     0.378       -          -     Unhealthy         3157
+     340     D16       H  STACKED-ANN                     0.959       -          -     Screening         6263
+     341     D10       H  STACKED-ANN                     1.000       -          -     Healthy           3145
+     343      D6       H  STACKED-ANN                     0.968       -          -     Screening         2095
+     344     D10       H  STACKED-ANN                     0.615       -          -     Unhealthy         3034
+     346     D10       H  STACKED-ANN                     0.664       -          -     Unhealthy         3142
+     348      D5       H  STACKED-ANN                     0.557       -          -     Unhealthy         3297
+     351      D2       H  STACKED-ANN                     0.931       -          -     Screening         3288
+     353     D10       H  STACKED-ANN                     0.552       -          -     Unhealthy         3148
+     356      D3       H  STACKED-ANN                     0.465       -          -     Unhealthy         3239
+     357      D2       H  STACKED-ANN                     0.287       -          -     Unhealthy         3272
+     358      D6       H  STACKED-ANN                     0.194       -          -     Unhealthy         3150
+     359      D2       H  STACKED-ANN                     0.107       -          -     Unhealthy         3187
+     360      D2       H  STACKED-ANN                     0.184       -          -     Unhealthy         2649
+     361      D3       H  STACKED-ANN                     0.494       -          -     Unhealthy         3248
+     362     D16       H  STACKED-ANN                     0.968       -          -     Screening         3258
+     363     D10       H  STACKED-ANN                     0.611       -          -     Unhealthy         3293
+     364      D6       H  STACKED-ANN                     1.000       -          -     Healthy           4304
+     366      D2       H  STACKED-ANN                     0.311       -          -     Unhealthy         2936
+     367      D2       H  STACKED-ANN                     0.930       -          -     Screening         2801
+     370      D9       H  STACKED-ANN                     0.306       -          -     Unhealthy         1330
+     372      D2       H  STACKED-ANN                     0.150       -          -     Unhealthy         1261
+     374      D5       H  STACKED-ANN                     0.659       -          -     Unhealthy         1175
+     375      D2       H  STACKED-ANN                     0.968       -          -     Screening         1252
+     376      D8       H  STACKED-ANN                     0.387       -          -     Unhealthy         1167
+     380     D16       H  STACKED-ANN                     0.387       -          -     Unhealthy         1180
+     381      D3       H  STACKED-ANN                     0.489       -          -     Unhealthy         1239
+     384      D6       H  STACKED-ANN                     0.615       -          -     Unhealthy         3088
+     386     D16       H  STACKED-ANN                     0.959       -          -     Screening         2444
+     387      D5       H  STACKED-ANN                     0.727       -          -     Unhealthy         3446
+     389       H      D4  STACKED-ANN                     0.130       -          -     Unhealthy         3021
+     397     D10       H  STACKED-ANN                     0.387       -          -     Unhealthy         2581
+     398      D3       H  STACKED-ANN                     0.178       -          -     Unhealthy         2272
+     400     D10       H  STACKED-ANN                     0.968       -          -     Screening         4149
+     401     D14       H  STACKED-ANN                     0.654       -          -     Unhealthy         2609
+     403      D5       H  STACKED-ANN                     0.005       -          -     Unhealthy         3455
+     409     D16       H  STACKED-ANN                     0.363       -          -     Unhealthy         2925
+     411      D2       H  STACKED-ANN                     0.194       -          -     Unhealthy         3104
+     412     D16       H  STACKED-ANN                     0.763       -          -     Unhealthy         3272
+     417     D10       H  STACKED-ANN                     0.586       -          -     Unhealthy         1530
+     424      D9       H  STACKED-ANN                     0.184       -          -     Unhealthy         1334
+     427     D10       H  STACKED-ANN                     0.591       -          -     Unhealthy         1500
+     431      D6       H  STACKED-ANN                     0.737       -          -     Unhealthy         2334
+     443     D10       H  STACKED-ANN                     0.611       -          -     Unhealthy         1456
+     448     D10       H  STACKED-ANN                     0.756       -          -     Unhealthy         2161
 
 ==============================================================================
