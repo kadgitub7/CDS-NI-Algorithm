@@ -1622,6 +1622,441 @@ def print_comparison(results: List[EvalResult]):
 
 
 # ============================================================================
+# HYBRID MODE 11: TGLLNET TIER 1 + CDS CASCADE
+# ============================================================================
+#
+# [ADAPTED FROM TGLLNet: learnable lead adjacency + CDS pipeline]
+#
+# Tier 1 adds feature-group correlation attention (13x13 learned
+# adjacency matrix) to discover which feature groups interact.
+# The enhanced features are fed to the ANN/RNN in the cascade.
+# CDS still runs on raw features (its Bayesian pipeline doesn't
+# benefit from the correlation features).
+# ============================================================================
+
+def run_hybrid_tgllnet_tier1(data, labels, max_users=None, healthy_class=1,
+                             ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 11: TGLLNET TIER1 + CDS — Feature group correlation + CDS cascade.
+
+    Architecture:
+      1. CDS runs on raw features (Algorithms 1-4)
+         - HEALTHY  -> trust CDS
+         - ALARM    -> multi-signal ANN veto (like AlarmRefine)
+         - SCREENING -> ANN with Tier1-enhanced features
+      2. Tier 1 learns a 13x13 inter-group correlation matrix from
+         training data (inspired by TGLLNet's learnable adjacency)
+      3. ANN receives [original 279 features + 13 attended group features]
+         = 292-dim input instead of 279
+
+    Key insight from TGLLNet: feature groups (ECG leads / demographics)
+    have hidden relationships that a flat MLP misses.  The learned
+    adjacency lets information flow between correlated groups.
+
+    Cost: ~150 extra parameters, <1ms overhead per prediction.
+    """
+    from tgllnet_tiers import Tier1FeatureGroupAttention
+
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="TGLLNet-T1+CDS")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 11: TGLLNET TIER1 + CDS CASCADE")
+    log.info("  Tier 1: Feature Group Correlation Attention (13x13 adjacency)")
+    log.info(f"  ML model: ANN on 292-dim enhanced features")
+    log.info(f"  Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        # ---- CDS pipeline (on raw features) ----
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            # CDS confident healthy -> trust it
+            pred.predicted_label = healthy_class
+            pred.source = "T1-CDS-HEALTHY"
+
+        elif decision == HealthDecision.UNHEALTHY:
+            # ALARM: multi-signal ANN veto using Tier1-enhanced features
+            tier1 = Tier1FeatureGroupAttention(alpha=0.5)
+            tier1.fit(train_data, train_labels)
+            train_enhanced = tier1.transform(train_data)
+            test_enhanced = tier1.transform(data[i:i+1])
+
+            ann = ANNClassifier(hidden_layers=(64, 32))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            ann_margin = _ann_confidence_margin(ann, test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            # Multi-signal override (same gates as AlarmRefine)
+            override = (
+                ann_pred == healthy_class
+                and ann_conf >= 0.70
+                and ann_margin >= 0.30
+                and af < 0.70
+            )
+            if override:
+                pred.predicted_label = healthy_class
+                pred.source = "T1-ANN-OVERRIDE"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "T1-CDS-ALARM"
+
+        else:
+            # SCREENING: ANN with Tier1-enhanced features
+            tier1 = Tier1FeatureGroupAttention(alpha=0.5)
+            tier1.fit(train_data, train_labels)
+            train_enhanced = tier1.transform(train_data)
+            test_enhanced = tier1.transform(data[i:i+1])
+
+            ann = ANNClassifier(hidden_layers=(64, 32))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+            pred.predicted_label = ann_pred
+            pred.source = "T1-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 12: TGLLNET TIER 1+2 + CDS CASCADE
+# ============================================================================
+#
+# [ADAPTED FROM TGLLNet: group correlation + dual-resolution attention + CDS]
+#
+# Tier 2 adds dual-resolution feature extraction with attention fusion:
+#   - Fine branch: Fisher-weighted feature projection (64-dim)
+#   - Coarse branch: per-group statistics projection (32-dim)
+#   - Channel attention: learned gating of combined features
+# This mirrors TGLLNet's Fusion_block (SE/ECA attention) and
+# BaseScale (multi-scale convolution).
+# ============================================================================
+
+def run_hybrid_tgllnet_tier12(data, labels, max_users=None, healthy_class=1,
+                              ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 12: TGLLNET TIER1+2 + CDS — Dual-resolution attention + CDS cascade.
+
+    Architecture:
+      1. CDS runs on raw features (Algorithms 1-4)
+         - HEALTHY  -> trust CDS
+         - ALARM    -> Tier1+2-enhanced ANN veto
+         - SCREENING -> ANN with Tier1+2-enhanced features
+      2. Tier 1: 13x13 group correlation (learnable adjacency)
+      3. Tier 2: Dual-resolution attention fusion
+         - Fine branch: Fisher-weighted projection -> 64-dim
+         - Coarse branch: group statistics -> 32-dim
+         - Channel attention: learned SE-style gating
+      4. ANN receives 388-dim input (279 + 13 + 64 + 32)
+
+    Key insight from TGLLNet: multi-scale feature processing with
+    attention captures both fine-grained individual features and
+    coarse group-level patterns simultaneously.
+
+    Cost: ~15K extra parameters, ~2ms overhead per prediction.
+    """
+    from tgllnet_tiers import Tier2DualResolutionFusion
+
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="TGLLNet-T12+CDS")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 12: TGLLNET TIER1+2 + CDS CASCADE")
+    log.info("  Tier 1: Feature Group Correlation (13x13 adjacency)")
+    log.info("  Tier 2: Dual-Resolution Attention Fusion (fine=64, coarse=32)")
+    log.info(f"  ML model: ANN on 388-dim enhanced features")
+    log.info(f"  Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        # ---- CDS pipeline (on raw features) ----
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "T12-CDS-HEALTHY"
+
+        elif decision == HealthDecision.UNHEALTHY:
+            # ALARM: Tier1+2-enhanced ANN veto
+            tier2 = Tier2DualResolutionFusion(fine_dim=64, coarse_dim=32)
+            tier2.fit(train_data, train_labels)
+            train_enhanced = tier2.transform(train_data)
+            test_enhanced = tier2.transform(data[i:i+1])
+
+            ann = ANNClassifier(hidden_layers=(96, 48))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            ann_margin = _ann_confidence_margin(ann, test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            override = (
+                ann_pred == healthy_class
+                and ann_conf >= 0.70
+                and ann_margin >= 0.30
+                and af < 0.70
+            )
+            if override:
+                pred.predicted_label = healthy_class
+                pred.source = "T12-ANN-OVERRIDE"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "T12-CDS-ALARM"
+
+        else:
+            # SCREENING: ANN with Tier1+2-enhanced features
+            tier2 = Tier2DualResolutionFusion(fine_dim=64, coarse_dim=32)
+            tier2.fit(train_data, train_labels)
+            train_enhanced = tier2.transform(train_data)
+            test_enhanced = tier2.transform(data[i:i+1])
+
+            ann = ANNClassifier(hidden_layers=(96, 48))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+            pred.predicted_label = ann_pred
+            pred.source = "T12-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 13: TGLLNET TIER 1+2+3 + CDS CASCADE
+# ============================================================================
+#
+# [ADAPTED FROM TGLLNet: full pipeline — GCN + attention + CDS]
+#
+# Tier 3 adds the full ChebyNet GCN pipeline:
+#   - ChebyNet spectral graph convolution (K=3, 2 layers)
+#   - Learnable adjacency matrix (from Tier 1)
+#   - Residual pyramid: GCN output + linear projection
+#   - Ridge-trained readout for discriminative scoring
+# This is the closest adaptation of TGLLNet's RPG module.
+#
+# Additionally uses the GCN's discriminative score as an extra
+# confidence signal in the CDS cascade, creating a three-way
+# confidence fusion: CDS AF + ANN confidence + GCN score.
+# ============================================================================
+
+def run_hybrid_tgllnet_tier123(data, labels, max_users=None, healthy_class=1,
+                               ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 13: TGLLNET TIER1+2+3 + CDS — Full GCN + attention + CDS cascade.
+
+    Architecture:
+      1. CDS runs on raw features (Algorithms 1-4)
+      2. Tier 1: 13x13 group correlation (learnable adjacency)
+      3. Tier 2: Dual-resolution attention fusion
+      4. Tier 3: ChebyNet GCN (2-layer, K=3) with residual pyramid
+      5. ANN receives 421-dim enhanced features
+      6. GCN score used as extra confidence signal in cascade decisions
+
+    Decision logic:
+      HEALTHY  -> trust CDS
+      ALARM    -> Three-way confidence fusion:
+                  - CDS AF (Bayesian evidence strength)
+                  - ANN confidence (neural network prediction quality)
+                  - GCN score (graph-based discriminative score)
+                  Override CDS alarm ONLY if all three agree patient is healthy
+      SCREENING -> ANN with full Tier1+2+3-enhanced features
+                   + GCN score as tiebreaker when ANN is uncertain
+
+    Key insight from TGLLNet: the ChebyNet GCN captures inter-group
+    relationships that are invisible to flat MLPs. The Chebyshev
+    polynomials allow K-hop neighborhood aggregation over the feature
+    group graph, meaning information propagates across related groups.
+
+    Cost: ~50K extra parameters, ~5-10ms overhead per prediction.
+    """
+    from tgllnet_tiers import Tier3GraphEnhanced
+
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="TGLLNet-T123+CDS")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 13: TGLLNET TIER1+2+3 + CDS CASCADE (Full GCN)")
+    log.info("  Tier 1: Feature Group Correlation (13x13 adjacency)")
+    log.info("  Tier 2: Dual-Resolution Attention Fusion")
+    log.info("  Tier 3: ChebyNet GCN (2-layer, K=3, hidden=16)")
+    log.info(f"  ML model: ANN on 421-dim enhanced features")
+    log.info(f"  Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        # ---- CDS pipeline (on raw features) ----
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "T123-CDS-HEALTHY"
+
+        elif decision == HealthDecision.UNHEALTHY:
+            # ALARM: Three-way confidence fusion (CDS AF + ANN + GCN)
+            tier3 = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+            tier3.fit(train_data, train_labels)
+            train_enhanced = tier3.transform(train_data)
+            test_enhanced = tier3.transform(data[i:i+1])
+
+            # GCN discriminative score
+            gcn_score = float(tier3.get_gcn_score(data[i:i+1])[0])
+            # Sigmoid to normalize to [0, 1]: high score = more likely diseased
+            gcn_p_diseased = 1.0 / (1.0 + np.exp(-gcn_score))
+
+            # ANN on enhanced features
+            ann = ANNClassifier(hidden_layers=(128, 64))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            ann_margin = _ann_confidence_margin(ann, test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            # Three-way override: ALL must agree patient is healthy
+            # [EXTENSION OF TGLLNet] TGLLNet uses GCN + CNN jointly;
+            # here we add CDS as a third signal
+            override = (
+                ann_pred == healthy_class          # ANN says healthy
+                and ann_conf >= 0.65               # ANN is confident
+                and ann_margin >= 0.25             # ANN is decisive
+                and af < 0.65                      # CDS had weak evidence
+                and gcn_p_diseased < 0.45          # GCN also leans healthy
+            )
+            if override:
+                pred.predicted_label = healthy_class
+                pred.source = "T123-TRIPLE-OVERRIDE"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "T123-CDS-ALARM"
+
+        else:
+            # SCREENING: ANN with full Tier1+2+3-enhanced features
+            tier3 = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+            tier3.fit(train_data, train_labels)
+            train_enhanced = tier3.transform(train_data)
+            test_enhanced = tier3.transform(data[i:i+1])
+
+            # GCN score as additional signal
+            gcn_score = float(tier3.get_gcn_score(data[i:i+1])[0])
+            gcn_p_diseased = 1.0 / (1.0 + np.exp(-gcn_score))
+
+            ann = ANNClassifier(hidden_layers=(128, 64))
+            ann.fit(train_enhanced, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+            ann_margin = _ann_confidence_margin(ann, test_enhanced)
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            # When ANN is uncertain (low margin), use GCN as tiebreaker
+            if ann_margin < 0.15:
+                # ANN is unsure — GCN breaks the tie
+                if gcn_p_diseased >= 0.55:
+                    # GCN leans diseased — predict most common disease class
+                    diseased_classes = labels[labels != healthy_class]
+                    if len(diseased_classes) > 0:
+                        pred.predicted_label = int(np.bincount(
+                            diseased_classes.astype(int)).argmax())
+                    else:
+                        pred.predicted_label = ann_pred
+                    pred.source = "T123-GCN-TIEBREAK"
+                else:
+                    pred.predicted_label = ann_pred
+                    pred.source = "T123-ANN-SCREEN"
+            else:
+                pred.predicted_label = ann_pred
+                pred.source = "T123-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
 # MAIN
 # ============================================================================
 
@@ -1636,6 +2071,9 @@ HYBRID_MODES = {
     "disagree-rules":   run_hybrid_disagree_rules,
     "alarm-specialist": run_hybrid_alarm_specialist,
     "triple-cascade":   run_hybrid_triple_cascade,
+    "tgllnet-t1":       run_hybrid_tgllnet_tier1,
+    "tgllnet-t12":      run_hybrid_tgllnet_tier12,
+    "tgllnet-t123":     run_hybrid_tgllnet_tier123,
 }
 
 def main():
@@ -1654,6 +2092,9 @@ Hybrid modes:
   8. disagree-rules   Asymmetric trust per disagreement pattern
   9. alarm-specialist Binary false-alarm filter for ALARM cases
  10. triple-cascade   CDS + ANN veto + ANN/RNN majority on SCREENING
+ 11. tgllnet-t1       TGLLNet Tier1 (group correlation) + CDS cascade
+ 12. tgllnet-t12      TGLLNet Tier1+2 (dual-resolution attention) + CDS
+ 13. tgllnet-t123     TGLLNet Tier1+2+3 (full GCN) + CDS cascade
         """,
     )
     parser.add_argument("--max-users", type=int, default=None,

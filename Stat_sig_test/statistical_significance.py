@@ -61,6 +61,9 @@ RESULT_FILES = [
     "DisagreeRules_ANN.txt",
     "AlarmSpecialist_ANN.txt",
     "TripleCascade.txt",
+    "TGLLNet-T1_CDS.txt",
+    "TGLLNet-T12_CDS.txt",
+    "TGLLNet-T123_CDS.txt",
 ]
 
 CLASS_LABELS = {
@@ -495,6 +498,9 @@ def load_models_from_folder(results_dir):
                 "DisagreeRules ANN": "DisagreeRules(ANN)",
                 "AlarmSpecialist ANN": "AlarmSpecialist(ANN)",
                 "TripleCascade": "TripleCascade",
+                "TGLLNet-T1 CDS": "TGLLNet-T1+CDS",
+                "TGLLNet-T12 CDS": "TGLLNet-T12+CDS",
+                "TGLLNet-T123 CDS": "TGLLNet-T123+CDS",
             }
             standard_key = key_map.get(key, key)
             models[standard_key] = data

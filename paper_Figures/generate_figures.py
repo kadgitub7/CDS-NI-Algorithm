@@ -59,6 +59,9 @@ COLORS = {
     "stack_rnn": "#FF5722",
     "sel_ann": "#3F51B5",
     "sel_rnn": "#009688",
+    "tgll_t1": "#1B5E20",
+    "tgll_t12": "#2E7D32",
+    "tgll_t123": "#388E3C",
 }
 
 MODE_ORDER = [
@@ -70,6 +73,7 @@ MODE_ORDER = [
     "Selector(CDS+ANN)", "Selector(CDS+RNN)",
     "AlarmRefine(ANN)", "AFGated(ANN)", "DisagreeRules(ANN)",
     "AlarmSpecialist(ANN)", "TripleCascade",
+    "TGLLNet-T1+CDS", "TGLLNet-T12+CDS", "TGLLNet-T123+CDS",
 ]
 
 MODE_COLORS = [
@@ -80,6 +84,7 @@ MODE_COLORS = [
     COLORS["stack_ann"], COLORS["stack_rnn"],
     COLORS["sel_ann"], COLORS["sel_rnn"],
     "#D50000", "#00C853", "#2962FF", "#AA00FF", "#FF6D00",
+    COLORS["tgll_t1"], COLORS["tgll_t12"], COLORS["tgll_t123"],
 ]
 
 MODE_SHORT = [
@@ -90,6 +95,7 @@ MODE_SHORT = [
     "Stk-A", "Stk-R",
     "Sel-A", "Sel-R",
     "ARef", "AFG", "DRule", "ASpec", "TriCas",
+    "TGL-1", "TGL-12", "TGL-123",
 ]
 
 
@@ -302,6 +308,9 @@ def load_all_enhanced():
         "DisagreeRules(ANN)": "DisagreeRules_ANN.txt",
         "AlarmSpecialist(ANN)": "AlarmSpecialist_ANN.txt",
         "TripleCascade": "TripleCascade.txt",
+        "TGLLNet-T1+CDS": "TGLLNet-T1_CDS.txt",
+        "TGLLNet-T12+CDS": "TGLLNet-T12_CDS.txt",
+        "TGLLNet-T123+CDS": "TGLLNet-T123_CDS.txt",
     }
     data = {}
     # Try Enhanced_model first, then resource_analysis as fallback

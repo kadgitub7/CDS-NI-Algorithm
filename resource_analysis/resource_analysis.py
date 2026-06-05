@@ -298,13 +298,15 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
 
     needs_ml = mode_name in ("ANN-only", "RNN-only") or hybrid_mode in (
         "cascade", "vote", "confidence", "stacked", "selector",
-        "alarm-refine", "af-gated", "disagree-rules", "alarm-specialist", "triple-cascade")
+        "alarm-refine", "af-gated", "disagree-rules", "alarm-specialist", "triple-cascade",
+        "tgllnet-t1", "tgllnet-t12", "tgllnet-t123")
     # For cascade: only train ML if CDS is uncertain
     if hybrid_mode == "cascade" and cds_decision in (HealthDecision.UNHEALTHY, HealthDecision.HEALTHY):
         needs_ml = False
     # For new modes: need ML for ALARM (D2 check) and SCREENING, but not HEALTHY
     if hybrid_mode in ("alarm-refine", "af-gated", "disagree-rules",
-                       "alarm-specialist", "triple-cascade"):
+                       "alarm-specialist", "triple-cascade",
+                       "tgllnet-t1", "tgllnet-t12", "tgllnet-t123"):
         if cds_decision == HealthDecision.HEALTHY:
             needs_ml = False
 
@@ -314,6 +316,27 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
 
         train_input = train_data
         test_input = data[i:i+1]
+
+        # TGLLNet modes: enhance features with tier transforms
+        if hybrid_mode in ("tgllnet-t1", "tgllnet-t12", "tgllnet-t123"):
+            from tgllnet_tiers import (Tier1FeatureGroupAttention,
+                                       Tier2DualResolutionFusion,
+                                       Tier3GraphEnhanced)
+            if hybrid_mode == "tgllnet-t1":
+                tier = Tier1FeatureGroupAttention(alpha=0.5)
+                tier.fit(train_data, train_labels)
+                train_input = tier.transform(train_data)
+                test_input = tier.transform(data[i:i+1])
+            elif hybrid_mode == "tgllnet-t12":
+                tier = Tier2DualResolutionFusion(fine_dim=64, coarse_dim=32)
+                tier.fit(train_data, train_labels)
+                train_input = tier.transform(train_data)
+                test_input = tier.transform(data[i:i+1])
+            elif hybrid_mode == "tgllnet-t123":
+                tier = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+                tier.fit(train_data, train_labels)
+                train_input = tier.transform(train_data)
+                test_input = tier.transform(data[i:i+1])
 
         # Stacked mode: augment features with CDS outputs
         if hybrid_mode == "stacked" and needs_cds:
@@ -560,6 +583,28 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
                 rec.predicted_label = healthy_class
                 rec.source = "TRI-MAJORITY-HEALTHY"
 
+    elif hybrid_mode in ("tgllnet-t1", "tgllnet-t12", "tgllnet-t123"):
+        # TGLLNet tier modes: CDS cascade with enhanced ANN
+        tag = {"tgllnet-t1": "T1", "tgllnet-t12": "T12", "tgllnet-t123": "T123"}[hybrid_mode]
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = f"{tag}-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            # Multi-signal ANN veto on ALARM
+            ml_proba = ml_model_obj.predict_proba(test_input)[0] if ml_model_obj else np.array([0.5, 0.5])
+            ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+            override = (ml_pred == healthy_class and ml_conf >= 0.70
+                        and ml_margin >= 0.30 and cds_af < 0.70)
+            if override:
+                rec.predicted_label = healthy_class
+                rec.source = f"{tag}-ANN-OVERRIDE"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = f"{tag}-CDS-ALARM"
+        else:
+            rec.predicted_label = ml_pred
+            rec.source = f"{tag}-ANN-SCREEN"
+
     # Correctness
     if true_label == healthy_class:
         rec.is_correct = (rec.predicted_label == healthy_class)
@@ -598,6 +643,9 @@ MODE_CONFIGS = {
     "disagree-rules":    ("DisagreeRules(ANN)",   "ann", "disagree-rules"),
     "alarm-specialist":  ("AlarmSpecialist(ANN)", "ann", "alarm-specialist"),
     "triple-cascade":    ("TripleCascade",        "ann", "triple-cascade"),
+    "tgllnet-t1":        ("TGLLNet-T1+CDS",      "ann", "tgllnet-t1"),
+    "tgllnet-t12":       ("TGLLNet-T12+CDS",     "ann", "tgllnet-t12"),
+    "tgllnet-t123":      ("TGLLNet-T123+CDS",    "ann", "tgllnet-t123"),
 }
 
 
