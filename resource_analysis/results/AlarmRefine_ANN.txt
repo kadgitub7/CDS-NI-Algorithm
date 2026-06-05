@@ -1,0 +1,187 @@
+=====================================================================================
+  RESOURCE ANALYSIS: AlarmRefine(ANN)
+=====================================================================================
+  Timestamp:            2026-06-04 14:50:06
+  Users evaluated:      452
+
+-------------------------------------------------------------------------------------
+  CLASSIFICATION METRICS
+-------------------------------------------------------------------------------------
+  Accuracy:             76.55%
+  Sensitivity:          75.36%
+  Specificity:          77.55%
+  Precision (PPV):      73.93%
+  Neg Pred Value:       78.84%
+  F1 Score:             74.64%
+
+-------------------------------------------------------------------------------------
+  TIME METRICS
+-------------------------------------------------------------------------------------
+  Total wall-clock:     7811.6s
+  Avg per user:         17228.2ms
+  Avg CDS train:        15378.8ms
+  Avg CDS predict:      119.6ms
+  Avg ML train:         1722.8ms
+  Avg ML predict:       3.3ms
+
+-------------------------------------------------------------------------------------
+  MEMORY METRICS
+-------------------------------------------------------------------------------------
+  Peak memory:          24.82 MB
+  Avg memory per fold:  20.89 MB
+
+-------------------------------------------------------------------------------------
+  COMPUTATIONAL COST (multiplications)
+-------------------------------------------------------------------------------------
+  Total multiplications:     337,950,791,848
+  Avg per user:                  747,678,743
+  CDS total:                         418,728
+  ML training total:         337,943,464,320
+  ML inference total:              6,908,800
+
+-------------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+-------------------------------------------------------------------------------------
+  Class   1 (Healthy     ): 190/245 (77.6%)
+  Class   2 (Disease-2   ): 33/44 (75.0%)
+  Class   3 (Disease-3   ): 15/15 (100.0%)
+  Class   4 (Disease-4   ): 13/15 (86.7%)
+  Class   5 (Disease-5   ): 9/13 (69.2%)
+  Class   6 (Disease-6   ): 16/25 (64.0%)
+  Class   7 (Disease-7   ): 2/3 (66.7%)
+  Class   8 (Disease-8   ): 2/2 (100.0%)
+  Class   9 (Disease-9   ): 8/9 (88.9%)
+  Class  10 (Disease-10  ): 39/50 (78.0%)
+  Class  14 (Disease-14  ): 4/4 (100.0%)
+  Class  15 (Disease-15  ): 5/5 (100.0%)
+  Class  16 (Disease-16  ): 10/22 (45.5%)
+
+-------------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE (106 errors)
+-------------------------------------------------------------------------------------
+    User    True    Pred  Source                   Time_ms   Mem_MB         Mults
+  ──────  ──────  ──────  ──────────────────────  ────────  ───────  ────────────
+       9     D10       H  AREF-ANN-SCREEN            23453    22.23  1,374,669,574
+      21       H      D2  AREF-CDS-ALARM             44587    22.19   989,767,714
+      34      D4       H  AREF-ANN-SCREEN             6145    22.23  1,319,683,654
+      37     D10       H  AREF-CDS-HEALTHY            5127    17.07         1,269
+      39      D6       H  AREF-ANN-OVERRIDE           5763    22.03  1,017,260,269
+      43       H      D2  AREF-CDS-ALARM              5780    21.99   604,865,749
+      46      D5       H  AREF-ANN-OVERRIDE           5478    22.15   632,359,159
+      50       H      D2  AREF-CDS-ALARM              5405    22.00   604,865,794
+      53     D16       H  AREF-ANN-OVERRIDE           5501    21.97   604,865,734
+      54     D16       H  AREF-ANN-SCREEN             5425    22.21   604,866,679
+      55      D6       H  AREF-ANN-SCREEN             5983    22.23  1,429,655,494
+      59       H      D2  AREF-CDS-ALARM              5204    22.20   604,866,529
+      61      D5       H  AREF-CDS-HEALTHY            5196    17.07         1,269
+      68      D6       H  AREF-CDS-HEALTHY           19339    17.26         1,269
+      71     D16       H  AREF-CDS-HEALTHY           17775    17.07         1,269
+      72       H      D2  AREF-CDS-ALARM             19989    22.21   659,852,494
+      77      D2       H  AREF-CDS-HEALTHY           17671    17.07         1,269
+      82      D2       H  AREF-ANN-SCREEN            20832    22.21   632,359,654
+      84      D6       H  AREF-ANN-OVERRIDE         269967    22.19   632,359,234
+      85      D9       H  AREF-ANN-OVERRIDE           5835    21.96   604,865,734
+      90       H      D3  AREF-CDS-ALARM              5705    22.19   632,359,414
+      98       H      D2  AREF-CDS-ALARM              5554    22.11   632,358,994
+      99       H      D2  AREF-CDS-ALARM              5381    22.05   632,358,799
+     100      D4       H  AREF-ANN-SCREEN             5839    22.21   632,359,654
+     104      D6       H  AREF-CDS-HEALTHY            5441    17.07         1,254
+     109       H      D2  AREF-CDS-ALARM              5127    22.03   577,372,864
+     110       H      D2  AREF-CDS-ALARM              7198    22.22  1,484,641,249
+     114      D6       H  AREF-CDS-HEALTHY            6915    17.07         1,269
+     116     D16       H  AREF-ANN-OVERRIDE          16641    22.14   577,373,194
+     126       H      D2  AREF-CDS-ALARM              7752    22.17  1,017,260,569
+     129       H      D2  AREF-CDS-ALARM              6067    22.14   989,767,504
+     133       H      D2  AREF-CDS-ALARM              5051    22.08   412,415,254
+     134     D10       H  AREF-CDS-HEALTHY            5184    17.14         1,269
+     136       H      D2  AREF-CDS-ALARM              5139    22.21   494,894,734
+     137     D10       H  AREF-ANN-SCREEN             5852    22.20   494,894,839
+     138       H      D6  AREF-CDS-ALARM              5160    22.22   494,894,869
+     144     D10       H  AREF-CDS-HEALTHY            4939    17.07         1,269
+     152       H      D2  AREF-CDS-ALARM              5343    22.20   934,782,034
+     154     D16       H  AREF-CDS-HEALTHY            4706    17.08         1,269
+     157      D2       H  AREF-ANN-SCREEN             5507    22.22   934,782,199
+     160       H      D2  AREF-CDS-ALARM              5447    21.99   989,767,174
+     162       H      D2  AREF-CDS-ALARM              5439    22.22  1,319,683,459
+     170       H      D2  AREF-CDS-ALARM              5448    22.22   989,768,074
+     172       H      D2  AREF-CDS-ALARM              5592    22.22  1,319,683,549
+     178       H      D2  AREF-CDS-ALARM             23141    22.22  1,319,683,504
+     179      D2       H  AREF-ANN-SCREEN            22351    22.21  1,319,683,654
+     181     D16       H  AREF-CDS-HEALTHY           16488    17.07         1,254
+     182       H      D2  AREF-CDS-ALARM             18425    22.19   494,894,689
+     186      D2       H  AREF-ANN-SCREEN            22370    22.23  1,402,162,534
+     190       H      D2  AREF-CDS-ALARM             21572    22.18  1,237,204,099
+     198     D16       H  AREF-ANN-OVERRIDE           5962    21.95  1,319,682,709
+     202       H      D2  AREF-CDS-ALARM              5718    22.13  1,292,190,064
+     211       H      D2  AREF-CDS-ALARM              6335    22.05  1,182,218,044
+     221       H      D2  AREF-CDS-ALARM              5889    22.23  1,209,711,769
+     223       H      D2  AREF-CDS-ALARM              5739    22.14  1,209,711,169
+     227     D16       H  AREF-ANN-OVERRIDE           5628    22.17  1,237,204,369
+     228       H      D2  AREF-CDS-ALARM              5800    22.21  1,209,711,769
+     233       H      D2  AREF-CDS-ALARM             21533    22.23  1,237,204,594
+     234       H      D2  AREF-CDS-ALARM             21648    22.12  1,209,711,064
+     241       H      D2  AREF-CDS-ALARM             24824    22.05  1,209,710,974
+     242       H      D2  AREF-CDS-ALARM             19830    22.19  1,209,711,469
+     246       H      D2  AREF-CDS-ALARM             21094    21.98  1,237,203,814
+     247       H      D2  AREF-CDS-ALARM             22303    22.20  1,237,204,609
+     250     D10       H  AREF-CDS-HEALTHY            5727    17.08         1,254
+     259      D2       H  AREF-ANN-OVERRIDE           5554    22.11   962,274,514
+     261     D16       H  AREF-CDS-HEALTHY            5264    17.07         1,269
+     267       H      D2  AREF-ANN-SCREEN             5911    22.39   824,810,374
+     268       H      D2  AREF-CDS-ALARM              5693    22.19   962,274,724
+     274       H      D2  AREF-ANN-SCREEN             6217    22.21   962,275,174
+     275      D2       H  AREF-ANN-SCREEN             5743    22.21   989,768,134
+     278     D10       H  AREF-ANN-SCREEN             6015    22.22   962,275,174
+     280       H      D2  AREF-CDS-ALARM              6156    22.15  1,017,260,614
+     283      D6       H  AREF-CDS-HEALTHY            5312    17.07         1,269
+     295      D2       H  AREF-CDS-HEALTHY           17216    17.06         1,269
+     299       H      D2  AREF-CDS-ALARM             21911    22.20   989,767,939
+     308      D2       H  AREF-ANN-OVERRIDE         356637    22.00  1,017,260,194
+     309      D7       H  AREF-CDS-HEALTHY            5740    17.07         1,269
+     311       H      D2  AREF-CDS-ALARM              6053    22.14   989,767,534
+     318       H     D16  AREF-ANN-SCREEN             5974    22.18  1,017,261,094
+     321       H      D2  AREF-CDS-ALARM              6955    22.17   989,767,564
+     326     D10       H  AREF-ANN-SCREEN            19446    22.20   907,289,239
+     331       H      D2  AREF-CDS-ALARM             19799    22.20  1,017,261,004
+     332     D16       H  AREF-ANN-OVERRIDE          19199    21.96  1,044,753,094
+     341     D10       H  AREF-CDS-HEALTHY           17295    17.07         1,269
+     343      D6       H  AREF-ANN-SCREEN            21243    22.22  1,017,261,094
+     348      D5       H  AREF-ANN-OVERRIDE          18610    22.14   907,288,669
+     352       H      D2  AREF-CDS-ALARM             17507    22.03   879,795,409
+     353     D10       H  AREF-ANN-OVERRIDE          17537    22.14   879,795,694
+     355       H      D2  AREF-CDS-ALARM             17881    22.20   879,796,099
+     362     D16       H  AREF-ANN-SCREEN            20285    22.20   879,796,294
+     364      D6       H  AREF-CDS-HEALTHY           16668    17.07         1,269
+     365       H      D2  AREF-CDS-ALARM             19353    22.05   879,795,484
+     367      D2       H  AREF-ANN-SCREEN            21358    22.20   879,796,249
+     374      D5       H  AREF-ANN-OVERRIDE          14746    22.19   879,795,979
+     375      D2       H  AREF-ANN-SCREEN            18260    22.21   879,796,294
+     386     D16       H  AREF-ANN-SCREEN            16771    22.20   879,796,279
+     389       H      D2  AREF-CDS-ALARM             19027    22.02   879,795,364
+     393       H      D2  AREF-CDS-ALARM             21997    22.08   907,288,444
+     394       H      D2  AREF-CDS-ALARM             20990    22.07   879,795,499
+     400     D10       H  AREF-ANN-SCREEN            19939    22.22   934,782,214
+     408       H      D2  AREF-CDS-ALARM             17913    22.21   934,782,019
+     416       H      D2  AREF-CDS-ALARM             18495    22.18   907,288,549
+     422       H      D2  AREF-CDS-ALARM             20157    22.12   907,288,579
+     434       H      D2  AREF-CDS-ALARM             19107    22.21   879,796,219
+     440       H      D3  AREF-CDS-ALARM             15645    22.18   879,796,084
+     451       H      D2  AREF-CDS-ALARM             12692    22.12   934,781,524
+
+-------------------------------------------------------------------------------------
+  SLOWEST USERS (top 10)
+-------------------------------------------------------------------------------------
+    User   Total_ms   CDS_train   CDS_pred   ML_train   ML_pred   Correct
+  ──────  ─────────  ──────────  ─────────  ─────────  ────────  ────────
+       0    1013729     1002927        265      10528         4         Y
+     248     413666      413049         20        593         2         Y
+     308     356637      355930          8        695         2         N
+      84     269967      268952         62        947         3         N
+      21      44587       42810         91       1680         3         N
+     412      26682       22242        214       4210         5         Y
+     184      25747       23290         66       2363         7         Y
+       3      25488       16156        458       8868         6         Y
+     119      25410       21281        303       3817         9         Y
+     300      25327       21613         24       3665         7         Y
+
+=====================================================================================

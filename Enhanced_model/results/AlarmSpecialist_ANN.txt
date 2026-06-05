@@ -1,0 +1,180 @@
+==============================================================================
+  RESULTS: AlarmSpecialist(ANN)
+==============================================================================
+  Timestamp:       2026-06-04 12:30:23
+  Mode:            AlarmSpecialist(ANN)
+  Users evaluated: 452
+  Total time:      1198.4s  (2651ms/user)
+
+------------------------------------------------------------------------------
+  SUMMARY METRICS
+------------------------------------------------------------------------------
+  Accuracy:              74.12%  (335/452)
+  Sensitivity (Recall):  73.43%  (diseased detected: 152/207)
+  Specificity:           74.69%  (healthy correct:   183/245)
+  Precision (PPV):       71.03%  (positive predictions correct: 152/214)
+  Neg Pred Value (NPV):  76.89%  (negative predictions correct: 183/238)
+  F1 Score:              72.21%
+  Misclassifications:    117
+
+------------------------------------------------------------------------------
+  CONFUSION MATRIX  (binary: healthy vs unhealthy)
+------------------------------------------------------------------------------
+                          Predicted
+                    Healthy    Unhealthy
+  Actual Healthy        183           62
+  Actual Unhealthy       55          152
+
+------------------------------------------------------------------------------
+  DECISION SOURCE BREAKDOWN
+------------------------------------------------------------------------------
+  Source                           Count        %   Accuracy
+  ──────────────────────────────  ──────  ───────  ─────────
+  ASPEC-ANN-SCREEN                   100    22.1%      78.0%
+  ASPEC-CDS-ALARM                    207    45.8%      71.5%
+  ASPEC-CDS-HEALTHY                  112    24.8%      83.9%
+  ASPEC-OVERRIDE                      33     7.3%      45.5%
+
+------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+------------------------------------------------------------------------------
+    Class   Correct   Total   Accuracy  Label     
+  ───────  ────────  ──────  ─────────  ──────────
+        1       183     245      74.7%  Healthy   
+        2        31      44      70.5%  Disease-2 
+        3        13      15      86.7%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5        11      13      84.6%  Disease-5 
+        6        16      25      64.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         8       9      88.9%  Disease-9 
+       10        34      50      68.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        13      22      59.1%  Disease-16
+
+------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE  (117 errors)
+------------------------------------------------------------------------------
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       9     D10       H  ASPEC-ANN-SCREEN                0.968      0.438       -     Screening         1421
+      10      D3       H  ASPEC-OVERRIDE                  0.117      0.672       -     Unhealthy         1075
+      13      D6       H  ASPEC-OVERRIDE                  0.504      0.743       -     Unhealthy         1041
+      16     D10       H  ASPEC-OVERRIDE                  0.382      0.678       -     Unhealthy         1100
+      21       H      D2  ASPEC-CDS-ALARM                 0.622      0.491       -     Unhealthy         1052
+      34      D4       H  ASPEC-ANN-SCREEN                0.968      0.629       -     Screening         1471
+      37     D10       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy           1020
+      43       H      D2  ASPEC-CDS-ALARM                 0.072      0.266       -     Unhealthy         1027
+      50       H      D2  ASPEC-CDS-ALARM                 0.193      0.503       -     Unhealthy         1171
+      52     D10       H  ASPEC-OVERRIDE                  0.615      0.704       -     Unhealthy         1064
+      53     D16       H  ASPEC-OVERRIDE                  0.015      0.822       -     Unhealthy         1168
+      54     D16       H  ASPEC-ANN-SCREEN                0.959      0.437       -     Screening         1013
+      55      D6       H  ASPEC-ANN-SCREEN                0.968      0.854       -     Screening         1360
+      59       H      D2  ASPEC-CDS-ALARM                 0.873       -          -     Unhealthy          949
+      60      D5       H  ASPEC-OVERRIDE                  0.577      0.721       -     Unhealthy          953
+      61      D5       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            887
+      68      D6       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            930
+      71     D16       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            985
+      72       H      D2  ASPEC-CDS-ALARM                 0.926       -          -     Unhealthy          966
+      77      D2       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            963
+      82      D2       H  ASPEC-ANN-SCREEN                0.968      0.440       -     Screening         1125
+      90       H      D3  ASPEC-CDS-ALARM                 0.724       -          -     Unhealthy          921
+      98       H      D2  ASPEC-CDS-ALARM                 0.511      0.397       -     Unhealthy         1014
+      99       H      D2  ASPEC-CDS-ALARM                 0.294      0.417       -     Unhealthy         1097
+     100      D4       H  ASPEC-ANN-SCREEN                0.968      0.545       -     Screening         1131
+     102       H      D2  ASPEC-CDS-ALARM                 0.010      0.432       -     Unhealthy         1021
+     104      D6       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            935
+     108      D2       H  ASPEC-OVERRIDE                  0.010      0.881       -     Unhealthy         1023
+     109       H      D2  ASPEC-CDS-ALARM                 0.261      0.489       -     Unhealthy         1087
+     110       H      D2  ASPEC-CDS-ALARM                 0.829       -          -     Unhealthy          912
+     113       H      D2  ASPEC-CDS-ALARM                 0.564      0.598       -     Unhealthy         1079
+     114      D6       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            950
+     126       H      D2  ASPEC-CDS-ALARM                 0.603      0.493       -     Unhealthy         1101
+     129       H      D2  ASPEC-CDS-ALARM                 0.530      0.208       -     Unhealthy         1037
+     134     D10       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            895
+     136       H      D2  ASPEC-CDS-ALARM                 0.882       -          -     Unhealthy          855
+     137     D10       H  ASPEC-ANN-SCREEN                0.963      0.332       -     Screening         1044
+     138       H      D6  ASPEC-CDS-ALARM                 1.000       -          -     Unhealthy          902
+     144     D10       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            947
+     145     D10       H  ASPEC-OVERRIDE                  0.615      0.738       -     Unhealthy         1071
+     152       H      D2  ASPEC-CDS-ALARM                 0.842       -          -     Unhealthy          953
+     154     D16       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            822
+     157      D2       H  ASPEC-ANN-SCREEN                0.959      0.353       -     Screening         1248
+     158       H      D2  ASPEC-CDS-ALARM                 0.574      0.505       -     Unhealthy         1040
+     162       H      D2  ASPEC-CDS-ALARM                 0.784       -          -     Unhealthy          958
+     170       H      D2  ASPEC-CDS-ALARM                 0.991       -          -     Unhealthy          981
+     171       H      D2  ASPEC-CDS-ALARM                 0.530      0.350       -     Unhealthy         1246
+     172       H      D2  ASPEC-CDS-ALARM                 0.947       -          -     Unhealthy         1017
+     178       H      D2  ASPEC-CDS-ALARM                 0.847       -          -     Unhealthy          899
+     179      D2       H  ASPEC-ANN-SCREEN                0.968      0.429       -     Screening         2970
+     181     D16       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            887
+     182       H      D2  ASPEC-CDS-ALARM                 0.863       -          -     Unhealthy         1021
+     186      D2       H  ASPEC-ANN-SCREEN                0.968      0.813       -     Screening         1724
+     190       H      D2  ASPEC-CDS-ALARM                 0.501      0.273       -     Unhealthy         1126
+     202       H      D2  ASPEC-CDS-ALARM                 0.564      0.401       -     Unhealthy         1044
+     210     D10       H  ASPEC-OVERRIDE                  0.024      0.832       -     Unhealthy         1044
+     213      D2       H  ASPEC-OVERRIDE                  0.607      0.922       -     Unhealthy          932
+     218      D3       H  ASPEC-OVERRIDE                  0.160      0.903       -     Unhealthy         3449
+     220       H      D2  ASPEC-CDS-ALARM                 0.501      0.575       -     Unhealthy         3517
+     221       H      D2  ASPEC-CDS-ALARM                 0.978       -          -     Unhealthy         3186
+     224     D10       H  ASPEC-OVERRIDE                  0.625      0.688       -     Unhealthy         3264
+     228       H      D2  ASPEC-CDS-ALARM                 0.978       -          -     Unhealthy         3196
+     233       H      D2  ASPEC-CDS-ALARM                 0.811       -          -     Unhealthy         2993
+     239       H      D2  ASPEC-CDS-ALARM                 0.675       -          -     Unhealthy         2932
+     241       H      D2  ASPEC-CDS-ALARM                 0.346      0.120       -     Unhealthy         3274
+     242       H      D2  ASPEC-CDS-ALARM                 0.646      0.355       -     Unhealthy         3255
+     246       H      D2  ASPEC-CDS-ALARM                 0.014      0.246       -     Unhealthy         1088
+     247       H      D2  ASPEC-CDS-ALARM                 0.829       -          -     Unhealthy         1005
+     250     D10       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            936
+     254       H      D2  ASPEC-CDS-ALARM                 0.535      0.432       -     Unhealthy         1047
+     255       H      D2  ASPEC-CDS-ALARM                 0.106      0.641       -     Unhealthy         1000
+     261     D16       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy           1077
+     267       H      D2  ASPEC-ANN-SCREEN                0.963      0.276       -     Screening         1660
+     268       H      D2  ASPEC-CDS-ALARM                 0.612      0.566       -     Unhealthy         1012
+     271       H      D2  ASPEC-CDS-ALARM                 0.516      0.558       -     Unhealthy         1058
+     274       H      D2  ASPEC-ANN-SCREEN                0.963      0.370       -     Screening         1300
+     275      D2       H  ASPEC-ANN-SCREEN                0.972      0.440       -     Screening         1241
+     278     D10       H  ASPEC-ANN-SCREEN                0.968      0.754       -     Screening         1221
+     280       H      D2  ASPEC-CDS-ALARM                 0.603      0.410       -     Unhealthy         1139
+     283      D6       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            811
+     295      D2       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            964
+     299       H      D2  ASPEC-CDS-ALARM                 0.784       -          -     Unhealthy          916
+     308      D2       H  ASPEC-OVERRIDE                  0.189      0.652       -     Unhealthy         1170
+     309      D7       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            939
+     311       H      D2  ASPEC-CDS-ALARM                 0.550      0.633       -     Unhealthy          989
+     318       H     D16  ASPEC-ANN-SCREEN                0.963      0.556       -     Screening         1137
+     321       H      D2  ASPEC-CDS-ALARM                 0.569      0.578       -     Unhealthy         1157
+     326     D10       H  ASPEC-ANN-SCREEN                0.959      0.340       -     Screening         1202
+     328       H      D2  ASPEC-CDS-ALARM                 0.135      0.296       -     Unhealthy         1079
+     331       H      D2  ASPEC-CDS-ALARM                 0.918       -          -     Unhealthy          916
+     341     D10       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            914
+     343      D6       H  ASPEC-ANN-SCREEN                0.968      0.360       -     Screening         1311
+     344     D10       H  ASPEC-OVERRIDE                  0.615      0.855       -     Unhealthy          984
+     352       H      D2  ASPEC-CDS-ALARM                 0.237      0.391       -     Unhealthy         1088
+     355       H      D2  ASPEC-CDS-ALARM                 0.793       -          -     Unhealthy          994
+     362     D16       H  ASPEC-ANN-SCREEN                0.968      0.661       -     Screening         1231
+     364      D6       H  ASPEC-CDS-HEALTHY               1.000       -          -     Healthy            911
+     365       H      D2  ASPEC-CDS-ALARM                 0.366      0.575       -     Unhealthy         1066
+     367      D2       H  ASPEC-ANN-SCREEN                0.930      0.501       -     Screening         1226
+     375      D2       H  ASPEC-ANN-SCREEN                0.968      0.438       -     Screening         1368
+     384      D6       H  ASPEC-OVERRIDE                  0.615      0.686       -     Unhealthy         1032
+     386     D16       H  ASPEC-ANN-SCREEN                0.959      0.573       -     Screening         1237
+     391       H      D2  ASPEC-CDS-ALARM                 0.072      0.568       -     Unhealthy          997
+     393       H      D2  ASPEC-CDS-ALARM                 0.376      0.633       -     Unhealthy         1064
+     394       H      D2  ASPEC-CDS-ALARM                 0.385      0.360       -     Unhealthy         1028
+     400     D10       H  ASPEC-ANN-SCREEN                0.968      0.792       -     Screening         1284
+     408       H      D2  ASPEC-CDS-ALARM                 0.793       -          -     Unhealthy          936
+     409     D16       H  ASPEC-OVERRIDE                  0.363      0.763       -     Unhealthy         1065
+     411      D2       H  ASPEC-OVERRIDE                  0.194      0.661       -     Unhealthy         1040
+     416       H      D2  ASPEC-CDS-ALARM                 0.477      0.560       -     Unhealthy         1018
+     422       H      D2  ASPEC-CDS-ALARM                 0.501      0.512       -     Unhealthy         1038
+     424      D9       H  ASPEC-OVERRIDE                  0.184      0.686       -     Unhealthy         1016
+     434       H      D2  ASPEC-CDS-ALARM                 0.957       -          -     Unhealthy          950
+     439       H      D2  ASPEC-CDS-ALARM                 0.608      0.556       -     Unhealthy          992
+     440       H      D3  ASPEC-CDS-ALARM                 0.767       -          -     Unhealthy          869
+     447       H      D2  ASPEC-CDS-ALARM                 0.304      0.348       -     Unhealthy         1082
+     451       H      D2  ASPEC-CDS-ALARM                 0.492      0.501       -     Unhealthy         1080
+
+==============================================================================

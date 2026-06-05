@@ -1,6 +1,6 @@
 ====================================================================================================
   COMBINED STATISTICAL SIGNIFICANCE SUMMARY
-  Generated: 2026-06-04 10:06:33
+  Generated: 2026-06-04 21:48:50
 ====================================================================================================
 
 ----------------------------------------------------------------------------------------------------
@@ -21,6 +21,11 @@
   Stacked(CDS->RNN)             : MATCH
   Selector(CDS+ANN)             : MISMATCH
   Selector(CDS+RNN)             : MISMATCH
+  AlarmRefine(ANN)              : MATCH
+  AFGated(ANN)                  : MATCH
+  DisagreeRules(ANN)            : MATCH
+  AlarmSpecialist(ANN)          : MATCH
+  TripleCascade                 : MATCH
 
   WARNING: Some models have different error sets between folders!
 
@@ -43,6 +48,11 @@
   Stacked(CDS->RNN)                40.0%  -34.5%        [35.6%, 44.6%]    67   223    0.000000  YES *
   Selector(CDS+ANN)                74.6%   +0.0%        [70.3%, 78.4%]     0     0    1.000000     no
   Selector(CDS+RNN)                74.6%   +0.0%        [70.3%, 78.4%]     0     0    1.000000     no
+  AlarmRefine(ANN)                 76.5%   +2.0%        [72.4%, 80.2%]    26    17    0.222469     no
+  AFGated(ANN)                     77.0%   +2.4%        [72.9%, 80.6%]    24    13    0.100178     no
+  DisagreeRules(ANN)               76.3%   +1.8%        [72.2%, 80.0%]    33    25    0.358020     no
+  AlarmSpecialist(ANN)             74.1%   -0.4%        [69.9%, 77.9%]    19    21    0.874367     no
+  TripleCascade                    76.8%   +2.2%        [72.7%, 80.4%]    25    15    0.154729     no
 
 ----------------------------------------------------------------------------------------------------
   PER-CLASS BREAKDOWN FOR TOP HYBRID MODELS
@@ -68,7 +78,7 @@
   KEY TAKEAWAYS
 ----------------------------------------------------------------------------------------------------
 
-  • 3 of 12 models show statistically significant differences from CDS-only (α=0.05)
+  • 3 of 17 models show statistically significant differences from CDS-only (α=0.05)
   • CDS-only 95% CI: [70.3%, 78.4%] — any model whose CI 
     overlaps this range cannot be claimed as definitively better or worse
   • Cascade(ANN) CI [70.6%, 78.6%] overlaps CDS-only CI — differences could be due to sampling variation

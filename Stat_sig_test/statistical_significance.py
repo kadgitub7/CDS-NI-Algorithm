@@ -56,6 +56,11 @@ RESULT_FILES = [
     "Stacked_CDS_to_RNN.txt",
     "Selector_CDS_ANN.txt",
     "Selector_CDS_RNN.txt",
+    "AlarmRefine_ANN.txt",
+    "AFGated_ANN.txt",
+    "DisagreeRules_ANN.txt",
+    "AlarmSpecialist_ANN.txt",
+    "TripleCascade.txt",
 ]
 
 CLASS_LABELS = {
@@ -485,6 +490,11 @@ def load_models_from_folder(results_dir):
                 "Stacked CDS to RNN": "Stacked(CDS->RNN)",
                 "Selector CDS ANN": "Selector(CDS+ANN)",
                 "Selector CDS RNN": "Selector(CDS+RNN)",
+                "AlarmRefine ANN": "AlarmRefine(ANN)",
+                "AFGated ANN": "AFGated(ANN)",
+                "DisagreeRules ANN": "DisagreeRules(ANN)",
+                "AlarmSpecialist ANN": "AlarmSpecialist(ANN)",
+                "TripleCascade": "TripleCascade",
             }
             standard_key = key_map.get(key, key)
             models[standard_key] = data

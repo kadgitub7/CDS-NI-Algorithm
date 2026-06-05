@@ -68,6 +68,8 @@ MODE_ORDER = [
     "Confidence(CDS+ANN)", "Confidence(CDS+RNN)",
     "Stacked(CDS->ANN)", "Stacked(CDS->RNN)",
     "Selector(CDS+ANN)", "Selector(CDS+RNN)",
+    "AlarmRefine(ANN)", "AFGated(ANN)", "DisagreeRules(ANN)",
+    "AlarmSpecialist(ANN)", "TripleCascade",
 ]
 
 MODE_COLORS = [
@@ -77,6 +79,7 @@ MODE_COLORS = [
     COLORS["conf_ann"], COLORS["conf_rnn"],
     COLORS["stack_ann"], COLORS["stack_rnn"],
     COLORS["sel_ann"], COLORS["sel_rnn"],
+    "#D50000", "#00C853", "#2962FF", "#AA00FF", "#FF6D00",
 ]
 
 MODE_SHORT = [
@@ -86,34 +89,103 @@ MODE_SHORT = [
     "Conf-A", "Conf-R",
     "Stk-A", "Stk-R",
     "Sel-A", "Sel-R",
+    "ARef", "AFG", "DRule", "ASpec", "TriCas",
 ]
 
 
 # ── Data Loading ────────────────────────────────────────────────────────────
 
+def _parse_resource_txt(filepath):
+    """Parse a single resource_analysis .txt file into a dict matching the CSV columns."""
+    text = filepath.read_text(encoding="utf-8")
+    row = {}
+
+    m = re.search(r"(?:RESOURCE ANALYSIS|RESULTS):\s*(.+)", text)
+    row["Mode"] = m.group(1).strip() if m else filepath.stem
+
+    m = re.search(r"Users evaluated:\s*(\d+)", text)
+    row["N_Users"] = float(m.group(1)) if m else 0
+
+    patterns = {
+        "Accuracy%": r"Accuracy:\s*([\d.]+)%",
+        "Sensitivity%": r"Sensitivity.*?:\s*([\d.]+)%",
+        "Specificity%": r"Specificity:\s*([\d.]+)%",
+        "PPV%": r"Precision \(PPV\):\s*([\d.]+)%",
+        "NPV%": r"Neg Pred Value.*?:\s*([\d.]+)%",
+        "F1%": r"F1 Score:\s*([\d.]+)%",
+        "Total_Time_s": r"Total wall-clock:\s*([\d.]+)s",
+        "Avg_Time_Per_User_ms": r"Avg per user:\s*([\d.]+)ms",
+        "Avg_CDS_Train_ms": r"Avg CDS train:\s*([\d.]+)ms",
+        "Avg_CDS_Predict_ms": r"Avg CDS predict:\s*([\d.]+)ms",
+        "Avg_ML_Train_ms": r"Avg ML train:\s*([\d.]+)ms",
+        "Avg_ML_Predict_ms": r"Avg ML predict:\s*([\d.]+)ms",
+        "Peak_Memory_MB": r"Peak memory:\s*([\d.]+)\s*MB",
+        "Avg_Memory_MB": r"Avg memory per fold:\s*([\d.]+)\s*MB",
+    }
+    for key, pat in patterns.items():
+        m = re.search(pat, text)
+        row[key] = float(m.group(1)) if m else 0.0
+
+    # Handle total time from Enhanced_model format too
+    if row["Total_Time_s"] == 0:
+        m = re.search(r"Total time:\s*([\d.]+)s", text)
+        if m:
+            row["Total_Time_s"] = float(m.group(1))
+        m = re.search(r"\((\d+)ms/user\)", text)
+        if m:
+            row["Avg_Time_Per_User_ms"] = float(m.group(1))
+
+    for key, pat in [
+        ("Total_Multiplications", r"Total multiplications:\s*([\d,]+)"),
+        ("CDS_Mults", r"CDS total:\s*([\d,]+)"),
+        ("ML_Train_Mults", r"ML training total:\s*([\d,]+)"),
+        ("ML_Infer_Mults", r"ML inference total:\s*([\d,]+)"),
+    ]:
+        m = re.search(pat, text)
+        row[key] = float(m.group(1).replace(",", "")) if m else 0.0
+
+    m = re.search(r"Avg per user:\s*([\d,]+)\n", text)
+    row["Avg_Mults_Per_User"] = float(m.group(1).replace(",", "")) if m else 0.0
+
+    return row
+
+
 def load_resource_csv():
-    """Load the resource_analysis comparison CSV."""
+    """Load resource data by parsing individual .txt result files directly."""
     data = OrderedDict()
-    with open(RESOURCE_CSV, encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            mode = row["Mode"]
-            for k, v in row.items():
-                if k != "Mode":
-                    try:
-                        row[k] = float(v)
-                    except ValueError:
-                        pass
-            data[mode] = row
+
+    # Scan resource_analysis/results/
+    if RESOURCE_DIR.exists():
+        print(f"  Scanning {RESOURCE_DIR}")
+        for fpath in sorted(RESOURCE_DIR.glob("*.txt")):
+            if fpath.name in ("comparison.txt",):
+                continue
+            row = _parse_resource_txt(fpath)
+            if row["N_Users"] > 0:
+                data[row["Mode"]] = row
+                print(f"    {row['Mode']:30s}  acc={row['Accuracy%']:.1f}%")
+
+    # Scan Enhanced_model/results/ for any modes not already found
+    if ENHANCED_DIR.exists():
+        print(f"  Scanning {ENHANCED_DIR}")
+        for fpath in sorted(ENHANCED_DIR.glob("*.txt")):
+            if fpath.name in ("comparison.txt",):
+                continue
+            row = _parse_resource_txt(fpath)
+            if row["N_Users"] > 0 and row["Mode"] not in data:
+                data[row["Mode"]] = row
+                print(f"    {row['Mode']:30s}  acc={row['Accuracy%']:.1f}%")
+
+    print(f"  Loaded resource data for {len(data)} modes")
     return data
 
 
 def parse_enhanced_file(filepath):
-    """Parse an Enhanced_model result file for confusion matrix and decision sources."""
+    """Parse an Enhanced_model or resource_analysis result file for confusion matrix, sources, per-class."""
     text = filepath.read_text(encoding="utf-8")
     result = {}
 
-    m = re.search(r"RESULTS?:?\s*(.+)", text)
+    m = re.search(r"(?:RESULTS|RESOURCE ANALYSIS):\s*(.+)", text)
     if m:
         result["mode"] = m.group(1).strip()
 
@@ -125,47 +197,92 @@ def parse_enhanced_file(filepath):
             [int(cm.group(1)), int(cm.group(2))],
             [int(cm.group(3)), int(cm.group(4))]
         ])
+    else:
+        # Derive from per-class data if no explicit confusion matrix
+        result["cm"] = None
 
-    # Decision sources
+    # Decision sources — extract from DECISION SOURCE BREAKDOWN section
     sources = []
-    in_source = False
+    in_source_section = False
     for line in text.splitlines():
         if "DECISION SOURCE BREAKDOWN" in line:
-            in_source = True
+            in_source_section = True
             continue
-        if in_source and "PER-CLASS" in line:
+        if in_source_section and ("PER-CLASS" in line or "MISCLASSIFICATION" in line):
             break
-        if in_source:
-            sm = re.match(r"\s{2}(\S[\w\-]+(?:\s*[\w\-]+)*)\s+(\d+)\s+([\d.]+)%\s+([\d.]+)%", line)
-            if sm:
-                sources.append({
-                    "source": sm.group(1).strip(),
-                    "count": int(sm.group(2)),
-                    "pct": float(sm.group(3)),
-                    "accuracy": float(sm.group(4)),
-                })
+        if not in_source_section:
+            continue
+        # Skip header/separator lines
+        if "Source" in line and "Count" in line:
+            continue
+        if line.strip().startswith("─") or line.strip().startswith("-") or not line.strip():
+            continue
+        # Match: "  ANN                                100    22.1%      78.0%"
+        sm = re.match(r"^\s{2,}(\S[\S ]*\S)\s{2,}(\d+)\s+([\d.]+)%\s+([\d.]+)%", line)
+        if sm:
+            sources.append({
+                "source": sm.group(1).strip(),
+                "count": int(sm.group(2)),
+                "pct": float(sm.group(3)),
+                "accuracy": float(sm.group(4)),
+            })
+            continue
+        # Match resource_analysis: "  SOURCE   :   COUNT  ( PCT%)  acc=ACC%"
+        sm = re.match(r"^\s{2,}(\S[\S ]*\S)\s*:\s*(\d+)\s+\(\s*([\d.]+)%\)\s+acc=([\d.]+)%", line)
+        if sm:
+            sources.append({
+                "source": sm.group(1).strip(),
+                "count": int(sm.group(2)),
+                "pct": float(sm.group(3)),
+                "accuracy": float(sm.group(4)),
+            })
     result["sources"] = sources
 
-    # Per-class
+    # Per-class — try multiple formats
     per_class = {}
+    # Format 1: "  Class  1 (Healthy     ): 231/245 (94.3%)"  (resource_analysis)
     for cm_match in re.finditer(
-        r"^\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)%\s+(\S+)",
-        text, re.MULTILINE
+        r"Class\s+(\d+)\s+\((\S[\w\-]*)\s*\):\s*(\d+)/(\d+)\s+\(([\d.]+)%\)",
+        text
     ):
         cls_id = int(cm_match.group(1))
         per_class[cls_id] = {
-            "correct": int(cm_match.group(2)),
-            "total": int(cm_match.group(3)),
-            "accuracy": float(cm_match.group(4)),
-            "label": cm_match.group(5),
+            "correct": int(cm_match.group(3)),
+            "total": int(cm_match.group(4)),
+            "accuracy": float(cm_match.group(5)),
+            "label": cm_match.group(2).strip(),
         }
+    # Format 2: "     1       231     245      94.3%  Healthy"  (Enhanced_model)
+    if not per_class:
+        for cm_match in re.finditer(
+            r"^\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)%\s+(\S+)",
+            text, re.MULTILINE
+        ):
+            cls_id = int(cm_match.group(1))
+            per_class[cls_id] = {
+                "correct": int(cm_match.group(2)),
+                "total": int(cm_match.group(3)),
+                "accuracy": float(cm_match.group(4)),
+                "label": cm_match.group(5),
+            }
     result["per_class"] = per_class
+
+    # Derive confusion matrix from per-class if missing
+    if result["cm"] is None and per_class:
+        h = per_class.get(1, {"correct": 0, "total": 0})
+        tn = h["correct"]
+        fp = h["total"] - h["correct"]
+        dis_correct = sum(v["correct"] for k, v in per_class.items() if k != 1)
+        dis_total = sum(v["total"] for k, v in per_class.items() if k != 1)
+        tp = dis_correct
+        fn = dis_total - dis_correct
+        result["cm"] = np.array([[tn, fp], [fn, tp]])
 
     return result
 
 
 def load_all_enhanced():
-    """Load all Enhanced_model result files."""
+    """Load all result files from both Enhanced_model and resource_analysis."""
     files = {
         "CDS-only": "CDS-only.txt",
         "ANN-only": "ANN-only.txt",
@@ -180,12 +297,23 @@ def load_all_enhanced():
         "Stacked(CDS->RNN)": "Stacked_CDS_to_RNN.txt",
         "Selector(CDS+ANN)": "Selector_CDS_ANN.txt",
         "Selector(CDS+RNN)": "Selector_CDS_RNN.txt",
+        "AlarmRefine(ANN)": "AlarmRefine_ANN.txt",
+        "AFGated(ANN)": "AFGated_ANN.txt",
+        "DisagreeRules(ANN)": "DisagreeRules_ANN.txt",
+        "AlarmSpecialist(ANN)": "AlarmSpecialist_ANN.txt",
+        "TripleCascade": "TripleCascade.txt",
     }
     data = {}
+    # Try Enhanced_model first, then resource_analysis as fallback
     for mode, fname in files.items():
-        fpath = ENHANCED_DIR / fname
-        if fpath.exists():
-            data[mode] = parse_enhanced_file(fpath)
+        for search_dir in (ENHANCED_DIR, RESOURCE_DIR):
+            fpath = search_dir / fname
+            if fpath.exists() and mode not in data:
+                parsed = parse_enhanced_file(fpath)
+                if parsed.get("per_class") or parsed.get("cm") is not None:
+                    data[mode] = parsed
+                    break
+    print(f"  Loaded enhanced data for {len(data)} modes")
     return data
 
 
@@ -285,13 +413,22 @@ def fig1_architecture():
 # FIGURE 2: Accuracy Bar Chart with CIs
 # ═══════════════════════════════════════════════════════════════════════════
 
+def _available_modes():
+    """Return only MODE_ORDER entries present in the resource CSV data."""
+    return [m for m in MODE_ORDER if m in resource_data]
+
+
 def fig2_accuracy_comparison():
-    fig, ax = plt.subplots(figsize=(12, 5))
+    fig, ax = plt.subplots(figsize=(14, 5.5))
+
+    avail = _available_modes()
+    colors = [MODE_COLORS[MODE_ORDER.index(m)] for m in avail]
+    shorts = [MODE_SHORT[MODE_ORDER.index(m)] for m in avail]
 
     accuracies = []
     ci_lo = []
     ci_hi = []
-    for mode in MODE_ORDER:
+    for mode in avail:
         acc = float(resource_data[mode]["Accuracy%"])
         n = int(float(resource_data[mode]["N_Users"]))
         correct = round(acc * n / 100)
@@ -300,8 +437,8 @@ def fig2_accuracy_comparison():
         ci_lo.append(acc - lo * 100)
         ci_hi.append(hi * 100 - acc)
 
-    x = np.arange(len(MODE_ORDER))
-    bars = ax.bar(x, accuracies, color=MODE_COLORS, edgecolor="black", linewidth=0.5, width=0.7)
+    x = np.arange(len(avail))
+    bars = ax.bar(x, accuracies, color=colors, edgecolor="black", linewidth=0.5, width=0.7)
     ax.errorbar(x, accuracies, yerr=[ci_lo, ci_hi], fmt="none", ecolor="black",
                 capsize=3, capthick=1, elinewidth=1)
 
@@ -310,7 +447,7 @@ def fig2_accuracy_comparison():
     ax.axhline(y=cds_acc, color="#2196F3", linestyle="--", linewidth=1, alpha=0.7, label=f"CDS-only ({cds_acc:.1f}%)")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(MODE_SHORT, rotation=45, ha="right")
+    ax.set_xticklabels(shorts, rotation=45, ha="right")
     ax.set_ylabel("Accuracy (%)")
     ax.set_title("Fig. 2: Classification Accuracy Comparison (452 Users, LOOCV)", fontweight="bold")
     ax.set_ylim(30, 85)
@@ -329,18 +466,48 @@ def fig2_accuracy_comparison():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def fig3_confusion_matrices():
-    models = ["CDS-only", "ANN-only", "Cascade(ANN)"]
-    titles = ["CDS-only (74.6%)", "ANN-only (70.6%)", "Cascade(ANN) (74.8%)"]
+    # Auto-select: best hybrid, best standalone, and CDS-only (always shown)
+    available = {m: d for m, d in enhanced_data.items() if d.get("cm") is not None}
+    if not available:
+        print("  Skip fig3: no confusion matrix data")
+        return
 
-    fig, axes = plt.subplots(1, 3, figsize=(13, 4))
-    fig.suptitle("Fig. 3: Binary Confusion Matrices — CDS vs ANN vs Best Hybrid", fontweight="bold", y=1.02)
+    # Rank by accuracy from resource_data
+    def _acc(mode):
+        if mode in resource_data:
+            return float(resource_data[mode].get("Accuracy%", 0))
+        return 0.0
 
-    for idx, (mode, title) in enumerate(zip(models, titles)):
+    standalones = [m for m in available if "-only" in m]
+    hybrids = [m for m in available if "-only" not in m]
+
+    # Pick: CDS-only (baseline), best standalone ML, best hybrid — up to 4
+    picks = []
+    if "CDS-only" in available:
+        picks.append("CDS-only")
+    best_ml = sorted([m for m in standalones if m != "CDS-only"], key=_acc, reverse=True)
+    if best_ml:
+        picks.append(best_ml[0])
+    best_hybrids = sorted(hybrids, key=_acc, reverse=True)
+    for h in best_hybrids:
+        if h not in picks:
+            picks.append(h)
+            if len(picks) >= 4:
+                break
+
+    n = len(picks)
+    fig, axes = plt.subplots(1, n, figsize=(4 * n, 4))
+    if n == 1:
+        axes = [axes]
+    fig.suptitle("Fig. 3: Binary Confusion Matrices (auto-selected top modes)", fontweight="bold", y=1.02)
+
+    for idx, mode in enumerate(picks):
         ax = axes[idx]
-        cm = enhanced_data[mode]["cm"]
+        cm = available[mode]["cm"]
         total = cm.sum()
+        acc = _acc(mode)
 
-        im = ax.imshow(cm, cmap="Blues", vmin=0, vmax=250)
+        im = ax.imshow(cm, cmap="Blues", vmin=0, vmax=max(250, cm.max()))
 
         labels = ["Healthy", "Unhealthy"]
         ax.set_xticks([0, 1])
@@ -350,13 +517,13 @@ def fig3_confusion_matrices():
         ax.set_xlabel("Predicted", fontsize=10)
         if idx == 0:
             ax.set_ylabel("Actual", fontsize=10)
-        ax.set_title(title, fontsize=10, fontweight="bold")
+        ax.set_title(f"{mode}\n({acc:.1f}%)", fontsize=10, fontweight="bold")
 
         for i in range(2):
             for j in range(2):
                 val = cm[i, j]
                 pct = val / total * 100
-                color = "white" if val > 150 else "black"
+                color = "white" if val > cm.max() * 0.6 else "black"
                 ax.text(j, i, f"{val}\n({pct:.1f}%)", ha="center", va="center",
                         fontsize=10, fontweight="bold", color=color)
 
@@ -369,30 +536,69 @@ def fig3_confusion_matrices():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def fig4_radar_chart():
-    modes_to_plot = ["CDS-only", "ANN-only", "Cascade(ANN)", "Cascade(RNN)"]
-    colors_radar = [COLORS["cds"], COLORS["ann"], COLORS["cascade_ann"], COLORS["cascade_rnn"]]
+    # Auto-select: 3 standalone + top 2 hybrids by accuracy (max 5 total)
+    avail = [m for m in resource_data if float(resource_data[m].get("Accuracy%", 0)) > 0]
+    if len(avail) < 2:
+        print("  Skip fig4: need at least 2 modes with data")
+        return
 
-    metrics = ["Accuracy", "Sensitivity", "Specificity", "F1 Score", "Speed\n(inv. time)", "Efficiency\n(inv. memory)"]
+    def _acc(m):
+        return float(resource_data[m].get("Accuracy%", 0))
+
+    standalones = sorted([m for m in avail if "-only" in m], key=_acc, reverse=True)
+    hybrids = sorted([m for m in avail if "-only" not in m], key=_acc, reverse=True)
+
+    modes_to_plot = []
+    for m in standalones[:3]:
+        modes_to_plot.append(m)
+    for m in hybrids:
+        if m not in modes_to_plot:
+            modes_to_plot.append(m)
+            if len(modes_to_plot) >= 5:
+                break
+
+    all_colors = ["#2196F3", "#FF9800", "#4CAF50", "#E91E63", "#9C27B0",
+                  "#00BCD4", "#795548", "#F44336"]
+
+    # Check if time/memory data exists
+    has_resources = any(float(resource_data[m].get("Avg_Time_Per_User_ms", 0)) > 0 for m in modes_to_plot)
+
+    if has_resources:
+        metrics = ["Accuracy", "Sensitivity", "Specificity", "F1 Score", "Speed\n(inv. time)", "Efficiency\n(inv. memory)"]
+    else:
+        metrics = ["Accuracy", "Sensitivity", "Specificity", "F1 Score", "PPV"]
+
     n_metrics = len(metrics)
     angles = np.linspace(0, 2 * np.pi, n_metrics, endpoint=False).tolist()
     angles += angles[:1]
 
     fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
 
-    max_time = max(float(resource_data[m]["Avg_Time_Per_User_ms"]) for m in modes_to_plot)
-    max_mem = max(float(resource_data[m]["Peak_Memory_MB"]) for m in modes_to_plot)
+    if has_resources:
+        max_time = max(max(float(resource_data[m].get("Avg_Time_Per_User_ms", 1)) for m in modes_to_plot), 1)
+        max_mem = max(max(float(resource_data[m].get("Peak_Memory_MB", 1)) for m in modes_to_plot), 1)
 
-    for mode, color in zip(modes_to_plot, colors_radar):
+    for i, mode in enumerate(modes_to_plot):
         rd = resource_data[mode]
-        values = [
-            float(rd["Accuracy%"]),
-            float(rd["Sensitivity%"]),
-            float(rd["Specificity%"]),
-            float(rd["F1%"]),
-            (1 - float(rd["Avg_Time_Per_User_ms"]) / max_time) * 100,
-            (1 - float(rd["Peak_Memory_MB"]) / max_mem) * 100,
-        ]
+        if has_resources:
+            values = [
+                float(rd["Accuracy%"]),
+                float(rd["Sensitivity%"]),
+                float(rd["Specificity%"]),
+                float(rd["F1%"]),
+                (1 - float(rd.get("Avg_Time_Per_User_ms", 0)) / max_time) * 100,
+                (1 - float(rd.get("Peak_Memory_MB", 0)) / max_mem) * 100,
+            ]
+        else:
+            values = [
+                float(rd["Accuracy%"]),
+                float(rd["Sensitivity%"]),
+                float(rd["Specificity%"]),
+                float(rd["F1%"]),
+                float(rd.get("PPV%", 0)),
+            ]
         values += values[:1]
+        color = all_colors[i % len(all_colors)]
         ax.plot(angles, values, "o-", linewidth=2, label=mode, color=color, markersize=4)
         ax.fill(angles, values, alpha=0.1, color=color)
 
@@ -401,8 +607,8 @@ def fig4_radar_chart():
     ax.set_ylim(0, 100)
     ax.set_yticks([20, 40, 60, 80, 100])
     ax.set_yticklabels(["20%", "40%", "60%", "80%", "100%"], fontsize=7, color="grey")
-    ax.set_title("Fig. 4: Multi-Objective Comparison\n(Top 4 Modes)", fontweight="bold", pad=20)
-    ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+    ax.set_title(f"Fig. 4: Multi-Objective Comparison\n(Top {len(modes_to_plot)} Modes — auto-selected)", fontweight="bold", pad=20)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.35, 1.1), fontsize=8)
 
     save_fig(fig, "fig4_radar_chart")
 
@@ -412,43 +618,76 @@ def fig4_radar_chart():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def fig5_decision_sources():
-    modes_to_plot = ["CDS-only", "Cascade(ANN)", "Cascade(RNN)",
-                     "Confidence(CDS+ANN)", "Vote(CDS+ANN)"]
+    # Auto-select: all modes that have source breakdown data with >1 source
+    modes_with_sources = [m for m, d in enhanced_data.items()
+                          if d.get("sources") and len(d["sources"]) > 1]
 
-    fig, axes = plt.subplots(1, 5, figsize=(16, 3.5))
-    fig.suptitle("Fig. 5: Decision Source Distribution — How Often Each Mode Uses CDS vs ML",
+    if not modes_with_sources:
+        # Try modes with exactly 1 source too (standalones)
+        modes_with_sources = [m for m, d in enhanced_data.items()
+                              if d.get("sources") and len(d["sources"]) >= 1]
+
+    if not modes_with_sources:
+        print("  Skip fig5: no decision source data found in any result files")
+        return
+
+    # Sort by accuracy, pick up to 6
+    def _acc(m):
+        if m in resource_data:
+            return float(resource_data[m].get("Accuracy%", 0))
+        return 0.0
+
+    modes_to_plot = sorted(modes_with_sources, key=_acc, reverse=True)[:6]
+    n = len(modes_to_plot)
+
+    fig, axes = plt.subplots(1, n, figsize=(3.2 * n, 3.5))
+    if n == 1:
+        axes = [axes]
+    fig.suptitle("Fig. 5: Decision Source Distribution (auto-selected modes with source data)",
                  fontweight="bold", y=1.05)
 
-    source_colors = {
+    # Color map for any source name
+    source_palette = {
         "CDS-ALARM": "#F44336", "CDS-HEALTHY": "#4CAF50", "CDS-SCREENING": "#FF9800",
-        "ANN": "#E91E63", "RNN": "#9C27B0",
-        "VOTE-AGREE-HEALTHY": "#4CAF50", "VOTE-AGREE-UNHEALTHY": "#F44336",
-        "VOTE-TIE-CDS": "#2196F3",
-        "CONF-CDS": "#2196F3", "CONF-ANN": "#E91E63", "CONF-HEALTHY": "#4CAF50",
-        "SEL-CDS": "#FF9800", "SEL-CDS-ALARM": "#F44336", "SEL-CDS-HEALTHY": "#4CAF50",
+        "ANN": "#E91E63", "RNN": "#9C27B0", "ANN-only": "#FF9800", "RNN-only": "#4CAF50",
+        "CDS-only": "#2196F3",
+        "VOTE-AGREE-HEALTHY": "#66BB6A", "VOTE-AGREE-UNHEALTHY": "#EF5350",
+        "VOTE-AGREE": "#66BB6A", "VOTE-TIE-CDS": "#42A5F5",
+        "CONF-CDS": "#42A5F5", "CONF-ANN": "#E91E63", "CONF-RNN": "#9C27B0",
+        "CONF-HEALTHY": "#66BB6A",
+        "STACKED-ANN": "#E91E63", "STACKED-RNN": "#9C27B0",
+        "SEL-CDS": "#FF9800", "SEL-CDS-ALARM": "#F44336", "SEL-CDS-HEALTHY": "#66BB6A",
+        "SEL-ANN": "#E91E63", "SEL-RNN": "#9C27B0",
     }
+    fallback_colors = ["#9E9E9E", "#757575", "#BDBDBD", "#616161", "#E0E0E0"]
 
     for idx, mode in enumerate(modes_to_plot):
         ax = axes[idx]
         sources = enhanced_data[mode]["sources"]
-        if not sources:
-            ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
-            continue
 
-        labels = [s["source"] for s in sources]
+        labels_list = [s["source"] for s in sources]
         sizes = [s["count"] for s in sources]
-        colors = [source_colors.get(s["source"], "#9E9E9E") for s in sources]
+        colors = []
+        for s in sources:
+            name = s["source"]
+            if name in source_palette:
+                colors.append(source_palette[name])
+            else:
+                colors.append(fallback_colors[len(colors) % len(fallback_colors)])
 
         short_labels = []
         for s in sources:
             name = s["source"]
-            name = name.replace("CDS-", "").replace("VOTE-", "V-").replace("CONF-", "C-").replace("SEL-", "S-")
+            name = (name.replace("CDS-", "").replace("VOTE-", "V-")
+                    .replace("CONF-", "C-").replace("SEL-", "S-")
+                    .replace("STACKED-", "Stk-"))
             short_labels.append(f"{name}\n{s['count']}")
 
         wedges, texts = ax.pie(sizes, labels=short_labels, colors=colors,
                                startangle=90, textprops={"fontsize": 7})
-        ax.set_title(mode.replace("(CDS+", "(").replace("Confidence", "Conf."),
-                     fontsize=9, fontweight="bold")
+        acc = _acc(mode)
+        title = mode.replace("(CDS+", "(").replace("Confidence", "Conf.")
+        ax.set_title(f"{title}\n({acc:.1f}%)", fontsize=8, fontweight="bold")
 
     plt.tight_layout()
     save_fig(fig, "fig5_decision_sources")
@@ -462,16 +701,20 @@ def fig6_computational_cost():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle("Fig. 6: Computational Cost and Inference Time Comparison", fontweight="bold", y=1.02)
 
+    avail = _available_modes()
+    colors = [MODE_COLORS[MODE_ORDER.index(m)] for m in avail]
+    shorts = [MODE_SHORT[MODE_ORDER.index(m)] for m in avail]
+
     # Panel A: Multiplications per user (log scale)
     mults = []
-    for mode in MODE_ORDER:
+    for mode in avail:
         mults.append(float(resource_data[mode]["Avg_Mults_Per_User"]))
 
-    x = np.arange(len(MODE_ORDER))
-    bars = ax1.bar(x, mults, color=MODE_COLORS, edgecolor="black", linewidth=0.5, width=0.7)
+    x = np.arange(len(avail))
+    bars = ax1.bar(x, mults, color=colors, edgecolor="black", linewidth=0.5, width=0.7)
     ax1.set_yscale("log")
     ax1.set_xticks(x)
-    ax1.set_xticklabels(MODE_SHORT, rotation=45, ha="right")
+    ax1.set_xticklabels(shorts, rotation=45, ha="right")
     ax1.set_ylabel("Avg. Multiplications / User (log scale)")
     ax1.set_title("(a) Computational Cost", fontweight="bold")
     ax1.grid(axis="y", alpha=0.3, which="both")
@@ -488,7 +731,7 @@ def fig6_computational_cost():
     times = []
     cds_times = []
     ml_times = []
-    for mode in MODE_ORDER:
+    for mode in avail:
         rd = resource_data[mode]
         t_cds = float(rd["Avg_CDS_Train_ms"]) + float(rd["Avg_CDS_Predict_ms"])
         t_ml = float(rd["Avg_ML_Train_ms"]) + float(rd["Avg_ML_Predict_ms"])
@@ -499,7 +742,7 @@ def fig6_computational_cost():
     ax2.bar(x, cds_times, color="#2196F3", edgecolor="black", linewidth=0.5, width=0.7, label="CDS time")
     ax2.bar(x, ml_times, bottom=cds_times, color="#E91E63", edgecolor="black", linewidth=0.5, width=0.7, label="ML time")
     ax2.set_xticks(x)
-    ax2.set_xticklabels(MODE_SHORT, rotation=45, ha="right")
+    ax2.set_xticklabels(shorts, rotation=45, ha="right")
     ax2.set_ylabel("Avg. Time / User (ms)")
     ax2.set_title("(b) Inference Time Breakdown", fontweight="bold")
     ax2.legend()
@@ -524,8 +767,11 @@ def fig7_perclass_heatmap():
         "D14\n(4)", "D15\n(5)", "D16\n(22)"
     ]
 
+    avail_e = [m for m in MODE_ORDER if m in enhanced_data]
+    shorts_e = [MODE_SHORT[MODE_ORDER.index(m)] for m in avail_e]
+
     matrix = []
-    for mode in MODE_ORDER:
+    for mode in avail_e:
         row = []
         pc = enhanced_data[mode]["per_class"]
         for cid in class_ids:
@@ -537,15 +783,15 @@ def fig7_perclass_heatmap():
 
     matrix = np.array(matrix)
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(12, max(5, len(avail_e) * 0.45)))
     im = ax.imshow(matrix, cmap="RdYlGn", aspect="auto", vmin=0, vmax=100)
 
     ax.set_xticks(np.arange(len(class_ids)))
     ax.set_xticklabels(class_labels, fontsize=8)
-    ax.set_yticks(np.arange(len(MODE_ORDER)))
-    ax.set_yticklabels(MODE_SHORT, fontsize=9)
+    ax.set_yticks(np.arange(len(avail_e)))
+    ax.set_yticklabels(shorts_e, fontsize=9)
 
-    for i in range(len(MODE_ORDER)):
+    for i in range(len(avail_e)):
         for j in range(len(class_ids)):
             val = matrix[i, j]
             color = "white" if val < 40 or val > 90 else "black"

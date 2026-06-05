@@ -804,6 +804,547 @@ def run_hybrid_selector(data, labels, max_users=None, healthy_class=1,
 
 
 # ============================================================================
+# HELPER: Extract generalizable CDS confidence signals
+# ============================================================================
+
+def _cds_confidence_signals(record):
+    """
+    Extract generalizable confidence signals from a CDS Algorithm 4 record.
+    These signals measure HOW confident CDS is, independent of which disease.
+
+    Returns (n_features_checked, n_actions_applied, max_focus, af_trajectory_slope)
+    """
+    if record is None:
+        return 0, 0, 1, 0.0
+    n_checked = len(record.af_trace) if record.af_trace else 0
+    n_actions = record.total_actions_applied if hasattr(record, 'total_actions_applied') else 0
+    max_focus = record.max_focus_reached if hasattr(record, 'max_focus_reached') else 1
+    # AF trajectory slope: how quickly AF accumulated (high slope = many features
+    # contributed to the AF, suggesting the alarm feature is an outlier)
+    slope = 0.0
+    if record.af_trace and len(record.af_trace) >= 2:
+        afs = [e.AF_real for e in record.af_trace]
+        slope = (afs[-1] - afs[0]) / max(1, len(afs))
+    return n_checked, n_actions, max_focus, slope
+
+
+def _ann_confidence_margin(ann_model, X):
+    """
+    Compute the margin between ANN's top two class probabilities.
+    High margin = ANN is decisive. Low margin = ANN is unsure.
+    This is more informative than raw confidence alone.
+    """
+    proba = ann_model.predict_proba(X)[0]
+    sorted_p = np.sort(proba)[::-1]
+    if len(sorted_p) >= 2:
+        return float(sorted_p[0] - sorted_p[1])
+    return float(sorted_p[0])
+
+
+# ============================================================================
+# HYBRID MODE 6: ALARM-REFINE CASCADE (multi-signal ANN veto)
+# ============================================================================
+
+def run_hybrid_alarm_refine(data, labels, max_users=None, healthy_class=1,
+                            ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 6: ALARM-REFINE — CDS cascade + multi-signal ANN veto on ALARM cases.
+
+    For ALARM cases, runs ANN and uses MULTIPLE generalizable signals to decide
+    whether to override CDS's alarm:
+      1. ANN confidence (softmax probability for 'healthy')
+      2. ANN margin (gap between top two probabilities — measures decisiveness)
+      3. CDS AF (how much evidence accumulated before the alarm)
+
+    Override CDS alarm ONLY when:
+      - ANN confidently says healthy (conf ≥ 0.70)
+      - ANN is decisive about it (margin ≥ 0.30)
+      - CDS AF is low (< 0.70) — meaning few features were checked before alarm,
+        suggesting the alarm triggered early on a single outlier feature
+
+    This multi-gate approach is dataset-agnostic: it uses the QUALITY of each
+    model's confidence, not dataset-specific class IDs.
+    """
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="AlarmRefine(ANN)")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 6: ALARM-REFINE (multi-signal veto)")
+    log.info(f"Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "AREF-CDS-HEALTHY"
+        elif decision == HealthDecision.UNHEALTHY:
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            ann_margin = _ann_confidence_margin(ann, data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            # Multi-signal override: ALL conditions must be met
+            override = (
+                ann_pred == healthy_class
+                and ann_conf >= 0.70        # ANN is confident
+                and ann_margin >= 0.30      # ANN is decisive (not ambiguous)
+                and af < 0.70               # CDS had low evidence before alarm
+            )
+            if override:
+                pred.predicted_label = healthy_class
+                pred.source = "AREF-ANN-OVERRIDE"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "AREF-CDS-ALARM"
+        else:
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+            pred.predicted_label = ann_pred
+            pred.source = "AREF-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 7: AF-GATED CONTINUOUS ROUTING
+# ============================================================================
+
+def run_hybrid_af_gated(data, labels, max_users=None, healthy_class=1,
+                        ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 7: AF-GATED — Route decisions based on CDS confidence level (AF).
+
+    Uses the Assurance Factor as a continuous confidence measure:
+      High AF + HEALTHY (AF ≥ 0.85) → CDS is very confident → trust CDS
+      ALARM + low actions checked    → alarm on early feature, likely outlier → ANN
+      ALARM + many actions checked   → alarm after thorough check → trust CDS
+      SCREENING                      → CDS uncertain → ANN decides
+
+    The key insight: when CDS checks many features (high action count) before
+    triggering an alarm, the alarm is more trustworthy. When only 1-2 features
+    were checked, it might be a single outlier triggering a false alarm.
+    """
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="AFGated(ANN)")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 7: AF-GATED CONTINUOUS ROUTING")
+    log.info(f"Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+        cds_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+        n_checked, n_actions, max_focus, _ = _cds_confidence_signals(record)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "AFG-CDS-HEALTHY"
+        elif decision == HealthDecision.UNHEALTHY:
+            # Few features checked → CDS alarm is based on thin evidence → consult ANN
+            # Many features checked → CDS did a thorough scan → trust its alarm
+            median_actions = data.shape[1] * 0.15  # ~15% of features as "thorough" threshold
+            if n_actions <= median_actions and af < 0.60:
+                ann = ANNClassifier()
+                ann.fit(train_data, train_labels)
+                ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+                pred.ann_prediction = ann_pred
+                pred.ann_confidence = ann_conf
+                if ann_pred == healthy_class and ann_conf >= 0.70:
+                    pred.predicted_label = healthy_class
+                    pred.source = "AFG-ANN-OVERRIDE"
+                else:
+                    pred.predicted_label = cds_label
+                    pred.source = "AFG-CDS-ALARM"
+            else:
+                pred.predicted_label = cds_label
+                pred.source = "AFG-CDS-ALARM"
+        else:
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+            pred.predicted_label = ann_pred
+            pred.source = "AFG-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 8: DISAGREEMENT-AWARE DECISION RULES
+# ============================================================================
+
+def run_hybrid_disagree_rules(data, labels, max_users=None, healthy_class=1,
+                              ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 8: DISAGREE-RULES — Principled rules for CDS-ANN disagreement.
+
+    Uses the NATURE of disagreement + confidence quality:
+      Both agree healthy        → healthy (high confidence)
+      Both agree sick           → sick (high confidence, use CDS class)
+      CDS sick + ANN healthy    → override ONLY if ANN is decisive (high margin)
+                                  AND CDS confidence is weak (low AF, few features)
+      CDS healthy + ANN sick    → trust CDS (CDS-HEALTHY is well-calibrated)
+      CDS SCREENING             → ANN decides
+
+    The key principle: disagreement resolution should depend on HOW MUCH each
+    model is sure, not just what they predict.
+    """
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="DisagreeRules(ANN)")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 8: DISAGREE-RULES (confidence-quality based)")
+    log.info(f"Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+        cds_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+
+        ann = ANNClassifier()
+        ann.fit(train_data, train_labels)
+        ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+        ann_margin = _ann_confidence_margin(ann, data[i:i+1])
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision),
+                          ann_prediction=ann_pred, ann_confidence=ann_conf)
+
+        ann_healthy = (ann_pred == healthy_class)
+        ann_decisive = (ann_margin >= 0.30)
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "DRULE-CDS-HEALTHY"
+        elif decision == HealthDecision.UNHEALTHY:
+            if not ann_healthy:
+                # Both agree patient is sick → high-confidence sick
+                pred.predicted_label = cds_label
+                pred.source = "DRULE-BOTH-SICK"
+            elif ann_healthy and ann_decisive and af < 0.60:
+                # ANN strongly says healthy + CDS had weak evidence → trust ANN
+                pred.predicted_label = healthy_class
+                pred.source = "DRULE-ANN-OVERRIDE"
+            else:
+                # Disagreement but conditions not met → conservative (trust CDS)
+                pred.predicted_label = cds_label
+                pred.source = "DRULE-CDS-ALARM"
+        else:
+            pred.predicted_label = ann_pred
+            pred.source = "DRULE-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 9: ALARM SPECIALIST (binary filter with calibrated threshold)
+# ============================================================================
+
+def run_hybrid_alarm_specialist(data, labels, max_users=None, healthy_class=1,
+                                ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 9: ALARM-SPECIALIST — Binary healthy/sick classifier for ALARM cases.
+
+    Instead of the full multiclass ANN, trains a FOCUSED binary classifier
+    (small MLP, 16 neurons) that answers just one question:
+    "Is this patient healthy or sick?"
+
+    The specialist is deployed ONLY on ALARM cases where CDS evidence is weak
+    (low AF, low action count). Uses ANN margin as quality gate.
+
+    Principle: a smaller model with a simpler task (binary) may be better
+    calibrated than a large multiclass model forced into binary decisions.
+    """
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="AlarmSpecialist(ANN)")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 9: ALARM SPECIALIST (binary filter)")
+    log.info(f"Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "ASPEC-CDS-HEALTHY"
+        elif decision == HealthDecision.UNHEALTHY:
+            # Only consult specialist when CDS evidence is weak
+            n_checked, n_actions, _, _ = _cds_confidence_signals(record)
+            weak_evidence = (af < 0.65 and n_actions < data.shape[1] * 0.20)
+
+            if weak_evidence:
+                binary_labels = np.where(train_labels == healthy_class, 0, 1)
+                specialist = ANNClassifier(hidden_layers=(16,), max_iter=300, random_state=42)
+                specialist.fit(train_data, binary_labels)
+                spec_proba = specialist.predict_proba(data[i:i+1])[0]
+                healthy_idx = np.where(specialist.clf.classes_ == 0)[0]
+                spec_healthy_conf = float(spec_proba[healthy_idx[0]]) if len(healthy_idx) > 0 else 0.0
+                # Also compute margin for quality gating
+                spec_margin = abs(spec_proba[0] - spec_proba[1]) if len(spec_proba) >= 2 else 0.0
+                pred.ann_confidence = spec_healthy_conf
+
+                if spec_healthy_conf >= 0.65 and spec_margin >= 0.25:
+                    pred.predicted_label = healthy_class
+                    pred.source = "ASPEC-OVERRIDE"
+                else:
+                    pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                    pred.source = "ASPEC-CDS-ALARM"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "ASPEC-CDS-ALARM"
+        else:
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+            pred.predicted_label = ann_pred
+            pred.source = "ASPEC-ANN-SCREEN"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
+# HYBRID MODE 10: TRIPLE CASCADE (multi-signal veto + majority vote)
+# ============================================================================
+
+def run_hybrid_triple_cascade(data, labels, max_users=None, healthy_class=1,
+                              ml_model="ann", **kwargs) -> EvalResult:
+    """
+    MODE 10: TRIPLE CASCADE — Multi-signal alarm veto + ANN/RNN majority vote.
+
+    Three-stage architecture using all three components:
+      HEALTHY  → trust CDS (well-calibrated path)
+      ALARM    → Multi-signal ANN veto (same logic as AlarmRefine)
+      SCREENING → Run BOTH ANN + RNN, majority vote of {CDS=healthy, ANN, RNN}
+                  This exploits ANN/RNN error diversity (Jaccard=0.37)
+
+    The SCREENING triple-vote is the unique contribution: when CDS is uncertain,
+    two independent ML models + the CDS healthy-lean vote give a robust decision.
+    """
+    _suppress_cds_loggers()
+    from Algorithm4 import HealthDecision
+    _suppress_cds_loggers()
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode="TripleCascade")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info("HYBRID MODE 10: TRIPLE CASCADE (veto + majority)")
+    log.info(f"Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        tree, a2, a3 = _run_cds_pipeline(train_data, train_labels)
+        decision, af, rw, record = _run_cds_predict(
+            i, data, labels, train_data, train_labels, tree, a2, a3, 42 + i)
+
+        pred = Prediction(user_idx=i, true_label=true_label, predicted_label=0,
+                          source="", cds_af=af, cds_rw=rw,
+                          cds_decision=decision.value if hasattr(decision, 'value') else str(decision))
+
+        if decision == HealthDecision.HEALTHY:
+            pred.predicted_label = healthy_class
+            pred.source = "TRI-CDS-HEALTHY"
+
+        elif decision == HealthDecision.UNHEALTHY:
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            ann_margin = _ann_confidence_margin(ann, data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            # Same multi-signal veto as AlarmRefine
+            override = (
+                ann_pred == healthy_class
+                and ann_conf >= 0.70
+                and ann_margin >= 0.30
+                and af < 0.70
+            )
+            if override:
+                pred.predicted_label = healthy_class
+                pred.source = "TRI-ANN-VETO"
+            else:
+                pred.predicted_label = _cds_decision_to_label(decision, record, labels, healthy_class)
+                pred.source = "TRI-CDS-ALARM"
+
+        else:
+            # SCREENING: triple majority vote exploiting ANN/RNN diversity
+            ann = ANNClassifier()
+            ann.fit(train_data, train_labels)
+            ann_pred, ann_conf = ann.predict_with_confidence(data[i:i+1])
+            pred.ann_prediction = ann_pred
+            pred.ann_confidence = ann_conf
+
+            rnn = EchoStateNetwork()
+            rnn.fit(train_data, train_labels)
+            rnn_pred, rnn_conf = rnn.predict_with_confidence(data[i:i+1])
+            pred.rnn_prediction = rnn_pred
+            pred.rnn_confidence = rnn_conf
+
+            cds_vote = 0  # CDS uncertain → lean healthy
+            ann_vote = 0 if ann_pred == healthy_class else 1
+            rnn_vote = 0 if rnn_pred == healthy_class else 1
+            sick_votes = cds_vote + ann_vote + rnn_vote
+
+            if sick_votes >= 2:
+                candidates = []
+                if ann_vote == 1:
+                    candidates.append((ann_conf, ann_pred))
+                if rnn_vote == 1:
+                    candidates.append((rnn_conf, rnn_pred))
+                if candidates:
+                    pred.predicted_label = max(candidates, key=lambda x: x[0])[1]
+                else:
+                    pred.predicted_label = healthy_class
+                pred.source = "TRI-MAJORITY-SICK"
+            else:
+                pred.predicted_label = healthy_class
+                pred.source = "TRI-MAJORITY-HEALTHY"
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%  sources={result.source_counts}")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+# ============================================================================
 # HELPERS
 # ============================================================================
 
@@ -1085,11 +1626,16 @@ def print_comparison(results: List[EvalResult]):
 # ============================================================================
 
 HYBRID_MODES = {
-    "cascade":    run_hybrid_cascade,
-    "vote":       run_hybrid_vote,
-    "confidence": run_hybrid_confidence,
-    "stacked":    run_hybrid_stacked,
-    "selector":   run_hybrid_selector,
+    "cascade":          run_hybrid_cascade,
+    "vote":             run_hybrid_vote,
+    "confidence":       run_hybrid_confidence,
+    "stacked":          run_hybrid_stacked,
+    "selector":         run_hybrid_selector,
+    "alarm-refine":     run_hybrid_alarm_refine,
+    "af-gated":         run_hybrid_af_gated,
+    "disagree-rules":   run_hybrid_disagree_rules,
+    "alarm-specialist": run_hybrid_alarm_specialist,
+    "triple-cascade":   run_hybrid_triple_cascade,
 }
 
 def main():
@@ -1098,11 +1644,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Hybrid modes:
-  1. cascade     CDS first -> ANN/RNN for uncertain cases
-  2. vote        CDS + ANN + RNN majority vote
-  3. confidence  Weighted by each model's confidence
-  4. stacked     CDS features fed as inputs to ANN/RNN
-  5. selector    Meta-learner picks best model per patient
+  1. cascade          CDS first -> ANN/RNN for uncertain cases
+  2. vote             CDS + ANN + RNN majority vote
+  3. confidence       Weighted by each model's confidence
+  4. stacked          CDS features fed as inputs to ANN/RNN
+  5. selector         Meta-learner picks best model per patient
+  6. alarm-refine     Cascade + ANN veto on ALARM false positives
+  7. af-gated         Route by continuous AF value, not discrete labels
+  8. disagree-rules   Asymmetric trust per disagreement pattern
+  9. alarm-specialist Binary false-alarm filter for ALARM cases
+ 10. triple-cascade   CDS + ANN veto + ANN/RNN majority on SCREENING
         """,
     )
     parser.add_argument("--max-users", type=int, default=None,

@@ -297,10 +297,16 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
     ml_model_obj = None
 
     needs_ml = mode_name in ("ANN-only", "RNN-only") or hybrid_mode in (
-        "cascade", "vote", "confidence", "stacked", "selector")
+        "cascade", "vote", "confidence", "stacked", "selector",
+        "alarm-refine", "af-gated", "disagree-rules", "alarm-specialist", "triple-cascade")
     # For cascade: only train ML if CDS is uncertain
     if hybrid_mode == "cascade" and cds_decision in (HealthDecision.UNHEALTHY, HealthDecision.HEALTHY):
         needs_ml = False
+    # For new modes: need ML for ALARM (D2 check) and SCREENING, but not HEALTHY
+    if hybrid_mode in ("alarm-refine", "af-gated", "disagree-rules",
+                       "alarm-specialist", "triple-cascade"):
+        if cds_decision == HealthDecision.HEALTHY:
+            needs_ml = False
 
     if needs_ml:
         use_rnn = (ml_model == "rnn") or mode_name == "RNN-only"
@@ -411,6 +417,149 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
             rec.predicted_label = ml_pred
             rec.source = f"SEL-{ml_model.upper()}"
 
+    elif hybrid_mode == "alarm-refine":
+        # Multi-signal ANN veto: ANN conf + ANN margin + CDS AF
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "AREF-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            ml_proba = ml_model_obj.predict_proba(data[i:i+1])[0] if ml_model_obj else np.array([0.5, 0.5])
+            ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+            override = (ml_pred == healthy_class and ml_conf >= 0.70
+                        and ml_margin >= 0.30 and cds_af < 0.70)
+            if override:
+                rec.predicted_label = healthy_class
+                rec.source = "AREF-ANN-OVERRIDE"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "AREF-CDS-ALARM"
+        else:
+            rec.predicted_label = ml_pred
+            rec.source = "AREF-ANN-SCREEN"
+
+    elif hybrid_mode == "af-gated":
+        # Route by CDS evidence depth: few actions checked → consult ANN
+        n_actions_cds = cds_record.total_actions_applied if cds_record and hasattr(cds_record, 'total_actions_applied') else 0
+        median_actions = n_features * 0.15
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "AFG-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            if n_actions_cds <= median_actions and cds_af < 0.60:
+                if ml_pred == healthy_class and ml_conf >= 0.70:
+                    rec.predicted_label = healthy_class
+                    rec.source = "AFG-ANN-OVERRIDE"
+                else:
+                    rec.predicted_label = cds_label
+                    rec.source = "AFG-CDS-ALARM"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "AFG-CDS-ALARM"
+        else:
+            rec.predicted_label = ml_pred
+            rec.source = "AFG-ANN-SCREEN"
+
+    elif hybrid_mode == "disagree-rules":
+        # Override ALARM only when ANN is decisive AND CDS evidence is weak
+        ann_healthy = (ml_pred == healthy_class)
+        ml_proba = ml_model_obj.predict_proba(data[i:i+1])[0] if ml_model_obj else np.array([0.5, 0.5])
+        ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+        ann_decisive = (ml_margin >= 0.30)
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "DRULE-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            if not ann_healthy:
+                rec.predicted_label = cds_label
+                rec.source = "DRULE-BOTH-SICK"
+            elif ann_healthy and ann_decisive and cds_af < 0.60:
+                rec.predicted_label = healthy_class
+                rec.source = "DRULE-ANN-OVERRIDE"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "DRULE-CDS-ALARM"
+        else:
+            rec.predicted_label = ml_pred
+            rec.source = "DRULE-ANN-SCREEN"
+
+    elif hybrid_mode == "alarm-specialist":
+        # Binary specialist only on weak-evidence ALARM cases
+        n_actions_cds = cds_record.total_actions_applied if cds_record and hasattr(cds_record, 'total_actions_applied') else 0
+        weak_evidence = (cds_af < 0.65 and n_actions_cds < n_features * 0.20)
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "ASPEC-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY and weak_evidence:
+            binary_labels = np.where(train_labels == healthy_class, 0, 1)
+            specialist = ANNClassifier(hidden_layers=(16,), max_iter=300, random_state=42)
+            t_spec_train = time.perf_counter()
+            specialist.fit(train_data, binary_labels)
+            rec.time_ml_train_ms = (time.perf_counter() - t_spec_train) * 1000
+            t_spec_pred = time.perf_counter()
+            spec_proba = specialist.predict_proba(data[i:i+1])[0]
+            rec.time_ml_predict_ms = (time.perf_counter() - t_spec_pred) * 1000
+            rec.ml_train_multiplications = specialist.train_multiplications
+            rec.ml_inference_multiplications = specialist.inference_multiplications
+            healthy_idx = np.where(specialist.clf.classes_ == 0)[0]
+            spec_healthy_conf = float(spec_proba[healthy_idx[0]]) if len(healthy_idx) > 0 else 0.0
+            spec_margin = abs(float(spec_proba[0]) - float(spec_proba[1])) if len(spec_proba) >= 2 else 0.0
+            if spec_healthy_conf >= 0.65 and spec_margin >= 0.25:
+                rec.predicted_label = healthy_class
+                rec.source = "ASPEC-OVERRIDE"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "ASPEC-CDS-ALARM"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            rec.predicted_label = cds_label
+            rec.source = "ASPEC-CDS-ALARM"
+        else:
+            rec.predicted_label = ml_pred
+            rec.source = "ASPEC-ANN-SCREEN"
+
+    elif hybrid_mode == "triple-cascade":
+        # Multi-signal veto on ALARM + triple majority on SCREENING
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "TRI-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            ml_proba = ml_model_obj.predict_proba(data[i:i+1])[0] if ml_model_obj else np.array([0.5, 0.5])
+            ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+            override = (ml_pred == healthy_class and ml_conf >= 0.70
+                        and ml_margin >= 0.30 and cds_af < 0.70)
+            if override:
+                rec.predicted_label = healthy_class
+                rec.source = "TRI-ANN-VETO"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "TRI-CDS-ALARM"
+        else:
+            rnn_model = EchoStateNetwork()
+            t_rnn_train = time.perf_counter()
+            rnn_model.fit(train_data, train_labels)
+            rnn_train_ms = (time.perf_counter() - t_rnn_train) * 1000
+            t_rnn_pred = time.perf_counter()
+            rnn_pred, rnn_conf = rnn_model.predict_with_confidence(data[i:i+1])
+            rnn_pred_ms = (time.perf_counter() - t_rnn_pred) * 1000
+            rec.time_ml_train_ms += rnn_train_ms
+            rec.time_ml_predict_ms += rnn_pred_ms
+            rec.ml_train_multiplications += rnn_model.train_multiplications
+            rec.ml_inference_multiplications += rnn_model.inference_multiplications
+            ann_vote = 0 if ml_pred == healthy_class else 1
+            rnn_vote = 0 if rnn_pred == healthy_class else 1
+            cds_vote = 0
+            sick_votes = cds_vote + ann_vote + rnn_vote
+            if sick_votes >= 2:
+                candidates = []
+                if ann_vote == 1:
+                    candidates.append((ml_conf, ml_pred))
+                if rnn_vote == 1:
+                    candidates.append((rnn_conf, rnn_pred))
+                rec.predicted_label = max(candidates, key=lambda x: x[0])[1] if candidates else healthy_class
+                rec.source = "TRI-MAJORITY-SICK"
+            else:
+                rec.predicted_label = healthy_class
+                rec.source = "TRI-MAJORITY-HEALTHY"
+
     # Correctness
     if true_label == healthy_class:
         rec.is_correct = (rec.predicted_label == healthy_class)
@@ -444,6 +593,11 @@ MODE_CONFIGS = {
     "stacked-rnn":       ("Stacked(CDS->RNN)",    "rnn", "stacked"),
     "selector-ann":      ("Selector(CDS+ANN)",    "ann", "selector"),
     "selector-rnn":      ("Selector(CDS+RNN)",    "rnn", "selector"),
+    "alarm-refine":      ("AlarmRefine(ANN)",     "ann", "alarm-refine"),
+    "af-gated":          ("AFGated(ANN)",         "ann", "af-gated"),
+    "disagree-rules":    ("DisagreeRules(ANN)",   "ann", "disagree-rules"),
+    "alarm-specialist":  ("AlarmSpecialist(ANN)", "ann", "alarm-specialist"),
+    "triple-cascade":    ("TripleCascade",        "ann", "triple-cascade"),
 }
 
 

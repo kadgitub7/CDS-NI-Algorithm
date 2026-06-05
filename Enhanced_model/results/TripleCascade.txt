@@ -1,0 +1,169 @@
+==============================================================================
+  RESULTS: TripleCascade
+==============================================================================
+  Timestamp:       2026-06-04 12:37:41
+  Mode:            TripleCascade
+  Users evaluated: 452
+  Total time:      1646.9s  (3644ms/user)
+
+------------------------------------------------------------------------------
+  SUMMARY METRICS
+------------------------------------------------------------------------------
+  Accuracy:              76.77%  (347/452)
+  Sensitivity (Recall):  74.88%  (diseased detected: 155/207)
+  Specificity:           78.37%  (healthy correct:   192/245)
+  Precision (PPV):       74.52%  (positive predictions correct: 155/208)
+  Neg Pred Value (NPV):  78.69%  (negative predictions correct: 192/244)
+  F1 Score:              74.70%
+  Misclassifications:    105
+
+------------------------------------------------------------------------------
+  CONFUSION MATRIX  (binary: healthy vs unhealthy)
+------------------------------------------------------------------------------
+                          Predicted
+                    Healthy    Unhealthy
+  Actual Healthy        192           53
+  Actual Unhealthy       52          155
+
+------------------------------------------------------------------------------
+  DECISION SOURCE BREAKDOWN
+------------------------------------------------------------------------------
+  Source                           Count        %   Accuracy
+  ──────────────────────────────  ──────  ───────  ─────────
+  TRI-ANN-VETO                        36     8.0%      61.1%
+  TRI-CDS-ALARM                      204    45.1%      74.5%
+  TRI-CDS-HEALTHY                    112    24.8%      83.9%
+  TRI-MAJORITY-HEALTHY                96    21.2%      79.2%
+  TRI-MAJORITY-SICK                    4     0.9%      75.0%
+
+------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+------------------------------------------------------------------------------
+    Class   Correct   Total   Accuracy  Label     
+  ───────  ────────  ──────  ─────────  ──────────
+        1       192     245      78.4%  Healthy   
+        2        32      44      72.7%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5         9      13      69.2%  Disease-5 
+        6        16      25      64.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         8       9      88.9%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        10      22      45.5%  Disease-16
+
+------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE  (105 errors)
+------------------------------------------------------------------------------
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       9     D10       H  TRI-MAJORITY-HEALTHY            0.968      0.438      0.114  Screening         2723
+      21       H      D2  TRI-CDS-ALARM                   0.622      0.606       -     Unhealthy         1292
+      34      D4       H  TRI-MAJORITY-HEALTHY            0.968      0.629      0.121  Screening         2937
+      37     D10       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            958
+      39      D6       H  TRI-ANN-VETO                    0.348      0.740       -     Unhealthy         1136
+      43       H      D2  TRI-CDS-ALARM                   0.072      0.288       -     Unhealthy         1171
+      46      D5       H  TRI-ANN-VETO                    0.601      0.785       -     Unhealthy         1089
+      50       H      D2  TRI-CDS-ALARM                   0.193      0.563       -     Unhealthy         1067
+      53     D16       H  TRI-ANN-VETO                    0.015      0.886       -     Unhealthy         1103
+      54     D16       H  TRI-MAJORITY-HEALTHY            0.959      0.437      0.142  Screening         2253
+      55      D6       H  TRI-MAJORITY-HEALTHY            0.968      0.854      0.221  Screening         2510
+      59       H      D2  TRI-CDS-ALARM                   0.873      0.896       -     Unhealthy         1150
+      61      D5       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            853
+      68      D6       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            935
+      71     D16       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            923
+      72       H      D2  TRI-CDS-ALARM                   0.926      0.741       -     Unhealthy         1137
+      77      D2       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            883
+      82      D2       H  TRI-MAJORITY-HEALTHY            0.968      0.440      0.104  Screening         2373
+      84      D6       H  TRI-ANN-VETO                    0.625      0.869       -     Unhealthy         1127
+      85      D9       H  TRI-ANN-VETO                    0.044      0.957       -     Unhealthy         1132
+      90       H      D3  TRI-CDS-ALARM                   0.724      0.602       -     Unhealthy         1129
+      98       H      D2  TRI-CDS-ALARM                   0.511      0.601       -     Unhealthy         1106
+      99       H      D2  TRI-CDS-ALARM                   0.294      0.487       -     Unhealthy         1166
+     100      D4       H  TRI-MAJORITY-HEALTHY            0.968      0.545      0.127  Screening         2262
+     104      D6       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            853
+     109       H      D2  TRI-CDS-ALARM                   0.261      0.335       -     Unhealthy         1058
+     110       H      D2  TRI-CDS-ALARM                   0.829      0.729       -     Unhealthy         1316
+     114      D6       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            873
+     116     D16       H  TRI-ANN-VETO                    0.586      0.938       -     Unhealthy         1114
+     126       H      D2  TRI-CDS-ALARM                   0.603      0.422       -     Unhealthy         1355
+     129       H      D2  TRI-CDS-ALARM                   0.530      0.542       -     Unhealthy         1759
+     133       H      D2  TRI-CDS-ALARM                   0.477      0.270       -     Unhealthy         1475
+     134     D10       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            942
+     136       H      D2  TRI-CDS-ALARM                   0.882      0.737       -     Unhealthy         1365
+     137     D10       H  TRI-MAJORITY-HEALTHY            0.963      0.332      0.098  Screening         2524
+     138       H      D6  TRI-CDS-ALARM                   1.000      0.693       -     Unhealthy          988
+     144     D10       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            962
+     152       H      D2  TRI-CDS-ALARM                   0.842      0.731       -     Unhealthy         1148
+     154     D16       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy           3266
+     157      D2       H  TRI-MAJORITY-HEALTHY            0.959      0.353      0.121  Screening        10967
+     160       H      D2  TRI-CDS-ALARM                   0.010      0.546       -     Unhealthy         4675
+     162       H      D2  TRI-CDS-ALARM                   0.784      0.811       -     Unhealthy         6447
+     170       H      D2  TRI-CDS-ALARM                   0.991      0.340       -     Unhealthy         5654
+     172       H      D2  TRI-CDS-ALARM                   0.947      0.660       -     Unhealthy         6871
+     178       H      D2  TRI-CDS-ALARM                   0.847      0.527       -     Unhealthy         1496
+     179      D2       H  TRI-MAJORITY-HEALTHY            0.968      0.429      0.269  Screening         2651
+     181     D16       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            948
+     182       H      D2  TRI-CDS-ALARM                   0.863      0.265       -     Unhealthy         1085
+     186      D2       H  TRI-MAJORITY-HEALTHY            0.968      0.813      0.108  Screening         2669
+     190       H      D2  TRI-CDS-ALARM                   0.501      0.481       -     Unhealthy         1371
+     198     D16       H  TRI-ANN-VETO                    0.063      0.952       -     Unhealthy         1280
+     200      D2       H  TRI-MAJORITY-HEALTHY            0.935      0.624      0.115  Screening         2545
+     202       H      D2  TRI-CDS-ALARM                   0.564      0.809       -     Unhealthy         1401
+     211       H      D2  TRI-CDS-ALARM                   0.366      0.388       -     Unhealthy         1273
+     221       H      D2  TRI-CDS-ALARM                   0.978      0.416       -     Unhealthy         1279
+     223       H      D2  TRI-CDS-ALARM                   0.535      0.499       -     Unhealthy         1322
+     227     D16       H  TRI-ANN-VETO                    0.630      0.718       -     Unhealthy         1415
+     228       H      D2  TRI-CDS-ALARM                   0.978      0.704       -     Unhealthy         1483
+     233       H      D2  TRI-CDS-ALARM                   0.811      0.905       -     Unhealthy         1162
+     234       H      D2  TRI-CDS-ALARM                   0.429      0.659       -     Unhealthy         1297
+     241       H      D2  TRI-CDS-ALARM                   0.346      0.607       -     Unhealthy         3194
+     242       H      D2  TRI-CDS-ALARM                   0.646      0.607       -     Unhealthy         1340
+     246       H      D2  TRI-CDS-ALARM                   0.014      0.327       -     Unhealthy         1273
+     247       H      D2  TRI-CDS-ALARM                   0.829      0.775       -     Unhealthy         2321
+     250     D10       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy           1002
+     259      D2       H  TRI-ANN-VETO                    0.509      0.711       -     Unhealthy         1376
+     261     D16       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            953
+     268       H      D2  TRI-CDS-ALARM                   0.612      0.265       -     Unhealthy         1250
+     274       H      D2  TRI-MAJORITY-SICK               0.963      0.370      0.171  Screening         2613
+     275      D2       H  TRI-MAJORITY-HEALTHY            0.972      0.440      0.135  Screening         2519
+     278     D10       H  TRI-MAJORITY-HEALTHY            0.968      0.754      0.152  Screening         2612
+     280       H      D2  TRI-CDS-ALARM                   0.603      0.598       -     Unhealthy         1204
+     283      D6       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            981
+     295      D2       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            976
+     299       H      D2  TRI-CDS-ALARM                   0.784      0.540       -     Unhealthy         1210
+     308      D2       H  TRI-ANN-VETO                    0.189      0.810       -     Unhealthy         1257
+     309      D7       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy            858
+     311       H      D2  TRI-CDS-ALARM                   0.550      0.629       -     Unhealthy         1173
+     321       H      D2  TRI-CDS-ALARM                   0.569      0.337       -     Unhealthy         1318
+     326     D10       H  TRI-MAJORITY-HEALTHY            0.959      0.340      0.101  Screening         2399
+     331       H      D2  TRI-CDS-ALARM                   0.918      0.633       -     Unhealthy         1167
+     332     D16       H  TRI-ANN-VETO                    0.010      0.831       -     Unhealthy         1133
+     341     D10       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy           2735
+     343      D6       H  TRI-MAJORITY-HEALTHY            0.968      0.360      0.155  Screening         7938
+     348      D5       H  TRI-ANN-VETO                    0.557      0.956       -     Unhealthy         3962
+     352       H      D2  TRI-CDS-ALARM                   0.237      0.176       -     Unhealthy         4102
+     353     D10       H  TRI-ANN-VETO                    0.552      0.728       -     Unhealthy         3394
+     355       H      D2  TRI-CDS-ALARM                   0.793      0.298       -     Unhealthy         3788
+     362     D16       H  TRI-MAJORITY-HEALTHY            0.968      0.661      0.194  Screening         8617
+     364      D6       H  TRI-CDS-HEALTHY                 1.000       -          -     Healthy           2588
+     365       H      D2  TRI-CDS-ALARM                   0.366      0.394       -     Unhealthy         3212
+     367      D2       H  TRI-MAJORITY-HEALTHY            0.930      0.501      0.172  Screening         7071
+     374      D5       H  TRI-ANN-VETO                    0.659      0.790       -     Unhealthy         3009
+     375      D2       H  TRI-MAJORITY-HEALTHY            0.968      0.438      0.130  Screening         6032
+     386     D16       H  TRI-MAJORITY-HEALTHY            0.959      0.573      0.112  Screening         4557
+     389       H      D2  TRI-CDS-ALARM                   0.130      0.306       -     Unhealthy         2634
+     393       H      D2  TRI-CDS-ALARM                   0.376      0.700       -     Unhealthy         3525
+     394       H      D2  TRI-CDS-ALARM                   0.385      0.247       -     Unhealthy         2735
+     400     D10       H  TRI-MAJORITY-HEALTHY            0.968      0.792      0.305  Screening         5816
+     408       H      D2  TRI-CDS-ALARM                   0.793      0.375       -     Unhealthy         2896
+     416       H      D2  TRI-CDS-ALARM                   0.477      0.616       -     Unhealthy         2655
+     422       H      D2  TRI-CDS-ALARM                   0.501      0.573       -     Unhealthy         2093
+     434       H      D2  TRI-CDS-ALARM                   0.957      0.864       -     Unhealthy         1534
+     440       H      D3  TRI-CDS-ALARM                   0.767      0.830       -     Unhealthy         2190
+     451       H      D2  TRI-CDS-ALARM                   0.492      0.518       -     Unhealthy         1513
+
+==============================================================================

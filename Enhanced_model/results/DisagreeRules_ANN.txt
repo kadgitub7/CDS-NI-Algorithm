@@ -1,0 +1,171 @@
+==============================================================================
+  RESULTS: DisagreeRules(ANN)
+==============================================================================
+  Timestamp:       2026-06-04 12:34:52
+  Mode:            DisagreeRules(ANN)
+  Users evaluated: 452
+  Total time:      1450.2s  (3208ms/user)
+
+------------------------------------------------------------------------------
+  SUMMARY METRICS
+------------------------------------------------------------------------------
+  Accuracy:              76.33%  (345/452)
+  Sensitivity (Recall):  71.50%  (diseased detected: 148/207)
+  Specificity:           80.41%  (healthy correct:   197/245)
+  Precision (PPV):       75.51%  (positive predictions correct: 148/196)
+  Neg Pred Value (NPV):  76.95%  (negative predictions correct: 197/256)
+  F1 Score:              73.45%
+  Misclassifications:    107
+
+------------------------------------------------------------------------------
+  CONFUSION MATRIX  (binary: healthy vs unhealthy)
+------------------------------------------------------------------------------
+                          Predicted
+                    Healthy    Unhealthy
+  Actual Healthy        197           48
+  Actual Unhealthy       59          148
+
+------------------------------------------------------------------------------
+  DECISION SOURCE BREAKDOWN
+------------------------------------------------------------------------------
+  Source                           Count        %   Accuracy
+  ──────────────────────────────  ──────  ───────  ─────────
+  DRULE-ANN-OVERRIDE                  51    11.3%      56.9%
+  DRULE-ANN-SCREEN                   100    22.1%      78.0%
+  DRULE-BOTH-SICK                     92    20.4%      89.1%
+  DRULE-CDS-ALARM                     97    21.5%      63.9%
+  DRULE-CDS-HEALTHY                  112    24.8%      83.9%
+
+------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+------------------------------------------------------------------------------
+    Class   Correct   Total   Accuracy  Label     
+  ───────  ────────  ──────  ─────────  ──────────
+        1       197     245      80.4%  Healthy   
+        2        27      44      61.4%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5        10      13      76.9%  Disease-5 
+        6        14      25      56.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         1       2      50.0%  Disease-8 
+        9         8       9      88.9%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         4       5      80.0%  Disease-15
+       16        11      22      50.0%  Disease-16
+
+------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE  (107 errors)
+------------------------------------------------------------------------------
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       9     D10       H  DRULE-ANN-SCREEN                0.968      0.438       -     Screening         1523
+      13      D6       H  DRULE-ANN-OVERRIDE              0.504      0.593       -     Unhealthy         1449
+      21       H      D2  DRULE-BOTH-SICK                 0.622      0.606       -     Unhealthy         1212
+      34      D4       H  DRULE-ANN-SCREEN                0.968      0.629       -     Screening         2065
+      37     D10       H  DRULE-CDS-HEALTHY               1.000      0.915       -     Healthy           1307
+      39      D6       H  DRULE-ANN-OVERRIDE              0.348      0.740       -     Unhealthy         1209
+      43       H      D2  DRULE-BOTH-SICK                 0.072      0.288       -     Unhealthy         1103
+      53     D16       H  DRULE-ANN-OVERRIDE              0.015      0.886       -     Unhealthy         1021
+      54     D16       H  DRULE-ANN-SCREEN                0.959      0.437       -     Screening         1116
+      55      D6       H  DRULE-ANN-SCREEN                0.968      0.854       -     Screening         1391
+      59       H      D2  DRULE-CDS-ALARM                 0.873      0.896       -     Unhealthy         1079
+      61      D5       H  DRULE-CDS-HEALTHY               1.000      0.929       -     Healthy           1418
+      68      D6       H  DRULE-CDS-HEALTHY               1.000      0.898       -     Healthy           1046
+      71     D16       H  DRULE-CDS-HEALTHY               1.000      0.648       -     Healthy           1195
+      72       H      D2  DRULE-CDS-ALARM                 0.926      0.741       -     Unhealthy         1073
+      77      D2       H  DRULE-CDS-HEALTHY               1.000      0.380       -     Healthy           1296
+      82      D2       H  DRULE-ANN-SCREEN                0.968      0.440       -     Screening         1099
+      85      D9       H  DRULE-ANN-OVERRIDE              0.044      0.957       -     Unhealthy         1147
+      90       H      D3  DRULE-CDS-ALARM                 0.724      0.602       -     Unhealthy         1182
+      99       H      D2  DRULE-BOTH-SICK                 0.294      0.487       -     Unhealthy         1127
+     100      D4       H  DRULE-ANN-SCREEN                0.968      0.545       -     Screening         1151
+     104      D6       H  DRULE-CDS-HEALTHY               1.000      0.708       -     Healthy           1245
+     106      D6       H  DRULE-ANN-OVERRIDE              0.155      0.699       -     Unhealthy         1070
+     109       H      D2  DRULE-CDS-ALARM                 0.261      0.335       -     Unhealthy         1297
+     110       H      D2  DRULE-CDS-ALARM                 0.829      0.729       -     Unhealthy         1323
+     114      D6       H  DRULE-CDS-HEALTHY               1.000      0.546       -     Healthy           1247
+     116     D16       H  DRULE-ANN-OVERRIDE              0.586      0.938       -     Unhealthy         1052
+     126       H      D2  DRULE-CDS-ALARM                 0.603      0.422       -     Unhealthy         1239
+     133       H      D2  DRULE-CDS-ALARM                 0.477      0.270       -     Unhealthy         1004
+     134     D10       H  DRULE-CDS-HEALTHY               1.000      0.781       -     Healthy           1289
+     136       H      D2  DRULE-CDS-ALARM                 0.882      0.737       -     Unhealthy         1232
+     137     D10       H  DRULE-ANN-SCREEN                0.963      0.332       -     Screening         1197
+     138       H      D6  DRULE-CDS-ALARM                 1.000      0.693       -     Unhealthy         1670
+     144     D10       H  DRULE-CDS-HEALTHY               1.000      0.487       -     Healthy           1374
+     152       H      D2  DRULE-CDS-ALARM                 0.842      0.731       -     Unhealthy         1279
+     153      D6       H  DRULE-ANN-OVERRIDE              0.382      0.665       -     Unhealthy         1252
+     154     D16       H  DRULE-CDS-HEALTHY               1.000      0.789       -     Healthy           1826
+     157      D2       H  DRULE-ANN-SCREEN                0.959      0.353       -     Screening         1157
+     160       H      D2  DRULE-BOTH-SICK                 0.010      0.546       -     Unhealthy         1197
+     162       H      D2  DRULE-CDS-ALARM                 0.784      0.811       -     Unhealthy         1332
+     170       H      D2  DRULE-CDS-ALARM                 0.991      0.340       -     Unhealthy         6870
+     172       H      D2  DRULE-CDS-ALARM                 0.947      0.660       -     Unhealthy         7595
+     174     D15       H  DRULE-ANN-OVERRIDE              0.199      0.601       -     Unhealthy         4750
+     178       H      D2  DRULE-CDS-ALARM                 0.847      0.527       -     Unhealthy         5421
+     179      D2       H  DRULE-ANN-SCREEN                0.968      0.429       -     Screening         5493
+     181     D16       H  DRULE-CDS-HEALTHY               1.000      0.396       -     Healthy           3768
+     182       H      D2  DRULE-CDS-ALARM                 0.863      0.265       -     Unhealthy         4904
+     186      D2       H  DRULE-ANN-SCREEN                0.968      0.813       -     Screening         6046
+     190       H      D2  DRULE-CDS-ALARM                 0.501      0.481       -     Unhealthy         1379
+     198     D16       H  DRULE-ANN-OVERRIDE              0.063      0.952       -     Unhealthy         1296
+     202       H      D2  DRULE-BOTH-SICK                 0.564      0.809       -     Unhealthy         1591
+     211       H      D2  DRULE-CDS-ALARM                 0.366      0.388       -     Unhealthy         1289
+     221       H      D2  DRULE-BOTH-SICK                 0.978      0.416       -     Unhealthy         1215
+     228       H      D2  DRULE-CDS-ALARM                 0.978      0.704       -     Unhealthy         1273
+     233       H      D2  DRULE-CDS-ALARM                 0.811      0.905       -     Unhealthy         1306
+     239       H      D2  DRULE-CDS-ALARM                 0.675      0.924       -     Unhealthy         1196
+     241       H      D2  DRULE-BOTH-SICK                 0.346      0.607       -     Unhealthy         1324
+     242       H      D2  DRULE-CDS-ALARM                 0.646      0.607       -     Unhealthy         1286
+     246       H      D2  DRULE-CDS-ALARM                 0.014      0.327       -     Unhealthy         1300
+     247       H      D2  DRULE-CDS-ALARM                 0.829      0.775       -     Unhealthy         1420
+     250     D10       H  DRULE-CDS-HEALTHY               1.000      0.628       -     Healthy           1141
+     259      D2       H  DRULE-ANN-OVERRIDE              0.509      0.711       -     Unhealthy         1364
+     261     D16       H  DRULE-CDS-HEALTHY               1.000      0.794       -     Healthy           1231
+     267       H      D2  DRULE-ANN-SCREEN                0.963      0.276       -     Screening         1254
+     268       H      D2  DRULE-CDS-ALARM                 0.612      0.265       -     Unhealthy         1269
+     274       H      D2  DRULE-ANN-SCREEN                0.963      0.370       -     Screening         1278
+     275      D2       H  DRULE-ANN-SCREEN                0.972      0.440       -     Screening         1233
+     277      D2       H  DRULE-ANN-OVERRIDE              0.199      0.522       -     Unhealthy         1259
+     278     D10       H  DRULE-ANN-SCREEN                0.968      0.754       -     Screening         1339
+     280       H      D2  DRULE-BOTH-SICK                 0.603      0.598       -     Unhealthy         1235
+     283      D6       H  DRULE-CDS-HEALTHY               1.000      0.671       -     Healthy           1238
+     294      D2       H  DRULE-ANN-OVERRIDE              0.053      0.593       -     Unhealthy         1338
+     295      D2       H  DRULE-CDS-HEALTHY               1.000      0.733       -     Healthy           1227
+     299       H      D2  DRULE-CDS-ALARM                 0.784      0.540       -     Unhealthy         1251
+     308      D2       H  DRULE-ANN-OVERRIDE              0.189      0.810       -     Unhealthy         1327
+     309      D7       H  DRULE-CDS-HEALTHY               1.000      0.641       -     Healthy           1184
+     318       H     D16  DRULE-ANN-SCREEN                0.963      0.556       -     Screening         1250
+     320      D5       H  DRULE-ANN-OVERRIDE              0.010      0.672       -     Unhealthy         1238
+     321       H      D2  DRULE-CDS-ALARM                 0.569      0.337       -     Unhealthy         1038
+     322      D2       H  DRULE-ANN-OVERRIDE              0.063      0.549       -     Unhealthy         1225
+     326     D10       H  DRULE-ANN-SCREEN                0.959      0.340       -     Screening         1223
+     331       H      D2  DRULE-CDS-ALARM                 0.918      0.633       -     Unhealthy         1372
+     332     D16       H  DRULE-ANN-OVERRIDE              0.010      0.831       -     Unhealthy         1233
+     341     D10       H  DRULE-CDS-HEALTHY               1.000      0.474       -     Healthy           1272
+     343      D6       H  DRULE-ANN-SCREEN                0.968      0.360       -     Screening         1148
+     348      D5       H  DRULE-ANN-OVERRIDE              0.557      0.956       -     Unhealthy         1262
+     352       H      D2  DRULE-CDS-ALARM                 0.237      0.176       -     Unhealthy         1197
+     353     D10       H  DRULE-ANN-OVERRIDE              0.552      0.728       -     Unhealthy         1070
+     355       H      D2  DRULE-CDS-ALARM                 0.793      0.298       -     Unhealthy         1133
+     357      D2       H  DRULE-ANN-OVERRIDE              0.287      0.625       -     Unhealthy         1120
+     360      D2       H  DRULE-ANN-OVERRIDE              0.184      0.683       -     Unhealthy         1267
+     362     D16       H  DRULE-ANN-SCREEN                0.968      0.661       -     Screening         1412
+     364      D6       H  DRULE-CDS-HEALTHY               1.000      0.612       -     Healthy           1182
+     365       H      D2  DRULE-CDS-ALARM                 0.366      0.394       -     Unhealthy         1185
+     367      D2       H  DRULE-ANN-SCREEN                0.930      0.501       -     Screening         1145
+     375      D2       H  DRULE-ANN-SCREEN                0.968      0.438       -     Screening         1150
+     376      D8       H  DRULE-ANN-OVERRIDE              0.387      0.573       -     Unhealthy         1098
+     386     D16       H  DRULE-ANN-SCREEN                0.959      0.573       -     Screening         4653
+     389       H      D2  DRULE-BOTH-SICK                 0.130      0.306       -     Unhealthy         3636
+     394       H      D2  DRULE-CDS-ALARM                 0.385      0.247       -     Unhealthy         4036
+     400     D10       H  DRULE-ANN-SCREEN                0.968      0.792       -     Screening         5739
+     408       H      D2  DRULE-BOTH-SICK                 0.793      0.375       -     Unhealthy         3693
+     411      D2       H  DRULE-ANN-OVERRIDE              0.194      0.497       -     Unhealthy         3529
+     422       H      D2  DRULE-CDS-ALARM                 0.501      0.573       -     Unhealthy         3171
+     434       H      D2  DRULE-CDS-ALARM                 0.957      0.864       -     Unhealthy         2850
+     439       H      D2  DRULE-CDS-ALARM                 0.608      0.709       -     Unhealthy         3882
+     440       H      D3  DRULE-CDS-ALARM                 0.767      0.830       -     Unhealthy         2865
+
+==============================================================================
