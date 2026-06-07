@@ -1622,6 +1622,92 @@ def print_comparison(results: List[EvalResult]):
 
 
 # ============================================================================
+# STANDALONE TGLLNET MODES (no CDS — pure TGLLNet + ANN)
+# ============================================================================
+
+def run_tgllnet_standalone(data, labels, max_users=None, healthy_class=1,
+                           tier_level=1, **kwargs) -> EvalResult:
+    """
+    TGLLNET STANDALONE — Pure TGLLNet-enhanced ANN, no CDS at all.
+
+    This isolates TGLLNet's contribution by removing the CDS cascade.
+    The ANN receives TGLLNet-enhanced features and makes ALL decisions.
+
+    Tier 1:  279 -> 292-dim  (group correlation attention)
+    Tier 12: 279 -> 388-dim  (+ dual-resolution attention fusion)
+    Tier 123: 279 -> 421-dim (+ ChebyNet GCN)
+    """
+    from tgllnet_tiers import (Tier1FeatureGroupAttention,
+                               Tier2DualResolutionFusion,
+                               Tier3GraphEnhanced)
+
+    tier_tag = {1: "T1", 2: "T12", 3: "T123"}[tier_level]
+    hidden = {1: (64, 32), 2: (96, 48), 3: (128, 64)}[tier_level]
+
+    n_total = data.shape[0] if max_users is None else min(max_users, data.shape[0])
+    result = EvalResult(mode=f"TGLLNet-{tier_tag}-only")
+    t0 = time.time()
+
+    log.info("=" * 70)
+    log.info(f"TGLLNET {tier_tag} STANDALONE (no CDS)")
+    log.info(f"  ANN hidden layers: {hidden}")
+    log.info(f"  Users: {n_total}")
+    log.info("=" * 70)
+
+    for i in range(n_total):
+        t_start = time.perf_counter()
+        train_mask = np.ones(data.shape[0], dtype=bool)
+        train_mask[i] = False
+        train_data, train_labels = data[train_mask], labels[train_mask]
+        true_label = int(labels[i])
+
+        # Build tier transform
+        if tier_level == 1:
+            tier = Tier1FeatureGroupAttention(alpha=0.5)
+        elif tier_level == 2:
+            tier = Tier2DualResolutionFusion(fine_dim=64, coarse_dim=32)
+        else:
+            tier = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+        tier.fit(train_data, train_labels)
+        train_enhanced = tier.transform(train_data)
+        test_enhanced = tier.transform(data[i:i+1])
+
+        # Pure ANN on enhanced features — no CDS involvement
+        ann = ANNClassifier(hidden_layers=hidden)
+        ann.fit(train_enhanced, train_labels)
+        ann_pred, ann_conf = ann.predict_with_confidence(test_enhanced)
+
+        pred = Prediction(
+            user_idx=i, true_label=true_label, predicted_label=ann_pred,
+            source=f"{tier_tag}-ANN", ann_prediction=ann_pred,
+            ann_confidence=ann_conf,
+        )
+
+        _set_correctness(pred, healthy_class)
+        pred.elapsed_ms = (time.perf_counter() - t_start) * 1000
+        result.predictions.append(pred)
+        result.source_counts[pred.source] = result.source_counts.get(pred.source, 0) + 1
+
+        if (i + 1) % max(1, n_total // 5) == 0 or i == n_total - 1:
+            acc = sum(1 for p in result.predictions if p.is_correct) / len(result.predictions)
+            log.info(f"  [{i+1}/{n_total}] acc={acc*100:.1f}%")
+
+    _compute_metrics(result, healthy_class)
+    result.total_time_s = time.time() - t0
+    return result
+
+
+def run_tgllnet_t1_only(data, labels, **kwargs) -> EvalResult:
+    return run_tgllnet_standalone(data, labels, tier_level=1, **kwargs)
+
+def run_tgllnet_t12_only(data, labels, **kwargs) -> EvalResult:
+    return run_tgllnet_standalone(data, labels, tier_level=2, **kwargs)
+
+def run_tgllnet_t123_only(data, labels, **kwargs) -> EvalResult:
+    return run_tgllnet_standalone(data, labels, tier_level=3, **kwargs)
+
+
+# ============================================================================
 # HYBRID MODE 11: TGLLNET TIER 1 + CDS CASCADE
 # ============================================================================
 #
@@ -2028,7 +2114,8 @@ def run_hybrid_tgllnet_tier123(data, labels, max_users=None, healthy_class=1,
                 # ANN is unsure — GCN breaks the tie
                 if gcn_p_diseased >= 0.55:
                     # GCN leans diseased — predict most common disease class
-                    diseased_classes = labels[labels != healthy_class]
+                    # [FIX] Use train_labels not labels to avoid data leakage
+                    diseased_classes = train_labels[train_labels != healthy_class]
                     if len(diseased_classes) > 0:
                         pred.predicted_label = int(np.bincount(
                             diseased_classes.astype(int)).argmax())
@@ -2074,6 +2161,9 @@ HYBRID_MODES = {
     "tgllnet-t1":       run_hybrid_tgllnet_tier1,
     "tgllnet-t12":      run_hybrid_tgllnet_tier12,
     "tgllnet-t123":     run_hybrid_tgllnet_tier123,
+    "tgllnet-t1-only":  run_tgllnet_t1_only,
+    "tgllnet-t12-only": run_tgllnet_t12_only,
+    "tgllnet-t123-only":run_tgllnet_t123_only,
 }
 
 def main():
@@ -2095,6 +2185,9 @@ Hybrid modes:
  11. tgllnet-t1       TGLLNet Tier1 (group correlation) + CDS cascade
  12. tgllnet-t12      TGLLNet Tier1+2 (dual-resolution attention) + CDS
  13. tgllnet-t123     TGLLNet Tier1+2+3 (full GCN) + CDS cascade
+ 14. tgllnet-t1-only  TGLLNet Tier1 standalone (no CDS, pure ANN)
+ 15. tgllnet-t12-only TGLLNet Tier1+2 standalone (no CDS, pure ANN)
+ 16. tgllnet-t123-only TGLLNet Tier1+2+3 standalone (no CDS, pure ANN)
         """,
     )
     parser.add_argument("--max-users", type=int, default=None,

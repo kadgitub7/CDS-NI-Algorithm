@@ -74,6 +74,7 @@ MODE_ORDER = [
     "AlarmRefine(ANN)", "AFGated(ANN)", "DisagreeRules(ANN)",
     "AlarmSpecialist(ANN)", "TripleCascade",
     "TGLLNet-T1+CDS", "TGLLNet-T12+CDS", "TGLLNet-T123+CDS",
+    "TGLLNet-T1-only", "TGLLNet-T12-only", "TGLLNet-T123-only",
 ]
 
 MODE_COLORS = [
@@ -85,6 +86,7 @@ MODE_COLORS = [
     COLORS["sel_ann"], COLORS["sel_rnn"],
     "#D50000", "#00C853", "#2962FF", "#AA00FF", "#FF6D00",
     COLORS["tgll_t1"], COLORS["tgll_t12"], COLORS["tgll_t123"],
+    "#66BB6A", "#81C784", "#A5D6A7",  # standalone tgllnet (lighter greens)
 ]
 
 MODE_SHORT = [
@@ -96,6 +98,7 @@ MODE_SHORT = [
     "Sel-A", "Sel-R",
     "ARef", "AFG", "DRule", "ASpec", "TriCas",
     "TGL-1", "TGL-12", "TGL-123",
+    "TGL1s", "TGL12s", "TGL123s",
 ]
 
 
@@ -311,6 +314,9 @@ def load_all_enhanced():
         "TGLLNet-T1+CDS": "TGLLNet-T1_CDS.txt",
         "TGLLNet-T12+CDS": "TGLLNet-T12_CDS.txt",
         "TGLLNet-T123+CDS": "TGLLNet-T123_CDS.txt",
+        "TGLLNet-T1-only": "TGLLNet-T1-only.txt",
+        "TGLLNet-T12-only": "TGLLNet-T12-only.txt",
+        "TGLLNet-T123-only": "TGLLNet-T123-only.txt",
     }
     data = {}
     # Try Enhanced_model first, then resource_analysis as fallback

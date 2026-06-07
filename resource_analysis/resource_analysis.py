@@ -278,6 +278,8 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
         needs_cds = True
     if mode_name in ("ANN-only", "RNN-only"):
         needs_cds = False
+    if hybrid_mode in ("tgllnet-t1-only", "tgllnet-t12-only", "tgllnet-t123-only"):
+        needs_cds = False
 
     if needs_cds:
         t_cds_train = time.perf_counter()
@@ -299,7 +301,8 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
     needs_ml = mode_name in ("ANN-only", "RNN-only") or hybrid_mode in (
         "cascade", "vote", "confidence", "stacked", "selector",
         "alarm-refine", "af-gated", "disagree-rules", "alarm-specialist", "triple-cascade",
-        "tgllnet-t1", "tgllnet-t12", "tgllnet-t123")
+        "tgllnet-t1", "tgllnet-t12", "tgllnet-t123",
+        "tgllnet-t1-only", "tgllnet-t12-only", "tgllnet-t123-only")
     # For cascade: only train ML if CDS is uncertain
     if hybrid_mode == "cascade" and cds_decision in (HealthDecision.UNHEALTHY, HealthDecision.HEALTHY):
         needs_ml = False
@@ -318,21 +321,23 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
         test_input = data[i:i+1]
 
         # TGLLNet modes: enhance features with tier transforms
-        if hybrid_mode in ("tgllnet-t1", "tgllnet-t12", "tgllnet-t123"):
+        # [MUST MATCH enhanced_hybrid.py hidden layer sizes exactly]
+        if hybrid_mode in ("tgllnet-t1", "tgllnet-t12", "tgllnet-t123",
+                           "tgllnet-t1-only", "tgllnet-t12-only", "tgllnet-t123-only"):
             from tgllnet_tiers import (Tier1FeatureGroupAttention,
                                        Tier2DualResolutionFusion,
                                        Tier3GraphEnhanced)
-            if hybrid_mode == "tgllnet-t1":
+            if hybrid_mode in ("tgllnet-t1", "tgllnet-t1-only"):
                 tier = Tier1FeatureGroupAttention(alpha=0.5)
                 tier.fit(train_data, train_labels)
                 train_input = tier.transform(train_data)
                 test_input = tier.transform(data[i:i+1])
-            elif hybrid_mode == "tgllnet-t12":
+            elif hybrid_mode in ("tgllnet-t12", "tgllnet-t12-only"):
                 tier = Tier2DualResolutionFusion(fine_dim=64, coarse_dim=32)
                 tier.fit(train_data, train_labels)
                 train_input = tier.transform(train_data)
                 test_input = tier.transform(data[i:i+1])
-            elif hybrid_mode == "tgllnet-t123":
+            elif hybrid_mode in ("tgllnet-t123", "tgllnet-t123-only"):
                 tier = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
                 tier.fit(train_data, train_labels)
                 train_input = tier.transform(train_data)
@@ -364,7 +369,14 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
             ml_model_obj = EchoStateNetwork()
             ml_model_obj.fit(train_input, train_labels)
         else:
-            ml_model_obj = ANNClassifier()
+            # Match ANN hidden layer sizes to enhanced_hybrid.py exactly:
+            # Tier12 uses (96,48), Tier123 uses (128,64), all others use (64,32)
+            if hybrid_mode in ("tgllnet-t12", "tgllnet-t12-only"):
+                ml_model_obj = ANNClassifier(hidden_layers=(96, 48))
+            elif hybrid_mode in ("tgllnet-t123", "tgllnet-t123-only"):
+                ml_model_obj = ANNClassifier(hidden_layers=(128, 64))
+            else:
+                ml_model_obj = ANNClassifier()
             ml_model_obj.fit(train_input, train_labels)
         rec.time_ml_train_ms = (time.perf_counter() - t_ml_train) * 1000
 
@@ -583,9 +595,17 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
                 rec.predicted_label = healthy_class
                 rec.source = "TRI-MAJORITY-HEALTHY"
 
-    elif hybrid_mode in ("tgllnet-t1", "tgllnet-t12", "tgllnet-t123"):
-        # TGLLNet tier modes: CDS cascade with enhanced ANN
-        tag = {"tgllnet-t1": "T1", "tgllnet-t12": "T12", "tgllnet-t123": "T123"}[hybrid_mode]
+    elif hybrid_mode in ("tgllnet-t1-only", "tgllnet-t12-only", "tgllnet-t123-only"):
+        # TGLLNet standalone: pure ANN on enhanced features, no CDS
+        tag = {"tgllnet-t1-only": "T1", "tgllnet-t12-only": "T12",
+               "tgllnet-t123-only": "T123"}[hybrid_mode]
+        rec.predicted_label = ml_pred
+        rec.source = f"{tag}-ANN"
+
+    elif hybrid_mode in ("tgllnet-t1", "tgllnet-t12"):
+        # TGLLNet Tier1/Tier12: CDS cascade with enhanced ANN
+        # [MUST MATCH enhanced_hybrid.py logic exactly]
+        tag = {"tgllnet-t1": "T1", "tgllnet-t12": "T12"}[hybrid_mode]
         if cds_decision == HealthDecision.HEALTHY:
             rec.predicted_label = healthy_class
             rec.source = f"{tag}-CDS-HEALTHY"
@@ -604,6 +624,60 @@ def _run_fold(i, data, labels, healthy_class, mode_name, ml_model,
         else:
             rec.predicted_label = ml_pred
             rec.source = f"{tag}-ANN-SCREEN"
+
+    elif hybrid_mode == "tgllnet-t123":
+        # TGLLNet Tier123: Three-way confidence fusion (CDS AF + ANN + GCN)
+        # [MUST MATCH enhanced_hybrid.py logic exactly]
+        from tgllnet_tiers import Tier3GraphEnhanced
+        if cds_decision == HealthDecision.HEALTHY:
+            rec.predicted_label = healthy_class
+            rec.source = "T123-CDS-HEALTHY"
+        elif cds_decision == HealthDecision.UNHEALTHY:
+            # Compute GCN score for three-way override
+            tier3_score = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+            tier3_score.fit(train_data, train_labels)
+            gcn_score = float(tier3_score.get_gcn_score(data[i:i+1])[0])
+            gcn_p_diseased = 1.0 / (1.0 + np.exp(-gcn_score))
+
+            ml_proba = ml_model_obj.predict_proba(test_input)[0] if ml_model_obj else np.array([0.5, 0.5])
+            ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+            # Three-way override: ALL must agree patient is healthy
+            override = (ml_pred == healthy_class
+                        and ml_conf >= 0.65
+                        and ml_margin >= 0.25
+                        and cds_af < 0.65
+                        and gcn_p_diseased < 0.45)
+            if override:
+                rec.predicted_label = healthy_class
+                rec.source = "T123-TRIPLE-OVERRIDE"
+            else:
+                rec.predicted_label = cds_label
+                rec.source = "T123-CDS-ALARM"
+        else:
+            # SCREENING: ANN with GCN tiebreaker when ANN is uncertain
+            ml_proba = ml_model_obj.predict_proba(test_input)[0] if ml_model_obj else np.array([0.5, 0.5])
+            ml_margin = float(np.sort(ml_proba)[-1] - np.sort(ml_proba)[-2]) if len(ml_proba) >= 2 else 0.0
+
+            if ml_margin < 0.15:
+                # ANN uncertain — use GCN as tiebreaker
+                tier3_score = Tier3GraphEnhanced(n_layers=2, K=3, hidden_dim=16)
+                tier3_score.fit(train_data, train_labels)
+                gcn_score = float(tier3_score.get_gcn_score(data[i:i+1])[0])
+                gcn_p_diseased = 1.0 / (1.0 + np.exp(-gcn_score))
+                if gcn_p_diseased >= 0.55:
+                    diseased_classes = train_labels[train_labels != healthy_class]
+                    if len(diseased_classes) > 0:
+                        rec.predicted_label = int(np.bincount(
+                            diseased_classes.astype(int)).argmax())
+                    else:
+                        rec.predicted_label = ml_pred
+                    rec.source = "T123-GCN-TIEBREAK"
+                else:
+                    rec.predicted_label = ml_pred
+                    rec.source = "T123-ANN-SCREEN"
+            else:
+                rec.predicted_label = ml_pred
+                rec.source = "T123-ANN-SCREEN"
 
     # Correctness
     if true_label == healthy_class:
@@ -646,6 +720,9 @@ MODE_CONFIGS = {
     "tgllnet-t1":        ("TGLLNet-T1+CDS",      "ann", "tgllnet-t1"),
     "tgllnet-t12":       ("TGLLNet-T12+CDS",     "ann", "tgllnet-t12"),
     "tgllnet-t123":      ("TGLLNet-T123+CDS",    "ann", "tgllnet-t123"),
+    "tgllnet-t1-only":   ("TGLLNet-T1-only",     "ann", "tgllnet-t1-only"),
+    "tgllnet-t12-only":  ("TGLLNet-T12-only",    "ann", "tgllnet-t12-only"),
+    "tgllnet-t123-only": ("TGLLNet-T123-only",   "ann", "tgllnet-t123-only"),
 }
 
 

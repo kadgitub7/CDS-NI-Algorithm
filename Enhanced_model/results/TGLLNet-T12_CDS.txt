@@ -1,55 +1,162 @@
 ==============================================================================
   RESULTS: TGLLNet-T12+CDS
 ==============================================================================
-  Timestamp:       2026-06-05 09:09:31
+  Timestamp:       2026-06-05 15:08:13
   Mode:            TGLLNet-T12+CDS
-  Users evaluated: 10
-  Total time:      647.6s  (64764ms/user)
+  Users evaluated: 452
+  Total time:      1648.6s  (3647ms/user)
 
 ------------------------------------------------------------------------------
   SUMMARY METRICS
 ------------------------------------------------------------------------------
-  Accuracy:              100.00%  (10/10)
-  Sensitivity (Recall):  100.00%  (diseased detected: 6/6)
-  Specificity:           100.00%  (healthy correct:   4/4)
-  Precision (PPV):       100.00%  (positive predictions correct: 6/6)
-  Neg Pred Value (NPV):  100.00%  (negative predictions correct: 4/4)
-  F1 Score:              100.00%
-  Misclassifications:    0
+  Accuracy:              78.10%  (353/452)
+  Sensitivity (Recall):  77.29%  (diseased detected: 160/207)
+  Specificity:           78.78%  (healthy correct:   193/245)
+  Precision (PPV):       75.47%  (positive predictions correct: 160/212)
+  Neg Pred Value (NPV):  80.42%  (negative predictions correct: 193/240)
+  F1 Score:              76.37%
+  Misclassifications:    99
 
 ------------------------------------------------------------------------------
   CONFUSION MATRIX  (binary: healthy vs unhealthy)
 ------------------------------------------------------------------------------
                           Predicted
                     Healthy    Unhealthy
-  Actual Healthy          4            0
-  Actual Unhealthy        0            6
+  Actual Healthy        193           52
+  Actual Unhealthy       47          160
 
 ------------------------------------------------------------------------------
   DECISION SOURCE BREAKDOWN
 ------------------------------------------------------------------------------
   Source                           Count        %   Accuracy
   ──────────────────────────────  ──────  ───────  ─────────
-  T12-ANN-OVERRIDE                     1    10.0%     100.0%
-  T12-ANN-SCREEN                       3    30.0%     100.0%
-  T12-CDS-ALARM                        5    50.0%     100.0%
-  T12-CDS-HEALTHY                      1    10.0%     100.0%
+  T12-ANN-OVERRIDE                    37     8.2%      70.3%
+  T12-ANN-SCREEN                     100    22.1%      78.0%
+  T12-CDS-ALARM                      203    44.9%      76.4%
+  T12-CDS-HEALTHY                    112    24.8%      83.9%
 
 ------------------------------------------------------------------------------
   PER-CLASS BREAKDOWN
 ------------------------------------------------------------------------------
     Class   Correct   Total   Accuracy  Label     
   ───────  ────────  ──────  ─────────  ──────────
-        1         4       4     100.0%  Healthy   
-        6         1       1     100.0%  Disease-6 
-        7         1       1     100.0%  Disease-7 
-        8         1       1     100.0%  Disease-8 
-       10         2       2     100.0%  Disease-10
-       14         1       1     100.0%  Disease-14
+        1       193     245      78.8%  Healthy   
+        2        33      44      75.0%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        12      15      80.0%  Disease-4 
+        5        10      13      76.9%  Disease-5 
+        6        18      25      72.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         9       9     100.0%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        11      22      50.0%  Disease-16
 
 ------------------------------------------------------------------------------
-  MISCLASSIFICATION TRACE  (0 errors)
+  MISCLASSIFICATION TRACE  (99 errors)
 ------------------------------------------------------------------------------
-  (none — all predictions correct)
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+      12     D10       H  T12-ANN-SCREEN                  0.959      0.458       -     Screening         1404
+      21       H      D2  T12-CDS-ALARM                   0.622      0.591       -     Unhealthy         1421
+      34      D4       H  T12-ANN-SCREEN                  0.968      0.822       -     Screening         1334
+      37     D10       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            811
+      43       H      D2  T12-CDS-ALARM                   0.072      0.276       -     Unhealthy         1262
+      50       H      D2  T12-CDS-ALARM                   0.193      0.544       -     Unhealthy         1332
+      53     D16       H  T12-ANN-OVERRIDE                0.015      0.890       -     Unhealthy         6010
+      54     D16       H  T12-ANN-SCREEN                  0.959      0.524       -     Screening         5361
+      55      D6       H  T12-ANN-SCREEN                  0.968      0.953       -     Screening         4366
+      59       H      D2  T12-CDS-ALARM                   0.873      0.687       -     Unhealthy         5281
+      61      D5       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2822
+      68      D6       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2758
+      71     D16       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2770
+      72       H      D2  T12-CDS-ALARM                   0.926      0.860       -     Unhealthy         4158
+      77      D2       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2749
+      82      D2       H  T12-ANN-SCREEN                  0.968      0.859       -     Screening         4814
+      83      D4       H  T12-ANN-OVERRIDE                0.659      0.751       -     Unhealthy         3910
+      90       H      D3  T12-CDS-ALARM                   0.724      0.728       -     Unhealthy         4644
+      98       H      D2  T12-CDS-ALARM                   0.511      0.587       -     Unhealthy         4122
+      99       H      D2  T12-CDS-ALARM                   0.294      0.446       -     Unhealthy         4775
+     100      D4       H  T12-ANN-SCREEN                  0.968      0.677       -     Screening         4365
+     104      D6       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2920
+     109       H      D2  T12-CDS-ALARM                   0.261      0.383       -     Unhealthy         4511
+     110       H      D2  T12-CDS-ALARM                   0.829      0.533       -     Unhealthy         4158
+     114      D6       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2610
+     126       H      D2  T12-CDS-ALARM                   0.603      0.401       -     Unhealthy         4576
+     133       H      D2  T12-CDS-ALARM                   0.477      0.389       -     Unhealthy         4025
+     134     D10       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2799
+     136       H      D2  T12-CDS-ALARM                   0.882      0.970       -     Unhealthy         4649
+     138       H      D6  T12-CDS-ALARM                   1.000      0.925       -     Unhealthy         2728
+     144     D10       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            907
+     152       H      D2  T12-CDS-ALARM                   0.842      0.549       -     Unhealthy         1373
+     154     D16       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            935
+     157      D2       H  T12-ANN-SCREEN                  0.959      0.535       -     Screening         1227
+     158       H      D2  T12-CDS-ALARM                   0.574      0.426       -     Unhealthy         1255
+     160       H      D2  T12-CDS-ALARM                   0.010      0.894       -     Unhealthy         1402
+     162       H      D2  T12-CDS-ALARM                   0.784      0.901       -     Unhealthy         1293
+     170       H      D2  T12-CDS-ALARM                   0.991      0.415       -     Unhealthy         1233
+     172       H      D2  T12-CDS-ALARM                   0.947      0.583       -     Unhealthy         1313
+     178       H      D2  T12-CDS-ALARM                   0.847      0.532       -     Unhealthy         1390
+     179      D2       H  T12-ANN-SCREEN                  0.968      0.703       -     Screening         1348
+     181     D16       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            898
+     182       H      D2  T12-CDS-ALARM                   0.863      0.388       -     Unhealthy         1237
+     186      D2       H  T12-ANN-SCREEN                  0.968      0.906       -     Screening         1263
+     190       H      D2  T12-CDS-ALARM                   0.501      0.208       -     Unhealthy         1260
+     200      D2       H  T12-ANN-SCREEN                  0.935      0.636       -     Screening         1234
+     202       H      D2  T12-CDS-ALARM                   0.564      0.617       -     Unhealthy         1312
+     221       H      D2  T12-CDS-ALARM                   0.978      0.554       -     Unhealthy         1361
+     227     D16       H  T12-ANN-OVERRIDE                0.630      0.770       -     Unhealthy         1277
+     228       H      D2  T12-CDS-ALARM                   0.978      0.803       -     Unhealthy         1397
+     233       H      D2  T12-CDS-ALARM                   0.811      0.744       -     Unhealthy         1375
+     234       H      D2  T12-CDS-ALARM                   0.429      0.514       -     Unhealthy         1363
+     239       H      D2  T12-CDS-ALARM                   0.675      0.658       -     Unhealthy         1405
+     241       H      D2  T12-CDS-ALARM                   0.346      0.919       -     Unhealthy         1375
+     246       H      D2  T12-CDS-ALARM                   0.014      0.677       -     Unhealthy         1445
+     247       H      D2  T12-CDS-ALARM                   0.829      0.981       -     Unhealthy         1357
+     250     D10       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            876
+     261     D16       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            869
+     267       H     D10  T12-ANN-SCREEN                  0.963      0.439       -     Screening         1593
+     268       H      D2  T12-CDS-ALARM                   0.612      0.460       -     Unhealthy         1178
+     277      D2       H  T12-ANN-OVERRIDE                0.199      0.813       -     Unhealthy         1308
+     278     D10       H  T12-ANN-SCREEN                  0.968      0.746       -     Screening         1295
+     281       H     D10  T12-ANN-SCREEN                  0.963      0.499       -     Screening         1306
+     283      D6       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            867
+     288       H      D4  T12-ANN-SCREEN                  0.963      0.228       -     Screening         1346
+     295      D2       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            933
+     299       H      D2  T12-CDS-ALARM                   0.784      0.440       -     Unhealthy         1288
+     309      D7       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy            911
+     312     D10       H  T12-ANN-OVERRIDE                0.238      1.000       -     Unhealthy         1297
+     318       H      D2  T12-ANN-SCREEN                  0.963      0.535       -     Screening         1312
+     320      D5       H  T12-ANN-OVERRIDE                0.010      0.802       -     Unhealthy         1252
+     321       H      D2  T12-CDS-ALARM                   0.569      0.420       -     Unhealthy         1295
+     326     D10       H  T12-ANN-SCREEN                  0.959      0.460       -     Screening         1238
+     328       H      D2  T12-CDS-ALARM                   0.135      0.460       -     Unhealthy         1237
+     331       H      D2  T12-CDS-ALARM                   0.918      0.440       -     Unhealthy         1220
+     332     D16       H  T12-ANN-OVERRIDE                0.010      0.962       -     Unhealthy         1333
+     335       H      D2  T12-CDS-ALARM                   0.376      0.419       -     Unhealthy         5060
+     341     D10       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2675
+     343      D6       H  T12-ANN-SCREEN                  0.968      0.430       -     Screening         4385
+     352       H      D2  T12-CDS-ALARM                   0.237      0.398       -     Unhealthy         4413
+     355       H      D2  T12-CDS-ALARM                   0.793      0.476       -     Unhealthy         3908
+     362     D16       H  T12-ANN-SCREEN                  0.968      0.913       -     Screening         4401
+     363     D10       H  T12-ANN-OVERRIDE                0.611      0.990       -     Unhealthy         4183
+     364      D6       H  T12-CDS-HEALTHY                 1.000       -          -     Healthy           2597
+     367      D2       H  T12-ANN-SCREEN                  0.930      0.266       -     Screening         4419
+     372      D2       H  T12-ANN-OVERRIDE                0.150      0.828       -     Unhealthy         4289
+     374      D5       H  T12-ANN-OVERRIDE                0.659      0.848       -     Unhealthy         4213
+     375      D2       H  T12-ANN-SCREEN                  0.968      0.588       -     Screening         4333
+     386     D16       H  T12-ANN-SCREEN                  0.959      0.646       -     Screening         4698
+     389       H      D2  T12-CDS-ALARM                   0.130      0.535       -     Unhealthy         4821
+     394       H      D2  T12-CDS-ALARM                   0.385      0.484       -     Unhealthy         4280
+     400     D10       H  T12-ANN-SCREEN                  0.968      0.938       -     Screening         4239
+     408       H      D2  T12-CDS-ALARM                   0.793      0.547       -     Unhealthy         4963
+     409     D16       H  T12-ANN-OVERRIDE                0.363      0.769       -     Unhealthy         4164
+     422       H      D2  T12-CDS-ALARM                   0.501      0.683       -     Unhealthy         1272
+     434       H      D2  T12-CDS-ALARM                   0.957      0.673       -     Unhealthy         1261
+     439       H      D2  T12-CDS-ALARM                   0.608      0.517       -     Unhealthy         1307
+     440       H      D3  T12-CDS-ALARM                   0.767      0.699       -     Unhealthy         1321
+     451       H      D2  T12-CDS-ALARM                   0.492      0.573       -     Unhealthy         1197
 
 ==============================================================================

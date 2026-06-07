@@ -64,6 +64,9 @@ RESULT_FILES = [
     "TGLLNet-T1_CDS.txt",
     "TGLLNet-T12_CDS.txt",
     "TGLLNet-T123_CDS.txt",
+    "TGLLNet-T1-only.txt",
+    "TGLLNet-T12-only.txt",
+    "TGLLNet-T123-only.txt",
 ]
 
 CLASS_LABELS = {
@@ -501,6 +504,9 @@ def load_models_from_folder(results_dir):
                 "TGLLNet-T1 CDS": "TGLLNet-T1+CDS",
                 "TGLLNet-T12 CDS": "TGLLNet-T12+CDS",
                 "TGLLNet-T123 CDS": "TGLLNet-T123+CDS",
+                "TGLLNet-T1-only": "TGLLNet-T1-only",
+                "TGLLNet-T12-only": "TGLLNet-T12-only",
+                "TGLLNet-T123-only": "TGLLNet-T123-only",
             }
             standard_key = key_map.get(key, key)
             models[standard_key] = data
