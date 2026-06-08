@@ -1,6 +1,6 @@
 ====================================================================================================
   STATISTICAL SIGNIFICANCE ANALYSIS — resource_analysis
-  Generated: 2026-06-04 21:48:50
+  Generated: 2026-06-08 10:43:17
   Baseline:  CDS-only
   N users:   452
   Alpha:     0.05
@@ -29,6 +29,12 @@
   DisagreeRules(ANN)                76.33%    345/452        72.20%        80.01%     7.82%
   AlarmSpecialist(ANN)              74.12%    335/452        69.89%        77.94%     8.05%
   TripleCascade                     76.77%    347/452        72.66%        80.43%     7.77%
+  TGLLNet-T1+CDS                    76.99%    348/452        72.89%        80.63%     7.74%
+  TGLLNet-T12+CDS                   78.10%    353/452        74.06%        81.66%     7.61%
+  TGLLNet-T123+CDS                  75.22%    340/452        71.04%        78.98%     7.94%
+  TGLLNet-T1-only                   71.90%    325/452        67.59%        75.85%     8.26%
+  TGLLNet-T12-only                  71.46%    323/452        67.13%        75.43%     8.30%
+  TGLLNet-T123-only                 73.89%    334/452        69.66%        77.73%     8.07%
 
 ----------------------------------------------------------------------------------------------------
   SECTION 2: McNEMAR'S TEST — EACH MODEL vs CDS-only
@@ -56,6 +62,12 @@
   DisagreeRules(ANN)                33    25     0.845    0.358020         N/A     no      B better
   AlarmSpecialist(ANN)              19    21     0.025    0.874367         N/A     no      A better
   TripleCascade                     25    15     2.025    0.154729         N/A     no      B better
+  TGLLNet-T1+CDS                    21    10     3.226    0.072486         N/A     no      B better
+  TGLLNet-T12+CDS                   31    15     4.891    0.026992         N/A  YES *      B better
+  TGLLNet-T123+CDS                  10     7     0.235    0.627626    0.629059     no      B better
+  TGLLNet-T1-only                   71    83     0.786    0.375399         N/A     no      A better
+  TGLLNet-T12-only                  70    84     1.097    0.294837         N/A     no      A better
+  TGLLNet-T123-only                 68    71     0.029    0.865295         N/A     no      A better
 
   CONTINGENCY TABLE DETAILS (models with different error patterns):
 
@@ -136,6 +148,42 @@
     Both wrong:       90
     CDS-only wrong, TripleCascade right (improvement):   25
     CDS-only right, TripleCascade wrong (regression):    15
+
+  CDS-only vs TGLLNet-T1+CDS:
+    Both correct:    327
+    Both wrong:       94
+    CDS-only wrong, TGLLNet-T1+CDS right (improvement):   21
+    CDS-only right, TGLLNet-T1+CDS wrong (regression):    10
+
+  CDS-only vs TGLLNet-T12+CDS:
+    Both correct:    322
+    Both wrong:       84
+    CDS-only wrong, TGLLNet-T12+CDS right (improvement):   31
+    CDS-only right, TGLLNet-T12+CDS wrong (regression):    15
+
+  CDS-only vs TGLLNet-T123+CDS:
+    Both correct:    330
+    Both wrong:      105
+    CDS-only wrong, TGLLNet-T123+CDS right (improvement):   10
+    CDS-only right, TGLLNet-T123+CDS wrong (regression):     7
+
+  CDS-only vs TGLLNet-T1-only:
+    Both correct:    254
+    Both wrong:       44
+    CDS-only wrong, TGLLNet-T1-only right (improvement):   71
+    CDS-only right, TGLLNet-T1-only wrong (regression):    83
+
+  CDS-only vs TGLLNet-T12-only:
+    Both correct:    253
+    Both wrong:       45
+    CDS-only wrong, TGLLNet-T12-only right (improvement):   70
+    CDS-only right, TGLLNet-T12-only wrong (regression):    84
+
+  CDS-only vs TGLLNet-T123-only:
+    Both correct:    266
+    Both wrong:       47
+    CDS-only wrong, TGLLNet-T123-only right (improvement):   68
+    CDS-only right, TGLLNet-T123-only wrong (regression):    71
 
 ----------------------------------------------------------------------------------------------------
   SECTION 3: PER-CLASS McNEMAR'S TEST vs CDS-only
@@ -372,6 +420,108 @@
     Disease-15        5         0         0         0          0    1.000000     no        same
     Disease-16       22         8        12         1          5    0.218750     no    A better
 
+  CDS-only vs TGLLNet-T1+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        61        16          3    0.004425  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         3         0          2    0.500000     no    A better
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         2          1    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         9         1          2    1.000000     no    A better
+
+  CDS-only vs TGLLNet-T12+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        52        26          4    0.000126  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         3         0          1    1.000000     no    A better
+    Disease-5        13         1         3         0          2    0.500000     no    A better
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        11         2          2    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8        11         1          4    0.375000     no    A better
+
+  CDS-only vs TGLLNet-T123+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        75         3          4    1.000000     no    A better
+    Disease-2        44        11         9         2          0    0.500000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         1         1          0    1.000000     no    B better
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         8         0          1    1.000000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         2          1    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         2          1    1.000000     no    B better
+
+  CDS-only vs TGLLNet-T1-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        13        65          4    0.000000  YES *    B better
+    Disease-2        44        11        21         2         12    0.012939  YES *    A better
+    Disease-3        15         0         2         0          2    0.500000     no    A better
+    Disease-4        15         2        11         0          9    0.003906  YES *    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        24         0         17    0.000015  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        19         3         11    0.057373     no    A better
+    Disease-14        4         0         1         0          1    1.000000     no    A better
+    Disease-15        5         0         3         0          3    0.250000     no    A better
+    Disease-16       22         8        19         1         12    0.003418  YES *    A better
+
+  CDS-only vs TGLLNet-T12-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        18        63          7    0.000000  YES *    B better
+    Disease-2        44        11        22         2         13    0.007385  YES *    A better
+    Disease-3        15         0         1         0          1    1.000000     no    A better
+    Disease-4        15         2        11         0          9    0.003906  YES *    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        24         0         17    0.000015  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        19         4         12    0.076813     no    A better
+    Disease-14        4         0         3         0          3    0.250000     no    A better
+    Disease-15        5         0         2         0          2    0.500000     no    A better
+    Disease-16       22         8        15         1          8    0.039062  YES *    A better
+
+  CDS-only vs TGLLNet-T123-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        18        60          4    0.000000  YES *    B better
+    Disease-2        44        11        22         2         13    0.007385  YES *    A better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         6         1          5    0.218750     no    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        23         0         16    0.000031  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        20         3         12    0.035156  YES *    A better
+    Disease-14        4         0         1         0          1    1.000000     no    A better
+    Disease-15        5         0         2         0          2    0.500000     no    A better
+    Disease-16       22         8        13         2          7    0.179688     no    A better
+
 ----------------------------------------------------------------------------------------------------
   SECTION 4: SUMMARY & INTERPRETATION
 ----------------------------------------------------------------------------------------------------
@@ -380,6 +530,7 @@
     • RNN-only underperforms CDS-only (p=0.011369, b=59, c=91)
     • Stacked(CDS->ANN) underperforms CDS-only (p=0.000002, b=66, c=134)
     • Stacked(CDS->RNN) underperforms CDS-only (p=0.000000, b=67, c=223)
+    • TGLLNet-T12+CDS outperforms CDS-only (p=0.026992, b=31, c=15)
 
   Notes:
   • McNemar's test is appropriate here because both classifiers are evaluated on the
