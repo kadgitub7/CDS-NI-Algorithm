@@ -1,0 +1,198 @@
+=====================================================================================
+  RESOURCE ANALYSIS: AlarmSpecialist(ANN)
+=====================================================================================
+  Timestamp:            2026-06-04 14:49:52
+  Users evaluated:      452
+
+-------------------------------------------------------------------------------------
+  CLASSIFICATION METRICS
+-------------------------------------------------------------------------------------
+  Accuracy:             74.12%
+  Sensitivity:          73.43%
+  Specificity:          74.69%
+  Precision (PPV):      71.03%
+  Neg Pred Value:       76.89%
+  F1 Score:             72.21%
+
+-------------------------------------------------------------------------------------
+  TIME METRICS
+-------------------------------------------------------------------------------------
+  Total wall-clock:     7711.1s
+  Avg per user:         17001.5ms
+  Avg CDS train:        13312.3ms
+  Avg CDS predict:      117.2ms
+  Avg ML train:         1085.0ms
+  Avg ML predict:       3.7ms
+
+-------------------------------------------------------------------------------------
+  MEMORY METRICS
+-------------------------------------------------------------------------------------
+  Peak memory:          24.87 MB
+  Avg memory per fold:  20.89 MB
+
+-------------------------------------------------------------------------------------
+  COMPUTATIONAL COST (multiplications)
+-------------------------------------------------------------------------------------
+  Total multiplications:     190,329,962,120
+  Avg per user:                  421,083,987
+  CDS total:                         418,728
+  ML training total:         190,326,271,872
+  ML inference total:              3,271,520
+
+-------------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+-------------------------------------------------------------------------------------
+  Class   1 (Healthy     ): 183/245 (74.7%)
+  Class   2 (Disease-2   ): 31/44 (70.5%)
+  Class   3 (Disease-3   ): 13/15 (86.7%)
+  Class   4 (Disease-4   ): 13/15 (86.7%)
+  Class   5 (Disease-5   ): 11/13 (84.6%)
+  Class   6 (Disease-6   ): 16/25 (64.0%)
+  Class   7 (Disease-7   ): 2/3 (66.7%)
+  Class   8 (Disease-8   ): 2/2 (100.0%)
+  Class   9 (Disease-9   ): 8/9 (88.9%)
+  Class  10 (Disease-10  ): 34/50 (68.0%)
+  Class  14 (Disease-14  ): 4/4 (100.0%)
+  Class  15 (Disease-15  ): 5/5 (100.0%)
+  Class  16 (Disease-16  ): 13/22 (59.1%)
+
+-------------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE (117 errors)
+-------------------------------------------------------------------------------------
+    User    True    Pred  Source                   Time_ms   Mem_MB         Mults
+  ──────  ──────  ──────  ──────────────────────  ────────  ───────  ────────────
+       9     D10       H  ASPEC-ANN-SCREEN           20418    22.21  1,374,669,574
+      10      D3       H  ASPEC-OVERRIDE             21899    21.98   109,495,908
+      13      D6       H  ASPEC-OVERRIDE             23776    22.11   109,496,163
+      16     D10       H  ASPEC-OVERRIDE             24998    22.06   109,496,043
+      21       H      D2  ASPEC-CDS-ALARM             6376    22.19   200,742,738
+      34      D4       H  ASPEC-ANN-SCREEN            5837    22.24  1,319,683,654
+      37     D10       H  ASPEC-CDS-HEALTHY           4955    17.07         1,269
+      43       H      D2  ASPEC-CDS-ALARM             5685    22.00   194,659,125
+      50       H      D2  ASPEC-CDS-ALARM             6040    22.00   261,573,138
+      52     D10       H  ASPEC-OVERRIDE              5564    22.18   109,496,388
+      53     D16       H  ASPEC-OVERRIDE              5645    21.97   115,578,966
+      54     D16       H  ASPEC-ANN-SCREEN            5290    22.21   604,866,679
+      55      D6       H  ASPEC-ANN-SCREEN            5899    22.23  1,429,655,494
+      59       H      D2  ASPEC-CDS-ALARM             5489    22.20   604,866,529
+      60      D5       H  ASPEC-OVERRIDE              5519    22.14   115,579,371
+      61      D5       H  ASPEC-CDS-HEALTHY           4876    17.07         1,269
+      68      D6       H  ASPEC-CDS-HEALTHY          18219    17.26         1,269
+      71     D16       H  ASPEC-CDS-HEALTHY          17667    17.07         1,269
+      72       H      D2  ASPEC-CDS-ALARM            20001    22.21   659,852,494
+      77      D2       H  ASPEC-CDS-HEALTHY          17502    17.07         1,269
+      82      D2       H  ASPEC-ANN-SCREEN            5741    22.21   632,359,654
+      90       H      D3  ASPEC-CDS-ALARM             5284    22.19   632,359,414
+      98       H      D2  ASPEC-CDS-ALARM             5503    22.10   218,991,762
+      99       H      D2  ASPEC-CDS-ALARM             5624    22.04   225,074,655
+     100      D4       H  ASPEC-ANN-SCREEN            5782    22.20   632,359,654
+     102       H      D2  ASPEC-CDS-ALARM             6376    22.08   285,905,430
+     104      D6       H  ASPEC-CDS-HEALTHY           4914    17.07         1,254
+     108      D2       H  ASPEC-OVERRIDE              5538    21.95    97,329,702
+     109       H      D2  ASPEC-CDS-ALARM             5918    22.03   285,905,520
+     110       H      D2  ASPEC-CDS-ALARM             5819    22.20  1,484,641,249
+     113       H      D2  ASPEC-CDS-ALARM            18306    22.15   267,656,556
+     114      D6       H  ASPEC-CDS-HEALTHY          17059    17.07         1,269
+     126       H      D2  ASPEC-CDS-ALARM             6231    22.18   200,742,633
+     129       H      D2  ASPEC-CDS-ALARM             5704    22.15   145,994,736
+     134     D10       H  ASPEC-CDS-HEALTHY           5460    17.14         1,269
+     136       H      D2  ASPEC-CDS-ALARM             5135    22.21   494,894,734
+     137     D10       H  ASPEC-ANN-SCREEN            5054    22.20   494,894,839
+     138       H      D6  ASPEC-CDS-ALARM             5021    22.22   494,894,869
+     144     D10       H  ASPEC-CDS-HEALTHY           4833    17.07         1,269
+     145     D10       H  ASPEC-OVERRIDE              5735    22.18    97,330,212
+     152       H      D2  ASPEC-CDS-ALARM             5425    22.20   934,782,034
+     154     D16       H  ASPEC-CDS-HEALTHY           4811    17.08         1,269
+     157      D2       H  ASPEC-ANN-SCREEN            5298    22.22   934,782,199
+     158       H      D2  ASPEC-CDS-ALARM             6488    22.14   133,828,590
+     162       H      D2  ASPEC-CDS-ALARM             5544    22.21  1,319,683,459
+     170       H      D2  ASPEC-CDS-ALARM            12159    22.22   989,768,074
+     171       H      D2  ASPEC-CDS-ALARM            20075    22.13   218,991,792
+     172       H      D2  ASPEC-CDS-ALARM            19615    22.22  1,319,683,549
+     178       H      D2  ASPEC-CDS-ALARM            21176    22.20  1,319,683,504
+     179      D2       H  ASPEC-ANN-SCREEN           21235    22.21  1,319,683,654
+     181     D16       H  ASPEC-CDS-HEALTHY          22023    17.07         1,254
+     182       H      D2  ASPEC-CDS-ALARM            18042    22.19   494,894,689
+     186      D2       H  ASPEC-ANN-SCREEN           21665    22.23  1,402,162,534
+     190       H      D2  ASPEC-CDS-ALARM             6683    22.18   225,074,835
+     202       H      D2  ASPEC-CDS-ALARM             5849    22.14   127,745,472
+     210     D10       H  ASPEC-OVERRIDE              5878    21.95    97,329,702
+     213      D2       H  ASPEC-OVERRIDE              5895    22.12    97,330,152
+     218      D3       H  ASPEC-OVERRIDE              5669    21.98    97,329,747
+     220       H      D2  ASPEC-CDS-ALARM             5796    22.13   127,745,427
+     221       H      D2  ASPEC-CDS-ALARM             5732    22.23  1,209,711,769
+     224     D10       H  ASPEC-OVERRIDE              5943    22.16   121,662,594
+     228       H      D2  ASPEC-CDS-ALARM            13308    22.20  1,209,711,769
+     233       H      D2  ASPEC-CDS-ALARM            20707    22.21  1,237,204,594
+     239       H      D2  ASPEC-CDS-ALARM            19762    22.19  1,209,711,469
+     241       H      D2  ASPEC-CDS-ALARM            21809    22.05   127,745,262
+     242       H      D2  ASPEC-CDS-ALARM            22323    22.19   127,745,757
+     246       H      D2  ASPEC-CDS-ALARM             6335    21.98   127,745,142
+     247       H      D2  ASPEC-CDS-ALARM             6357    22.20  1,237,204,609
+     250     D10       H  ASPEC-CDS-HEALTHY           5073    17.08         1,254
+     254       H      D2  ASPEC-CDS-ALARM             5775    22.12   127,745,442
+     255       H      D2  ASPEC-CDS-ALARM             6444    22.00   127,745,172
+     261     D16       H  ASPEC-CDS-HEALTHY           4883    17.07         1,269
+     267       H      D2  ASPEC-ANN-SCREEN            5736    22.33   824,810,374
+     268       H      D2  ASPEC-CDS-ALARM             5867    22.19   127,745,652
+     271       H      D2  ASPEC-CDS-ALARM             6293    22.13   127,745,457
+     274       H      D2  ASPEC-ANN-SCREEN            5373    22.21   962,275,174
+     275      D2       H  ASPEC-ANN-SCREEN            5597    22.21   989,768,134
+     278     D10       H  ASPEC-ANN-SCREEN            5569    22.21   962,275,174
+     280       H      D2  ASPEC-CDS-ALARM             5596    22.15   218,991,942
+     283      D6       H  ASPEC-CDS-HEALTHY           4901    17.07         1,269
+     295      D2       H  ASPEC-CDS-HEALTHY          16201    17.06         1,269
+     299       H      D2  ASPEC-CDS-ALARM            20526    22.20   989,767,939
+     308      D2       H  ASPEC-OVERRIDE              6328    22.00   225,074,610
+     309      D7       H  ASPEC-CDS-HEALTHY           5143    17.07         1,269
+     311       H      D2  ASPEC-CDS-ALARM             6421    22.13   127,745,502
+     318       H     D16  ASPEC-ANN-SCREEN            5791    22.17  1,017,261,094
+     321       H      D2  ASPEC-CDS-ALARM             5984    22.17   225,074,940
+     326     D10       H  ASPEC-ANN-SCREEN           19246    22.19   907,289,239
+     328       H      D2  ASPEC-CDS-ALARM            17310    22.00   133,828,260
+     331       H      D2  ASPEC-CDS-ALARM            19416    22.20  1,017,261,004
+     341     D10       H  ASPEC-CDS-HEALTHY          19601    17.07         1,269
+     343      D6       H  ASPEC-ANN-SCREEN           20040    22.22  1,017,261,094
+     344     D10       H  ASPEC-OVERRIDE             20265    22.18   145,994,916
+     352       H      D2  ASPEC-CDS-ALARM            17710    22.03   225,074,625
+     355       H      D2  ASPEC-CDS-ALARM            17603    22.20   879,796,099
+     362     D16       H  ASPEC-ANN-SCREEN           19570    22.20   879,796,294
+     364      D6       H  ASPEC-CDS-HEALTHY          15776    17.07         1,269
+     365       H      D2  ASPEC-CDS-ALARM            21414    22.05   152,077,644
+     367      D2       H  ASPEC-ANN-SCREEN           20038    22.20   879,796,249
+     375      D2       H  ASPEC-ANN-SCREEN           16566    22.21   879,796,294
+     384      D6       H  ASPEC-OVERRIDE             18487    22.17   145,994,916
+     386     D16       H  ASPEC-ANN-SCREEN           16245    22.20   879,796,279
+     391       H      D2  ASPEC-CDS-ALARM            19961    21.99   145,994,421
+     393       H      D2  ASPEC-CDS-ALARM            19746    22.07   206,825,436
+     394       H      D2  ASPEC-CDS-ALARM            20036    22.06   206,825,451
+     400     D10       H  ASPEC-ANN-SCREEN           19900    22.22   934,782,214
+     408       H      D2  ASPEC-CDS-ALARM            18859    22.21   934,782,019
+     409     D16       H  ASPEC-OVERRIDE             18264    22.05   145,994,541
+     411      D2       H  ASPEC-OVERRIDE             18464    22.00   145,994,466
+     416       H      D2  ASPEC-CDS-ALARM            18830    22.29   206,825,541
+     422       H      D2  ASPEC-CDS-ALARM            20873    22.13   145,994,691
+     424      D9       H  ASPEC-OVERRIDE             22719    21.97   145,994,451
+     434       H      D2  ASPEC-CDS-ALARM            20418    22.21   879,796,219
+     439       H      D2  ASPEC-CDS-ALARM            18460    22.18   200,742,693
+     440       H      D3  ASPEC-CDS-ALARM            16843    22.18   879,796,084
+     447       H      D2  ASPEC-CDS-ALARM            14258    22.04   170,326,863
+     451       H      D2  ASPEC-CDS-ALARM            12526    22.12   170,327,028
+
+-------------------------------------------------------------------------------------
+  SLOWEST USERS (top 10)
+-------------------------------------------------------------------------------------
+    User   Total_ms   CDS_train   CDS_pred   ML_train   ML_pred   Correct
+  ──────  ─────────  ──────────  ─────────  ─────────  ────────  ────────
+       0     996813      988843        380       7564        24         Y
+     245     418607       16926        110        161         2         Y
+     306     366489       17060        108        181         1         Y
+      81     277468      274206         53       3206         3         Y
+      17      55065       55010         55          0         0         Y
+     298      26762       16293        173        886         4         Y
+     119      26451       20456        380       5608         7         Y
+     412      26298       18823        321       7147         6         Y
+      16      24998       18579         88        746         7         N
+       2      24980       16663         64       1475         8         Y
+
+=====================================================================================

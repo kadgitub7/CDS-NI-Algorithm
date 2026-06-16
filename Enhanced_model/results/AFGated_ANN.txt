@@ -1,0 +1,167 @@
+==============================================================================
+  RESULTS: AFGated(ANN)
+==============================================================================
+  Timestamp:       2026-06-04 12:31:54
+  Mode:            AFGated(ANN)
+  Users evaluated: 452
+  Total time:      1258.8s  (2785ms/user)
+
+------------------------------------------------------------------------------
+  SUMMARY METRICS
+------------------------------------------------------------------------------
+  Accuracy:              76.99%  (348/452)
+  Sensitivity (Recall):  77.29%  (diseased detected: 160/207)
+  Specificity:           76.73%  (healthy correct:   188/245)
+  Precision (PPV):       73.73%  (positive predictions correct: 160/217)
+  Neg Pred Value (NPV):  80.00%  (negative predictions correct: 188/235)
+  F1 Score:              75.47%
+  Misclassifications:    104
+
+------------------------------------------------------------------------------
+  CONFUSION MATRIX  (binary: healthy vs unhealthy)
+------------------------------------------------------------------------------
+                          Predicted
+                    Healthy    Unhealthy
+  Actual Healthy        188           57
+  Actual Unhealthy       47          160
+
+------------------------------------------------------------------------------
+  DECISION SOURCE BREAKDOWN
+------------------------------------------------------------------------------
+  Source                           Count        %   Accuracy
+  ──────────────────────────────  ──────  ───────  ─────────
+  AFG-ANN-OVERRIDE                    30     6.6%      66.7%
+  AFG-ANN-SCREEN                     100    22.1%      78.0%
+  AFG-CDS-ALARM                      210    46.5%      74.3%
+  AFG-CDS-HEALTHY                    112    24.8%      83.9%
+
+------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+------------------------------------------------------------------------------
+    Class   Correct   Total   Accuracy  Label     
+  ───────  ────────  ──────  ─────────  ──────────
+        1       188     245      76.7%  Healthy   
+        2        33      44      75.0%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5        11      13      84.6%  Disease-5 
+        6        17      25      68.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         8       9      88.9%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        11      22      50.0%  Disease-16
+
+------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE  (104 errors)
+------------------------------------------------------------------------------
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       9     D10       H  AFG-ANN-SCREEN                  0.968      0.438       -     Screening         1380
+      21       H      D2  AFG-CDS-ALARM                   0.622       -          -     Unhealthy          944
+      34      D4       H  AFG-ANN-SCREEN                  0.968      0.629       -     Screening         1464
+      37     D10       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            927
+      39      D6       H  AFG-ANN-OVERRIDE                0.348      0.740       -     Unhealthy         1289
+      43       H      D2  AFG-CDS-ALARM                   0.072      0.288       -     Unhealthy         1134
+      50       H      D2  AFG-CDS-ALARM                   0.193      0.563       -     Unhealthy         1129
+      53     D16       H  AFG-ANN-OVERRIDE                0.015      0.886       -     Unhealthy         1218
+      54     D16       H  AFG-ANN-SCREEN                  0.959      0.437       -     Screening         1144
+      55      D6       H  AFG-ANN-SCREEN                  0.968      0.854       -     Screening         1360
+      59       H      D2  AFG-CDS-ALARM                   0.873       -          -     Unhealthy          929
+      61      D5       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            971
+      68      D6       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            957
+      71     D16       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            952
+      72       H      D2  AFG-CDS-ALARM                   0.926       -          -     Unhealthy          877
+      77      D2       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            844
+      82      D2       H  AFG-ANN-SCREEN                  0.968      0.440       -     Screening         1226
+      85      D9       H  AFG-ANN-OVERRIDE                0.044      0.957       -     Unhealthy         1132
+      90       H      D3  AFG-CDS-ALARM                   0.724       -          -     Unhealthy          894
+      98       H      D2  AFG-CDS-ALARM                   0.511      0.601       -     Unhealthy         1093
+      99       H      D2  AFG-CDS-ALARM                   0.294      0.487       -     Unhealthy         1050
+     100      D4       H  AFG-ANN-SCREEN                  0.968      0.545       -     Screening         1165
+     104      D6       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy           1007
+     109       H      D2  AFG-CDS-ALARM                   0.261      0.335       -     Unhealthy         1058
+     110       H      D2  AFG-CDS-ALARM                   0.829       -          -     Unhealthy          910
+     114      D6       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            802
+     116     D16       H  AFG-ANN-OVERRIDE                0.586      0.938       -     Unhealthy         1197
+     126       H      D2  AFG-CDS-ALARM                   0.603       -          -     Unhealthy          916
+     129       H      D2  AFG-CDS-ALARM                   0.530      0.542       -     Unhealthy         1281
+     133       H      D2  AFG-CDS-ALARM                   0.477      0.270       -     Unhealthy         1110
+     134     D10       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy           1011
+     136       H      D2  AFG-CDS-ALARM                   0.882       -          -     Unhealthy          861
+     137     D10       H  AFG-ANN-SCREEN                  0.963      0.332       -     Screening         1330
+     138       H      D6  AFG-CDS-ALARM                   1.000       -          -     Unhealthy          982
+     144     D10       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            957
+     152       H      D2  AFG-CDS-ALARM                   0.842       -          -     Unhealthy         1053
+     154     D16       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy           1035
+     157      D2       H  AFG-ANN-SCREEN                  0.959      0.353       -     Screening         1577
+     160       H      D2  AFG-CDS-ALARM                   0.010      0.546       -     Unhealthy         2040
+     162       H      D2  AFG-CDS-ALARM                   0.784       -          -     Unhealthy         1122
+     170       H      D2  AFG-CDS-ALARM                   0.991       -          -     Unhealthy          930
+     172       H      D2  AFG-CDS-ALARM                   0.947       -          -     Unhealthy          876
+     178       H      D2  AFG-CDS-ALARM                   0.847       -          -     Unhealthy          988
+     179      D2       H  AFG-ANN-SCREEN                  0.968      0.429       -     Screening         1348
+     181     D16       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            861
+     182       H      D2  AFG-CDS-ALARM                   0.863       -          -     Unhealthy          986
+     186      D2       H  AFG-ANN-SCREEN                  0.968      0.813       -     Screening         1306
+     190       H      D2  AFG-CDS-ALARM                   0.501      0.481       -     Unhealthy         1290
+     198     D16       H  AFG-ANN-OVERRIDE                0.063      0.952       -     Unhealthy         7469
+     202       H      D2  AFG-CDS-ALARM                   0.564      0.809       -     Unhealthy         6154
+     211       H      D2  AFG-CDS-ALARM                   0.366      0.388       -     Unhealthy         6206
+     221       H      D2  AFG-CDS-ALARM                   0.978       -          -     Unhealthy         1020
+     223       H      D2  AFG-CDS-ALARM                   0.535      0.499       -     Unhealthy         1361
+     228       H      D2  AFG-CDS-ALARM                   0.978       -          -     Unhealthy          916
+     233       H      D2  AFG-CDS-ALARM                   0.811       -          -     Unhealthy          919
+     234       H      D2  AFG-CDS-ALARM                   0.429      0.659       -     Unhealthy         1310
+     239       H      D2  AFG-CDS-ALARM                   0.675       -          -     Unhealthy          853
+     241       H      D2  AFG-CDS-ALARM                   0.346      0.607       -     Unhealthy         1270
+     242       H      D2  AFG-CDS-ALARM                   0.646       -          -     Unhealthy          970
+     246       H      D2  AFG-CDS-ALARM                   0.014      0.327       -     Unhealthy         1315
+     247       H      D2  AFG-CDS-ALARM                   0.829       -          -     Unhealthy          974
+     250     D10       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            864
+     259      D2       H  AFG-ANN-OVERRIDE                0.509      0.711       -     Unhealthy         1268
+     261     D16       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy           1019
+     267       H      D2  AFG-ANN-SCREEN                  0.963      0.276       -     Screening         1069
+     268       H      D2  AFG-CDS-ALARM                   0.612       -          -     Unhealthy          894
+     274       H      D2  AFG-ANN-SCREEN                  0.963      0.370       -     Screening         1708
+     275      D2       H  AFG-ANN-SCREEN                  0.972      0.440       -     Screening         1165
+     278     D10       H  AFG-ANN-SCREEN                  0.968      0.754       -     Screening         1457
+     280       H      D2  AFG-CDS-ALARM                   0.603       -          -     Unhealthy          917
+     283      D6       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            978
+     295      D2       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            977
+     299       H      D2  AFG-CDS-ALARM                   0.784       -          -     Unhealthy          834
+     308      D2       H  AFG-ANN-OVERRIDE                0.189      0.810       -     Unhealthy         1518
+     309      D7       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            950
+     311       H      D2  AFG-CDS-ALARM                   0.550      0.629       -     Unhealthy         1311
+     318       H     D16  AFG-ANN-SCREEN                  0.963      0.556       -     Screening         1206
+     321       H      D2  AFG-CDS-ALARM                   0.569      0.337       -     Unhealthy         1336
+     326     D10       H  AFG-ANN-SCREEN                  0.959      0.340       -     Screening         1108
+     331       H      D2  AFG-CDS-ALARM                   0.918       -          -     Unhealthy          938
+     332     D16       H  AFG-ANN-OVERRIDE                0.010      0.831       -     Unhealthy         1207
+     341     D10       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            925
+     343      D6       H  AFG-ANN-SCREEN                  0.968      0.360       -     Screening         1143
+     348      D5       H  AFG-ANN-OVERRIDE                0.557      0.956       -     Unhealthy         1410
+     352       H      D2  AFG-CDS-ALARM                   0.237      0.176       -     Unhealthy         1121
+     353     D10       H  AFG-ANN-OVERRIDE                0.552      0.728       -     Unhealthy         1146
+     355       H      D2  AFG-CDS-ALARM                   0.793       -          -     Unhealthy          892
+     362     D16       H  AFG-ANN-SCREEN                  0.968      0.661       -     Screening         1226
+     364      D6       H  AFG-CDS-HEALTHY                 1.000       -          -     Healthy            907
+     365       H      D2  AFG-CDS-ALARM                   0.366      0.394       -     Unhealthy         1268
+     367      D2       H  AFG-ANN-SCREEN                  0.930      0.501       -     Screening         1261
+     375      D2       H  AFG-ANN-SCREEN                  0.968      0.438       -     Screening         1225
+     386     D16       H  AFG-ANN-SCREEN                  0.959      0.573       -     Screening         1121
+     389       H      D2  AFG-CDS-ALARM                   0.130      0.306       -     Unhealthy         1178
+     393       H      D2  AFG-CDS-ALARM                   0.376      0.700       -     Unhealthy         1162
+     394       H      D2  AFG-CDS-ALARM                   0.385      0.247       -     Unhealthy         1183
+     400     D10       H  AFG-ANN-SCREEN                  0.968      0.792       -     Screening         1208
+     408       H      D2  AFG-CDS-ALARM                   0.793       -          -     Unhealthy          879
+     416       H      D2  AFG-CDS-ALARM                   0.477      0.616       -     Unhealthy         1211
+     422       H      D2  AFG-CDS-ALARM                   0.501      0.573       -     Unhealthy         1215
+     434       H      D2  AFG-CDS-ALARM                   0.957       -          -     Unhealthy         2915
+     439       H      D2  AFG-CDS-ALARM                   0.608       -          -     Unhealthy         2779
+     440       H      D3  AFG-CDS-ALARM                   0.767       -          -     Unhealthy         2855
+     451       H      D2  AFG-CDS-ALARM                   0.492      0.518       -     Unhealthy         3537
+
+==============================================================================

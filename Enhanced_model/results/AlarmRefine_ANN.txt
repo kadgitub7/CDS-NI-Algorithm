@@ -1,0 +1,169 @@
+==============================================================================
+  RESULTS: AlarmRefine(ANN)
+==============================================================================
+  Timestamp:       2026-06-04 12:33:23
+  Mode:            AlarmRefine(ANN)
+  Users evaluated: 452
+  Total time:      1346.9s  (2980ms/user)
+
+------------------------------------------------------------------------------
+  SUMMARY METRICS
+------------------------------------------------------------------------------
+  Accuracy:              76.55%  (346/452)
+  Sensitivity (Recall):  75.36%  (diseased detected: 156/207)
+  Specificity:           77.55%  (healthy correct:   190/245)
+  Precision (PPV):       73.93%  (positive predictions correct: 156/211)
+  Neg Pred Value (NPV):  78.84%  (negative predictions correct: 190/241)
+  F1 Score:              74.64%
+  Misclassifications:    106
+
+------------------------------------------------------------------------------
+  CONFUSION MATRIX  (binary: healthy vs unhealthy)
+------------------------------------------------------------------------------
+                          Predicted
+                    Healthy    Unhealthy
+  Actual Healthy        190           55
+  Actual Unhealthy       51          156
+
+------------------------------------------------------------------------------
+  DECISION SOURCE BREAKDOWN
+------------------------------------------------------------------------------
+  Source                           Count        %   Accuracy
+  ──────────────────────────────  ──────  ───────  ─────────
+  AREF-ANN-OVERRIDE                   36     8.0%      61.1%
+  AREF-ANN-SCREEN                    100    22.1%      78.0%
+  AREF-CDS-ALARM                     204    45.1%      74.5%
+  AREF-CDS-HEALTHY                   112    24.8%      83.9%
+
+------------------------------------------------------------------------------
+  PER-CLASS BREAKDOWN
+------------------------------------------------------------------------------
+    Class   Correct   Total   Accuracy  Label     
+  ───────  ────────  ──────  ─────────  ──────────
+        1       190     245      77.6%  Healthy   
+        2        33      44      75.0%  Disease-2 
+        3        15      15     100.0%  Disease-3 
+        4        13      15      86.7%  Disease-4 
+        5         9      13      69.2%  Disease-5 
+        6        16      25      64.0%  Disease-6 
+        7         2       3      66.7%  Disease-7 
+        8         2       2     100.0%  Disease-8 
+        9         8       9      88.9%  Disease-9 
+       10        39      50      78.0%  Disease-10
+       14         4       4     100.0%  Disease-14
+       15         5       5     100.0%  Disease-15
+       16        10      22      45.5%  Disease-16
+
+------------------------------------------------------------------------------
+  MISCLASSIFICATION TRACE  (106 errors)
+------------------------------------------------------------------------------
+    User    True    Pred  Source                         CDS_AF   ANN_Conf   RNN_Conf  CDS_Dec        Time_ms
+  ──────  ──────  ──────  ────────────────────────────  ───────  ─────────  ─────────  ────────────  ────────
+       9     D10       H  AREF-ANN-SCREEN                 0.968      0.438       -     Screening         1326
+      21       H      D2  AREF-CDS-ALARM                  0.622      0.606       -     Unhealthy         1586
+      34      D4       H  AREF-ANN-SCREEN                 0.968      0.629       -     Screening         1534
+      37     D10       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            905
+      39      D6       H  AREF-ANN-OVERRIDE               0.348      0.740       -     Unhealthy         1256
+      43       H      D2  AREF-CDS-ALARM                  0.072      0.288       -     Unhealthy         1073
+      46      D5       H  AREF-ANN-OVERRIDE               0.601      0.785       -     Unhealthy         1077
+      50       H      D2  AREF-CDS-ALARM                  0.193      0.563       -     Unhealthy         1117
+      53     D16       H  AREF-ANN-OVERRIDE               0.015      0.886       -     Unhealthy         1195
+      54     D16       H  AREF-ANN-SCREEN                 0.959      0.437       -     Screening         1219
+      55      D6       H  AREF-ANN-SCREEN                 0.968      0.854       -     Screening         1482
+      59       H      D2  AREF-CDS-ALARM                  0.873      0.896       -     Unhealthy         1202
+      61      D5       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            998
+      68      D6       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            831
+      71     D16       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            913
+      72       H      D2  AREF-CDS-ALARM                  0.926      0.741       -     Unhealthy         1109
+      77      D2       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            930
+      82      D2       H  AREF-ANN-SCREEN                 0.968      0.440       -     Screening         1099
+      84      D6       H  AREF-ANN-OVERRIDE               0.625      0.869       -     Unhealthy         1109
+      85      D9       H  AREF-ANN-OVERRIDE               0.044      0.957       -     Unhealthy         1216
+      90       H      D3  AREF-CDS-ALARM                  0.724      0.602       -     Unhealthy         1113
+      98       H      D2  AREF-CDS-ALARM                  0.511      0.601       -     Unhealthy         1100
+      99       H      D2  AREF-CDS-ALARM                  0.294      0.487       -     Unhealthy         1026
+     100      D4       H  AREF-ANN-SCREEN                 0.968      0.545       -     Screening         1139
+     104      D6       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            983
+     109       H      D2  AREF-CDS-ALARM                  0.261      0.335       -     Unhealthy         1063
+     110       H      D2  AREF-CDS-ALARM                  0.829      0.729       -     Unhealthy         1489
+     114      D6       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            916
+     116     D16       H  AREF-ANN-OVERRIDE               0.586      0.938       -     Unhealthy         1065
+     126       H      D2  AREF-CDS-ALARM                  0.603      0.422       -     Unhealthy         1269
+     129       H      D2  AREF-CDS-ALARM                  0.530      0.542       -     Unhealthy         1330
+     133       H      D2  AREF-CDS-ALARM                  0.477      0.270       -     Unhealthy         1110
+     134     D10       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            853
+     136       H      D2  AREF-CDS-ALARM                  0.882      0.737       -     Unhealthy         1064
+     137     D10       H  AREF-ANN-SCREEN                 0.963      0.332       -     Screening         1119
+     138       H      D6  AREF-CDS-ALARM                  1.000      0.693       -     Unhealthy         1164
+     144     D10       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            941
+     152       H      D2  AREF-CDS-ALARM                  0.842      0.731       -     Unhealthy         1127
+     154     D16       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy           1011
+     157      D2       H  AREF-ANN-SCREEN                 0.959      0.353       -     Screening         1423
+     160       H      D2  AREF-CDS-ALARM                  0.010      0.546       -     Unhealthy         1350
+     162       H      D2  AREF-CDS-ALARM                  0.784      0.811       -     Unhealthy         2630
+     170       H      D2  AREF-CDS-ALARM                  0.991      0.340       -     Unhealthy         1200
+     172       H      D2  AREF-CDS-ALARM                  0.947      0.660       -     Unhealthy         1259
+     178       H      D2  AREF-CDS-ALARM                  0.847      0.527       -     Unhealthy         1386
+     179      D2       H  AREF-ANN-SCREEN                 0.968      0.429       -     Screening         1240
+     181     D16       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy           1013
+     182       H      D2  AREF-CDS-ALARM                  0.863      0.265       -     Unhealthy         1174
+     186      D2       H  AREF-ANN-SCREEN                 0.968      0.813       -     Screening         6019
+     190       H      D2  AREF-CDS-ALARM                  0.501      0.481       -     Unhealthy         5668
+     198     D16       H  AREF-ANN-OVERRIDE               0.063      0.952       -     Unhealthy         8633
+     202       H      D2  AREF-CDS-ALARM                  0.564      0.809       -     Unhealthy         5826
+     211       H      D2  AREF-CDS-ALARM                  0.366      0.388       -     Unhealthy         1340
+     221       H      D2  AREF-CDS-ALARM                  0.978      0.416       -     Unhealthy         1217
+     223       H      D2  AREF-CDS-ALARM                  0.535      0.499       -     Unhealthy         1275
+     227     D16       H  AREF-ANN-OVERRIDE               0.630      0.718       -     Unhealthy         1264
+     228       H      D2  AREF-CDS-ALARM                  0.978      0.704       -     Unhealthy         1310
+     233       H      D2  AREF-CDS-ALARM                  0.811      0.905       -     Unhealthy         1169
+     234       H      D2  AREF-CDS-ALARM                  0.429      0.659       -     Unhealthy         1324
+     241       H      D2  AREF-CDS-ALARM                  0.346      0.607       -     Unhealthy         1415
+     242       H      D2  AREF-CDS-ALARM                  0.646      0.607       -     Unhealthy         1382
+     246       H      D2  AREF-CDS-ALARM                  0.014      0.327       -     Unhealthy         1323
+     247       H      D2  AREF-CDS-ALARM                  0.829      0.775       -     Unhealthy         1301
+     250     D10       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            896
+     259      D2       H  AREF-ANN-OVERRIDE               0.509      0.711       -     Unhealthy         1276
+     261     D16       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            932
+     267       H      D2  AREF-ANN-SCREEN                 0.963      0.276       -     Screening         1179
+     268       H      D2  AREF-CDS-ALARM                  0.612      0.265       -     Unhealthy         1145
+     274       H      D2  AREF-ANN-SCREEN                 0.963      0.370       -     Screening         1141
+     275      D2       H  AREF-ANN-SCREEN                 0.972      0.440       -     Screening         1258
+     278     D10       H  AREF-ANN-SCREEN                 0.968      0.754       -     Screening         1172
+     280       H      D2  AREF-CDS-ALARM                  0.603      0.598       -     Unhealthy         1167
+     283      D6       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            921
+     295      D2       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy           1136
+     299       H      D2  AREF-CDS-ALARM                  0.784      0.540       -     Unhealthy         1285
+     308      D2       H  AREF-ANN-OVERRIDE               0.189      0.810       -     Unhealthy         1219
+     309      D7       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            865
+     311       H      D2  AREF-CDS-ALARM                  0.550      0.629       -     Unhealthy         1183
+     318       H     D16  AREF-ANN-SCREEN                 0.963      0.556       -     Screening         1330
+     321       H      D2  AREF-CDS-ALARM                  0.569      0.337       -     Unhealthy         1178
+     326     D10       H  AREF-ANN-SCREEN                 0.959      0.340       -     Screening         1192
+     331       H      D2  AREF-CDS-ALARM                  0.918      0.633       -     Unhealthy         1840
+     332     D16       H  AREF-ANN-OVERRIDE               0.010      0.831       -     Unhealthy         1242
+     341     D10       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            851
+     343      D6       H  AREF-ANN-SCREEN                 0.968      0.360       -     Screening         1262
+     348      D5       H  AREF-ANN-OVERRIDE               0.557      0.956       -     Unhealthy         1266
+     352       H      D2  AREF-CDS-ALARM                  0.237      0.176       -     Unhealthy         1227
+     353     D10       H  AREF-ANN-OVERRIDE               0.552      0.728       -     Unhealthy         1173
+     355       H      D2  AREF-CDS-ALARM                  0.793      0.298       -     Unhealthy         1154
+     362     D16       H  AREF-ANN-SCREEN                 0.968      0.661       -     Screening         1204
+     364      D6       H  AREF-CDS-HEALTHY                1.000       -          -     Healthy            942
+     365       H      D2  AREF-CDS-ALARM                  0.366      0.394       -     Unhealthy         1208
+     367      D2       H  AREF-ANN-SCREEN                 0.930      0.501       -     Screening         1879
+     374      D5       H  AREF-ANN-OVERRIDE               0.659      0.790       -     Unhealthy         1236
+     375      D2       H  AREF-ANN-SCREEN                 0.968      0.438       -     Screening         1169
+     386     D16       H  AREF-ANN-SCREEN                 0.959      0.573       -     Screening         1108
+     389       H      D2  AREF-CDS-ALARM                  0.130      0.306       -     Unhealthy         1302
+     393       H      D2  AREF-CDS-ALARM                  0.376      0.700       -     Unhealthy         1184
+     394       H      D2  AREF-CDS-ALARM                  0.385      0.247       -     Unhealthy         1131
+     400     D10       H  AREF-ANN-SCREEN                 0.968      0.792       -     Screening         1184
+     408       H      D2  AREF-CDS-ALARM                  0.793      0.375       -     Unhealthy         1101
+     416       H      D2  AREF-CDS-ALARM                  0.477      0.616       -     Unhealthy         3542
+     422       H      D2  AREF-CDS-ALARM                  0.501      0.573       -     Unhealthy         3788
+     434       H      D2  AREF-CDS-ALARM                  0.957      0.864       -     Unhealthy         3589
+     440       H      D3  AREF-CDS-ALARM                  0.767      0.830       -     Unhealthy         3761
+     451       H      D2  AREF-CDS-ALARM                  0.492      0.518       -     Unhealthy         3466
+
+==============================================================================

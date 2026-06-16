@@ -1,0 +1,544 @@
+====================================================================================================
+  STATISTICAL SIGNIFICANCE ANALYSIS — resource_analysis
+  Generated: 2026-06-08 10:43:17
+  Baseline:  CDS-only
+  N users:   452
+  Alpha:     0.05
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+  SECTION 1: WILSON 95% CONFIDENCE INTERVALS ON ACCURACY
+----------------------------------------------------------------------------------------------------
+  Model                           Accuracy  Correct  95% CI Lower  95% CI Upper  CI Width
+  ──────────────────────────────  ────────  ───────  ────────────  ────────────  ────────
+  CDS-only                          74.56%    337/452        70.35%        78.35%     8.01%
+  ANN-only                          70.58%    319/452        66.21%        74.59%     8.37%
+  RNN-only                          67.48%    305/452        63.03%        71.63%     8.61%
+  Cascade(ANN)                      74.78%    338/452        70.58%        78.56%     7.98%
+  Cascade(RNN)                      72.35%    327/452        68.05%        76.27%     8.22%
+  Vote(CDS+ANN)                     74.56%    337/452        70.35%        78.35%     8.01%
+  Vote(CDS+RNN)                     74.56%    337/452        70.35%        78.35%     8.01%
+  Confidence(CDS+ANN)               74.56%    337/452        70.35%        78.35%     8.01%
+  Confidence(CDS+RNN)               74.56%    337/452        70.35%        78.35%     8.01%
+  Stacked(CDS->ANN)                 59.51%    269/452        54.93%        63.94%     9.01%
+  Stacked(CDS->RNN)                 40.04%    181/452        35.63%        44.63%     9.00%
+  Selector(CDS+ANN)                 74.78%    338/452        70.58%        78.56%     7.98%
+  Selector(CDS+RNN)                 72.35%    327/452        68.05%        76.27%     8.22%
+  AlarmRefine(ANN)                  76.55%    346/452        72.43%        80.22%     7.79%
+  AFGated(ANN)                      76.99%    348/452        72.89%        80.63%     7.74%
+  DisagreeRules(ANN)                76.33%    345/452        72.20%        80.01%     7.82%
+  AlarmSpecialist(ANN)              74.12%    335/452        69.89%        77.94%     8.05%
+  TripleCascade                     76.77%    347/452        72.66%        80.43%     7.77%
+  TGLLNet-T1+CDS                    76.99%    348/452        72.89%        80.63%     7.74%
+  TGLLNet-T12+CDS                   78.10%    353/452        74.06%        81.66%     7.61%
+  TGLLNet-T123+CDS                  75.22%    340/452        71.04%        78.98%     7.94%
+  TGLLNet-T1-only                   71.90%    325/452        67.59%        75.85%     8.26%
+  TGLLNet-T12-only                  71.46%    323/452        67.13%        75.43%     8.30%
+  TGLLNet-T123-only                 73.89%    334/452        69.66%        77.73%     8.07%
+
+----------------------------------------------------------------------------------------------------
+  SECTION 2: McNEMAR'S TEST — EACH MODEL vs CDS-only
+----------------------------------------------------------------------------------------------------
+  Tests whether the error patterns differ significantly from the baseline.
+  b = baseline wrong & model right (improvement)
+  c = baseline right & model wrong (regression)
+
+  Model                              b     c        χ²     p-value     p-exact   Sig?     Direction
+  ──────────────────────────────  ────  ────  ────────  ──────────  ──────────  ─────  ────────────
+  ANN-only                          70    88     1.829    0.176232         N/A     no      A better
+  RNN-only                          59    91     6.407    0.011369         N/A  YES *      A better
+  Cascade(ANN)                       4     3     0.000    1.000000    1.000000     no      B better
+  Cascade(RNN)                       6    16     3.682    0.055009    0.052479     no      A better
+  Vote(CDS+ANN)                      0     0     0.000    1.000000         N/A     no          tied
+  Vote(CDS+RNN)                      0     0     0.000    1.000000         N/A     no          tied
+  Confidence(CDS+ANN)                0     0     0.000    1.000000         N/A     no          tied
+  Confidence(CDS+RNN)                0     0     0.000    1.000000         N/A     no          tied
+  Stacked(CDS->ANN)                 66   134    22.445    0.000002         N/A  YES *      A better
+  Stacked(CDS->RNN)                 67   223    82.845    0.000000         N/A  YES *      A better
+  Selector(CDS+ANN)                  4     3     0.000    1.000000    1.000000     no      B better
+  Selector(CDS+RNN)                  6    16     3.682    0.055009    0.052479     no      A better
+  AlarmRefine(ANN)                  26    17     1.488    0.222469         N/A     no      B better
+  AFGated(ANN)                      24    13     2.703    0.100178         N/A     no      B better
+  DisagreeRules(ANN)                33    25     0.845    0.358020         N/A     no      B better
+  AlarmSpecialist(ANN)              19    21     0.025    0.874367         N/A     no      A better
+  TripleCascade                     25    15     2.025    0.154729         N/A     no      B better
+  TGLLNet-T1+CDS                    21    10     3.226    0.072486         N/A     no      B better
+  TGLLNet-T12+CDS                   31    15     4.891    0.026992         N/A  YES *      B better
+  TGLLNet-T123+CDS                  10     7     0.235    0.627626    0.629059     no      B better
+  TGLLNet-T1-only                   71    83     0.786    0.375399         N/A     no      A better
+  TGLLNet-T12-only                  70    84     1.097    0.294837         N/A     no      A better
+  TGLLNet-T123-only                 68    71     0.029    0.865295         N/A     no      A better
+
+  CONTINGENCY TABLE DETAILS (models with different error patterns):
+
+  CDS-only vs ANN-only:
+    Both correct:    249
+    Both wrong:       45
+    CDS-only wrong, ANN-only right (improvement):   70
+    CDS-only right, ANN-only wrong (regression):    88
+
+  CDS-only vs RNN-only:
+    Both correct:    246
+    Both wrong:       56
+    CDS-only wrong, RNN-only right (improvement):   59
+    CDS-only right, RNN-only wrong (regression):    91
+
+  CDS-only vs Cascade(ANN):
+    Both correct:    334
+    Both wrong:      111
+    CDS-only wrong, Cascade(ANN) right (improvement):    4
+    CDS-only right, Cascade(ANN) wrong (regression):     3
+
+  CDS-only vs Cascade(RNN):
+    Both correct:    321
+    Both wrong:      109
+    CDS-only wrong, Cascade(RNN) right (improvement):    6
+    CDS-only right, Cascade(RNN) wrong (regression):    16
+
+  CDS-only vs Stacked(CDS->ANN):
+    Both correct:    203
+    Both wrong:       49
+    CDS-only wrong, Stacked(CDS->ANN) right (improvement):   66
+    CDS-only right, Stacked(CDS->ANN) wrong (regression):   134
+
+  CDS-only vs Stacked(CDS->RNN):
+    Both correct:    114
+    Both wrong:       48
+    CDS-only wrong, Stacked(CDS->RNN) right (improvement):   67
+    CDS-only right, Stacked(CDS->RNN) wrong (regression):   223
+
+  CDS-only vs Selector(CDS+ANN):
+    Both correct:    334
+    Both wrong:      111
+    CDS-only wrong, Selector(CDS+ANN) right (improvement):    4
+    CDS-only right, Selector(CDS+ANN) wrong (regression):     3
+
+  CDS-only vs Selector(CDS+RNN):
+    Both correct:    321
+    Both wrong:      109
+    CDS-only wrong, Selector(CDS+RNN) right (improvement):    6
+    CDS-only right, Selector(CDS+RNN) wrong (regression):    16
+
+  CDS-only vs AlarmRefine(ANN):
+    Both correct:    320
+    Both wrong:       89
+    CDS-only wrong, AlarmRefine(ANN) right (improvement):   26
+    CDS-only right, AlarmRefine(ANN) wrong (regression):    17
+
+  CDS-only vs AFGated(ANN):
+    Both correct:    324
+    Both wrong:       91
+    CDS-only wrong, AFGated(ANN) right (improvement):   24
+    CDS-only right, AFGated(ANN) wrong (regression):    13
+
+  CDS-only vs DisagreeRules(ANN):
+    Both correct:    312
+    Both wrong:       82
+    CDS-only wrong, DisagreeRules(ANN) right (improvement):   33
+    CDS-only right, DisagreeRules(ANN) wrong (regression):    25
+
+  CDS-only vs AlarmSpecialist(ANN):
+    Both correct:    316
+    Both wrong:       96
+    CDS-only wrong, AlarmSpecialist(ANN) right (improvement):   19
+    CDS-only right, AlarmSpecialist(ANN) wrong (regression):    21
+
+  CDS-only vs TripleCascade:
+    Both correct:    322
+    Both wrong:       90
+    CDS-only wrong, TripleCascade right (improvement):   25
+    CDS-only right, TripleCascade wrong (regression):    15
+
+  CDS-only vs TGLLNet-T1+CDS:
+    Both correct:    327
+    Both wrong:       94
+    CDS-only wrong, TGLLNet-T1+CDS right (improvement):   21
+    CDS-only right, TGLLNet-T1+CDS wrong (regression):    10
+
+  CDS-only vs TGLLNet-T12+CDS:
+    Both correct:    322
+    Both wrong:       84
+    CDS-only wrong, TGLLNet-T12+CDS right (improvement):   31
+    CDS-only right, TGLLNet-T12+CDS wrong (regression):    15
+
+  CDS-only vs TGLLNet-T123+CDS:
+    Both correct:    330
+    Both wrong:      105
+    CDS-only wrong, TGLLNet-T123+CDS right (improvement):   10
+    CDS-only right, TGLLNet-T123+CDS wrong (regression):     7
+
+  CDS-only vs TGLLNet-T1-only:
+    Both correct:    254
+    Both wrong:       44
+    CDS-only wrong, TGLLNet-T1-only right (improvement):   71
+    CDS-only right, TGLLNet-T1-only wrong (regression):    83
+
+  CDS-only vs TGLLNet-T12-only:
+    Both correct:    253
+    Both wrong:       45
+    CDS-only wrong, TGLLNet-T12-only right (improvement):   70
+    CDS-only right, TGLLNet-T12-only wrong (regression):    84
+
+  CDS-only vs TGLLNet-T123-only:
+    Both correct:    266
+    Both wrong:       47
+    CDS-only wrong, TGLLNet-T123-only right (improvement):   68
+    CDS-only right, TGLLNet-T123-only wrong (regression):    71
+
+----------------------------------------------------------------------------------------------------
+  SECTION 3: PER-CLASS McNEMAR'S TEST vs CDS-only
+----------------------------------------------------------------------------------------------------
+  Tests whether improvement/regression is concentrated in specific disease classes.
+  Uses exact binomial test (two-sided) when discordant pairs < 25.
+
+  CDS-only vs ANN-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        14        64          4    0.000000  YES *    B better
+    Disease-2        44        11        23         2         14    0.004181  YES *    A better
+    Disease-3        15         0         1         0          1    1.000000     no    A better
+    Disease-4        15         2        11         0          9    0.003906  YES *    A better
+    Disease-5        13         1        11         0         10    0.001953  YES *    A better
+    Disease-6        25         7        24         0         17    0.000015  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         3         0          3    0.250000     no    A better
+    Disease-10       50        11        20         3         12    0.035156  YES *    A better
+    Disease-14        4         0         3         0          3    0.250000     no    A better
+    Disease-15        5         0         3         0          3    0.250000     no    A better
+    Disease-16       22         8        16         1          9    0.021484  YES *    A better
+
+  CDS-only vs RNN-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        55        48         29    0.040239  YES *    B better
+    Disease-2        44        11        16         3          8    0.226562     no    A better
+    Disease-3        15         0         6         0          6    0.031250  YES *    A better
+    Disease-4        15         2         6         0          4    0.125000     no    A better
+    Disease-5        13         1         8         0          7    0.015625  YES *    A better
+    Disease-6        25         7        18         1         12    0.003418  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         1         0          1    1.000000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        18         5         12    0.143463     no    A better
+    Disease-14        4         0         2         0          2    0.500000     no    A better
+    Disease-15        5         0         1         0          1    1.000000     no    A better
+    Disease-16       22         8        13         2          7    0.179688     no    A better
+
+  CDS-only vs Cascade(ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        77         0          3    0.250000     no    A better
+    Disease-2        44        11         9         2          0    0.500000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         1          0    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         1          0    1.000000     no    B better
+
+  CDS-only vs Cascade(RNN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        90         0         16    0.000031  YES *    A better
+    Disease-2        44        11         8         3          0    0.250000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11         9         2          0    0.500000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         1          0    1.000000     no    B better
+
+  Vote(CDS+ANN): identical to CDS-only — skipped
+
+  Vote(CDS+RNN): identical to CDS-only — skipped
+
+  Confidence(CDS+ANN): identical to CDS-only — skipped
+
+  Confidence(CDS+RNN): identical to CDS-only — skipped
+
+  CDS-only vs Stacked(CDS->ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        23        62         11    0.000000  YES *    B better
+    Disease-2        44        11        28         1         18    0.000076  YES *    A better
+    Disease-3        15         0        11         0         11    0.000977  YES *    A better
+    Disease-4        15         2        10         1          9    0.021484  YES *    A better
+    Disease-5        13         1        11         1         11    0.006348  YES *    A better
+    Disease-6        25         7        23         1         17    0.000145  YES *    A better
+    Disease-7         3         1         3         0          2    0.500000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         5         0          5    0.062500     no    A better
+    Disease-10       50        11        42         0         31    0.000000  YES *    A better
+    Disease-14        4         0         4         0          4    0.125000     no    A better
+    Disease-15        5         0         3         0          3    0.250000     no    A better
+    Disease-16       22         8        18         0         10    0.001953  YES *    A better
+
+  CDS-only vs Stacked(CDS->RNN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74       197        31        154    0.000000  YES *    A better
+    Disease-2        44        11        18         9         16    0.230139     no    A better
+    Disease-3        15         0        10         0         10    0.001953  YES *    A better
+    Disease-4        15         2         7         2          7    0.179688     no    A better
+    Disease-5        13         1         5         1          5    0.218750     no    A better
+    Disease-6        25         7         8         5          6    1.000000     no    A better
+    Disease-7         3         1         0         1          0    1.000000     no    B better
+    Disease-8         2         0         1         0          1    1.000000     no    A better
+    Disease-9         9         0         5         0          5    0.062500     no    A better
+    Disease-10       50        11        11        10         10    1.000000     no        same
+    Disease-14        4         0         2         0          2    0.500000     no    A better
+    Disease-15        5         0         2         0          2    0.500000     no    A better
+    Disease-16       22         8         5         8          5    0.581055     no    B better
+
+  CDS-only vs Selector(CDS+ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        77         0          3    0.250000     no    A better
+    Disease-2        44        11         9         2          0    0.500000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         1          0    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         1          0    1.000000     no    B better
+
+  CDS-only vs Selector(CDS+RNN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        90         0         16    0.000031  YES *    A better
+    Disease-2        44        11         8         3          0    0.250000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11         9         2          0    0.500000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         1          0    1.000000     no    B better
+
+  CDS-only vs AlarmRefine(ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        55        22          3    0.000318  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         4         0          3    0.250000     no    A better
+    Disease-6        25         7         9         0          2    0.500000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        11         1          1    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8        12         1          5    0.218750     no    A better
+
+  CDS-only vs AFGated(ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        57        20          3    0.000488  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         2         0          1    1.000000     no    A better
+    Disease-6        25         7         8         0          1    1.000000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        11         1          1    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8        11         1          4    0.375000     no    A better
+
+  CDS-only vs DisagreeRules(ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        48        29          3    0.000010  YES *    B better
+    Disease-2        44        11        17         2          8    0.109375     no    A better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         3         0          2    0.500000     no    A better
+    Disease-6        25         7        11         0          4    0.125000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         1         0          1    1.000000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        11         1          1    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         1         0          1    1.000000     no    A better
+    Disease-16       22         8        11         1          4    0.375000     no    A better
+
+  CDS-only vs AlarmSpecialist(ANN):
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        62        15          3    0.007538  YES *    B better
+    Disease-2        44        11        13         2          4    0.687500     no    A better
+    Disease-3        15         0         2         0          2    0.500000     no    A better
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         2         0          1    1.000000     no    A better
+    Disease-6        25         7         9         0          2    0.500000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        16         1          6    0.125000     no    A better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         9         1          2    1.000000     no    A better
+
+  CDS-only vs TripleCascade:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        53        22          1    0.000006  YES *    B better
+    Disease-2        44        11        12         1          2    1.000000     no    A better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         4         0          3    0.250000     no    A better
+    Disease-6        25         7         9         0          2    0.500000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        11         1          1    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8        12         1          5    0.218750     no    A better
+
+  CDS-only vs TGLLNet-T1+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        61        16          3    0.004425  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         2         0          0    1.000000     no        same
+    Disease-5        13         1         3         0          2    0.500000     no    A better
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         2          1    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         9         1          2    1.000000     no    A better
+
+  CDS-only vs TGLLNet-T12+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        52        26          4    0.000126  YES *    B better
+    Disease-2        44        11        11         2          2    1.000000     no        same
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         3         0          1    1.000000     no    A better
+    Disease-5        13         1         3         0          2    0.500000     no    A better
+    Disease-6        25         7         7         0          0    1.000000     no        same
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        11         2          2    1.000000     no        same
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8        11         1          4    0.375000     no    A better
+
+  CDS-only vs TGLLNet-T123+CDS:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        75         3          4    1.000000     no    A better
+    Disease-2        44        11         9         2          0    0.500000     no    B better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         1         1          0    1.000000     no    B better
+    Disease-5        13         1         1         0          0    1.000000     no        same
+    Disease-6        25         7         8         0          1    1.000000     no    A better
+    Disease-7         3         1         1         0          0    1.000000     no        same
+    Disease-8         2         0         0         0          0    1.000000     no        same
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        10         2          1    1.000000     no    B better
+    Disease-14        4         0         0         0          0    1.000000     no        same
+    Disease-15        5         0         0         0          0    1.000000     no        same
+    Disease-16       22         8         7         2          1    1.000000     no    B better
+
+  CDS-only vs TGLLNet-T1-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        13        65          4    0.000000  YES *    B better
+    Disease-2        44        11        21         2         12    0.012939  YES *    A better
+    Disease-3        15         0         2         0          2    0.500000     no    A better
+    Disease-4        15         2        11         0          9    0.003906  YES *    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        24         0         17    0.000015  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        19         3         11    0.057373     no    A better
+    Disease-14        4         0         1         0          1    1.000000     no    A better
+    Disease-15        5         0         3         0          3    0.250000     no    A better
+    Disease-16       22         8        19         1         12    0.003418  YES *    A better
+
+  CDS-only vs TGLLNet-T12-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        18        63          7    0.000000  YES *    B better
+    Disease-2        44        11        22         2         13    0.007385  YES *    A better
+    Disease-3        15         0         1         0          1    1.000000     no    A better
+    Disease-4        15         2        11         0          9    0.003906  YES *    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        24         0         17    0.000015  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         1         0          1    1.000000     no    A better
+    Disease-10       50        11        19         4         12    0.076813     no    A better
+    Disease-14        4         0         3         0          3    0.250000     no    A better
+    Disease-15        5         0         2         0          2    0.500000     no    A better
+    Disease-16       22         8        15         1          8    0.039062  YES *    A better
+
+  CDS-only vs TGLLNet-T123-only:
+    Class             N  Base Err   Mod Err  Improved  Regressed     p-value   Sig?         Dir
+    ────────────  ─────  ────────  ────────  ────────  ─────────  ──────────  ─────  ──────────
+    Healthy         245        74        18        60          4    0.000000  YES *    B better
+    Disease-2        44        11        22         2         13    0.007385  YES *    A better
+    Disease-3        15         0         0         0          0    1.000000     no        same
+    Disease-4        15         2         6         1          5    0.218750     no    A better
+    Disease-5        13         1         9         0          8    0.007812  YES *    A better
+    Disease-6        25         7        23         0         16    0.000031  YES *    A better
+    Disease-7         3         1         2         0          1    1.000000     no    A better
+    Disease-8         2         0         2         0          2    0.500000     no    A better
+    Disease-9         9         0         0         0          0    1.000000     no        same
+    Disease-10       50        11        20         3         12    0.035156  YES *    A better
+    Disease-14        4         0         1         0          1    1.000000     no    A better
+    Disease-15        5         0         2         0          2    0.500000     no    A better
+    Disease-16       22         8        13         2          7    0.179688     no    A better
+
+----------------------------------------------------------------------------------------------------
+  SECTION 4: SUMMARY & INTERPRETATION
+----------------------------------------------------------------------------------------------------
+
+  Models with STATISTICALLY SIGNIFICANT differences from CDS-only (α=0.05):
+    • RNN-only underperforms CDS-only (p=0.011369, b=59, c=91)
+    • Stacked(CDS->ANN) underperforms CDS-only (p=0.000002, b=66, c=134)
+    • Stacked(CDS->RNN) underperforms CDS-only (p=0.000000, b=67, c=223)
+    • TGLLNet-T12+CDS outperforms CDS-only (p=0.026992, b=31, c=15)
+
+  Notes:
+  • McNemar's test is appropriate here because both classifiers are evaluated on the
+    exact same 452 users via LOOCV, making predictions paired.
+  • Wilson intervals are preferred over normal approximation for n=452 as they provide
+    better coverage, especially for proportions near boundaries.
+  • Per-class tests use exact binomial (two-sided) when discordant pairs < 25,
+    as chi-squared approximation is unreliable for very small counts.
+  • Continuity correction (Edwards') is applied to chi-squared McNemar's statistic.
+
+====================================================================================================
