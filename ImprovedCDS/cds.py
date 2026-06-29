@@ -1,317 +1,444 @@
-"""
-CDS Arrhythmia Classifier — Algorithms 1-4 with LOOCV.
-Paper: "Brain-Inspired Intelligence for Real-Time Health Situation Understanding
-        in Smart e-Health Home Applications" (IEEE Access, 2019)
-"""
-
-import math
-import random
-import time
+"""CDS Arrhythmia Classifier — Algorithms 1-4 with LOOCV."""
+import math, random, time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
-
 import numpy as np
 
 THRESHOLD = 0.025
 U_MIN = math.ceil(5 / THRESHOLD)  # 200
 HEALTHY = 1
 N_FEAT = 279
-LAPLACE = 1e-6
+FORCE_SEX_BRANCHING = True
+SEX_FEAT = 1
 
-
-# ─── Data ────────────────────────────────────────────────────────────────────
 
 def load_data(path):
     rows = []
     with open(path) as f:
         for line in f:
             line = line.strip()
-            if not line: continue
+            if not line:
+                continue
             rows.append([float('nan') if v.strip() == '?' else float(v.strip())
                          for v in line.split(",")])
     raw = np.array(rows, dtype=np.float64)
     data, labels = raw[:, :N_FEAT], raw[:, N_FEAT].astype(int)
-    remap = {1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,14:11,15:12,16:13}
+    remap = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 14:11, 15:12, 16:13}
     return data, np.array([remap.get(l, l) for l in labels], dtype=int)
 
 
 def classify_features(data):
     is_bin = np.zeros(N_FEAT, dtype=bool)
     for c in range(N_FEAT):
-        v = data[:, c]; v = v[~np.isnan(v)]
+        v = data[:, c]
+        v = v[~np.isnan(v)]
         if len(v) > 0 and set(np.unique(v)).issubset({0.0, 1.0}):
             is_bin[c] = True
     return is_bin
 
 
-# ─── Algorithm 1: Decision Tree ─────────────────────────────────────────────
-
-class Node:
-    __slots__ = ('nid','lvl','uidx','feats','hdist','bfeat','bvset','blo','bhi','bbin','children')
-    def __init__(self, nid, lvl, uidx, feats, hdist):
-        self.nid=nid; self.lvl=lvl; self.uidx=uidx; self.feats=feats; self.hdist=hdist
-        self.bfeat=self.bvset=self.blo=self.bhi=None; self.bbin=False; self.children=[]
-    @property
-    def nu(self): return len(self.uidx)
-    @property
-    def nd(self): return sum(v for k,v in self.hdist.items() if k!=HEALTHY)
-    def contains(self, row):
-        if self.bfeat is None: return True
-        v = row[self.bfeat]
-        if np.isnan(v): return False
-        if self.bbin: return v in self.bvset
-        return self.blo <= v <= self.bhi
-
-
 def _hdist(labels, idx):
     d = defaultdict(int)
-    for u in idx: d[labels[u]] += 1
+    for u in idx:
+        d[labels[u]] += 1
     return dict(d)
 
 
+# ═══════════════════════════════════════════════════════════════════
+# Algorithm 1: Decision Tree
+# For each feature not in ancestry: expand into children.
+# Inline U_MIN check (skip children < 200 users).
+# Post-step: prune duplicate user sets at same level.
+# ═══════════════════════════════════════════════════════════════════
+
+class Node:
+    __slots__ = ('nid', 'lvl', 'uidx', 'hdist', 'bfeat', 'bbin',
+                 'bvset', 'blo', 'bhi', 'children', 'parent', 'ancestor_feats')
+
+    def __init__(self, nid, lvl, uidx, hdist):
+        self.nid = nid
+        self.lvl = lvl
+        self.uidx = uidx
+        self.hdist = hdist
+        self.bfeat = self.bvset = self.blo = self.bhi = None
+        self.bbin = False
+        self.children = []
+        self.parent = None
+        self.ancestor_feats = frozenset()
+
+    @property
+    def nu(self):
+        return len(self.uidx)
+
+    @property
+    def n_diseased(self):
+        return sum(v for k, v in self.hdist.items() if k != HEALTHY)
+
+    def branch_match(self, row):
+        if self.bfeat is None:
+            return True
+        v = row[self.bfeat]
+        if np.isnan(v):
+            return False
+        if self.bbin:
+            return v in self.bvset
+        if self.bhi == np.inf:
+            return v > self.blo
+        return v <= self.bhi
+
+
 def build_tree(data, labels, is_bin):
-    """Build decision tree. Returns list of all nodes."""
     n = data.shape[0]
-    root = Node("root", 1, np.arange(n), set(range(N_FEAT)), _hdist(labels, np.arange(n)))
-    nodes = [root]; nc = [0]
+    root = Node("root", 1, np.arange(n), _hdist(labels, np.arange(n)))
+    all_nodes = [root]
+    current_level = [root]
+    ctr = [0]
 
-    def branch(parent):
-        for f in sorted(parent.feats):
-            col = data[parent.uidx, f]; vm = ~np.isnan(col); vv = col[vm]
-            if len(vv) == 0: continue
-            if is_bin[f]:
-                uq = sorted(set(vv))
-                if len(uq) < 2: continue
-                parts = []
-                for val in uq:
-                    cu = parent.uidx[vm & (col == val)]
-                    if len(cu) < U_MIN: parts = []; break
-                    parts.append((cu, frozenset({val}), None, None, True))
-                if len(parts) < 2: continue
+    while current_level:
+        lvl = current_level[0].lvl
+        if FORCE_SEX_BRANCHING and lvl > 1:
+            break
+        children = []
+
+        for parent in current_level:
+            if FORCE_SEX_BRANCHING:
+                feats = [SEX_FEAT]
             else:
-                if float(vv.min()) == float(vv.max()): continue
-                med = float(np.median(vv))
-                lo_u, hi_u = parent.uidx[vm & (col<=med)], parent.uidx[vm & (col>med)]
-                if len(lo_u) < U_MIN or len(hi_u) < U_MIN: continue
-                parts = [(lo_u,None,-np.inf,med,False), (hi_u,None,med,np.inf,False)]
-            for cu,vs,lo,hi,ib in parts:
-                nc[0] += 1
-                cf = set(parent.feats)
-                if parent.lvl >= 2: cf.discard(f)
-                nd = Node(f"L{parent.lvl+1}_f{f}_{nc[0]}", parent.lvl+1, cu, cf, _hdist(labels,cu))
-                nd.bfeat,nd.bvset,nd.blo,nd.bhi,nd.bbin = f,vs,lo,hi,ib
-                parent.children.append(nd); nodes.append(nd)
+                feats = [f for f in range(N_FEAT) if f not in parent.ancestor_feats]
 
-    branch(root)
-    for nd in list(nodes):
-        if nd.lvl == 2: branch(nd)
-    return nodes
+            for f in feats:
+                col = data[parent.uidx, f]
+                vm = ~np.isnan(col)
+                vv = col[vm]
+                if len(vv) == 0:
+                    continue
+                if is_bin[f]:
+                    uq = sorted(set(vv))
+                    if len(uq) < 2:
+                        continue
+                    parts = [(parent.uidx[vm & (col == val)],
+                              frozenset({val}), None, None, True) for val in uq]
+                else:
+                    if float(vv.min()) == float(vv.max()):
+                        continue
+                    med = float(np.median(vv))
+                    parts = [
+                        (parent.uidx[vm & (col <= med)], None, -np.inf, med, False),
+                        (parent.uidx[vm & (col > med)], None, med, np.inf, False),
+                    ]
+                for cu, vs, lo, hi, ib in parts:
+                    if len(cu) < U_MIN:
+                        continue
+                    ctr[0] += 1
+                    ch = Node(f"L{lvl+1}_f{f}_{ctr[0]}", lvl + 1,
+                              cu, _hdist(labels, cu))
+                    ch.bfeat, ch.bvset, ch.blo, ch.bhi, ch.bbin = f, vs, lo, hi, ib
+                    ch.parent = parent
+                    ch.ancestor_feats = parent.ancestor_feats | frozenset({f})
+                    parent.children.append(ch)
+                    children.append(ch)
+
+        # Prune duplicate user sets at this level
+        seen = {}
+        deduped = []
+        for ch in children:
+            key = np.sort(ch.uidx).tobytes()
+            if key not in seen:
+                seen[key] = True
+                deduped.append(ch)
+            else:
+                ch.parent.children.remove(ch)
+
+        all_nodes.extend(deduped)
+        current_level = deduped
+
+    return all_nodes
 
 
-# ─── Algorithm 2: Perceptor & Executive Training ────────────────────────────
-# model = (b_min_healthy, b_max_healthy, n_bins, p_bin_given_h, min_healthy_bin, max_healthy_bin)
-# action = (feat_idx, node_id, disease_h, weight)
+# ═══════════════════════════════════════════════════════════════════
+# Algorithm 2: Perceptor & Executive Training
+# For each node and feature: compute likelihood P(B̂|h),
+# prevalence P(h,f), evidence P(B̂), posterior P(h|B̂),
+# healthy range, and executive action weights.
+# When no healthy users exist: all bins are outside the
+# (nonexistent) healthy range, so r_{o|h} = 1.0.
+# ═══════════════════════════════════════════════════════════════════
 
-def train_node(node, data, labels, is_bin, all_cls, N_total):
-    """Run Algorithm 2 for one node. Returns (models_dict, actions_list)."""
-    nc = len(all_cls); ci_h = all_cls.index(HEALTHY)
-    models = {}; actions = []
-    nd_data = data[node.uidx]; nd_labels = labels[node.uidx]
+class FeatureModel:
+    __slots__ = ('likelihood', 'prevalence', 'evidence', 'posterior',
+                 'h_min', 'h_max', 'n_bins', 'edges', 'min_hbin', 'max_hbin')
 
-    for f in sorted(node.feats):
-        col = nd_data[:, f]; vm = ~np.isnan(col); vv = col[vm]; nv = len(vv)
-        if nv == 0: continue
-        bmin, bmax = float(vv.min()), float(vv.max())
+    def __init__(self, likelihood, prevalence, evidence, posterior,
+                 h_min, h_max, n_bins, edges, min_hbin, max_hbin):
+        self.likelihood = likelihood
+        self.prevalence = prevalence
+        self.evidence = evidence
+        self.posterior = posterior
+        self.h_min = h_min
+        self.h_max = h_max
+        self.n_bins = n_bins
+        self.edges = edges
+        self.min_hbin = min_hbin
+        self.max_hbin = max_hbin
 
+
+def train_node(node, data, labels, is_bin, all_cls):
+    nc = len(all_cls)
+    models, actions = {}, []
+    nd_data, nd_labels = data[node.uidx], labels[node.uidx]
+    ns = node.nu
+
+    for f in range(N_FEAT):
+        col = nd_data[:, f]
+        vm = ~np.isnan(col)
+        vv = col[vm]
+        nv = len(vv)
+        if nv == 0:
+            continue
+
+        vmin, vmax = float(vv.min()), float(vv.max())
+
+        # Sturges' bins: K = ceil(1 + log2(n))
         if is_bin[f]:
-            if bmin == bmax: nb, edges = 1, np.array([bmin-.5, bmin+.5])
-            else: nb, edges = 2, np.array([-.5, .5, 1.5])
-        elif bmin == bmax: nb, edges = 1, np.array([bmin-.5, bmin+.5])
+            nb = 1 if vmin == vmax else 2
+            edges = (np.array([vmin - .5, vmin + .5]) if nb == 1
+                     else np.array([-.5, .5, 1.5]))
+        elif vmin == vmax:
+            nb, edges = 1, np.array([vmin - .5, vmin + .5])
         else:
             nb = max(2, int(np.ceil(1 + np.log2(nv))))
-            edges = np.linspace(bmin, bmax, nb+1)
+            edges = np.linspace(vmin, vmax, nb + 1)
 
-        ba = np.clip(np.searchsorted(edges[1:], vv, side='right'), 0, nb-1)
+        ba = np.clip(np.searchsorted(edges[1:], vv, side='right'), 0, nb - 1)
         lv = nd_labels[vm]
 
-        pbh = np.zeros((nb, nc))
+        # Likelihood: P(B̂|h) — (n_bins, n_classes)
+        lk = np.zeros((nb, nc))
         for ci, c in enumerate(all_cls):
-            cm = (lv == c); n_c = cm.sum()
-            if n_c == 0: pbh[:, ci] = 1.0/nb
+            cm = (lv == c)
+            n_c = cm.sum()
+            if n_c == 0:
+                pass  # leave as zeros — no data, no contribution
             else:
-                cnt = np.bincount(ba[cm], minlength=nb).astype(float) + LAPLACE
-                pbh[:, ci] = cnt / cnt.sum()
+                lk[:, ci] = np.bincount(ba[cm], minlength=nb).astype(float) / n_c
 
+        # Prevalence: P(h, f) = count(h in node) / node_size — (n_classes,)
+        prev = np.array([node.hdist.get(c, 0) / ns for c in all_cls])
+
+        # Evidence: P(B̂) = Σ_h P(B̂|h) · P(h,f) — (n_bins,)
+        ev = lk @ prev
+
+        # Posterior: P(h|B̂) = P(B̂|h) · P(h,f) / P(B̂) — (n_bins, n_classes)
+        post = np.zeros((nb, nc))
+        for b in range(nb):
+            if ev[b] > 0:
+                post[b] = lk[b] * prev / ev[b]
+
+        # Healthy range
         hm = (lv == HEALTHY)
-        if hm.sum() > 0:
-            hv = vv[hm]; h_min, h_max = float(hv.min()), float(hv.max())
-            hb = ba[hm]; minhb, maxhb = int(hb.min()), int(hb.max())
+        has_healthy = hm.sum() > 0
+        if has_healthy:
+            hv = vv[hm]
+            h_min, h_max = float(hv.min()), float(hv.max())
+            hb = ba[hm]
+            mhb, xhb = int(hb.min()), int(hb.max())
         else:
-            h_min, h_max, minhb, maxhb = bmin, bmax, 0, nb-1
+            # No healthy users: any value is outside the (nonexistent) range
+            h_min, h_max = np.inf, -np.inf
+            mhb, xhb = nb, -1
 
-        models[(node.nid, f)] = (h_min, h_max, nb, pbh, minhb, maxhb)
+        models[(node.nid, f)] = FeatureModel(
+            lk, prev, ev, post, h_min, h_max, nb, edges, mhb, xhb)
 
-        if hm.sum() == 0: continue
+        # Executive action library
         for ci, c in enumerate(all_cls):
-            if c == HEALTHY or node.hdist.get(c, 0) <= 0: continue
-            pb = pbh[:minhb, ci].sum() if minhb > 0 else 0.0
-            pa = pbh[maxhb+1:, ci].sum() if maxhb < nb-1 else 0.0
-            r = pb + pa
-            if r > 0: actions.append((f, node.nid, c, r))
+            if c == HEALTHY or prev[ci] <= 0:
+                continue
+            if not has_healthy:
+                r = 1.0
+            else:
+                r = ((lk[:mhb, ci].sum() if mhb > 0 else 0.0) +
+                     (lk[xhb + 1:, ci].sum() if xhb < nb - 1 else 0.0))
+            if r > 0:
+                actions.append((f, node.nid, c, r))
 
     return models, actions
 
 
-# ─── Algorithm 3: Refinement ────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════
+# Algorithm 3: Refinement (Greedy Set-Cover)
+# Per-node: sort actions by r_o descending, remove 0-weight.
+# Outer loop: disease class (reset newinf per h).
+# Inner loop: features sorted by r_o — keep if new users caught.
+# ═══════════════════════════════════════════════════════════════════
 
-def refine_node(node, models, actions, data):
-    """Greedy set-cover for one node. Global buffer/newinf."""
-    dcs = sorted(h for h in node.hdist if h != HEALTHY and node.hdist[h] > 0)
-    if not dcs: return []
-    newinf = np.zeros(node.nu, dtype=bool); buf = 0; kept = []
-    acts_h = defaultdict(list)
-    for a in actions:
-        if a[1] == node.nid: acts_h[a[2]].append(a)
+def refine_node(node, models, node_actions, data):
+    na = sorted([a for a in node_actions if a[3] > 0],
+                key=lambda a: a[3], reverse=True)
+    if not na:
+        return []
 
-    for h in dcs:
-        ha = sorted(acts_h.get(h, []), key=lambda a: a[3], reverse=True)
-        for a in ha:
+    kept = []
+    newinf = np.zeros(node.nu, dtype=bool)
+    buf = 0
+    for h in sorted(set(a[2] for a in na)):
+        for a in [x for x in na if x[2] == h]:
             m = models.get((node.nid, a[0]))
-            if not m: continue
+            if not m:
+                continue
             raw = data[node.uidx, a[0]]
-            valid = ~np.isnan(raw)
-            newinf |= valid & ((raw < m[0]) | (raw > m[1]))
+            vm = ~np.isnan(raw)
+            newinf |= vm & ((raw < m.h_min) | (raw > m.h_max))
             s = int(newinf.sum())
-            if s <= buf: continue
-            buf = s; kept.append(a)
+            if s > buf:
+                buf = s
+                kept.append(a)
+
     return kept
 
 
-# ─── Algorithm 4: Prediction ────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════
+# Algorithm 4: Prediction
+# Initial random action from root → compute AF.
+# BFS through focus levels: AF inherits from parent node,
+# resets when moving to sibling. Features reset per node.
+# First conclusive answer (HEALTHY/UNHEALTHY) wins.
+# ═══════════════════════════════════════════════════════════════════
+
+def _route_user(uid, data, nodes):
+    by_lvl = defaultdict(list)
+    for nd in nodes:
+        by_lvl[nd.lvl].append(nd)
+    result, active = {}, set()
+    for lvl in sorted(by_lvl.keys()):
+        if lvl == 1:
+            result[1] = [nodes[0]]
+            active = {nodes[0].nid}
+        else:
+            matched = [nd for nd in by_lvl[lvl]
+                       if nd.parent and nd.parent.nid in active
+                       and nd.branch_match(data[uid])]
+            if matched:
+                result[lvl] = matched
+                active = {nd.nid for nd in matched}
+            else:
+                break
+    return result
+
 
 def predict(uid, data, nodes, models, retained, rng):
-    """Predict one user. Returns (decision, n_pacs)."""
-    acts_nh = defaultdict(list)
-    for a in retained: acts_nh[(a[1], a[2])].append(a)
+    anh = defaultdict(list)
+    for a in retained:
+        anh[(a[1], a[2])].append(a)
 
-    af, pacs, consumed = 0.0, 0, set()
-    root = nodes[0]
+    pacs = 0
+    af_at = {}
 
-    def phf(nd, h): return nd.hdist.get(h,0) / max(nd.nu,1)
+    def phf(nd, h):
+        return nd.hdist.get(h, 0) / max(nd.nu, 1)
+
     def phg(nd):
-        d = nd.nd; return d/nd.nu if d > 0 and nd.nu > 0 else 1e-9
-    def afi(p, r, g): return max(0.0, p*r/g) if g > 1e-12 else 0.0
-    def rl(cands, nd, h, afc):
-        if not cands: return None
-        p, g = phf(nd,h), phg(nd)
-        return min(cands, key=lambda a: 1.0-(afi(p,a[3],g)+afc))
+        return nd.n_diseased / max(nd.nu, 1)
 
-    # Init action
-    ra = [a for a in retained if a[1]==root.nid and not np.isnan(data[uid,a[0]])]
-    h_init = j_init = None
-    if ra:
-        ia = rng.choice(ra); j_init, h_init = ia[0], ia[2]
-        m = models.get((root.nid, j_init))
+    def afi(p, r, g):
+        return (p * r / g) if g > 1e-12 else 0.0
+
+    # Initial random action from root node only
+    root = nodes[0]
+    root_af = 0.0
+    root_used = set()
+    root_ok = [a for a in retained if a[1] == root.nid
+               and not np.isnan(data[uid, a[0]])]
+    if root_ok:
+        ia = rng.choice(root_ok)
+        m = models.get((root.nid, ia[0]))
         if m:
-            af = min(1.0, af + afi(phf(root,h_init), ia[3], phg(root)))
-            pacs += 1; consumed.add((j_init, h_init))
-            if data[uid,j_init] < m[0] or data[uid,j_init] > m[1]:
+            root_af = min(1.0, root_af + afi(phf(root, ia[2]), ia[3], phg(root)))
+            pacs += 1
+            root_used.add(ia[0])
+            v = data[uid, ia[0]]
+            if v < m.h_min or v > m.h_max:
                 return "UNHEALTHY", pacs
 
-    max_lvl = max((nd.lvl for nd in nodes if nd.nid in {k[0] for k in models}), default=1)
-    trained = {k[0] for k in models}
+    # BFS through focus levels
+    lvl_nodes = _route_user(uid, data, nodes)
 
-    for lvl in range(1, max_lvl+1):
-        active = None
-        if lvl == 1: active = root
-        else:
-            for nd in nodes:
-                if nd.lvl==lvl and nd.nid in trained and nd.contains(data[uid]):
-                    active = nd; break
-        if not active: return "SCREENING", pacs
+    for lvl in sorted(lvl_nodes.keys()):
+        for nd in lvl_nodes[lvl]:
+            # Inherit AF from parent; features reset per node
+            if nd.nid == root.nid:
+                node_af = root_af
+                node_used = set(root_used)
+            else:
+                parent_nid = nd.parent.nid if nd.parent else root.nid
+                node_af = af_at.get(parent_nid, 0.0)
+                node_used = set()
 
-        dcs = sorted(h for h in active.hdist if h!=HEALTHY and active.hdist[h]>0)
-        if not dcs: return "HEALTHY", pacs
+            for h in sorted(k for k in nd.hdist if k != HEALTHY and nd.hdist[k] > 0):
+                cands = [a for a in anh.get((nd.nid, h), [])
+                         if a[0] not in node_used
+                         and not np.isnan(data[uid, a[0]])]
+                cands.sort(key=lambda a: a[3], reverse=True)
 
-        for h in dcs:
-            cb = [a for a in acts_nh.get((active.nid,h),[]) if (a[0],h) not in consumed]
-            if h_init is not None and h==h_init and lvl==1:
-                cb = [a for a in cb if a[0]!=j_init]
-            cb.sort(key=lambda a: a[3], reverse=True)
-            while cb:
-                sel = rl(cb, active, h, af)
-                if not sel: break
-                cb = [a for a in cb if a[0]!=sel[0]]
-                v = data[uid, sel[0]]
-                if np.isnan(v): continue
-                pacs += 1; consumed.add((sel[0], h))
-                m = models.get((active.nid, sel[0]))
-                if not m: continue
-                af = min(1.0, af + afi(phf(active,h), sel[3], phg(active)))
-                if v < m[0] or v > m[1]: return "UNHEALTHY", pacs
+                while cands:
+                    best = min(cands,
+                               key=lambda a: 1.0 - (node_af + afi(phf(nd, a[2]), a[3], phg(nd))))
+                    cands = [a for a in cands if a is not best]
+                    node_used.add(best[0])
+                    m = models.get((nd.nid, best[0]))
+                    if not m:
+                        continue
+                    pacs += 1
+                    node_af = min(1.0, node_af + afi(phf(nd, best[2]), best[3], phg(nd)))
+                    v = data[uid, best[0]]
+                    if v < m.h_min or v > m.h_max:
+                        return "UNHEALTHY", pacs
+                    if 1.0 - node_af <= THRESHOLD:
+                        return "HEALTHY", pacs
 
-        if 1.0 - af <= THRESHOLD: return "HEALTHY", pacs
+            af_at[nd.nid] = node_af
+
     return "SCREENING", pacs
 
 
-# ─── LOOCV ───────────────────────────────────────────────────────────────────
-
-def _route_user(uid, data, nodes, trained_nids):
-    """Find which nodes the test user would visit (one per level)."""
-    visited = [nodes[0]]  # root
-    for nd in nodes:
-        if nd.lvl > 1 and nd.nid in trained_nids and nd.contains(data[uid]):
-            visited.append(nd)
-            break
-    return visited
-
+# ═══════════════════════════════════════════════════════════════════
+# LOOCV — per-fold retraining, train ALL nodes
+# ═══════════════════════════════════════════════════════════════════
 
 def run_loocv(data, labels, max_users=None, seed=42):
     n = data.shape[0] if max_users is None else min(max_users, data.shape[0])
     is_bin = classify_features(data)
     all_cls = sorted(set(labels))
     rng = random.Random(seed)
-    results = []; t0 = time.perf_counter()
+    results = []
+    t0 = time.perf_counter()
 
     for i in range(n):
-        mask = np.ones(data.shape[0], dtype=bool); mask[i] = False
+        mask = np.ones(data.shape[0], dtype=bool)
+        mask[i] = False
         td, tl = data[mask], labels[mask]
-        N_train = td.shape[0]
 
-        # Alg 1: build tree
         nodes = build_tree(td, tl, is_bin)
 
-        # Optimization: only train nodes the test user will visit
-        # First pass: train root to get its models (needed for routing)
-        root_models, root_actions = train_node(nodes[0], td, tl, is_bin, all_cls, N_train)
-
-        # Find which level-2 node the test user belongs to
-        all_models = dict(root_models)
-        all_actions = list(root_actions)
-        trained_nids = {nodes[0].nid}
-
+        all_models = {}
+        actions_by_node = defaultdict(list)
         for nd in nodes:
-            if nd.lvl == 2 and nd.contains(data[i]):
-                nm, na = train_node(nd, td, tl, is_bin, all_cls, N_train)
-                all_models.update(nm)
-                all_actions.extend(na)
-                trained_nids.add(nd.nid)
-                break
+            nm, na = train_node(nd, td, tl, is_bin, all_cls)
+            all_models.update(nm)
+            for a in na:
+                actions_by_node[a[1]].append(a)
 
-        # Alg 3: refine actions per trained node
         retained = []
         for nd in nodes:
-            if nd.nid in trained_nids:
-                retained.extend(refine_node(nd, all_models, all_actions, td))
+            retained.extend(refine_node(nd, all_models,
+                                        actions_by_node.get(nd.nid, []), td))
 
-        # Alg 4: predict
         dec, npacs = predict(i, data, nodes, all_models, retained, rng)
         tl_i = int(labels[i])
         ok = (dec != "UNHEALTHY") if tl_i == HEALTHY else (dec == "UNHEALTHY")
         results.append((i, tl_i, dec, ok, npacs))
 
-        if (i+1) % 50 == 0 or i == n-1:
+        if (i + 1) % 50 == 0 or i == n - 1:
             acc = sum(r[3] for r in results) / len(results) * 100
             print(f"  [{i+1}/{n}] acc={acc:.1f}%  {time.perf_counter()-t0:.1f}s")
 
@@ -319,13 +446,15 @@ def run_loocv(data, labels, max_users=None, seed=42):
 
 
 def print_report(results):
-    n = len(results); nc = sum(r[3] for r in results)
-    th = [r for r in results if r[1]==HEALTHY]
-    td = [r for r in results if r[1]!=HEALTHY]
-    spec = sum(r[3] for r in th)/len(th)*100 if th else 0
-    sens = sum(r[3] for r in td)/len(td)*100 if td else 0
+    n = len(results)
+    nc = sum(r[3] for r in results)
+    th = [r for r in results if r[1] == HEALTHY]
+    td = [r for r in results if r[1] != HEALTHY]
+    spec = sum(r[3] for r in th) / len(th) * 100 if th else 0
+    sens = sum(r[3] for r in td) / len(td) * 100 if td else 0
     dc = defaultdict(int)
-    for r in results: dc[r[2]] += 1
+    for r in results:
+        dc[r[2]] += 1
 
     print(f"\n{'='*60}")
     print(f"CDS LOOCV — {n} users")
@@ -337,10 +466,12 @@ def print_report(results):
     print(f"\nPer-class:")
     print(f"  {'Class':>8s} {'N':>4s} {'OK':>4s} {'Acc':>5s}  Decisions")
     for cls in sorted(set(r[1] for r in results)):
-        cr = [r for r in results if r[1]==cls]
-        c = sum(r[3] for r in cr); cd = defaultdict(int)
-        for r in cr: cd[r[2]] += 1
-        lbl = "healthy" if cls==HEALTHY else f"h={cls}"
+        cr = [r for r in results if r[1] == cls]
+        c = sum(r[3] for r in cr)
+        cd = defaultdict(int)
+        for r in cr:
+            cd[r[2]] += 1
+        lbl = "healthy" if cls == HEALTHY else f"h={cls}"
         print(f"  {lbl:>8s} {len(cr):4d} {c:4d} {c/len(cr)*100:5.1f}  {dict(cd)}")
     print(f"\nAvg PACs: {np.mean([r[4] for r in results]):.1f}")
     print(f"{'='*60}")
@@ -350,7 +481,6 @@ if __name__ == "__main__":
     import sys
     dp = str(Path(__file__).parent / "data" / "arrhythmia.data")
     mu = int(sys.argv[1]) if len(sys.argv) > 1 else None
-
     print(f"Loading {dp}")
     data, labels = load_data(dp)
     print(f"{data.shape[0]} users x {data.shape[1]} feats | "
