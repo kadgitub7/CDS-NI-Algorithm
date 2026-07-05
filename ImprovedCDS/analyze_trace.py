@@ -1,220 +1,173 @@
-"""Analyze LOOCV trace data — diagnose what works, what fails, and why."""
+"""Post-hoc analysis of LOOCV trace: find optimal thresholds and detailed metrics."""
 import json
-import sys
+import numpy as np
 from collections import defaultdict
-from pathlib import Path
 
-def load_trace(path):
-    with open(path) as f:
-        return json.load(f)
+HEALTHY = 1
 
-def analyze(traces):
-    all_cls = sorted(set(t['true_class'] for t in traces))
-    n = len(traces)
+with open('output/loocv_trace_ovr.json') as f:
+    traces = json.load(f)
 
-    # 1. Overall accuracy
-    correct = sum(1 for t in traces if t['correct'])
-    print(f"{'='*80}")
-    print(f"OVERALL: {correct}/{n} = {100*correct/n:.1f}%")
-    print(f"{'='*80}\n")
+n = len(traces)
+print(f'Loaded {n} traces')
+print()
 
-    # 2. Per-class breakdown with confusion
-    print("PER-CLASS ACCURACY + CONFUSION:")
-    print(f"{'Class':>8s} {'N':>4s} {'Correct':>8s} {'Acc%':>6s}  Misclassified as...")
-    print("-" * 80)
-    for cls in all_cls:
-        cls_traces = [t for t in traces if t['true_class'] == cls]
-        n_cls = len(cls_traces)
-        n_correct = sum(1 for t in cls_traces if t['correct'])
-        wrong = defaultdict(int)
-        for t in cls_traces:
-            if not t['correct']:
-                wrong[t['predicted']] += 1
-        wrong_str = ", ".join(f"c{k}({v})" for k, v in
-                              sorted(wrong.items(), key=lambda x: -x[1])[:5])
-        lbl = "healthy" if cls == 1 else f"class {cls}"
-        print(f"{lbl:>8s} {n_cls:4d} {n_correct:8d} {100*n_correct/n_cls:5.1f}%  {wrong_str}")
-    print()
-
-    # 3. For each WRONG prediction, analyze WHY
-    print("=" * 80)
-    print("ERROR ANALYSIS — WHAT WENT WRONG FOR EACH MISCLASSIFIED USER")
-    print("=" * 80)
-
-    # Group errors by true class
-    for cls in all_cls:
-        errors = [t for t in traces if t['true_class'] == cls and not t['correct']]
-        if not errors:
-            continue
-
-        lbl = "healthy" if cls == 1 else f"class {cls}"
-        print(f"\n--- {lbl} errors ({len(errors)} users) ---")
-
-        for t in errors[:5]:  # Show up to 5 per class
-            uid = t['uid']
-            pred = t['predicted']
-            af = t['af_final']
-            n_feats = t['n_features_used']
-
-            true_af = af.get(str(cls), 0)
-            pred_af = af.get(str(pred), 0)
-
-            print(f"\n  User {uid}: true=c{cls}, predicted=c{pred}")
-            print(f"    AF for true class (c{cls}): {true_af:+.3f}")
-            print(f"    AF for pred class (c{pred}): {pred_af:+.3f}")
-            print(f"    Margin: {pred_af - true_af:+.3f} ({n_feats} features used)")
-
-            # Top 3 AF values
-            sorted_af = sorted(af.items(), key=lambda x: x[1], reverse=True)[:5]
-            print(f"    Top AF: {', '.join(f'c{k}={v:+.3f}' for k, v in sorted_af)}")
-
-            # Which features pushed TOWARD wrong class and AWAY from true class?
-            feats = t.get('features', [])
-            if feats:
-                pushers_wrong = []
-                pushers_right = []
-                for ft in feats:
-                    if 'skipped' in ft:
-                        continue
-                    ev = ft.get('evidence_contrib', {})
-                    ev_true = ev.get(str(cls), 0)
-                    ev_pred = ev.get(str(pred), 0)
-                    pushers_wrong.append((ft['feat'], ft['node'], ev_pred, ev_true,
-                                          ft['bin'], ft['n_bins'], ft['pop'],
-                                          ft.get('decisiveness', 0)))
-
-                # Sort by how much they pushed toward wrong class
-                pushers_wrong.sort(key=lambda x: x[2], reverse=True)
-                print(f"    Top features pushing toward c{pred} (wrong):")
-                for f, node, ev_pred, ev_true, bi, nb, pop, dec in pushers_wrong[:5]:
-                    print(f"      F{f:3d} @{node} bin {bi}/{nb} pop={pop} "
-                          f"dec={dec:.2f} ev_pred={ev_pred:+.4f} ev_true={ev_true:+.4f}")
-
-                # Features that pushed away from true class
-                pushers_away = sorted(pushers_wrong, key=lambda x: x[3])
-                print(f"    Top features pushing away from c{cls} (true):")
-                for f, node, ev_pred, ev_true, bi, nb, pop, dec in pushers_away[:5]:
-                    print(f"      F{f:3d} @{node} bin {bi}/{nb} pop={pop} "
-                          f"dec={dec:.2f} ev_pred={ev_pred:+.4f} ev_true={ev_true:+.4f}")
-
-    # 4. Feature importance: which features appear most in correct vs incorrect
-    print("\n" + "=" * 80)
-    print("FEATURE CONTRIBUTION PATTERNS")
-    print("=" * 80)
-
-    feat_correct_push = defaultdict(float)
-    feat_wrong_push = defaultdict(float)
-    feat_count = defaultdict(int)
+def evaluate_scoring(traces, score_key, threshold):
+    tp = tn = fp = fn = 0
+    per_class_correct = defaultdict(int)
+    per_class_total = defaultdict(int)
+    wrong_disease = 0
 
     for t in traces:
-        cls = t['true_class']
-        for ft in t.get('features', []):
-            if 'skipped' in ft:
-                continue
-            ev = ft.get('evidence_contrib', {})
-            ev_true = ev.get(str(cls), 0)
-            fkey = ft['feat']
-            feat_count[fkey] += 1
-            if t['correct']:
-                feat_correct_push[fkey] += ev_true
-            else:
-                feat_wrong_push[fkey] += ev_true
+        true = t['true_class']
+        scores = {int(k): v for k, v in t[score_key].items()}
+        disease_scores = {c: s for c, s in scores.items() if c != HEALTHY}
+        best_d = max(disease_scores, key=disease_scores.get)
 
-    print("\nFeatures that contribute MOST to correct predictions (high ev for true class):")
-    top_helpful = sorted(feat_correct_push.items(), key=lambda x: x[1], reverse=True)[:20]
-    for f, total_ev in top_helpful:
-        wrong_ev = feat_wrong_push.get(f, 0)
-        print(f"  F{f:3d}: correct_ev={total_ev:+.1f}  wrong_ev={wrong_ev:+.1f}  "
-              f"used {feat_count[f]} times")
-
-    print("\nFeatures that contribute MOST to wrong predictions (push away from true class):")
-    top_harmful = sorted(feat_wrong_push.items(), key=lambda x: x[1])[:20]
-    for f, total_ev in top_harmful:
-        correct_ev = feat_correct_push.get(f, 0)
-        print(f"  F{f:3d}: wrong_ev={total_ev:+.1f}  correct_ev={correct_ev:+.1f}  "
-              f"used {feat_count[f]} times")
-
-    # 5. Decisiveness distribution: are we weighting correctly?
-    print("\n" + "=" * 80)
-    print("DECISIVENESS DISTRIBUTION")
-    print("=" * 80)
-
-    dec_correct = []
-    dec_wrong = []
-    for t in traces:
-        for ft in t.get('features', []):
-            if 'skipped' in ft:
-                continue
-            d = ft.get('decisiveness', 0)
-            if t['correct']:
-                dec_correct.append(d)
-            else:
-                dec_wrong.append(d)
-
-    if dec_correct:
-        import numpy as np
-        dc = np.array(dec_correct)
-        dw = np.array(dec_wrong) if dec_wrong else np.array([0])
-        print(f"  Correct predictions — decisiveness: "
-              f"mean={dc.mean():.3f} median={np.median(dc):.3f} "
-              f"p90={np.percentile(dc,90):.3f} max={dc.max():.3f}")
-        print(f"  Wrong predictions   — decisiveness: "
-              f"mean={dw.mean():.3f} median={np.median(dw):.3f} "
-              f"p90={np.percentile(dw,90):.3f} max={dw.max():.3f}")
-
-    # 6. The key diagnostic: for wrong predictions, how often did the
-    #    true class have a STRONG signal that got drowned?
-    print("\n" + "=" * 80)
-    print("SIGNAL vs NOISE: Did correct class have strong features that got drowned?")
-    print("=" * 80)
-
-    drowned_count = 0
-    no_signal_count = 0
-    for t in traces:
-        if t['correct']:
-            continue
-        cls = t['true_class']
-        feats = t.get('features', [])
-        if not feats:
-            continue
-        max_true_ev = max((ft.get('evidence_contrib', {}).get(str(cls), 0)
-                           for ft in feats if 'skipped' not in ft), default=0)
-        if max_true_ev > 0.5:
-            drowned_count += 1
+        if disease_scores[best_d] >= threshold:
+            pred = best_d
         else:
-            no_signal_count += 1
+            pred = HEALTHY
 
-    total_wrong = sum(1 for t in traces if not t['correct'])
-    print(f"  Total wrong: {total_wrong}")
-    print(f"  Had strong true-class signal (>0.5) but got drowned: {drowned_count}")
-    print(f"  No strong true-class signal at all: {no_signal_count}")
+        per_class_total[true] += 1
+        true_b = 'H' if true == HEALTHY else 'D'
+        pred_b = 'H' if pred == HEALTHY else 'D'
 
-    # 7. Healthy users misclassified as disease — what's going on?
-    print("\n" + "=" * 80)
-    print("HEALTHY USERS MISCLASSIFIED AS DISEASE")
-    print("=" * 80)
-    h_errors = [t for t in traces if t['true_class'] == 1 and not t['correct']]
-    if h_errors:
-        pred_dist = defaultdict(int)
-        for t in h_errors:
-            pred_dist[t['predicted']] += 1
-        print(f"  {len(h_errors)} healthy users misclassified:")
-        for k, v in sorted(pred_dist.items(), key=lambda x: -x[1]):
-            print(f"    as class {k}: {v}")
+        if true_b == 'H' and pred_b == 'H': tn += 1; per_class_correct[true] += 1
+        elif true_b == 'H' and pred_b == 'D': fp += 1
+        elif true_b == 'D' and pred_b == 'D':
+            tp += 1
+            if pred == true: per_class_correct[true] += 1
+            else: wrong_disease += 1
+        else: fn += 1
 
-        # Show a few examples
-        for t in h_errors[:3]:
-            uid = t['uid']
-            pred = t['predicted']
-            af = t['af_final']
-            sorted_af = sorted(af.items(), key=lambda x: x[1], reverse=True)[:5]
-            print(f"\n  User {uid}: predicted c{pred}")
-            print(f"    AF: {', '.join(f'c{k}={v:+.3f}' for k, v in sorted_af)}")
-            print(f"    AF(healthy): {af.get('1', 0):+.3f}")
+    binary_acc = (tp + tn) / n
+    spec = tn / (tn + fp) if (tn + fp) > 0 else 0
+    sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+    ppv = tp / (tp + fp) if (tp + fp) > 0 else 0
+    npv = tn / (tn + fn) if (tn + fn) > 0 else 0
+    ba = np.mean([per_class_correct[c]/per_class_total[c]
+                  for c in per_class_total if per_class_total[c] > 0])
+    per_cls_acc = sum(per_class_correct.values()) / n
+    return {
+        'binary_acc': binary_acc, 'spec': spec, 'sens': sens,
+        'ppv': ppv, 'npv': npv, 'ba': ba, 'per_cls_acc': per_cls_acc,
+        'tp': tp, 'tn': tn, 'fp': fp, 'fn': fn,
+        'wrong_disease': wrong_disease,
+        'per_class_correct': dict(per_class_correct),
+        'per_class_total': dict(per_class_total)
+    }
 
 
-if __name__ == "__main__":
-    trace_path = sys.argv[1] if len(sys.argv) > 1 else str(
-        Path(__file__).parent / "output" / "loocv_trace.json")
-    traces = load_trace(trace_path)
-    analyze(traces)
+# =====================================================================
+# CONTRAST SCORING threshold sweep
+# =====================================================================
+print('='*70)
+print('CONTRAST SCORING: (af_for - af_against) / (total + eps)')
+print('='*70)
+print(f'{"Thresh":>7s}  {"BinAcc":>7s}  {"Spec":>7s}  {"Sens":>7s}  {"PPV":>7s}  {"NPV":>7s}  {"FP":>4s}  {"FN":>4s}  {"WD":>4s}')
+
+best_contrast_acc = 0; best_contrast_t = 0
+for t_100 in range(-20, 96):
+    t = t_100 / 100.0
+    r = evaluate_scoring(traces, 'class_scores', t)
+    if r['binary_acc'] > best_contrast_acc:
+        best_contrast_acc = r['binary_acc']; best_contrast_t = t
+    if t_100 % 5 == 0 or r['binary_acc'] >= best_contrast_acc:
+        print(f'{t:7.2f}  {100*r["binary_acc"]:6.1f}%  {100*r["spec"]:6.1f}%  '
+              f'{100*r["sens"]:6.1f}%  {100*r["ppv"]:6.1f}%  {100*r["npv"]:6.1f}%  '
+              f'{r["fp"]:4d}  {r["fn"]:4d}  {r["wrong_disease"]:4d}'
+              f'{"  <-- BEST" if r["binary_acc"] >= best_contrast_acc else ""}')
+
+print()
+print(f'Best contrast threshold: {best_contrast_t:.2f} -> {100*best_contrast_acc:.1f}% binary acc')
+r_best_c = evaluate_scoring(traces, 'class_scores', best_contrast_t)
+print(f'  Spec={100*r_best_c["spec"]:.1f}%  Sens={100*r_best_c["sens"]:.1f}%  '
+      f'PPV={100*r_best_c["ppv"]:.1f}%  NPV={100*r_best_c["npv"]:.1f}%')
+print(f'  Per-class acc={100*r_best_c["per_cls_acc"]:.1f}%  BA={100*r_best_c["ba"]:.1f}%')
+print()
+
+# =====================================================================
+# RATIO SCORING threshold sweep (same evidence, different scoring)
+# =====================================================================
+print('='*70)
+print('RATIO SCORING: (af_for + eps) / (af_against + eps)')
+print('  (same evidence model with dynamic support + penalty)')
+print('='*70)
+print(f'{"Thresh":>7s}  {"BinAcc":>7s}  {"Spec":>7s}  {"Sens":>7s}  {"PPV":>7s}  {"NPV":>7s}  {"FP":>4s}  {"FN":>4s}  {"WD":>4s}')
+
+best_ratio_acc = 0; best_ratio_t = 0
+for t_10 in range(10, 80):
+    t = t_10 / 10.0
+    r = evaluate_scoring(traces, 'ratio_scores', t)
+    if r['binary_acc'] > best_ratio_acc:
+        best_ratio_acc = r['binary_acc']; best_ratio_t = t
+    if t_10 % 5 == 0 or r['binary_acc'] >= best_ratio_acc:
+        print(f'{t:7.1f}  {100*r["binary_acc"]:6.1f}%  {100*r["spec"]:6.1f}%  '
+              f'{100*r["sens"]:6.1f}%  {100*r["ppv"]:6.1f}%  {100*r["npv"]:6.1f}%  '
+              f'{r["fp"]:4d}  {r["fn"]:4d}  {r["wrong_disease"]:4d}'
+              f'{"  <-- BEST" if r["binary_acc"] >= best_ratio_acc else ""}')
+
+print()
+print(f'Best ratio threshold: {best_ratio_t:.1f} -> {100*best_ratio_acc:.1f}% binary acc')
+r_best_r = evaluate_scoring(traces, 'ratio_scores', best_ratio_t)
+print(f'  Spec={100*r_best_r["spec"]:.1f}%  Sens={100*r_best_r["sens"]:.1f}%  '
+      f'PPV={100*r_best_r["ppv"]:.1f}%  NPV={100*r_best_r["npv"]:.1f}%')
+print()
+
+# =====================================================================
+# COMPARISON WITH PREVIOUS BASELINE
+# =====================================================================
+print('='*70)
+print('COMPARISON')
+print('='*70)
+print(f'Previous LOOCV (ratio, no fixes):  80.3% binary, 87.8% spec, 71.5% sens')
+print(f'New contrast (optimal threshold):  {100*best_contrast_acc:.1f}% binary, '
+      f'{100*r_best_c["spec"]:.1f}% spec, {100*r_best_c["sens"]:.1f}% sens')
+print(f'New ratio (optimal threshold):     {100*best_ratio_acc:.1f}% binary, '
+      f'{100*r_best_r["spec"]:.1f}% spec, {100*r_best_r["sens"]:.1f}% sens')
+print()
+
+if best_contrast_acc >= best_ratio_acc:
+    print(f'WINNER: Contrast scoring at t={best_contrast_t:.2f}')
+    best_t = best_contrast_t; score_key = 'class_scores'
+    r_win = r_best_c
+else:
+    print(f'WINNER: Ratio scoring at t={best_ratio_t:.1f}')
+    best_t = best_ratio_t; score_key = 'ratio_scores'
+    r_win = r_best_r
+print()
+
+# =====================================================================
+# PER-CLASS DETAIL for the winner
+# =====================================================================
+print('='*70)
+print('PER-CLASS DETAIL (best scoring method)')
+print('='*70)
+
+per_cls = defaultdict(lambda: {'total': 0, 'correct': 0, 'detected': 0, 'wrong': defaultdict(int)})
+for t_entry in traces:
+    true = t_entry['true_class']
+    scores = {int(k): v for k, v in t_entry[score_key].items()}
+    disease_scores = {c: s for c, s in scores.items() if c != HEALTHY}
+    best_d = max(disease_scores, key=disease_scores.get)
+    pred = best_d if disease_scores[best_d] >= best_t else HEALTHY
+
+    per_cls[true]['total'] += 1
+    if pred == true:
+        per_cls[true]['correct'] += 1
+    else:
+        per_cls[true]['wrong'][pred] += 1
+    if true != HEALTHY and pred != HEALTHY:
+        per_cls[true]['detected'] += 1
+
+for cls in sorted(per_cls.keys()):
+    c = per_cls[cls]
+    lbl = 'healthy' if cls == HEALTHY else f'class {cls}'
+    det_str = f'  detected: {c["detected"]}/{c["total"]}' if cls != HEALTHY else ''
+    wrong_parts = sorted(c['wrong'].items(), key=lambda x: -x[1])[:3]
+    wrong_str = ''
+    if wrong_parts:
+        wrong_str = '  misclassed as: ' + ', '.join(
+            f'{"H" if k==1 else f"c{k}"}({v})' for k, v in wrong_parts)
+    print(f'  {lbl:>10s}  {c["correct"]:3d}/{c["total"]:3d} = {100*c["correct"]/c["total"]:5.1f}%{det_str}{wrong_str}')

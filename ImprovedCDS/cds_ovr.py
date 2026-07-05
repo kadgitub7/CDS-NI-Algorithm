@@ -1,17 +1,21 @@
-"""CDS Arrhythmia Classifier — One-vs-Rest with corrected evidence model.
+"""CDS Arrhythmia Classifier — One-vs-Rest with clinical reasoning layers.
 
-Evidence fixes applied at the source (not calibration):
+Evidence model:
   1. Prior-aware Laplace smoothing: smooths toward class prior, not 0.5
   2. Confidence-weighted evidence: soft weight by bin population
   3. Equal-width binning: stable bin boundaries that preserve tail signal
   4. Dual assurance factors: separate af_for / af_against, ratio scoring
 
-Decision architecture (two-stage clinical reasoning):
-  - Score all disease classifiers (classes 2-13)
-  - If best disease score >= DISEASE_THRESHOLD -> diagnose that disease
-  - Otherwise -> healthy (no disease pattern detected)
-  This prevents the healthy classifier from winning via breadth (many weak
-  signals) when a disease classifier has genuine depth (few strong signals).
+Decision architecture (three-layer clinical reasoning):
+  Layer 1 - Size-based thresholds:
+    Well-represented classes (n >= 20) use lower threshold (2.7)
+    Small classes (n < 20) use stricter threshold (3.3)
+  Layer 2 - Healthy-as-competitor:
+    Disease score must exceed HEALTHY_WEIGHT * healthy_score
+    (strong healthy profile raises the bar for disease diagnosis)
+  Layer 3 - Suspicion gate:
+    If healthy_score < SUSPICION_HCUT, reduce threshold by SUSPICION_OFFSET
+    (patients who don't look healthy get lower bar for disease detection)
 """
 import time
 import json
@@ -31,7 +35,12 @@ RATIO_EPS = 0.1
 CORR_THRESHOLD = 0.8
 FEATURES_PER_CLASS = 15
 MAX_BINS = 6
-DISEASE_THRESHOLD = 3.3
+DISEASE_THRESHOLD = 3.3          # strict threshold for small/noisy classes
+BASE_THRESHOLD = 2.7             # relaxed threshold for well-represented classes
+LARGE_CLASS_N = 20               # classes with >= 20 members use BASE_THRESHOLD
+HEALTHY_WEIGHT = 1.1             # disease must exceed this × healthy_score
+SUSPICION_HCUT = 1.5             # h_score below this triggers suspicion gate
+SUSPICION_OFFSET = 0.5           # threshold reduction for suspicious users
 
 
 def load_data(path):
@@ -166,14 +175,18 @@ def build_tree(data, labels, is_bin):
 
 
 class BinModel:
-    __slots__ = ('n_bins', 'edges', 'bin_counts', 'p_class', 'prior')
+    __slots__ = ('n_bins', 'edges', 'bin_counts', 'target_counts',
+                 'p_class', 'prior', 'cls_conf_support')
 
-    def __init__(self, n_bins, edges, bin_counts, p_class, prior):
+    def __init__(self, n_bins, edges, bin_counts, target_counts,
+                 p_class, prior, cls_conf_support):
         self.n_bins = n_bins
         self.edges = edges
         self.bin_counts = bin_counts
+        self.target_counts = target_counts
         self.p_class = p_class
         self.prior = prior
+        self.cls_conf_support = cls_conf_support
 
 
 def _fast_abs_corr(x, y):
@@ -222,13 +235,13 @@ def train_ovr_node(node, data, labels, is_bin, target_class):
         lv = nd_labels[vm]
         bin_counts = np.bincount(ba, minlength=nb)
 
-        # Prior-aware Laplace: smooths toward prior, not 0.5
         target_counts = np.bincount(ba[lv == target_class], minlength=nb).astype(float)
         p_class = (target_counts + LAPLACE_ALPHA * prior) / (bin_counts + LAPLACE_ALPHA)
 
-        models[(node.nid, f)] = BinModel(nb, edges, bin_counts, p_class, prior)
+        models[(node.nid, f)] = BinModel(
+            nb, edges, bin_counts, target_counts, p_class, prior,
+            CONF_SUPPORT)
 
-        # Feature score: max confidence-weighted shift from prior
         score = 0.0
         for b in range(nb):
             if bin_counts[b] >= MIN_SUPPORT:
@@ -338,6 +351,7 @@ def _compute_af(uid, data, nodes, models, retained):
                     0, mo.n_bins - 1
                 ))
                 bc = mo.bin_counts[bin_idx]
+
                 if bc < MIN_SUPPORT:
                     continue
 
@@ -356,12 +370,23 @@ def _compute_af(uid, data, nodes, models, retained):
     return af_for, af_against, n_used
 
 
+def size_based_thresholds(train_labels, all_cls):
+    """Assign per-class thresholds based on training set class size."""
+    thresholds = {}
+    for cls in all_cls:
+        if cls == HEALTHY:
+            continue
+        n_cls = int((train_labels == cls).sum())
+        thresholds[cls] = BASE_THRESHOLD if n_cls >= LARGE_CLASS_N else DISEASE_THRESHOLD
+    return thresholds
+
+
 def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
-                trace=None):
-    """Two-stage clinical prediction:
-    1. Score disease classifiers only (exclude healthy from competition)
-    2. If best disease score >= DISEASE_THRESHOLD -> diagnose that disease
-    3. Otherwise -> healthy (no disease pattern found)
+                class_thresholds=None, trace=None):
+    """Three-layer clinical prediction:
+    Layer 1: Size-based per-class thresholds
+    Layer 2: Healthy-as-competitor (disease must beat healthy_weight * h_score)
+    Layer 3: Suspicion gate (low h_score reduces threshold)
     """
     class_scores = {}
     class_detail = {}
@@ -371,24 +396,44 @@ def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
             uid, data, nodes, class_models[cls], class_retained[cls])
         score = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
         class_scores[cls] = score
-        class_detail[cls] = (af_for, af_against)
+        class_detail[cls] = (af_for, af_against, n_used)
 
     if trace is not None:
         trace['class_scores'] = {int(k): round(float(v), 4)
                                   for k, v in class_scores.items()}
         trace['class_detail'] = {
-            int(k): {'af_for': round(float(v[0]), 4),
-                      'af_against': round(float(v[1]), 4)}
-            for k, v in class_detail.items()
+            int(k): {'af_for': round(float(d[0]), 4),
+                      'af_against': round(float(d[1]), 4),
+                      'n_used': int(d[2])}
+            for k, d in class_detail.items()
         }
+        if class_thresholds:
+            trace['class_thresholds'] = {int(k): round(float(v), 2)
+                                          for k, v in class_thresholds.items()}
 
     disease_scores = {c: s for c, s in class_scores.items() if c != HEALTHY}
-    best_disease = max(disease_scores, key=disease_scores.get)
+    h_score = class_scores.get(HEALTHY, 1.0)
+    healthy_bar = HEALTHY_WEIGHT * h_score
 
-    if disease_scores[best_disease] >= DISEASE_THRESHOLD:
-        best_cls = best_disease
+    if class_thresholds:
+        candidates = {}
+        for cls, score in disease_scores.items():
+            t = class_thresholds.get(cls, DISEASE_THRESHOLD)
+            if h_score < SUSPICION_HCUT:
+                t -= SUSPICION_OFFSET
+            t = max(t, healthy_bar)
+            if score >= t:
+                candidates[cls] = (score - t) / max(t, 0.1)
+        if candidates:
+            best_cls = max(candidates, key=candidates.get)
+        else:
+            best_cls = HEALTHY
     else:
-        best_cls = HEALTHY
+        best_disease = max(disease_scores, key=disease_scores.get)
+        if disease_scores[best_disease] >= DISEASE_THRESHOLD:
+            best_cls = best_disease
+        else:
+            best_cls = HEALTHY
 
     return best_cls, class_scores
 
@@ -430,13 +475,13 @@ def run_loocv(data, labels, max_users=None, trace_file=None):
             class_models[cls] = cls_models
             class_retained[cls] = cls_retained
 
-        # No calibration phase — ratio scoring is self-normalizing
+        class_thresholds = size_based_thresholds(tl, all_cls)
 
         trace = {} if trace_file else None
 
         pred, scores = predict_ovr(
             i, data, nodes, class_models, class_retained, all_cls,
-            trace=trace
+            class_thresholds=class_thresholds, trace=trace
         )
 
         true_cls = int(labels[i])
