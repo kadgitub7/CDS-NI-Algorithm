@@ -6,16 +6,17 @@ Evidence model:
   3. Equal-width binning: stable bin boundaries that preserve tail signal
   4. Dual assurance factors: separate af_for / af_against, ratio scoring
 
-Decision architecture (three-layer clinical reasoning):
+Decision architecture (three-layer clinical reasoning + hierarchical merging):
+  Layer 0 - Class merging:
+    Tiny/near-random classes (n<6 or AUC<0.6) merged into "rare" super-class
+    for stabler OVR evidence; subtyped in a second stage if detected.
   Layer 1 - Size-based thresholds:
     Well-represented classes (n >= 20) use lower threshold (2.7)
     Small classes (n < 20) use stricter threshold (3.3)
   Layer 2 - Healthy-as-competitor:
     Disease score must exceed HEALTHY_WEIGHT * healthy_score
-    (strong healthy profile raises the bar for disease diagnosis)
   Layer 3 - Suspicion gate:
     If healthy_score < SUSPICION_HCUT, reduce threshold by SUSPICION_OFFSET
-    (patients who don't look healthy get lower bar for disease detection)
 """
 import time
 import json
@@ -41,6 +42,8 @@ LARGE_CLASS_N = 20               # classes with >= 20 members use BASE_THRESHOLD
 HEALTHY_WEIGHT = 1.1             # disease must exceed this × healthy_score
 SUSPICION_HCUT = 1.5             # h_score below this triggers suspicion gate
 SUSPICION_OFFSET = 0.5           # threshold reduction for suspicious users
+MERGE_CLASSES = {7, 8, 11, 12, 13}  # tiny/near-random classes merged for stage 1
+MERGED_LABEL = 99
 
 
 def load_data(path):
@@ -438,10 +441,30 @@ def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
     return best_cls, class_scores
 
 
+def _train_all_classes(nodes, data, labels, is_bin, all_cls):
+    class_models = {}
+    class_retained = {}
+    for cls in all_cls:
+        cls_models = {}
+        cls_actions_by_node = defaultdict(list)
+        for nd in nodes:
+            nm, na = train_ovr_node(nd, data, labels, is_bin, cls)
+            cls_models.update(nm)
+            for a in na:
+                cls_actions_by_node[a[1]].append(a)
+        cls_ret = []
+        for nd in nodes:
+            cls_ret.extend(
+                refine_ovr_node(nd, cls_models,
+                                cls_actions_by_node.get(nd.nid, []), data))
+        class_models[cls] = cls_models
+        class_retained[cls] = cls_ret
+    return class_models, class_retained
+
+
 def run_loocv(data, labels, max_users=None, trace_file=None):
     n = data.shape[0] if max_users is None else min(max_users, data.shape[0])
     is_bin = classify_features(data)
-    all_cls = sorted(set(labels))
     results = []
     t0 = time.perf_counter()
     all_traces = [] if trace_file else None
@@ -451,38 +474,41 @@ def run_loocv(data, labels, max_users=None, trace_file=None):
         mask[i] = False
         td, tl = data[mask], labels[mask]
 
-        nodes = build_tree(td, tl, is_bin)
+        # Stage 1: merged labels for stabler OVR
+        merged_tl = tl.copy()
+        for c in MERGE_CLASSES:
+            merged_tl[merged_tl == c] = MERGED_LABEL
+        merged_cls = sorted(set(merged_tl))
 
-        class_models = {}
-        class_retained = {}
+        nodes = build_tree(td, merged_tl, is_bin)
+        class_models, class_retained = _train_all_classes(
+            nodes, td, merged_tl, is_bin, merged_cls)
 
-        for cls in all_cls:
-            cls_models = {}
-            cls_actions_by_node = defaultdict(list)
-
-            for nd in nodes:
-                nm, na = train_ovr_node(nd, td, tl, is_bin, cls)
-                cls_models.update(nm)
-                for a in na:
-                    cls_actions_by_node[a[1]].append(a)
-
-            cls_retained = []
-            for nd in nodes:
-                cls_retained.extend(
-                    refine_ovr_node(nd, cls_models,
-                                    cls_actions_by_node.get(nd.nid, []), td))
-
-            class_models[cls] = cls_models
-            class_retained[cls] = cls_retained
-
-        class_thresholds = size_based_thresholds(tl, all_cls)
+        class_thresholds = size_based_thresholds(merged_tl, merged_cls)
 
         trace = {} if trace_file else None
 
         pred, scores = predict_ovr(
-            i, data, nodes, class_models, class_retained, all_cls,
+            i, data, nodes, class_models, class_retained, merged_cls,
             class_thresholds=class_thresholds, trace=trace
         )
+
+        # Stage 2: subtype within merged class
+        if pred == MERGED_LABEL:
+            sub_classes = sorted(c for c in MERGE_CLASSES if c in set(tl))
+            if sub_classes:
+                sub_nodes = build_tree(td, tl, is_bin)
+                sub_models, sub_retained = _train_all_classes(
+                    sub_nodes, td, tl, is_bin, sub_classes)
+                best_sub, best_score = sub_classes[0], -1.0
+                for cls in sub_classes:
+                    af_for, af_against, _ = _compute_af(
+                        i, data, sub_nodes, sub_models[cls], sub_retained[cls])
+                    sc = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
+                    if sc > best_score:
+                        best_score = sc
+                        best_sub = cls
+                pred = best_sub
 
         true_cls = int(labels[i])
         ok = (pred == true_cls)
