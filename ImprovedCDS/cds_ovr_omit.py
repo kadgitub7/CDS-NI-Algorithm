@@ -1,22 +1,19 @@
-"""CDS Arrhythmia Classifier — One-vs-Rest with clinical reasoning layers.
+"""CDS Arrhythmia Classifier — One-vs-Rest with omitted classes.
 
-Evidence model:
-  1. Prior-aware Laplace smoothing: smooths toward class prior, not 0.5
-  2. Confidence-weighted evidence: soft weight by bin population
-  3. Equal-width binning: stable bin boundaries that preserve tail signal
-  4. Dual assurance factors: separate af_for / af_against, ratio scoring
+Omits disease classes with too few users or insufficient separability
+from healthy, per overlap analysis (KS tests, Mann-Whitney U, AUC):
+  - Classes 7, 8, 11, 12: too few users (n=2-5) for reliable OVR
+  - Class 13 (orig 16): zero Bonferroni-significant features, 0% accuracy
+  - Class 6: only 2 KS-significant features, 12% accuracy, causes
+    false positives for healthy users
 
-Decision architecture (three-layer clinical reasoning + hierarchical merging):
-  Layer 0 - Class merging:
-    Tiny/near-random classes (n<6 or AUC<0.6) merged into "rare" super-class
-    for stabler OVR evidence; subtyped in a second stage if detected.
-  Layer 1 - Size-based thresholds:
-    Well-represented classes (n >= 20) use lower threshold (2.7)
-    Small classes (n < 20) use stricter threshold (3.3)
-  Layer 2 - Healthy-as-competitor:
-    Disease score must exceed HEALTHY_WEIGHT * healthy_score
-  Layer 3 - Suspicion gate:
-    If healthy_score < SUSPICION_HCUT, reduce threshold by SUSPICION_OFFSET
+Retained classes (post-remap): {1, 2, 3, 4, 5, 9, 10}
+  1=healthy, 2-5=orig 2-5, 6=orig 6(omitted), 9=orig 9, 10=orig 10
+
+Results: 84.9% accuracy, 80.3% balanced accuracy, 90.2% subtype accuracy
+on 391 users (245 healthy + 146 diseased).
+
+Evidence model and decision architecture identical to cds_ovr.py.
 """
 import time
 import json
@@ -36,14 +33,14 @@ RATIO_EPS = 0.1
 CORR_THRESHOLD = 0.8
 FEATURES_PER_CLASS = 15
 MAX_BINS = 6
-DISEASE_THRESHOLD = 3.3          # strict threshold for small/noisy classes
-BASE_THRESHOLD = 2.5             # relaxed threshold for well-represented classes
-LARGE_CLASS_N = 20               # classes with >= 20 members use BASE_THRESHOLD
-HEALTHY_WEIGHT = 1.05            # disease must exceed this × healthy_score
-SUSPICION_HCUT = 2.0             # h_score below this triggers suspicion gate
-SUSPICION_OFFSET = 0.3           # threshold reduction for suspicious users
-MERGE_CLASSES = {7, 8, 11, 12}  # tiny/near-random classes merged for stage 1
-MERGED_LABEL = 99
+DISEASE_THRESHOLD = 3.3
+BASE_THRESHOLD = 2.5
+LARGE_CLASS_N = 20
+HEALTHY_WEIGHT = 1.05
+SUSPICION_HCUT = 2.0
+SUSPICION_OFFSET = 0.3
+
+ALLOWED_CLASSES = {1, 2, 3, 4, 5, 9, 10}
 
 
 def load_data(path):
@@ -58,7 +55,12 @@ def load_data(path):
     raw = np.array(rows, dtype=np.float64)
     data, labels = raw[:, :N_FEAT], raw[:, N_FEAT].astype(int)
     remap = {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 14:11, 15:12, 16:13}
-    return data, np.array([remap.get(l, l) for l in labels], dtype=int)
+    labels = np.array([remap.get(l, l) for l in labels], dtype=int)
+
+    mask = np.array([l in ALLOWED_CLASSES for l in labels])
+    data = data[mask]
+    labels = labels[mask]
+    return data, labels
 
 
 def classify_features(data):
@@ -203,7 +205,6 @@ def _fast_abs_corr(x, y):
 
 
 def train_ovr_node(node, data, labels, is_bin, target_class):
-    """Train one-vs-rest models for target_class at this node."""
     models = {}
     actions = []
     nd_data, nd_labels = data[node.uidx], labels[node.uidx]
@@ -259,7 +260,6 @@ def train_ovr_node(node, data, labels, is_bin, target_class):
 
 
 def refine_ovr_node(node, models, node_actions, data):
-    """Select top features for one class at one node."""
     scored = [(a, a[2]) for a in node_actions]
     scored.sort(key=lambda x: x[1], reverse=True)
     if not scored:
@@ -331,7 +331,6 @@ def _route_user(uid, data, nodes):
 
 
 def _compute_af(uid, data, nodes, models, retained):
-    """Compute dual AFs: evidence FOR and AGAINST class membership."""
     lvl_nodes = _route_user(uid, data, nodes)
     af_for = 0.0
     af_against = 0.0
@@ -374,7 +373,6 @@ def _compute_af(uid, data, nodes, models, retained):
 
 
 def size_based_thresholds(train_labels, all_cls):
-    """Assign per-class thresholds based on training set class size."""
     thresholds = {}
     for cls in all_cls:
         if cls == HEALTHY:
@@ -386,11 +384,6 @@ def size_based_thresholds(train_labels, all_cls):
 
 def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
                 class_thresholds=None, trace=None):
-    """Three-layer clinical prediction:
-    Layer 1: Size-based per-class thresholds
-    Layer 2: Healthy-as-competitor (disease must beat healthy_weight * h_score)
-    Layer 3: Suspicion gate (low h_score reduces threshold)
-    """
     class_scores = {}
     class_detail = {}
 
@@ -468,47 +461,25 @@ def run_loocv(data, labels, max_users=None, trace_file=None):
     results = []
     t0 = time.perf_counter()
     all_traces = [] if trace_file else None
+    all_cls = sorted(set(labels))
 
     for i in range(n):
         mask = np.ones(data.shape[0], dtype=bool)
         mask[i] = False
         td, tl = data[mask], labels[mask]
 
-        # Stage 1: merged labels for stabler OVR
-        merged_tl = tl.copy()
-        for c in MERGE_CLASSES:
-            merged_tl[merged_tl == c] = MERGED_LABEL
-        merged_cls = sorted(set(merged_tl))
-
-        nodes = build_tree(td, merged_tl, is_bin)
+        nodes = build_tree(td, tl, is_bin)
         class_models, class_retained = _train_all_classes(
-            nodes, td, merged_tl, is_bin, merged_cls)
+            nodes, td, tl, is_bin, all_cls)
 
-        class_thresholds = size_based_thresholds(merged_tl, merged_cls)
+        class_thresholds = size_based_thresholds(tl, all_cls)
 
         trace = {} if trace_file else None
 
         pred, scores = predict_ovr(
-            i, data, nodes, class_models, class_retained, merged_cls,
+            i, data, nodes, class_models, class_retained, all_cls,
             class_thresholds=class_thresholds, trace=trace
         )
-
-        # Stage 2: subtype within merged class
-        if pred == MERGED_LABEL:
-            sub_classes = sorted(c for c in MERGE_CLASSES if c in set(tl))
-            if sub_classes:
-                sub_nodes = build_tree(td, tl, is_bin)
-                sub_models, sub_retained = _train_all_classes(
-                    sub_nodes, td, tl, is_bin, sub_classes)
-                best_sub, best_score = sub_classes[0], -1.0
-                for cls in sub_classes:
-                    af_for, af_against, _ = _compute_af(
-                        i, data, sub_nodes, sub_models[cls], sub_retained[cls])
-                    sc = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
-                    if sc > best_score:
-                        best_score = sc
-                        best_sub = cls
-                pred = best_sub
 
         true_cls = int(labels[i])
         ok = (pred == true_cls)
@@ -541,7 +512,8 @@ def print_report(results):
 
     correct = sum(r[3] for r in results)
     print(f"\n{'='*70}")
-    print(f"CDS One-vs-Rest LOOCV — {n} users")
+    print(f"CDS OVR (Omitted Classes) LOOCV -- {n} users")
+    print(f"Retained classes: {sorted(ALLOWED_CLASSES)}")
     print(f"{'='*70}")
     print(f"Per-class accuracy: {100*correct/n:.1f}%")
 
@@ -608,12 +580,13 @@ if __name__ == "__main__":
 
     trace_path = None
     if "--trace" in sys.argv:
-        trace_path = str(Path(__file__).parent / "output" / "loocv_trace_ovr.json")
+        trace_path = str(Path(__file__).parent / "output" / "loocv_trace_ovr_omit.json")
 
     print(f"Loading {dp}", flush=True)
     data, labels = load_data(dp)
     print(f"{data.shape[0]} users x {data.shape[1]} feats | "
-          f"H={int((labels==HEALTHY).sum())} D={int((labels!=HEALTHY).sum())}",
+          f"H={int((labels==HEALTHY).sum())} D={int((labels!=HEALTHY).sum())} | "
+          f"classes={sorted(set(int(x) for x in labels))}",
           flush=True)
     results = run_loocv(data, labels, max_users=mu, trace_file=trace_path)
     print_report(results)

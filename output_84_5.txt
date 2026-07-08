@@ -1,0 +1,43 @@
+Loading C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\ImprovedCDS\data\arrhythmia.data
+452 users x 279 feats | H=245 D=207
+  [50/452] acc=76.0%  129.7s
+  [100/452] acc=80.0%  265.2s
+  [150/452] acc=78.7%  399.4s
+  [200/452] acc=77.0%  551.6s
+  [250/452] acc=76.8%  688.5s
+  [300/452] acc=76.3%  837.4s
+  [350/452] acc=75.4%  972.2s
+  [400/452] acc=75.2%  1112.1s
+  [450/452] acc=74.7%  1220.6s
+  [452/452] acc=74.8%  1224.6s
+  Trace saved to C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\CDS-NI-Algorithm\ImprovedCDS\output\loocv_trace_ovr.json
+
+======================================================================
+CDS One-vs-Rest LOOCV — 452 users
+======================================================================
+Per-class accuracy: 74.8%
+Balanced Accuracy:  47.8%
+
+Binary (H vs D):
+  Accuracy:        84.5%
+  Specificity:     90.2%  (221/245)
+  Sensitivity:     77.8%  (161/207)
+  PPV:             87.0%
+  NPV:             82.8%
+  Subtyping:       117/161 detected = 72.7% correct class
+
+Per-class detail:
+     healthy  221/245 =  90.2%  misclassed as: c2(9), c10(5), c6(5)
+     class 2   32/ 44 =  72.7%  detected: 37/44  misclassed as: H(7), c4(2), c6(1)
+     class 3   14/ 15 =  93.3%  detected: 15/15  misclassed as: c2(1)
+     class 4   14/ 15 =  93.3%  detected: 14/15  misclassed as: H(1)
+     class 5    7/ 13 =  53.8%  detected: 7/13  misclassed as: H(6)
+     class 6    9/ 25 =  36.0%  detected: 14/25  misclassed as: H(11), c4(2), c7(1)
+     class 7    0/  3 =   0.0%  detected: 2/3  misclassed as: c4(1), H(1), c3(1)
+     class 8    0/  2 =   0.0%  detected: 2/2  misclassed as: c4(1), c2(1)
+     class 9    9/  9 = 100.0%  detected: 9/9
+    class 10   31/ 50 =  62.0%  detected: 38/50  misclassed as: H(12), c5(3), c6(1)
+    class 11    0/  4 =   0.0%  detected: 3/4  misclassed as: c5(2), H(1), c2(1)
+    class 12    1/  5 =  20.0%  detected: 5/5  misclassed as: c2(2), c3(1), c4(1)
+    class 13    0/ 22 =   0.0%  detected: 15/22  misclassed as: H(7), c6(6), c5(3)
+======================================================================
