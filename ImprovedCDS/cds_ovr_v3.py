@@ -1,13 +1,11 @@
-"""CDS OVR V3 — Structural scoring improvements.
+"""CDS OVR V3 — Evidence-based fixes from V2 error analysis.
 
 Changes from V2:
   1. Remove classes 7,8,11,12,13 (indistinguishable or too few samples)
   2. Asymmetric AGAINST weighting (AGAINST_SCALE)
   3. Cap healthy_bar (HEALTHY_BAR_CAP)
   4. Per-class optimized thresholds
-  5. Concentration penalty: scores relying on single feature are penalized
-  6. NET-evidence healthy gate: disease must have stronger net than healthy
-  7. Minimum FOR evidence gate: disease needs minimum af_for to qualify
+  5. No class merging needed — single-stage prediction only
 """
 import time
 import json
@@ -34,10 +32,6 @@ SUSPICION_OFFSET = 0.3
 REMOVE_CLASSES = {7, 8, 11, 12, 13}
 AGAINST_SCALE = 0.6
 HEALTHY_BAR_CAP = 5.0
-CONCENTRATION_THRESH = 0.5
-CONCENTRATION_PENALTY = 0.5
-MIN_AF_FOR = 0.2
-NET_HEALTHY_GATE = True
 
 CLASS_THRESHOLDS = {
     2: 3.5,
@@ -397,30 +391,14 @@ def _compute_af(uid, data, nodes, models, retained):
 
 def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
                 class_thresholds=None):
-    """Prediction with concentration penalty, NET gate, and FOR minimum."""
     class_scores = {}
-    class_info = {}
-
     for cls in all_cls:
         af_for, af_against, n_used, n_for, n_against, max_fc = _compute_af(
             uid, data, nodes, class_models[cls], class_retained[cls])
-        raw_ratio = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
-        net = af_for - af_against
-
-        concentration = max_fc / af_for if af_for > 0 else 0.0
-        if concentration > CONCENTRATION_THRESH:
-            excess = concentration - CONCENTRATION_THRESH
-            penalty = 1.0 - CONCENTRATION_PENALTY * excess
-            score = raw_ratio * max(penalty, 0.1)
-        else:
-            score = raw_ratio
-
-        class_scores[cls] = score
-        class_info[cls] = (af_for, af_against, net, raw_ratio, concentration)
+        class_scores[cls] = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
 
     h_score = class_scores.get(HEALTHY, 1.0)
-    h_raw = class_info[HEALTHY][3]
-    h_net = class_info[HEALTHY][2]
+    h_ratio = h_score
     healthy_bar = min(HEALTHY_WEIGHT * h_score, HEALTHY_BAR_CAP)
 
     thresholds = class_thresholds or CLASS_THRESHOLDS
@@ -430,19 +408,11 @@ def predict_ovr(uid, data, nodes, class_models, class_retained, all_cls,
         if cls == HEALTHY:
             continue
         t = thresholds.get(cls, 3.0)
-        if h_raw < SUSPICION_HCUT:
+        if h_ratio < SUSPICION_HCUT:
             t -= SUSPICION_OFFSET
         t = max(t, healthy_bar)
-
         if score < t:
             continue
-        d_af_for = class_info[cls][0]
-        d_net = class_info[cls][2]
-        if d_af_for < MIN_AF_FOR:
-            continue
-        if NET_HEALTHY_GATE and h_net > d_net:
-            continue
-
         candidates[cls] = (score - t) / max(t, 0.1)
 
     if candidates:

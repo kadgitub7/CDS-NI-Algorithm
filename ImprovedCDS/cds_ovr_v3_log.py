@@ -44,10 +44,6 @@ SUSPICION_OFFSET = 0.3
 REMOVE_CLASSES = {7, 8, 11, 12, 13}
 AGAINST_SCALE = 0.6
 HEALTHY_BAR_CAP = 5.0
-CONCENTRATION_THRESH = 0.5
-CONCENTRATION_PENALTY = 0.5
-MIN_AF_FOR = 0.2
-NET_HEALTHY_GATE = True
 
 CLASS_THRESHOLDS = {
     2: 3.5,
@@ -491,38 +487,21 @@ def _compute_af_logged(uid, data, nodes, models, retained):
 
 def predict_ovr_logged(uid, data, nodes, class_models, class_retained, all_cls,
                        class_thresholds=None):
-    """Prediction with concentration penalty, NET gate, FOR minimum + logging."""
     class_scores = {}
-    class_info = {}
     class_logs = {}
 
     for cls in all_cls:
         af_for, af_against, n_used, n_for, n_ag, max_fc, af_log = \
             _compute_af_logged(
                 uid, data, nodes, class_models[cls], class_retained[cls])
-        raw_ratio = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
-        net = af_for - af_against
-
-        concentration = max_fc / af_for if af_for > 0 else 0.0
-        if concentration > CONCENTRATION_THRESH:
-            excess = concentration - CONCENTRATION_THRESH
-            penalty = 1.0 - CONCENTRATION_PENALTY * excess
-            score = raw_ratio * max(penalty, 0.1)
-        else:
-            penalty = 1.0
-            score = raw_ratio
+        score = (af_for + RATIO_EPS) / (af_against + RATIO_EPS)
 
         class_scores[cls] = score
-        class_info[cls] = (af_for, af_against, net, raw_ratio,
-                           concentration, penalty)
-
-        af_log["penalized_score"] = round(float(score), 6)
-        af_log["concentration_penalty"] = round(float(penalty), 6)
+        af_log["score"] = round(float(score), 6)
         class_logs[str(int(cls))] = af_log
 
     h_score = class_scores.get(HEALTHY, 1.0)
-    h_raw = class_info[HEALTHY][3]
-    h_net = class_info[HEALTHY][2]
+    h_ratio = h_score
     raw_healthy_bar = HEALTHY_WEIGHT * h_score
     healthy_bar = min(raw_healthy_bar, HEALTHY_BAR_CAP)
 
@@ -532,12 +511,11 @@ def predict_ovr_logged(uid, data, nodes, class_models, class_retained, all_cls,
         "all_scores": {str(int(k)): round(float(v), 6)
                        for k, v in class_scores.items()},
         "h_score": round(float(h_score), 6),
-        "h_raw_ratio": round(float(h_raw), 6),
-        "h_net": round(float(h_net), 6),
+        "h_ratio": round(float(h_ratio), 6),
         "raw_healthy_bar": round(float(raw_healthy_bar), 6),
         "healthy_bar_capped": round(float(healthy_bar), 6),
         "healthy_bar_was_capped": raw_healthy_bar > HEALTHY_BAR_CAP,
-        "suspicion_active": h_raw < SUSPICION_HCUT,
+        "suspicion_active": h_ratio < SUSPICION_HCUT,
     }
 
     candidates = {}
@@ -547,47 +525,24 @@ def predict_ovr_logged(uid, data, nodes, class_models, class_retained, all_cls,
             continue
         t = thresholds.get(cls, 3.0)
         t_orig = t
-        if h_raw < SUSPICION_HCUT:
+        if h_ratio < SUSPICION_HCUT:
             t -= SUSPICION_OFFSET
         t_after_suspicion = t
         t = max(t, healthy_bar)
         t_final = t
 
-        d_af_for = class_info[cls][0]
-        d_net = class_info[cls][2]
-        d_conc = class_info[cls][4]
-
-        passed_threshold = score >= t_final
-        passed_af_for = d_af_for >= MIN_AF_FOR
-        passed_net_gate = not NET_HEALTHY_GATE or d_net > h_net
-        passed_all = passed_threshold and passed_af_for and passed_net_gate
-
-        reject_reason = None
-        if not passed_threshold:
-            reject_reason = "below_threshold"
-        elif not passed_af_for:
-            reject_reason = f"af_for={d_af_for:.3f}<{MIN_AF_FOR}"
-        elif not passed_net_gate:
-            reject_reason = f"net={d_net:.3f}<=h_net={h_net:.3f}"
+        passed = score >= t_final
 
         candidate_details[str(int(cls))] = {
             "score": round(float(score), 6),
-            "raw_ratio": round(float(class_info[cls][3]), 6),
-            "concentration": round(float(d_conc), 6),
-            "net": round(float(d_net), 6),
-            "af_for": round(float(d_af_for), 6),
             "threshold_base": t_orig,
             "threshold_after_suspicion": round(float(t_after_suspicion), 6),
             "threshold_final": round(float(t_final), 6),
             "margin": round(float(score - t_final), 6),
-            "passed_threshold": passed_threshold,
-            "passed_af_for": passed_af_for,
-            "passed_net_gate": passed_net_gate,
-            "passed_all": passed_all,
-            "reject_reason": reject_reason,
+            "passed": passed,
         }
 
-        if passed_all:
+        if passed:
             candidates[cls] = (score - t_final) / max(t_final, 0.1)
 
     decision_log["candidate_details"] = candidate_details
@@ -602,7 +557,7 @@ def predict_ovr_logged(uid, data, nodes, class_models, class_retained, all_cls,
     else:
         best_cls = HEALTHY
         decision_log["winner"] = HEALTHY
-        decision_log["reason"] = "no_candidates_passed_all_gates"
+        decision_log["reason"] = "no_candidates"
 
     return best_cls, class_scores, {
         "class_af_details": class_logs,
@@ -698,10 +653,6 @@ def log_training_summary(nodes, class_models, class_retained, train_labels, all_
             "REMOVE_CLASSES": sorted(REMOVE_CLASSES),
             "AGAINST_SCALE": AGAINST_SCALE,
             "HEALTHY_BAR_CAP": HEALTHY_BAR_CAP,
-            "CONCENTRATION_THRESH": CONCENTRATION_THRESH,
-            "CONCENTRATION_PENALTY": CONCENTRATION_PENALTY,
-            "MIN_AF_FOR": MIN_AF_FOR,
-            "NET_HEALTHY_GATE": NET_HEALTHY_GATE,
             "CLASS_THRESHOLDS": CLASS_THRESHOLDS,
         },
     }
