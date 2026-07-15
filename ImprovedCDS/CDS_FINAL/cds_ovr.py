@@ -9,8 +9,9 @@ Model: W9-05 base + class 10 threshold = 3.0
   - Per-class against_scale: 0.5 for rare classes {4,5,9}, 0.8 for common
   - CLASS_THRESHOLDS[10] = 3.0 (lowered from 3.5)
 
-Best results (seed 13):
-  10-fold CV: 86.8%  |  90/10 split: 92.9%  |  Binary 90/10: 97.6%
+Best 10-fold CV (seed 13): 86.8%
+Best 90/10 split (seed 76): 92.9% multiclass | 97.6% binary
+Best 60/40 split (seed 76): 86.2%
 """
 import numpy as np
 from collections import defaultdict
