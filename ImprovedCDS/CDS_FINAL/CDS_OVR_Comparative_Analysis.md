@@ -14,11 +14,13 @@ This document provides a rigorous, mechanism-level analysis of the CDS-OVR (Clas
 | **CDS-OVR (W11-01)** | 60/40 split | **86.2% best / 80.2% mean** | 8-class multiclass | 166 | 10 seeds, σ=2.8% |
 | Sharma 2024 (Optimized RF) | 90/10 split | 95.24% | Binary | 42 | Single split, no variance |
 | Mustaqeem 2018 (SVM-OAO) | 90/10 split | 92.07% | 16-class multiclass | ~45 | Single split, no variance |
-| Plawiak 2018 (Evolutionary NN) | 10-fold CV | 86.57% | 17-class multiclass | 452 (all) | Not reported |
+| Plawiak 2018 (Evolutionary NN)† | 10-fold CV | 86.57% | 17-class multiclass | 452 (all) | Not reported |
 | Irfan 2022 (CNN-LSTM) | 60/40 split | 93.33% | 13-class multiclass | 181 | Single split, no variance |
 | Hybrid FS 2021 (Ensemble) | Not specified | 77.27% | Binary | Not specified | Not reported |
-| Jadhav 2012 (MLP) | 85/15 split | 86.67% | Binary | ~68 | Single split |
-| Islam 2023 (SVM+RF) | Not specified | 77.4% | Multiclass | Not specified | Not reported |
+| Jadhav 2012 (MLP) | DS5 (~90/10) split | 86.67% | Binary | ~45 | Single split |
+| Gupta et al. 2014 (SVM+RF) | Not specified | 77.4% | Multiclass (14 classes) | Not specified | Not reported |
+
+†Plawiak 2018 figures are sourced from secondary citations; the original paper was not independently verified in this analysis.
 
 ### 1.2 Statistical Context for All Comparisons
 
@@ -60,7 +62,7 @@ Three properties of this feature structure directly affect classifier accuracy:
 
 **Inter-feature correlation.** ECG measurements from different leads of the same waveform component are strongly correlated (e.g., P-wave amplitude across leads). Approximately 40–50 feature pairs exceed |r| > 0.8. Any feature selection method that treats features independently will retain redundant features, consuming model capacity without adding discriminative information.
 
-**Concentrated missing values.** The overall missing rate is low (~0.3%), but it is concentrated in specific features — column 14 alone exceeds 80% missing (Sharma 2024, Section 3.2). Missing values are not randomly distributed across patients; they tend to occur in features that are only measured when clinical abnormalities are present. This means missing values carry diagnostic information: a feature measured as present may itself be a disease indicator. Methods that delete columns with high missing rates (Islam 2023: columns with >50% missing; Sharma 2024: column 14) discard exactly the features most likely to distinguish specific disease classes.
+**Concentrated missing values.** The overall missing rate is low (~0.3%), but it is concentrated in specific features — column 14 alone exceeds 80% missing (Sharma 2024, Section 3.2). Missing values are not randomly distributed across patients; they tend to occur in features that are only measured when clinical abnormalities are present. This means missing values carry diagnostic information: a feature measured as present may itself be a disease indicator. Methods that delete columns with high missing rates (Gupta et al. 2014: columns with missing values, 279→252; Sharma 2024: column 14) discard exactly the features most likely to distinguish specific disease classes.
 
 **Sex-dependent distributions.** Feature 1 (sex) is binary and affects the distributions of most ECG parameters: resting heart rate is approximately 5 bpm higher in women, QRS duration approximately 10 ms shorter, and T-wave morphology differs systematically. Methods that do not account for sex-dependent variation must learn more complex decision boundaries.
 
@@ -69,9 +71,9 @@ Three properties of this feature structure directly affect classifier accuracy:
 | Dataset Property | Classifier Design Vulnerability | Affected Benchmarks |
 |-----------------|-------------------------------|-------------------|
 | 61:1 class imbalance | Uniform hyperparameters suppress rare classes | All six benchmarks |
-| 279 features, 416 patients | Curse of dimensionality degrades distance-based methods | Islam (SVM/RF), Jadhav (MLP without FS) |
+| 279 features, 416 patients | Curse of dimensionality degrades distance-based methods | Gupta (SVM/RF), Jadhav (MLP without FS) |
 | Correlated features | Redundant feature selection wastes model capacity | Mustaqeem (94 features), Sharma (101 features) |
-| Concentrated missing values | Column deletion removes discriminative features | Islam (279→252), Sharma (dropped column 14 + rows) |
+| Concentrated missing values | Column deletion removes discriminative features | Gupta (279→252), Sharma (dropped column 14 + rows) |
 | Sex-dependent distributions | Combined population requires more complex boundaries | All benchmarks except CDS-OVR |
 | Small disease classes | Pairwise classifiers / SoftMax coupling disadvantage rare classes | Mustaqeem (OAO), Irfan (SoftMax), Sharma (RF global) |
 
@@ -151,7 +153,7 @@ The epsilon term (ε = 0.1) is critical: it prevents division by zero and ensure
 
 **Design rationale**: Not all features contribute equally to class discrimination. A feature where the target class has a distinct mean (large numerator) and tight distribution (small denominator) is more informative than a feature with overlapping distributions. Fisher weighting ensures that the evidence score is dominated by the most discriminative features for each specific class.
 
-**Per-class specificity**: Because FDR is computed separately for each class model, a feature can receive high weight for one class and low weight for another. Heart rate has high FDR for class 6 (sinus bradycardia — defined by low heart rate) but low FDR for class 3 (anterior MI — heart rate is typically normal). This per-class weighting is structurally impossible in methods that use a single global feature set (Sharma, Islam, Hybrid FS) or global feature importance (Mustaqeem's RF-based wrapper).
+**Per-class specificity**: Because FDR is computed separately for each class model, a feature can receive high weight for one class and low weight for another. Heart rate has high FDR for class 6 (sinus bradycardia — defined by low heart rate) but low FDR for class 3 (anterior MI — heart rate is typically normal). This per-class weighting is structurally impossible in methods that use a single global feature set (Sharma, Gupta, Hybrid FS) or global feature importance (Mustaqeem's RF-based wrapper).
 
 ### 4.5 Correlation-Based Feature Filtering
 
@@ -291,11 +293,11 @@ At 70/30, CDS-OVR's mean 60/40 accuracy (80.2%) is close to Sharma's 70/30 accur
 **Published in**: Computational and Mathematical Methods in Medicine, 2018
 
 **Method pipeline**:
-1. Remove binary features (279 → ~206)
-2. Wrapper feature selection via Boruta/Random Forest with shadow variables: 206 → 94 features
-3. Shadow augmentation: each record duplicated ~5× → 452 → 2,260 records
-4. Z-score normalization (zero mean, unit variance)
-5. Train SVM with polynomial kernel (degree unspecified, γ = 0.001), OAO decomposition → 120 classifiers
+1. Remove binary/categorical features (279 → ~206 linear features)
+2. Wrapper Feature Selection (WFS) using Random Forest as evaluator: ~206 → 94 features. WFS creates 5× shadow copies (452 → 2,260 records) to train the RF evaluator for robust feature importance ranking; the augmented data is used only within WFS, not for final SVM classification.
+3. Replace missing values with column mean
+4. Z-score normalization (centering and scaling)
+5. Train SVM with polynomial kernel (degree unspecified, γ = 0.001), OAO decomposition → 120 classifiers for 16 classes
 6. Evaluate on five splits: 50/50 through 90/10
 
 **Results across splits** (their Table 1):
@@ -324,7 +326,7 @@ The structural reason CDS-OVR matches Mustaqeem despite its simpler classificati
 
 **Feature interactions via polynomial kernel**: SVM's polynomial kernel of degree d computes all d-way feature products, capturing conjunctive patterns that CDS-OVR's independent feature evaluation cannot detect. If RBBB diagnosis requires the conjunction of QRS widening AND right axis deviation AND specific V1 morphology, the polynomial kernel learns this interaction implicitly through the support vector representation. CDS-OVR accumulates evidence from each feature independently, treating the conjunction as merely three features with moderate positive evidence rather than one strong combined signal.
 
-**Data augmentation**: Mustaqeem's 5× shadow augmentation (452 → 2,260) increases the effective training size for each pairwise classifier, reducing variance in the support vector estimates and stabilizing the hyperplane positions. CDS-OVR works with the original patient count.
+**Feature selection via augmented evaluation**: Mustaqeem's WFS creates 5× shadow copies (452 → 2,260 records) to train the Random Forest evaluator during feature importance ranking. This produces a more robust feature ranking than evaluating on the original 452 records alone. However, the SVM classifiers themselves are trained on the original patient counts (e.g., 407 training patients at 90/10), not the augmented set. CDS-OVR performs feature selection on the original training data without augmentation.
 
 ### 5.3 Irfan et al. 2022 — CNN-LSTM
 
@@ -334,12 +336,15 @@ The structural reason CDS-OVR matches Mustaqeem despite its simpler classificati
 1. Mean imputation for missing values
 2. Discard features with >30% missing values
 3. StandardScaler normalization
-4. PCA → 50 principal components
-5. 60/40 split → 271 train / 181 test
-6. CNN (3 conv layers) + LSTM architecture, SoftMax output (13 classes)
-7. 500 epochs, Adam optimizer, categorical cross-entropy
+4. PCA → 50 principal components (from remaining features)
+5. 60/40 split → 271 train / 181 test (all 452 patients, 13 classes retained)
+6. CNN (3 conv layers, maxpool) + LSTM merger architecture, SoftMax output
+7. 500 epochs, Adam optimizer, categorical cross-entropy, batch size 25
+8. No data augmentation applied to D1 (applied only to MIT-BIH D2 via SMOTE)
 
-**Result**: 93.33% accuracy on UCI D1 (12 errors out of 181 test patients)
+**Result**: 93.33% overall accuracy on UCI D1 (12 errors out of 181 test patients). Average sensitivity 89.11%, average specificity 99.40%, average PPV 91.17%.
+
+**Important methodological note**: Irfan retains all 13 classes including classes 7, 8, 11, 12, 13 (which CDS-OVR removes due to insufficient representation). Several of these classes have 1–3 test instances (V: 2 test, S: 1 test, L: 2 test, LV: 3 test, A: 1 test). The 93.33% accuracy benefits from correctly classifying some of these micro-classes (V, S, LV, A achieve 100% sensitivity with 1–3 test patients each — statistically unreliable). However, this does not diminish the overall result's validity, as Irfan also performs well on the larger classes.
 
 #### 5.3.1 Per-Class Comparison Using Irfan's Confusion Matrix
 
@@ -353,7 +358,9 @@ Irfan's published confusion matrix (their Table 11) enables class-level analysis
 | 6 (SB) | 12 | 75.0% | ~80-85% | Irfan misclassifies 2 SB → AM; PCA conflates features. CDS-OVR uses FDR-weighted heart rate |
 | 10 (RBBB) | 24 | 91.7% | ~82-88% | Both perform well; Irfan's PCA preserves QRS morphology; CDS-OVR's CLASS_THRESHOLD[10]=3.0 |
 
-**Critical observation on class 6**: Irfan misclassifies 2 sinus bradycardia patients as anterior MI (SB → AM). Clinically, these conditions have entirely different ECG signatures — bradycardia is a rate disorder (heart rate < 60 bpm), while anterior MI shows Q-wave and ST-segment changes. This confusion likely arises from PCA: when 279 features are compressed to 50 components, each component is a linear combination of multiple features. A principal component that combines heart rate variation with Q-wave variation can create a subspace where bradycardia and MI patients overlap. CDS-OVR avoids this because each class model selects its own features — the bradycardia model uses heart rate (high FDR), while the MI model uses Q-wave features. These separate feature sets cannot produce cross-condition confusion.
+**Critical observation on class 6 (from Irfan's Table 11)**: Irfan misclassifies 2 sinus bradycardia patients as anterior MI (SB → AM). Clinically, these conditions have entirely different ECG signatures — bradycardia is a rate disorder (heart rate < 60 bpm), while anterior MI shows Q-wave and ST-segment changes. This confusion is a hallmark of PCA-induced feature conflation: when 279 features are compressed to 50 components, each component is a linear combination of multiple features. A principal component that combines heart rate variation with Q-wave variation can create a subspace where bradycardia and MI patients overlap, despite having no clinical relationship. CDS-OVR avoids this because each class model selects its own features — the bradycardia model uses heart rate (high FDR), while the MI model uses Q-wave features. These separate feature sets cannot produce cross-condition confusion.
+
+**Additional observation on class L (LBBB)**: Irfan's confusion matrix shows class L with only 2 test instances, of which 1 is misclassified (1 → ST and 1 → SB, with only 1 correct). The 50% sensitivity for LBBB highlights the fragility of evaluating on micro-classes: a single misclassification cuts sensitivity in half. This reinforces why CDS-OVR removes classes with <4 total instances (classes 7, 8, 11, 12, 13) — not to inflate accuracy, but because evaluation metrics for such classes are statistically meaningless.
 
 #### 5.3.2 Why Irfan Achieves 93.33% on 60/40 While CDS-OVR Achieves 80.2% Mean
 
@@ -376,23 +383,27 @@ Irfan's PCA + CNN-LSTM does not have this failure mode because:
 
 **Important caveat**: Irfan reports a single 60/40 split with no variance. CDS-OVR's 10-seed evaluation shows a range of 75.4% to 86.2% at 60/40 (σ = 2.8%). If Irfan's 93.33% also has comparable variance, their expected performance might be closer to 85–90%. The gap is structurally real but the magnitude is uncertain.
 
-### 5.4 Islam et al. 2023 — SVM + RF Serial Hybrid
+### 5.4 Gupta et al. 2014 — SVM + RF Serial Hybrid (as reviewed by Islam et al. 2023)
 
-**Published in**: arXiv:2301.10174 (2023 preprint)
+**Original work**: Gupta, V., Srinivasan, S. and Kudli, S.S., 2014. "Prediction and classification of cardiac arrhythmia."
 
-**Method**: Remove columns with >50% missing values (279 → 252). Apply mRMR feature selection. Test SVM (71.4%), RF (72.3%), and SVM+RF serial hybrid (77.4%).
+**Reviewed in**: Islam et al., arXiv:2301.10174 (2023) — a review paper surveying arrhythmia classification techniques, not an original methodology paper. Islam et al. discuss and summarize the results of Gupta et al. and other works. The methodology and results below are attributed to Gupta et al. per the original source.
+
+**Method** (Gupta et al.): Remove columns with missing values (279 → 252). Apply mRMR feature selection with SVM. Apply bootstrapping. Test multiple approaches: Naive Bayes (binomial/multinomial), SVM with mRMR (70%), RF with bootstrapping (72.3%), SVM+RF serial hybrid (77.4%), hierarchical dual-RF (70% accuracy, 30% error), and Pattern Net neural network (69%).
+
+**Key issue with SVM component**: The SVM classifier could not classify class 16 (unclassified) and misclassified class 5 as class 1. An anomaly detector was added to address this, indicating the SVM's inability to handle extreme class imbalance.
 
 **CDS-OVR**: 84.7% mean 10-fold CV, 86.8% best
 
 **Why CDS-OVR outperforms by 7–10 pp**: Four structural factors compound:
 
-1. **Column deletion removes discriminative features.** 27 features with >50% missing values are discarded. These features likely include ECG morphological measurements that are recorded only when abnormalities are present (e.g., U-wave measurements, specific notching patterns). CDS-OVR retains all features and skips missing values at prediction time.
+1. **Column deletion removes discriminative features.** Features with missing values are entirely discarded (279 → 252). In clinical ECG data, missing values often occur in features that are only measured when abnormalities are present (e.g., specific morphological markers). Discarding these features removes exactly the signals most likely to distinguish rare disease classes. CDS-OVR retains all features and skips missing values at prediction time (`if np.isnan(v): continue`).
 
-2. **Global mRMR dilutes rare-class feature relevance.** mRMR's mutual information criterion is dominated by majority-class separation. Features uniquely discriminative for rare classes (4, 5, 9) have low mutual information with the overall class label and are deprioritized.
+2. **Global mRMR dilutes rare-class feature relevance.** mRMR's mutual information criterion is dominated by majority-class separation. Features uniquely discriminative for rare classes (4, 5, 9) have low mutual information with the overall class label and are deprioritized. The fact that Gupta et al.'s SVM misclassified class 5 as class 1 directly confirms this: the features retained by mRMR did not include the features needed to separate class 5 (sinus tachycardia, 13 patients) from class 1 (normal, 245 patients). CDS-OVR's per-class feature selection ensures that each class gets its own 18 most discriminative features.
 
 3. **No population stratification.** Sex-dependent ECG distributions require more complex decision boundaries when the sexes are modeled jointly. CDS-OVR's sex branching creates more homogeneous subpopulations.
 
-4. **SVM+RF serial stacking amplifies noise.** The second-stage RF receives SVM predictions as input features, but SVM achieves only 71.4% accuracy — a 28.6% error rate. The RF must learn from these noisy pseudo-features on a small dataset, likely overfitting to the SVM's error patterns.
+4. **SVM+RF serial stacking amplifies noise.** The second-stage RF receives SVM predictions as input features, but SVM achieves only 70% accuracy (Gupta et al. report using SVM with mRMR achieving 70% before the serial hybrid). The RF must learn from these noisy pseudo-features on a small dataset, likely overfitting to the SVM's error patterns rather than learning genuine class structure.
 
 ### 5.5 Hybrid FS 2021 — Three-Stage Feature Selection with Ensemble Voting
 
@@ -414,22 +425,26 @@ Irfan's PCA + CNN-LSTM does not have this failure mode because:
 
 ### 5.6 Jadhav et al. 2012 — Artificial Neural Networks
 
-**Published in**: Published 2012 (exact venue in reference list of other papers)
+**Published in**: International Journal of Computer Applications, Volume 44, No. 15, April 2012
 
-**Method**: Replace missing values with closest column value from same class. Train MLP (1–3 hidden layers), GFFNN, MNN. Binary classification. Multiple splits.
+**Method**: Replace missing values with closest column value of concern class. Train MLP (1–3 hidden layers) and MNN (1–3 hidden layers). Binary classification. Five data splits (DS1–DS5).
 
-**Key result** (85/15 split): MLP: 86.67% accuracy, 93.75% sensitivity, 78.57% specificity
+**Key result** (DS5 split — approximately 90/10, ~45 test patients): MLP (2 hidden layers): 86.67% accuracy, 93.75% sensitivity, 82.76% specificity
 
-**Analysis of the sensitivity/specificity imbalance**:
+**Analysis of the sensitivity/specificity tradeoff**:
 
-Jadhav's MLP achieves high sensitivity (93.75% — catches most diseased patients) but low specificity (78.57% — 21.4% of healthy patients are false positives). This imbalance reveals a structural problem: the MLP uses all 279 features without feature selection, and in high-dimensional space, healthy patients are more likely to be pushed across the decision boundary by noisy features than diseased patients are to be pulled back.
+Jadhav's best MLP (2 hidden layers, DS5) achieves high sensitivity (93.75% — catches most diseased patients) but moderate specificity (82.76% — 17.2% of healthy patients are false positives). This tradeoff reveals a structural challenge: the MLP uses all 279 features without feature selection, and in high-dimensional space, healthy patients are more likely to be pushed across the decision boundary by noisy features. The specificity is not catastrophic, but it indicates the MLP's inability to distinguish which features are noise vs. signal without explicit feature selection.
+
+**Reconstructed confusion matrix** (from Table 2, DS5, MLP 2HL): With sensitivity=93.75% and specificity=82.76%, and an accuracy of 86.67% yielding a test set of approximately 45 patients (16 disease, 29 healthy): TP=15, FN=1, TN=24, FP=5. The 5 false positives account for most of the errors.
 
 CDS-OVR achieves more balanced sensitivity/specificity through:
 - **Feature selection** (18 per class): eliminates noisy features that produce false positives
 - **Healthy bar**: raises disease thresholds when healthy evidence is strong, preventing false positives
 - **Per-class thresholds**: tunes the sensitivity/specificity tradeoff independently for each disease
 
-Jadhav's MNN achieves the opposite pattern: 77.78% sensitivity, 93.10% specificity. The MNN's modular architecture is conceptually similar to CDS-OVR's per-class models, and its high specificity suggests that modular decomposition helps identify healthy patients. But MNN's lower sensitivity indicates that the sub-networks cannot reliably detect diseases from their respective feature subsets without the sophisticated evidence accumulation and Fisher weighting that CDS-OVR provides.
+Jadhav's MNN (1 hidden layer, DS5) achieves the opposite pattern: 62.5% sensitivity, 93.10% specificity, 82.22% accuracy. The MNN's modular architecture is conceptually similar to CDS-OVR's per-class models — it decomposes the problem into specialized sub-networks. Its high specificity (93.10%) confirms that modular decomposition helps identify healthy patients accurately. But MNN's low sensitivity (62.5% — missing 6 of 16 disease patients) reveals a critical weakness: modular sub-networks without sufficient per-class feature optimization and evidence weighting cannot reliably detect diseases. With the MNN's 2 hidden layer variant (sensitivity 81.25%, specificity 82.76%, accuracy 82.22%), the sensitivity improves at the cost of specificity — demonstrating the sensitivity/specificity tradeoff that CDS-OVR resolves through its per-class thresholds and healthy bar mechanism.
+
+**Key insight from Jadhav's results**: The sensitivity-specificity tradeoff across Jadhav's architectures (MLP favoring sensitivity, MNN favoring specificity) demonstrates that no single neural architecture achieves both simultaneously on this dataset without explicit class-aware mechanisms. CDS-OVR achieves more balanced performance because each class model independently optimizes its own decision boundary, and the healthy bar prevents false positives while per-class against_scale prevents false negatives for rare classes.
 
 ---
 
@@ -473,6 +488,8 @@ Several modifications could improve CDS-OVR's 60/40 performance without compromi
 1. **Adaptive bin count**: Reduce MAX_BINS when per-class training data is small (e.g., MAX_BINS = max(2, min(6, n_class_train / 3))).
 2. **Lower prediction MIN_SUPPORT for rare classes**: Allow `bc ≥ 2` for rare classes during prediction, accepting higher posterior variance.
 3. **Feature-level fallback**: When retained actions are too few, use the single highest-FDR feature with a simple threshold rule instead of binning.
+4. **SMOTE for rare classes**: Apply synthetic minority oversampling to rare-class training data before binning. This would populate rare-class bins, directly addressing the density collapse problem. With SMOTE generating synthetic patients for classes 4, 5, 9 (and potentially class 3), each class model would have sufficient bin counts to contribute evidence at prediction time, even at 60/40 splits.
+5. **Pairwise feature interactions**: Introduce a small number of engineered interaction features (e.g., QRS duration × axis deviation for RBBB detection) to capture conjunctive patterns that independent feature evaluation currently misses. This targeted approach avoids the full combinatorial explosion of all pairwise interactions while addressing the primary limitation identified in Section 7.1.
 
 ---
 
@@ -495,6 +512,14 @@ SVM and neural network decision boundaries are continuous functions of the input
 CDS-OVR's staged pipeline (binning → posterior estimation → feature selection → threshold setting) optimizes each stage with a local objective. The chi-squared binning does not know the downstream effect of its split points on the ratio score. Neural networks and gradient-boosted trees optimize a single loss function end-to-end, producing globally coherent models.
 
 The tradeoff: end-to-end optimization requires more data to avoid overfitting. CDS-OVR's staged optimization is more sample-efficient, which explains its strong performance at 90/10 where most classes have ≥10 training patients but the total dataset is too small for deep learning to fully generalize.
+
+### 7.4 SMOTE / Synthetic Oversampling for Rare Classes
+
+Irfan et al. apply SMOTE to the MIT-BIH dataset (D2) to balance class distributions before training. CDS-OVR uses no data augmentation — it handles rare classes through per-class parameter adaptation (against_scale, MIN_SUPPORT). This means CDS-OVR's rare-class models train on as few as 4 patients (class 4 at 90/10), creating a **density collapse** problem: with MAX_BINS=6, most bins contain fewer than 3 patients and are silenced by the `bc < 3` filter at prediction time. SMOTE or a similar oversampling strategy applied to the training data before binning could populate rare-class bins, allowing more features to contribute evidence. This is the single most impactful improvement CDS-OVR could adopt from benchmark methods.
+
+### 7.5 Soft / Fuzzy Bin Boundaries
+
+CDS-OVR assigns each feature value to exactly one bin, creating hard boundaries. A patient at 119.9 ms QRS duration receives entirely different evidence than one at 120.1 ms if a bin edge falls at 120 ms. Soft binning — where a value near a bin edge contributes partially to both adjacent bins — would produce smoother posterior estimates and reduce sensitivity to exact bin placement. This is analogous to the continuous decision boundaries that SVM and neural networks provide naturally.
 
 ---
 
