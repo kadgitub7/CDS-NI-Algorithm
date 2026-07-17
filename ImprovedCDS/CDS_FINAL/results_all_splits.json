@@ -1,0 +1,4399 @@
+{
+  "50/50": {
+    "summary": {
+      "multi_mean": 79.38,
+      "multi_std": 2.85,
+      "multi_best": 85.1,
+      "multi_worst": 73.56,
+      "binary_mean": 83.03,
+      "binary_std": 2.65,
+      "binary_best": 87.5,
+      "binary_worst": 77.4
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 208,
+        "multiclass_acc": 80.77,
+        "binary_acc": 84.62,
+        "specificity": 95.04,
+        "sensitivity": 70.11,
+        "balanced_acc": 61.18,
+        "TP": 61,
+        "FN": 26,
+        "TN": 115,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 121,
+            "correct": 115,
+            "accuracy": 0.9504
+          },
+          "2": {
+            "n_test": 25,
+            "correct": 15,
+            "accuracy": 0.6
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 9,
+            "correct": 7,
+            "accuracy": 0.7778
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 1,
+            "accuracy": 0.2
+          },
+          "6": {
+            "n_test": 11,
+            "correct": 3,
+            "accuracy": 0.2727
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 2,
+            "accuracy": 0.3333
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 19,
+            "accuracy": 0.76
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 208,
+        "multiclass_acc": 73.56,
+        "binary_acc": 77.4,
+        "specificity": 89.17,
+        "sensitivity": 61.36,
+        "balanced_acc": 62.96,
+        "TP": 54,
+        "FN": 34,
+        "TN": 107,
+        "FP": 13,
+        "per_class": {
+          "1": {
+            "n_test": 120,
+            "correct": 107,
+            "accuracy": 0.8917
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 12,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 10,
+            "correct": 3,
+            "accuracy": 0.3
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 1,
+            "accuracy": 0.1429
+          },
+          "6": {
+            "n_test": 14,
+            "correct": 10,
+            "accuracy": 0.7143
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 28,
+            "correct": 9,
+            "accuracy": 0.3214
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 208,
+        "multiclass_acc": 81.25,
+        "binary_acc": 86.06,
+        "specificity": 92.13,
+        "sensitivity": 76.54,
+        "balanced_acc": 69.23,
+        "TP": 62,
+        "FN": 19,
+        "TN": 117,
+        "FP": 10,
+        "per_class": {
+          "1": {
+            "n_test": 127,
+            "correct": 117,
+            "accuracy": 0.9213
+          },
+          "2": {
+            "n_test": 21,
+            "correct": 12,
+            "accuracy": 0.5714
+          },
+          "3": {
+            "n_test": 7,
+            "correct": 7,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "5": {
+            "n_test": 8,
+            "correct": 1,
+            "accuracy": 0.125
+          },
+          "6": {
+            "n_test": 11,
+            "correct": 9,
+            "accuracy": 0.8182
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 22,
+            "correct": 16,
+            "accuracy": 0.7273
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 208,
+        "multiclass_acc": 78.37,
+        "binary_acc": 82.21,
+        "specificity": 91.87,
+        "sensitivity": 68.24,
+        "balanced_acc": 64.61,
+        "TP": 58,
+        "FN": 27,
+        "TN": 113,
+        "FP": 10,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 113,
+            "accuracy": 0.9187
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 14,
+            "accuracy": 0.6364
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "accuracy": 0.875
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "5": {
+            "n_test": 8,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 11,
+            "correct": 6,
+            "accuracy": 0.5455
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 14,
+            "accuracy": 0.56
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 208,
+        "multiclass_acc": 76.92,
+        "binary_acc": 80.77,
+        "specificity": 94.69,
+        "sensitivity": 64.21,
+        "balanced_acc": 57.24,
+        "TP": 61,
+        "FN": 34,
+        "TN": 107,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 113,
+            "correct": 107,
+            "accuracy": 0.9469
+          },
+          "2": {
+            "n_test": 27,
+            "correct": 13,
+            "accuracy": 0.4815
+          },
+          "3": {
+            "n_test": 10,
+            "correct": 9,
+            "accuracy": 0.9
+          },
+          "4": {
+            "n_test": 10,
+            "correct": 4,
+            "accuracy": 0.4
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 10,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 2,
+            "accuracy": 0.3333
+          },
+          "10": {
+            "n_test": 29,
+            "correct": 15,
+            "accuracy": 0.5172
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 208,
+        "multiclass_acc": 79.81,
+        "binary_acc": 83.65,
+        "specificity": 95.97,
+        "sensitivity": 65.48,
+        "balanced_acc": 56.07,
+        "TP": 55,
+        "FN": 29,
+        "TN": 119,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 124,
+            "correct": 119,
+            "accuracy": 0.9597
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 13,
+            "accuracy": 0.7222
+          },
+          "3": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 10,
+            "correct": 3,
+            "accuracy": 0.3
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 2,
+            "accuracy": 0.4
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 7,
+            "accuracy": 0.5385
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "10": {
+            "n_test": 23,
+            "correct": 13,
+            "accuracy": 0.5652
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 208,
+        "multiclass_acc": 79.33,
+        "binary_acc": 82.21,
+        "specificity": 95.28,
+        "sensitivity": 61.73,
+        "balanced_acc": 67.19,
+        "TP": 50,
+        "FN": 31,
+        "TN": 121,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 127,
+            "correct": 121,
+            "accuracy": 0.9528
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 12,
+            "accuracy": 0.5455
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 5,
+            "accuracy": 0.625
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 15,
+            "correct": 2,
+            "accuracy": 0.1333
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 21,
+            "correct": 13,
+            "accuracy": 0.619
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 208,
+        "multiclass_acc": 78.37,
+        "binary_acc": 83.17,
+        "specificity": 91.27,
+        "sensitivity": 70.73,
+        "balanced_acc": 55.55,
+        "TP": 58,
+        "FN": 24,
+        "TN": 115,
+        "FP": 11,
+        "per_class": {
+          "1": {
+            "n_test": 126,
+            "correct": 115,
+            "accuracy": 0.9127
+          },
+          "2": {
+            "n_test": 21,
+            "correct": 17,
+            "accuracy": 0.8095
+          },
+          "3": {
+            "n_test": 10,
+            "correct": 9,
+            "accuracy": 0.9
+          },
+          "4": {
+            "n_test": 7,
+            "correct": 3,
+            "accuracy": 0.4286
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "6": {
+            "n_test": 12,
+            "correct": 3,
+            "accuracy": 0.25
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 14,
+            "accuracy": 0.56
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 208,
+        "multiclass_acc": 80.29,
+        "binary_acc": 82.69,
+        "specificity": 95.04,
+        "sensitivity": 65.52,
+        "balanced_acc": 64.46,
+        "TP": 57,
+        "FN": 30,
+        "TN": 115,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 121,
+            "correct": 115,
+            "accuracy": 0.9504
+          },
+          "2": {
+            "n_test": 24,
+            "correct": 16,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "5": {
+            "n_test": 10,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 9,
+            "correct": 4,
+            "accuracy": 0.4444
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 18,
+            "accuracy": 0.72
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 208,
+        "multiclass_acc": 85.1,
+        "binary_acc": 87.5,
+        "specificity": 94.53,
+        "sensitivity": 76.25,
+        "balanced_acc": 77.68,
+        "TP": 61,
+        "FN": 19,
+        "TN": 121,
+        "FP": 7,
+        "per_class": {
+          "1": {
+            "n_test": 128,
+            "correct": 121,
+            "accuracy": 0.9453
+          },
+          "2": {
+            "n_test": 20,
+            "correct": 16,
+            "accuracy": 0.8
+          },
+          "3": {
+            "n_test": 7,
+            "correct": 7,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 4,
+            "accuracy": 0.6667
+          },
+          "10": {
+            "n_test": 26,
+            "correct": 14,
+            "accuracy": 0.5385
+          }
+        }
+      }
+    ]
+  },
+  "60/40": {
+    "summary": {
+      "multi_mean": 80.18,
+      "multi_std": 3.06,
+      "multi_best": 86.23,
+      "multi_worst": 75.45,
+      "binary_mean": 84.49,
+      "binary_std": 3.39,
+      "binary_best": 92.22,
+      "binary_worst": 80.24
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 167,
+        "multiclass_acc": 80.84,
+        "binary_acc": 85.03,
+        "specificity": 92.39,
+        "sensitivity": 76.0,
+        "balanced_acc": 71.78,
+        "TP": 57,
+        "FN": 18,
+        "TN": 85,
+        "FP": 7,
+        "per_class": {
+          "1": {
+            "n_test": 92,
+            "correct": 85,
+            "accuracy": 0.9239
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 14,
+            "accuracy": 0.6364
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 7,
+            "correct": 7,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 1,
+            "accuracy": 0.2
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 5,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "10": {
+            "n_test": 22,
+            "correct": 15,
+            "accuracy": 0.6818
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 167,
+        "multiclass_acc": 75.45,
+        "binary_acc": 80.24,
+        "specificity": 91.75,
+        "sensitivity": 64.29,
+        "balanced_acc": 62.56,
+        "TP": 45,
+        "FN": 25,
+        "TN": 89,
+        "FP": 8,
+        "per_class": {
+          "1": {
+            "n_test": 97,
+            "correct": 89,
+            "accuracy": 0.9175
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 7,
+            "correct": 7,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 1,
+            "accuracy": 0.2
+          },
+          "6": {
+            "n_test": 12,
+            "correct": 5,
+            "accuracy": 0.4167
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 21,
+            "correct": 9,
+            "accuracy": 0.4286
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 167,
+        "multiclass_acc": 78.44,
+        "binary_acc": 83.23,
+        "specificity": 89.42,
+        "sensitivity": 73.02,
+        "balanced_acc": 67.32,
+        "TP": 46,
+        "FN": 17,
+        "TN": 93,
+        "FP": 11,
+        "per_class": {
+          "1": {
+            "n_test": 104,
+            "correct": 93,
+            "accuracy": 0.8942
+          },
+          "2": {
+            "n_test": 16,
+            "correct": 8,
+            "accuracy": 0.5
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 7,
+            "correct": 3,
+            "accuracy": 0.4286
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 3,
+            "accuracy": 0.4286
+          },
+          "6": {
+            "n_test": 7,
+            "correct": 3,
+            "accuracy": 0.4286
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 17,
+            "correct": 12,
+            "accuracy": 0.7059
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 167,
+        "multiclass_acc": 80.84,
+        "binary_acc": 84.43,
+        "specificity": 89.9,
+        "sensitivity": 76.47,
+        "balanced_acc": 74.62,
+        "TP": 52,
+        "FN": 16,
+        "TN": 89,
+        "FP": 10,
+        "per_class": {
+          "1": {
+            "n_test": 99,
+            "correct": 89,
+            "accuracy": 0.899
+          },
+          "2": {
+            "n_test": 19,
+            "correct": 12,
+            "accuracy": 0.6316
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 1,
+            "accuracy": 0.1667
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 5,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 22,
+            "correct": 17,
+            "accuracy": 0.7727
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 167,
+        "multiclass_acc": 77.84,
+        "binary_acc": 82.04,
+        "specificity": 93.1,
+        "sensitivity": 70.0,
+        "balanced_acc": 68.97,
+        "TP": 56,
+        "FN": 24,
+        "TN": 81,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 87,
+            "correct": 81,
+            "accuracy": 0.931
+          },
+          "2": {
+            "n_test": 25,
+            "correct": 13,
+            "accuracy": 0.52
+          },
+          "3": {
+            "n_test": 10,
+            "correct": 9,
+            "accuracy": 0.9
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 1,
+            "accuracy": 0.125
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 7,
+            "accuracy": 0.875
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "10": {
+            "n_test": 21,
+            "correct": 14,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 167,
+        "multiclass_acc": 83.83,
+        "binary_acc": 87.43,
+        "specificity": 97.96,
+        "sensitivity": 72.46,
+        "balanced_acc": 68.64,
+        "TP": 50,
+        "FN": 19,
+        "TN": 96,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 96,
+            "accuracy": 0.9796
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 9,
+            "accuracy": 0.6429
+          },
+          "3": {
+            "n_test": 7,
+            "correct": 7,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 7,
+            "correct": 2,
+            "accuracy": 0.2857
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 5,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 4,
+            "accuracy": 0.6667
+          },
+          "10": {
+            "n_test": 21,
+            "correct": 14,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 167,
+        "multiclass_acc": 77.84,
+        "binary_acc": 81.44,
+        "specificity": 93.88,
+        "sensitivity": 63.77,
+        "balanced_acc": 63.28,
+        "TP": 44,
+        "FN": 25,
+        "TN": 92,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 92,
+            "accuracy": 0.9388
+          },
+          "2": {
+            "n_test": 21,
+            "correct": 13,
+            "accuracy": 0.619
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 7,
+            "correct": 4,
+            "accuracy": 0.5714
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 12,
+            "correct": 3,
+            "accuracy": 0.25
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 9,
+            "accuracy": 0.6
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 167,
+        "multiclass_acc": 82.04,
+        "binary_acc": 86.83,
+        "specificity": 91.09,
+        "sensitivity": 80.3,
+        "balanced_acc": 74.5,
+        "TP": 53,
+        "FN": 13,
+        "TN": 92,
+        "FP": 9,
+        "per_class": {
+          "1": {
+            "n_test": 101,
+            "correct": 92,
+            "accuracy": 0.9109
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 12,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 5,
+            "accuracy": 0.625
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 13,
+            "accuracy": 0.65
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 167,
+        "multiclass_acc": 78.44,
+        "binary_acc": 82.04,
+        "specificity": 91.0,
+        "sensitivity": 68.66,
+        "balanced_acc": 64.85,
+        "TP": 46,
+        "FN": 21,
+        "TN": 91,
+        "FP": 9,
+        "per_class": {
+          "1": {
+            "n_test": 100,
+            "correct": 91,
+            "accuracy": 0.91
+          },
+          "2": {
+            "n_test": 20,
+            "correct": 13,
+            "accuracy": 0.65
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 9,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 7,
+            "correct": 5,
+            "accuracy": 0.7143
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "10": {
+            "n_test": 17,
+            "correct": 11,
+            "accuracy": 0.6471
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 167,
+        "multiclass_acc": 86.23,
+        "binary_acc": 92.22,
+        "specificity": 96.0,
+        "sensitivity": 86.57,
+        "balanced_acc": 76.56,
+        "TP": 58,
+        "FN": 9,
+        "TN": 96,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 100,
+            "correct": 96,
+            "accuracy": 0.96
+          },
+          "2": {
+            "n_test": 17,
+            "correct": 14,
+            "accuracy": 0.8235
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 6,
+            "correct": 2,
+            "accuracy": 0.3333
+          },
+          "10": {
+            "n_test": 22,
+            "correct": 13,
+            "accuracy": 0.5909
+          }
+        }
+      }
+    ]
+  },
+  "70/30": {
+    "summary": {
+      "multi_mean": 81.36,
+      "multi_std": 3.75,
+      "multi_best": 87.2,
+      "multi_worst": 76.0,
+      "binary_mean": 85.12,
+      "binary_std": 4.04,
+      "binary_best": 90.4,
+      "binary_worst": 79.2
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 125,
+        "multiclass_acc": 80.0,
+        "binary_acc": 84.8,
+        "specificity": 91.94,
+        "sensitivity": 77.78,
+        "balanced_acc": 70.16,
+        "TP": 49,
+        "FN": 14,
+        "TN": 57,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 62,
+            "correct": 57,
+            "accuracy": 0.9194
+          },
+          "2": {
+            "n_test": 16,
+            "correct": 11,
+            "accuracy": 0.6875
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 9,
+            "correct": 5,
+            "accuracy": 0.5556
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 1,
+            "accuracy": 0.2
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 15,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 125,
+        "multiclass_acc": 76.0,
+        "binary_acc": 79.2,
+        "specificity": 87.32,
+        "sensitivity": 68.52,
+        "balanced_acc": 59.94,
+        "TP": 37,
+        "FN": 17,
+        "TN": 62,
+        "FP": 9,
+        "per_class": {
+          "1": {
+            "n_test": 71,
+            "correct": 62,
+            "accuracy": 0.8732
+          },
+          "2": {
+            "n_test": 12,
+            "correct": 9,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 2,
+            "accuracy": 0.25
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "10": {
+            "n_test": 17,
+            "correct": 10,
+            "accuracy": 0.5882
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 125,
+        "multiclass_acc": 77.6,
+        "binary_acc": 83.2,
+        "specificity": 87.01,
+        "sensitivity": 77.08,
+        "balanced_acc": 70.32,
+        "TP": 37,
+        "FN": 11,
+        "TN": 67,
+        "FP": 10,
+        "per_class": {
+          "1": {
+            "n_test": 77,
+            "correct": 67,
+            "accuracy": 0.8701
+          },
+          "2": {
+            "n_test": 13,
+            "correct": 6,
+            "accuracy": 0.4615
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 4,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 2,
+            "accuracy": 0.4
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 11,
+            "correct": 8,
+            "accuracy": 0.7273
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 125,
+        "multiclass_acc": 87.2,
+        "binary_acc": 90.4,
+        "specificity": 89.33,
+        "sensitivity": 92.0,
+        "balanced_acc": 91.81,
+        "TP": 46,
+        "FN": 4,
+        "TN": 67,
+        "FP": 8,
+        "per_class": {
+          "1": {
+            "n_test": 75,
+            "correct": 67,
+            "accuracy": 0.8933
+          },
+          "2": {
+            "n_test": 16,
+            "correct": 12,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 16,
+            "correct": 13,
+            "accuracy": 0.8125
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 125,
+        "multiclass_acc": 81.6,
+        "binary_acc": 84.0,
+        "specificity": 94.03,
+        "sensitivity": 72.41,
+        "balanced_acc": 76.88,
+        "TP": 42,
+        "FN": 16,
+        "TN": 63,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 67,
+            "correct": 63,
+            "accuracy": 0.9403
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 10,
+            "accuracy": 0.5556
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "10": {
+            "n_test": 16,
+            "correct": 11,
+            "accuracy": 0.6875
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 125,
+        "multiclass_acc": 85.6,
+        "binary_acc": 89.6,
+        "specificity": 97.3,
+        "sensitivity": 78.43,
+        "balanced_acc": 70.67,
+        "TP": 40,
+        "FN": 11,
+        "TN": 72,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 72,
+            "accuracy": 0.973
+          },
+          "2": {
+            "n_test": 10,
+            "correct": 7,
+            "accuracy": 0.7
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 17,
+            "correct": 11,
+            "accuracy": 0.6471
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 125,
+        "multiclass_acc": 80.0,
+        "binary_acc": 81.6,
+        "specificity": 94.67,
+        "sensitivity": 62.0,
+        "balanced_acc": 67.55,
+        "TP": 31,
+        "FN": 19,
+        "TN": 71,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 75,
+            "correct": 71,
+            "accuracy": 0.9467
+          },
+          "2": {
+            "n_test": 13,
+            "correct": 9,
+            "accuracy": 0.6923
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "6": {
+            "n_test": 11,
+            "correct": 2,
+            "accuracy": 0.1818
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 8,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 125,
+        "multiclass_acc": 83.2,
+        "binary_acc": 88.0,
+        "specificity": 90.67,
+        "sensitivity": 84.0,
+        "balanced_acc": 76.96,
+        "TP": 42,
+        "FN": 8,
+        "TN": 68,
+        "FP": 7,
+        "per_class": {
+          "1": {
+            "n_test": 75,
+            "correct": 68,
+            "accuracy": 0.9067
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 8,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 125,
+        "multiclass_acc": 76.8,
+        "binary_acc": 80.0,
+        "specificity": 87.34,
+        "sensitivity": 67.39,
+        "balanced_acc": 67.27,
+        "TP": 31,
+        "FN": 15,
+        "TN": 69,
+        "FP": 10,
+        "per_class": {
+          "1": {
+            "n_test": 79,
+            "correct": 69,
+            "accuracy": 0.8734
+          },
+          "2": {
+            "n_test": 16,
+            "correct": 10,
+            "accuracy": 0.625
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 7,
+            "accuracy": 0.5833
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 125,
+        "multiclass_acc": 85.6,
+        "binary_acc": 90.4,
+        "specificity": 94.74,
+        "sensitivity": 83.67,
+        "balanced_acc": 78.49,
+        "TP": 41,
+        "FN": 8,
+        "TN": 72,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 76,
+            "correct": 72,
+            "accuracy": 0.9474
+          },
+          "2": {
+            "n_test": 10,
+            "correct": 9,
+            "accuracy": 0.9
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 2,
+            "accuracy": 0.4
+          },
+          "10": {
+            "n_test": 19,
+            "correct": 12,
+            "accuracy": 0.6316
+          }
+        }
+      }
+    ]
+  },
+  "75/25": {
+    "summary": {
+      "multi_mean": 82.5,
+      "multi_std": 3.21,
+      "multi_best": 86.54,
+      "multi_worst": 76.92,
+      "binary_mean": 85.77,
+      "binary_std": 3.64,
+      "binary_best": 91.35,
+      "binary_worst": 80.77
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 104,
+        "multiclass_acc": 84.62,
+        "binary_acc": 88.46,
+        "specificity": 96.0,
+        "sensitivity": 81.48,
+        "balanced_acc": 81.15,
+        "TP": 44,
+        "FN": 10,
+        "TN": 48,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 50,
+            "correct": 48,
+            "accuracy": 0.96
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 17,
+            "correct": 14,
+            "accuracy": 0.8235
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 104,
+        "multiclass_acc": 81.73,
+        "binary_acc": 82.69,
+        "specificity": 89.66,
+        "sensitivity": 73.91,
+        "balanced_acc": 71.92,
+        "TP": 34,
+        "FN": 12,
+        "TN": 52,
+        "FP": 6,
+        "per_class": {
+          "1": {
+            "n_test": 58,
+            "correct": 52,
+            "accuracy": 0.8966
+          },
+          "2": {
+            "n_test": 10,
+            "correct": 7,
+            "accuracy": 0.7
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 7,
+            "correct": 5,
+            "accuracy": 0.7143
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 14,
+            "correct": 9,
+            "accuracy": 0.6429
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 104,
+        "multiclass_acc": 76.92,
+        "binary_acc": 82.69,
+        "specificity": 86.36,
+        "sensitivity": 76.32,
+        "balanced_acc": 70.59,
+        "TP": 29,
+        "FN": 9,
+        "TN": 57,
+        "FP": 9,
+        "per_class": {
+          "1": {
+            "n_test": 66,
+            "correct": 57,
+            "accuracy": 0.8636
+          },
+          "2": {
+            "n_test": 12,
+            "correct": 7,
+            "accuracy": 0.5833
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 7,
+            "accuracy": 0.7
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 104,
+        "multiclass_acc": 83.65,
+        "binary_acc": 87.5,
+        "specificity": 91.67,
+        "sensitivity": 81.82,
+        "balanced_acc": 84.62,
+        "TP": 36,
+        "FN": 8,
+        "TN": 55,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 60,
+            "correct": 55,
+            "accuracy": 0.9167
+          },
+          "2": {
+            "n_test": 13,
+            "correct": 9,
+            "accuracy": 0.6923
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 3,
+            "accuracy": 0.375
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 14,
+            "correct": 11,
+            "accuracy": 0.7857
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 104,
+        "multiclass_acc": 79.81,
+        "binary_acc": 80.77,
+        "specificity": 93.1,
+        "sensitivity": 65.22,
+        "balanced_acc": 75.39,
+        "TP": 30,
+        "FN": 16,
+        "TN": 54,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 58,
+            "correct": 54,
+            "accuracy": 0.931
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 7,
+            "accuracy": 0.4667
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 7,
+            "accuracy": 0.5833
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 104,
+        "multiclass_acc": 85.58,
+        "binary_acc": 89.42,
+        "specificity": 94.92,
+        "sensitivity": 82.22,
+        "balanced_acc": 72.91,
+        "TP": 37,
+        "FN": 8,
+        "TN": 56,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 59,
+            "correct": 56,
+            "accuracy": 0.9492
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 6,
+            "accuracy": 0.6667
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 12,
+            "accuracy": 0.8
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 104,
+        "multiclass_acc": 80.77,
+        "binary_acc": 83.65,
+        "specificity": 96.88,
+        "sensitivity": 62.5,
+        "balanced_acc": 60.76,
+        "TP": 25,
+        "FN": 15,
+        "TN": 62,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 64,
+            "correct": 62,
+            "accuracy": 0.9688
+          },
+          "2": {
+            "n_test": 11,
+            "correct": 7,
+            "accuracy": 0.6364
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 9,
+            "correct": 2,
+            "accuracy": 0.2222
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 7,
+            "accuracy": 0.7
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 104,
+        "multiclass_acc": 86.54,
+        "binary_acc": 89.42,
+        "specificity": 92.06,
+        "sensitivity": 85.37,
+        "balanced_acc": 83.1,
+        "TP": 35,
+        "FN": 6,
+        "TN": 58,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 63,
+            "correct": 58,
+            "accuracy": 0.9206
+          },
+          "2": {
+            "n_test": 12,
+            "correct": 9,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 11,
+            "correct": 8,
+            "accuracy": 0.7273
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 104,
+        "multiclass_acc": 78.85,
+        "binary_acc": 81.73,
+        "specificity": 92.19,
+        "sensitivity": 65.0,
+        "balanced_acc": 61.98,
+        "TP": 26,
+        "FN": 14,
+        "TN": 59,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 64,
+            "correct": 59,
+            "accuracy": 0.9219
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 9,
+            "accuracy": 0.6
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 11,
+            "correct": 7,
+            "accuracy": 0.6364
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 104,
+        "multiclass_acc": 86.54,
+        "binary_acc": 91.35,
+        "specificity": 93.55,
+        "sensitivity": 88.1,
+        "balanced_acc": 80.65,
+        "TP": 37,
+        "FN": 5,
+        "TN": 58,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 62,
+            "correct": 58,
+            "accuracy": 0.9355
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          }
+        }
+      }
+    ]
+  },
+  "80/19": {
+    "summary": {
+      "multi_mean": 85.47,
+      "multi_std": 2.43,
+      "multi_best": 89.29,
+      "multi_worst": 82.14,
+      "binary_mean": 87.98,
+      "binary_std": 3.35,
+      "binary_best": 94.05,
+      "binary_worst": 82.14
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 84,
+        "multiclass_acc": 89.29,
+        "binary_acc": 90.48,
+        "specificity": 97.44,
+        "sensitivity": 84.44,
+        "balanced_acc": 88.01,
+        "TP": 38,
+        "FN": 7,
+        "TN": 38,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 39,
+            "correct": 38,
+            "accuracy": 0.9744
+          },
+          "2": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 10,
+            "accuracy": 0.8333
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 84,
+        "multiclass_acc": 82.14,
+        "binary_acc": 85.71,
+        "specificity": 93.33,
+        "sensitivity": 76.92,
+        "balanced_acc": 81.67,
+        "TP": 30,
+        "FN": 9,
+        "TN": 42,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 45,
+            "correct": 42,
+            "accuracy": 0.9333
+          },
+          "2": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "3": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 7,
+            "correct": 4,
+            "accuracy": 0.5714
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 14,
+            "correct": 8,
+            "accuracy": 0.5714
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 84,
+        "multiclass_acc": 85.71,
+        "binary_acc": 88.1,
+        "specificity": 90.74,
+        "sensitivity": 83.33,
+        "balanced_acc": 84.29,
+        "TP": 25,
+        "FN": 5,
+        "TN": 49,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 54,
+            "correct": 49,
+            "accuracy": 0.9074
+          },
+          "2": {
+            "n_test": 7,
+            "correct": 4,
+            "accuracy": 0.5714
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 7,
+            "correct": 5,
+            "accuracy": 0.7143
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 84,
+        "multiclass_acc": 88.1,
+        "binary_acc": 90.48,
+        "specificity": 94.12,
+        "sensitivity": 84.85,
+        "balanced_acc": 82.6,
+        "TP": 28,
+        "FN": 5,
+        "TN": 48,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 51,
+            "correct": 48,
+            "accuracy": 0.9412
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 7,
+            "accuracy": 0.7778
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 84,
+        "multiclass_acc": 82.14,
+        "binary_acc": 82.14,
+        "specificity": 93.75,
+        "sensitivity": 66.67,
+        "balanced_acc": 83.44,
+        "TP": 24,
+        "FN": 12,
+        "TN": 45,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 48,
+            "correct": 45,
+            "accuracy": 0.9375
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 8,
+            "accuracy": 0.5714
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 5,
+            "accuracy": 0.5
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 84,
+        "multiclass_acc": 88.1,
+        "binary_acc": 90.48,
+        "specificity": 96.0,
+        "sensitivity": 82.35,
+        "balanced_acc": 78.96,
+        "TP": 28,
+        "FN": 6,
+        "TN": 48,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 50,
+            "correct": 48,
+            "accuracy": 0.96
+          },
+          "2": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 9,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 84,
+        "multiclass_acc": 84.52,
+        "binary_acc": 84.52,
+        "specificity": 94.34,
+        "sensitivity": 67.74,
+        "balanced_acc": 68.39,
+        "TP": 21,
+        "FN": 10,
+        "TN": 50,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 53,
+            "correct": 50,
+            "accuracy": 0.9434
+          },
+          "2": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 7,
+            "accuracy": 0.7778
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 84,
+        "multiclass_acc": 84.52,
+        "binary_acc": 88.1,
+        "specificity": 90.2,
+        "sensitivity": 84.85,
+        "balanced_acc": 80.44,
+        "TP": 28,
+        "FN": 5,
+        "TN": 46,
+        "FP": 5,
+        "per_class": {
+          "1": {
+            "n_test": 51,
+            "correct": 46,
+            "accuracy": 0.902
+          },
+          "2": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 7,
+            "accuracy": 0.7
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 84,
+        "multiclass_acc": 83.33,
+        "binary_acc": 85.71,
+        "specificity": 94.23,
+        "sensitivity": 71.88,
+        "balanced_acc": 66.71,
+        "TP": 23,
+        "FN": 9,
+        "TN": 49,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 52,
+            "correct": 49,
+            "accuracy": 0.9423
+          },
+          "2": {
+            "n_test": 11,
+            "correct": 8,
+            "accuracy": 0.7273
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 6,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 84,
+        "multiclass_acc": 86.9,
+        "binary_acc": 94.05,
+        "specificity": 94.12,
+        "sensitivity": 93.94,
+        "balanced_acc": 79.77,
+        "TP": 31,
+        "FN": 2,
+        "TN": 48,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 51,
+            "correct": 48,
+            "accuracy": 0.9412
+          },
+          "2": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "10": {
+            "n_test": 12,
+            "correct": 10,
+            "accuracy": 0.8333
+          }
+        }
+      }
+    ]
+  },
+  "85/15": {
+    "summary": {
+      "multi_mean": 85.87,
+      "multi_std": 2.6,
+      "multi_best": 90.48,
+      "multi_worst": 82.54,
+      "binary_mean": 88.89,
+      "binary_std": 3.25,
+      "binary_best": 96.83,
+      "binary_worst": 84.13
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_acc": 88.89,
+        "specificity": 96.67,
+        "sensitivity": 81.82,
+        "balanced_acc": 82.2,
+        "TP": 27,
+        "FN": 6,
+        "TN": 29,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 30,
+            "correct": 29,
+            "accuracy": 0.9667
+          },
+          "2": {
+            "n_test": 13,
+            "correct": 9,
+            "accuracy": 0.6923
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 63,
+        "multiclass_acc": 84.13,
+        "binary_acc": 87.3,
+        "specificity": 91.43,
+        "sensitivity": 82.14,
+        "balanced_acc": 81.26,
+        "TP": 23,
+        "FN": 5,
+        "TN": 32,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 35,
+            "correct": 32,
+            "accuracy": 0.9143
+          },
+          "2": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 4,
+            "correct": 1,
+            "accuracy": 0.25
+          },
+          "6": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 6,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 63,
+        "multiclass_acc": 82.54,
+        "binary_acc": 87.3,
+        "specificity": 90.48,
+        "sensitivity": 80.95,
+        "balanced_acc": 75.07,
+        "TP": 17,
+        "FN": 4,
+        "TN": 38,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 42,
+            "correct": 38,
+            "accuracy": 0.9048
+          },
+          "2": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 63,
+        "multiclass_acc": 88.89,
+        "binary_acc": 88.89,
+        "specificity": 95.0,
+        "sensitivity": 78.26,
+        "balanced_acc": 83.54,
+        "TP": 18,
+        "FN": 5,
+        "TN": 38,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 40,
+            "correct": 38,
+            "accuracy": 0.95
+          },
+          "2": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 63,
+        "multiclass_acc": 82.54,
+        "binary_acc": 84.13,
+        "specificity": 94.44,
+        "sensitivity": 70.37,
+        "balanced_acc": 77.43,
+        "TP": 19,
+        "FN": 8,
+        "TN": 34,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 36,
+            "correct": 34,
+            "accuracy": 0.9444
+          },
+          "2": {
+            "n_test": 10,
+            "correct": 5,
+            "accuracy": 0.5
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_acc": 87.3,
+        "specificity": 91.89,
+        "sensitivity": 80.77,
+        "balanced_acc": 80.58,
+        "TP": 21,
+        "FN": 5,
+        "TN": 34,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 37,
+            "correct": 34,
+            "accuracy": 0.9189
+          },
+          "2": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 7,
+            "accuracy": 0.7778
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 63,
+        "multiclass_acc": 88.89,
+        "binary_acc": 88.89,
+        "specificity": 92.68,
+        "sensitivity": 81.82,
+        "balanced_acc": 75.75,
+        "TP": 18,
+        "FN": 4,
+        "TN": 38,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 41,
+            "correct": 38,
+            "accuracy": 0.9268
+          },
+          "2": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 63,
+        "multiclass_acc": 84.13,
+        "binary_acc": 92.06,
+        "specificity": 91.89,
+        "sensitivity": 92.31,
+        "balanced_acc": 81.28,
+        "TP": 24,
+        "FN": 2,
+        "TN": 34,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 37,
+            "correct": 34,
+            "accuracy": 0.9189
+          },
+          "2": {
+            "n_test": 6,
+            "correct": 3,
+            "accuracy": 0.5
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_acc": 87.3,
+        "specificity": 94.59,
+        "sensitivity": 76.92,
+        "balanced_acc": 78.2,
+        "TP": 20,
+        "FN": 6,
+        "TN": 35,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 37,
+            "correct": 35,
+            "accuracy": 0.9459
+          },
+          "2": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 9,
+            "correct": 7,
+            "accuracy": 0.7778
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 63,
+        "multiclass_acc": 90.48,
+        "binary_acc": 96.83,
+        "specificity": 97.44,
+        "sensitivity": 95.83,
+        "balanced_acc": 81.52,
+        "TP": 23,
+        "FN": 1,
+        "TN": 38,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 39,
+            "correct": 38,
+            "accuracy": 0.9744
+          },
+          "2": {
+            "n_test": 7,
+            "correct": 6,
+            "accuracy": 0.8571
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 1,
+            "accuracy": 0.3333
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 8,
+            "correct": 7,
+            "accuracy": 0.875
+          }
+        }
+      }
+    ]
+  },
+  "90/9": {
+    "summary": {
+      "multi_mean": 86.19,
+      "multi_std": 4.97,
+      "multi_best": 92.86,
+      "multi_worst": 76.19,
+      "binary_mean": 88.57,
+      "binary_std": 4.74,
+      "binary_best": 97.62,
+      "binary_worst": 80.95
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 42,
+        "multiclass_acc": 80.95,
+        "binary_acc": 85.71,
+        "specificity": 88.89,
+        "sensitivity": 83.33,
+        "balanced_acc": 83.69,
+        "TP": 20,
+        "FN": 4,
+        "TN": 16,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 18,
+            "correct": 16,
+            "accuracy": 0.8889
+          },
+          "2": {
+            "n_test": 11,
+            "correct": 7,
+            "accuracy": 0.6364
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 42,
+        "multiclass_acc": 85.71,
+        "binary_acc": 85.71,
+        "specificity": 91.3,
+        "sensitivity": 78.95,
+        "balanced_acc": 77.33,
+        "TP": 15,
+        "FN": 4,
+        "TN": 21,
+        "FP": 2,
+        "per_class": {
+          "1": {
+            "n_test": 23,
+            "correct": 21,
+            "accuracy": 0.913
+          },
+          "2": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 6,
+            "correct": 4,
+            "accuracy": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 42,
+        "multiclass_acc": 76.19,
+        "binary_acc": 80.95,
+        "specificity": 85.19,
+        "sensitivity": 73.33,
+        "balanced_acc": 66.98,
+        "TP": 11,
+        "FN": 4,
+        "TN": 23,
+        "FP": 4,
+        "per_class": {
+          "1": {
+            "n_test": 27,
+            "correct": 23,
+            "accuracy": 0.8519
+          },
+          "2": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "6": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "10": {
+            "n_test": 4,
+            "correct": 2,
+            "accuracy": 0.5
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 42,
+        "multiclass_acc": 90.48,
+        "binary_acc": 90.48,
+        "specificity": 96.3,
+        "sensitivity": 80.0,
+        "balanced_acc": 78.76,
+        "TP": 12,
+        "FN": 3,
+        "TN": 26,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 27,
+            "correct": 26,
+            "accuracy": 0.963
+          },
+          "2": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_acc": 88.1,
+        "specificity": 100.0,
+        "sensitivity": 72.22,
+        "balanced_acc": 89.17,
+        "TP": 13,
+        "FN": 5,
+        "TN": 24,
+        "FP": 0,
+        "per_class": {
+          "1": {
+            "n_test": 24,
+            "correct": 24,
+            "accuracy": 1.0
+          },
+          "2": {
+            "n_test": 6,
+            "correct": 2,
+            "accuracy": 0.3333
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 42,
+        "multiclass_acc": 90.48,
+        "binary_acc": 92.86,
+        "specificity": 100.0,
+        "sensitivity": 84.21,
+        "balanced_acc": 82.14,
+        "TP": 16,
+        "FN": 3,
+        "TN": 23,
+        "FP": 0,
+        "per_class": {
+          "1": {
+            "n_test": 23,
+            "correct": 23,
+            "accuracy": 1.0
+          },
+          "2": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 8,
+            "correct": 6,
+            "accuracy": 0.75
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_acc": 88.1,
+        "specificity": 96.43,
+        "sensitivity": 71.43,
+        "balanced_acc": 60.92,
+        "TP": 10,
+        "FN": 4,
+        "TN": 27,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 28,
+            "correct": 27,
+            "accuracy": 0.9643
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "10": {
+            "n_test": 4,
+            "correct": 4,
+            "accuracy": 1.0
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_acc": 92.86,
+        "specificity": 96.0,
+        "sensitivity": 88.24,
+        "balanced_acc": 87.83,
+        "TP": 15,
+        "FN": 2,
+        "TN": 24,
+        "FP": 1,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "accuracy": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 3,
+            "accuracy": 0.6
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "accuracy": 0.6667
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "accuracy": 0.8
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 42,
+        "multiclass_acc": 80.95,
+        "binary_acc": 83.33,
+        "specificity": 86.96,
+        "sensitivity": 78.95,
+        "balanced_acc": 72.83,
+        "TP": 15,
+        "FN": 4,
+        "TN": 20,
+        "FP": 3,
+        "per_class": {
+          "1": {
+            "n_test": 23,
+            "correct": 20,
+            "accuracy": 0.8696
+          },
+          "2": {
+            "n_test": 6,
+            "correct": 4,
+            "accuracy": 0.6667
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "accuracy": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "accuracy": 0.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 6,
+            "correct": 5,
+            "accuracy": 0.8333
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 42,
+        "multiclass_acc": 92.86,
+        "binary_acc": 97.62,
+        "specificity": 100.0,
+        "sensitivity": 93.33,
+        "balanced_acc": 82.14,
+        "TP": 14,
+        "FN": 1,
+        "TN": 27,
+        "FP": 0,
+        "per_class": {
+          "1": {
+            "n_test": 27,
+            "correct": 27,
+            "accuracy": 1.0
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 5,
+            "accuracy": 1.0
+          },
+          "3": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "6": {
+            "n_test": 2,
+            "correct": 1,
+            "accuracy": 0.5
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 4,
+            "correct": 3,
+            "accuracy": 0.75
+          }
+        }
+      }
+    ]
+  },
+  "10-fold CV": {
+    "summary": {
+      "multi_mean": 84.66,
+      "multi_std": 0.93,
+      "multi_best": 86.78,
+      "multi_worst": 83.41,
+      "binary_mean": 87.72,
+      "binary_std": 0.63,
+      "binary_best": 88.7,
+      "binary_worst": 86.78
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "n_test": 416,
+        "multiclass_acc": 86.78,
+        "binary_acc": 88.7,
+        "specificity": 91.43,
+        "sensitivity": 84.8,
+        "balanced_acc": 81.47,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 224,
+            "accuracy": 0.9143
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "accuracy": 0.7727
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "accuracy": 0.6154
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 21,
+            "accuracy": 0.84
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 41,
+            "accuracy": 0.82
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "n_test": 416,
+        "multiclass_acc": 84.13,
+        "binary_acc": 87.74,
+        "specificity": 90.2,
+        "sensitivity": 84.21,
+        "balanced_acc": 78.69,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 221,
+            "accuracy": 0.902
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "accuracy": 0.7045
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 9,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "accuracy": 0.6154
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 19,
+            "accuracy": 0.76
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 39,
+            "accuracy": 0.78
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "n_test": 416,
+        "multiclass_acc": 85.82,
+        "binary_acc": 88.7,
+        "specificity": 91.84,
+        "sensitivity": 84.21,
+        "balanced_acc": 80.49,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 225,
+            "accuracy": 0.9184
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "accuracy": 0.7727
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "accuracy": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 19,
+            "accuracy": 0.76
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 37,
+            "accuracy": 0.74
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "n_test": 416,
+        "multiclass_acc": 84.62,
+        "binary_acc": 87.26,
+        "specificity": 90.2,
+        "sensitivity": 83.04,
+        "balanced_acc": 79.33,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 221,
+            "accuracy": 0.902
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "accuracy": 0.7727
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 9,
+            "accuracy": 0.6
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 7,
+            "accuracy": 0.5385
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 22,
+            "accuracy": 0.88
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "accuracy": 0.72
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "n_test": 416,
+        "multiclass_acc": 84.13,
+        "binary_acc": 87.74,
+        "specificity": 90.61,
+        "sensitivity": 83.63,
+        "balanced_acc": 79.81,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 222,
+            "accuracy": 0.9061
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 28,
+            "accuracy": 0.6364
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "accuracy": 0.6154
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 38,
+            "accuracy": 0.76
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "n_test": 416,
+        "multiclass_acc": 83.89,
+        "binary_acc": 87.26,
+        "specificity": 91.43,
+        "sensitivity": 81.29,
+        "balanced_acc": 77.47,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 224,
+            "accuracy": 0.9143
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "accuracy": 0.7045
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 7,
+            "accuracy": 0.5385
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 18,
+            "accuracy": 0.72
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "accuracy": 0.72
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "n_test": 416,
+        "multiclass_acc": 84.62,
+        "binary_acc": 87.74,
+        "specificity": 90.61,
+        "sensitivity": 83.63,
+        "balanced_acc": 79.86,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 222,
+            "accuracy": 0.9061
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 32,
+            "accuracy": 0.7273
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 10,
+            "accuracy": 0.6667
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "accuracy": 0.6154
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "accuracy": 0.8
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 37,
+            "accuracy": 0.74
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "n_test": 416,
+        "multiclass_acc": 83.41,
+        "binary_acc": 87.02,
+        "specificity": 90.2,
+        "sensitivity": 82.46,
+        "balanced_acc": 78.15,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 221,
+            "accuracy": 0.902
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "accuracy": 0.7045
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 7,
+            "accuracy": 0.5385
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 18,
+            "accuracy": 0.72
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "accuracy": 0.72
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "n_test": 416,
+        "multiclass_acc": 84.86,
+        "binary_acc": 88.22,
+        "specificity": 91.02,
+        "sensitivity": 84.21,
+        "balanced_acc": 77.72,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 223,
+            "accuracy": 0.9102
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 33,
+            "accuracy": 0.75
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 6,
+            "accuracy": 0.4615
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 19,
+            "accuracy": 0.76
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 8,
+            "accuracy": 0.8889
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 39,
+            "accuracy": 0.78
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "n_test": 416,
+        "multiclass_acc": 84.38,
+        "binary_acc": 86.78,
+        "specificity": 90.2,
+        "sensitivity": 81.87,
+        "balanced_acc": 80.32,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 221,
+            "accuracy": 0.902
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "accuracy": 0.7045
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "accuracy": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "accuracy": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "accuracy": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 17,
+            "accuracy": 0.68
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "accuracy": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 39,
+            "accuracy": 0.78
+          }
+        }
+      }
+    ]
+  }
+}

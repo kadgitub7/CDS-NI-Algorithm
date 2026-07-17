@@ -1,0 +1,665 @@
+"""Parameterized CDS-OVR sweep runner for PhysioNet 2017.
+
+Accepts a strategy name as argv[1]. Each strategy defines a distinct
+set of tuning parameters. Runs 90/10 splits across multiple seeds
+and reports aggregate results.
+
+Usage: python sweep_runner.py <strategy_name>
+"""
+import json
+import numpy as np
+import pickle
+import sys
+import time
+from collections import defaultdict
+from pathlib import Path
+
+# ─── Strategy definitions ───
+# Each strategy is a hypothesis about what parameter regime works best.
+
+STRATEGIES = {
+    # A: AFEvidence split + balanced thresholds + z-score normalization
+    # Rationale: AFEvidence (feat 0) directly measures AF probability,
+    # normalization helps because the 188 features have wildly different scales
+    "A_norm_afev": {
+        "TREE_SPLIT_FEAT": 0,     # AFEvidence — strongest single AF indicator
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 200,
+        "LAPLACE_ALPHA": 1.0,
+        "CORR_THRESHOLD": 0.75,
+        "FEATURES_PER_CLASS": 30,  # more features for richer signal
+        "MAX_BINS": 6,
+        "HEALTHY_WEIGHT": 1.0,
+        "HEALTHY_BAR_CAP": 4.0,
+        "CLASS_THRESHOLD": 2.0,
+        "MIN_SUPPORT": {1: 3, 2: 3},
+        "CONF_SUPPORT": {1: 10, 2: 10},
+        "AGAINST_SCALE": {1: 0.8, 2: 0.7},
+        "NORMALIZE": True,          # z-score standardize features
+        "CLIP_OUTLIERS": False,
+    },
+
+    # B: IrrEvidence split + lower correlation threshold (more diverse features)
+    # Rationale: allowing more correlated features through means each class
+    # has more evidence to draw from; IrrEvidence captures irregularity broadly
+    "B_irr_morefeat": {
+        "TREE_SPLIT_FEAT": 2,     # IrrEvidence
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 200,
+        "LAPLACE_ALPHA": 0.5,      # less smoothing = sharper bin boundaries
+        "CORR_THRESHOLD": 0.9,     # allow more correlated features through
+        "FEATURES_PER_CLASS": 40,  # significantly more features
+        "MAX_BINS": 8,             # finer binning with large dataset
+        "HEALTHY_WEIGHT": 1.0,
+        "HEALTHY_BAR_CAP": 4.0,
+        "CLASS_THRESHOLD": 2.2,
+        "MIN_SUPPORT": {1: 3, 2: 3},
+        "CONF_SUPPORT": {1: 12, 2: 12},
+        "AGAINST_SCALE": {1: 0.8, 2: 0.8},
+        "NORMALIZE": False,
+        "CLIP_OUTLIERS": True,      # clip outliers at 1st/99th percentile
+    },
+
+    # C: CVrr split + normalization + aggressive binning
+    # Rationale: original CVrr split but with normalized data and more bins;
+    # the supervised binning can find finer decision boundaries with 8k records
+    "C_cvrr_finebins": {
+        "TREE_SPLIT_FEAT": 7,     # CVrr (original choice)
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 150,             # smaller nodes allowed (more tree branching)
+        "LAPLACE_ALPHA": 0.5,
+        "CORR_THRESHOLD": 0.8,
+        "FEATURES_PER_CLASS": 25,
+        "MAX_BINS": 10,            # much finer binning
+        "HEALTHY_WEIGHT": 1.05,
+        "HEALTHY_BAR_CAP": 4.5,
+        "CLASS_THRESHOLD": 2.5,
+        "MIN_SUPPORT": {1: 5, 2: 3},   # higher support for healthy (majority)
+        "CONF_SUPPORT": {1: 15, 2: 8},
+        "AGAINST_SCALE": {1: 0.75, 2: 0.75},
+        "NORMALIZE": True,
+        "CLIP_OUTLIERS": False,
+    },
+
+    # D: Dual-feature split (AFEvidence + CVrr) + balanced decision
+    # Rationale: use the two most discriminative features for splitting,
+    # creating 4 population subgroups. Conservative thresholds since
+    # each subgroup gets its own trained model.
+    "D_dual_split": {
+        "TREE_SPLIT_FEAT": [0, 7],  # AFEvidence AND CVrr at level 1
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 200,
+        "LAPLACE_ALPHA": 1.0,
+        "CORR_THRESHOLD": 0.8,
+        "FEATURES_PER_CLASS": 25,
+        "MAX_BINS": 6,
+        "HEALTHY_WEIGHT": 1.0,
+        "HEALTHY_BAR_CAP": 4.0,
+        "CLASS_THRESHOLD": 2.0,
+        "MIN_SUPPORT": {1: 3, 2: 3},
+        "CONF_SUPPORT": {1: 10, 2: 10},
+        "AGAINST_SCALE": {1: 0.8, 2: 0.7},
+        "NORMALIZE": True,
+        "CLIP_OUTLIERS": False,
+    },
+
+    # E: Norm + outlier clip + high FPC + relaxed corr — max info extraction
+    # Rationale: throw everything at it. Normalize, clip outliers, use lots
+    # of features with relaxed correlation filter. The idea is that binary
+    # classification benefits from more diverse weak signals.
+    "E_maxinfo": {
+        "TREE_SPLIT_FEAT": 0,     # AFEvidence
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 200,
+        "LAPLACE_ALPHA": 0.75,
+        "CORR_THRESHOLD": 0.85,
+        "FEATURES_PER_CLASS": 50,  # use up to 50 features per class
+        "MAX_BINS": 8,
+        "HEALTHY_WEIGHT": 1.0,
+        "HEALTHY_BAR_CAP": 3.5,
+        "CLASS_THRESHOLD": 1.8,
+        "MIN_SUPPORT": {1: 3, 2: 2},
+        "CONF_SUPPORT": {1: 10, 2: 8},
+        "AGAINST_SCALE": {1: 0.7, 2: 0.6},
+        "NORMALIZE": True,
+        "CLIP_OUTLIERS": True,
+    },
+
+    # F: Poincare split + conservative + high confidence requirements
+    # Rationale: Poincare_dispersion (feat 9) captures beat-to-beat variability
+    # structure differently from CVrr. High confidence support means only
+    # strong signals contribute — reduces noise in predictions.
+    "F_poincare_strict": {
+        "TREE_SPLIT_FEAT": 9,     # Poincare_dispersion
+        "TREE_MAX_LVL": 1,
+        "U_MIN": 250,
+        "LAPLACE_ALPHA": 1.5,      # more smoothing = more robust bins
+        "CORR_THRESHOLD": 0.7,     # stricter decorrelation
+        "FEATURES_PER_CLASS": 20,  # fewer but highly decorrelated features
+        "MAX_BINS": 5,
+        "HEALTHY_WEIGHT": 1.1,
+        "HEALTHY_BAR_CAP": 5.0,
+        "CLASS_THRESHOLD": 2.5,
+        "MIN_SUPPORT": {1: 5, 2: 4},
+        "CONF_SUPPORT": {1: 15, 2: 12},  # high confidence needed
+        "AGAINST_SCALE": {1: 0.9, 2: 0.8},
+        "NORMALIZE": False,
+        "CLIP_OUTLIERS": False,
+    },
+}
+
+SEEDS = [13, 20, 27, 34, 41]
+
+# ─── Data ───
+
+DATA_DIR = str(Path(__file__).parent.parent / "data" / "physioNetData2017")
+CACHE_DIR = str(Path(__file__).parent.parent / "data" / "physioNetData2017_cache")
+N_FEAT = 188
+HEALTHY = 1
+ABNORMAL = 2
+RATIO_EPS = 0.1
+
+
+def load_data():
+    cache_file = Path(CACHE_DIR) / "features_188_all.pkl"
+    with open(cache_file, "rb") as f:
+        cached = pickle.load(f)
+    return cached["data"], cached["labels"]
+
+
+def classify_features(data):
+    is_bin = np.zeros(N_FEAT, dtype=bool)
+    for c in range(N_FEAT):
+        v = data[:, c]
+        v = v[~np.isnan(v)]
+        if len(v) > 0 and set(np.unique(v)).issubset({0.0, 1.0}):
+            is_bin[c] = True
+    return is_bin
+
+
+def preprocess(data, cfg):
+    out = data.copy()
+    if cfg.get("CLIP_OUTLIERS"):
+        for c in range(N_FEAT):
+            col = out[:, c]
+            valid = ~np.isnan(col)
+            if valid.sum() > 10:
+                lo = np.nanpercentile(col, 1)
+                hi = np.nanpercentile(col, 99)
+                out[valid, c] = np.clip(col[valid], lo, hi)
+    if cfg.get("NORMALIZE"):
+        for c in range(N_FEAT):
+            col = out[:, c]
+            valid = ~np.isnan(col)
+            if valid.sum() > 2:
+                mu = np.nanmean(col)
+                sd = np.nanstd(col)
+                if sd > 1e-10:
+                    out[valid, c] = (col[valid] - mu) / sd
+    return out
+
+
+# ─── CDS core (same algorithm, parameterized) ───
+
+def _hdist(labels, idx):
+    d = defaultdict(int)
+    for u in idx:
+        d[labels[u]] += 1
+    return dict(d)
+
+
+class Node:
+    __slots__ = ('nid', 'lvl', 'uidx', 'hdist', 'bfeat', 'bbin',
+                 'bvset', 'blo', 'bhi', 'children', 'parent', 'ancestor_feats')
+    def __init__(self, nid, lvl, uidx, hdist):
+        self.nid, self.lvl, self.uidx, self.hdist = nid, lvl, uidx, hdist
+        self.bfeat = self.bvset = self.blo = self.bhi = None
+        self.bbin = False
+        self.children, self.parent = [], None
+        self.ancestor_feats = frozenset()
+
+    @property
+    def nu(self):
+        return len(self.uidx)
+
+    def branch_match(self, row):
+        if self.bfeat is None:
+            return True
+        v = row[self.bfeat]
+        if np.isnan(v):
+            return False
+        if self.bbin:
+            return v in self.bvset
+        if self.bhi == np.inf:
+            return v > self.blo
+        return v <= self.bhi
+
+
+class BinModel:
+    __slots__ = ('n_bins', 'edges', 'bin_counts', 'target_counts',
+                 'p_class', 'prior', 'cls_conf_support')
+    def __init__(self, n_bins, edges, bin_counts, target_counts,
+                 p_class, prior, cls_conf_support):
+        self.n_bins, self.edges = n_bins, edges
+        self.bin_counts, self.target_counts = bin_counts, target_counts
+        self.p_class, self.prior, self.cls_conf_support = p_class, prior, cls_conf_support
+
+
+def build_tree(data, labels, is_bin, cfg):
+    n = data.shape[0]
+    root = Node("root", 1, np.arange(n), _hdist(labels, np.arange(n)))
+    all_nodes = [root]
+    current_level = [root]
+    ctr = [0]
+    u_min = cfg["U_MIN"]
+    max_lvl = cfg["TREE_MAX_LVL"]
+    split_feat = cfg["TREE_SPLIT_FEAT"]
+    if isinstance(split_feat, int):
+        split_feat = [split_feat]
+
+    while current_level:
+        lvl = current_level[0].lvl
+        if lvl > max_lvl:
+            break
+        children = []
+        for parent in current_level:
+            feats = split_feat
+
+            for f in feats:
+                col = data[parent.uidx, f]
+                vm = ~np.isnan(col)
+                vv = col[vm]
+                if len(vv) == 0:
+                    continue
+                if is_bin[f]:
+                    uq = sorted(set(vv))
+                    if len(uq) < 2:
+                        continue
+                    parts = [(parent.uidx[vm & (col == val)], frozenset({val}), None, None, True)
+                             for val in uq]
+                else:
+                    if float(vv.min()) == float(vv.max()):
+                        continue
+                    med = float(np.median(vv))
+                    parts = [(parent.uidx[vm & (col <= med)], None, -np.inf, med, False),
+                             (parent.uidx[vm & (col > med)], None, med, np.inf, False)]
+
+                for cu, vs, lo, hi, ib in parts:
+                    if len(cu) < u_min:
+                        continue
+                    ctr[0] += 1
+                    ch = Node(f"L{lvl+1}_f{f}_{ctr[0]}", lvl+1, cu, _hdist(labels, cu))
+                    ch.bfeat, ch.bvset, ch.blo, ch.bhi, ch.bbin = f, vs, lo, hi, ib
+                    ch.parent = parent
+                    ch.ancestor_feats = parent.ancestor_feats | frozenset({f})
+                    parent.children.append(ch)
+                    children.append(ch)
+
+        seen, deduped = {}, []
+        for ch in children:
+            key = np.sort(ch.uidx).tobytes()
+            if key not in seen:
+                seen[key] = True
+                deduped.append(ch)
+            else:
+                ch.parent.children.remove(ch)
+        all_nodes.extend(deduped)
+        current_level = deduped
+
+    return all_nodes
+
+
+def _fast_abs_corr(x, y):
+    mx, my = x.mean(), y.mean()
+    dx, dy = x - mx, y - my
+    num = (dx * dy).sum()
+    den2 = (dx * dx).sum() * (dy * dy).sum()
+    return abs(num / np.sqrt(den2)) if den2 > 0 else 0.0
+
+
+def _route_user(uid, data, nodes):
+    by_lvl = defaultdict(list)
+    for nd in nodes:
+        by_lvl[nd.lvl].append(nd)
+    result, active = {}, set()
+    for lvl in sorted(by_lvl.keys()):
+        if lvl == 1:
+            result[1] = [nodes[0]]
+            active = {nodes[0].nid}
+        else:
+            matched = [nd for nd in by_lvl[lvl]
+                       if nd.parent and nd.parent.nid in active and nd.branch_match(data[uid])]
+            if matched:
+                result[lvl] = matched
+                active = {nd.nid for nd in matched}
+            else:
+                break
+    return result
+
+
+def _supervised_bin_edges(vv, is_target, max_bins, min_support):
+    n = len(vv)
+    vmin, vmax = float(vv.min()), float(vv.max())
+    if vmin == vmax or n < 2 * min_support:
+        return np.array([vmin - 0.5, vmax + 0.5])
+    sort_idx = np.argsort(vv)
+    sv = vv[sort_idx]
+    st = is_target[sort_idx]
+    edges = [vmin, vmax]
+    for _ in range(max_bins - 1):
+        best_gain, best_split, best_seg = 0.0, None, None
+        for seg_i in range(len(edges) - 1):
+            lo, hi = edges[seg_i], edges[seg_i + 1]
+            if seg_i == 0:
+                mask = sv <= hi
+            elif seg_i == len(edges) - 2:
+                mask = sv > lo
+            else:
+                mask = (sv > lo) & (sv <= hi)
+            seg_vals, seg_targ = sv[mask], st[mask]
+            n_seg = len(seg_vals)
+            if n_seg < 2 * min_support:
+                continue
+            n_t, n_r = seg_targ.sum(), n_seg - seg_targ.sum()
+            if n_t == 0 or n_r == 0:
+                continue
+            candidates = np.where(seg_vals[:-1] != seg_vals[1:])[0]
+            if len(candidates) == 0:
+                continue
+            cum_t = np.cumsum(seg_targ)
+            for ci in candidates:
+                n_left, n_right = ci + 1, n_seg - ci - 1
+                if n_left < min_support or n_right < min_support:
+                    continue
+                t_left = cum_t[ci]
+                t_right = n_t - t_left
+                r_left, r_right = n_left - t_left, n_right - t_right
+                e_tl = n_left * n_t / n_seg
+                e_tr = n_right * n_t / n_seg
+                e_rl = n_left * n_r / n_seg
+                e_rr = n_right * n_r / n_seg
+                chi2 = sum((o - e)**2 / e for o, e in
+                           [(t_left, e_tl), (t_right, e_tr),
+                            (r_left, e_rl), (r_right, e_rr)] if e > 0)
+                if chi2 > best_gain:
+                    best_gain = chi2
+                    best_split = (seg_vals[ci] + seg_vals[ci + 1]) / 2.0
+                    best_seg = seg_i
+        if best_split is None or best_gain < 0.5:
+            break
+        edges.insert(best_seg + 1, best_split)
+    edges[0] = vmin - 1e-10
+    edges[-1] = vmax + 1e-10
+    return np.array(sorted(set(edges)))
+
+
+def _train_ovr_node(node, data, labels, is_bin, target_class, min_support, conf_support, cfg):
+    models, actions = {}, []
+    nd_data, nd_labels = data[node.uidx], labels[node.uidx]
+    ns = node.nu
+    n_target = int((nd_labels == target_class).sum())
+    if n_target < 1:
+        return models, actions
+    prior = n_target / ns
+    is_target = (nd_labels == target_class)
+    laplace = cfg["LAPLACE_ALPHA"]
+    max_bins = cfg["MAX_BINS"]
+
+    for f in range(N_FEAT):
+        col = nd_data[:, f]
+        vm = ~np.isnan(col)
+        vv = col[vm]
+        nv = len(vv)
+        if nv == 0:
+            continue
+        vmin, vmax = float(vv.min()), float(vv.max())
+
+        if is_bin[f]:
+            nb = 1 if vmin == vmax else 2
+            edges = np.array([vmin - .5, vmin + .5]) if nb == 1 else np.array([-.5, .5, 1.5])
+        elif vmin == vmax:
+            nb, edges = 1, np.array([vmin - .5, vmin + .5])
+        else:
+            max_nb = min(max(2, int(np.ceil(1 + np.log2(nv)))), max_bins)
+            edges = _supervised_bin_edges(vv, is_target[vm].astype(float), max_nb, min_support)
+            nb = len(edges) - 1
+
+        ba = np.clip(np.searchsorted(edges[1:], vv, side='right'), 0, nb - 1)
+        lv = nd_labels[vm]
+        bin_counts = np.bincount(ba, minlength=nb)
+        target_counts = np.bincount(ba[lv == target_class], minlength=nb).astype(float)
+        p_class = (target_counts + laplace * prior) / (bin_counts + laplace)
+
+        models[(node.nid, f)] = BinModel(nb, edges, bin_counts, target_counts,
+                                         p_class, prior, conf_support)
+
+        score = 0.0
+        for b in range(nb):
+            if bin_counts[b] >= min_support:
+                shift = abs(p_class[b] - prior)
+                confidence = min(1.0, float(bin_counts[b]) / conf_support)
+                score += shift * confidence
+
+        target_vals = vv[lv == target_class]
+        rest_vals = vv[lv != target_class]
+        if len(target_vals) >= 2 and len(rest_vals) >= 2:
+            mean_diff2 = (target_vals.mean() - rest_vals.mean()) ** 2
+            var_sum = target_vals.var() + rest_vals.var()
+            fisher = mean_diff2 / (var_sum + 1e-10)
+        else:
+            fisher = 0.0
+
+        if score > 0.001:
+            actions.append((f, node.nid, score, fisher))
+
+    return models, actions
+
+
+def _refine_ovr_node(node, models, node_actions, data, cfg):
+    fpc = cfg["FEATURES_PER_CLASS"]
+    corr_thresh = cfg["CORR_THRESHOLD"]
+    scored = [(a, a[2]) for a in node_actions]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    if not scored:
+        return []
+    top_scored = scored[:3 * fpc]
+    nd_data = data[node.uidx]
+    top_feats = sorted(set(a[0] for a, _ in top_scored))
+    correlations = {}
+    for i, f1 in enumerate(top_feats):
+        col1 = nd_data[:, f1]
+        nan1 = np.isnan(col1)
+        for f2 in top_feats[i+1:]:
+            col2 = nd_data[:, f2]
+            valid = ~(nan1 | np.isnan(col2))
+            if valid.sum() > 10:
+                c = _fast_abs_corr(col1[valid], col2[valid])
+                if c > 0:
+                    correlations[(f1, f2)] = c
+                    correlations[(f2, f1)] = c
+    kept, kept_features = [], set()
+    for a, s in top_scored:
+        f = a[0]
+        if f in kept_features:
+            continue
+        raw = data[node.uidx, f]
+        if (~np.isnan(raw)).sum() == 0:
+            continue
+        if kept_features:
+            max_corr = max(correlations.get((f, kf), 0.0) for kf in kept_features)
+            if max_corr > corr_thresh:
+                continue
+        kept.append(a)
+        kept_features.add(f)
+        if len(kept) >= fpc:
+            break
+    return kept
+
+
+def train(nodes, data, labels, is_bin, all_cls, cfg):
+    class_models, class_retained = {}, {}
+    for cls in all_cls:
+        ms = cfg["MIN_SUPPORT"].get(cls, 3)
+        cs = cfg["CONF_SUPPORT"].get(cls, 10)
+        cls_models = {}
+        cls_actions = defaultdict(list)
+        for nd in nodes:
+            nm, na = _train_ovr_node(nd, data, labels, is_bin, cls, ms, cs, cfg)
+            cls_models.update(nm)
+            for a in na:
+                cls_actions[a[1]].append(a)
+        cls_ret = []
+        for nd in nodes:
+            cls_ret.extend(_refine_ovr_node(
+                nd, cls_models, cls_actions.get(nd.nid, []), data, cfg))
+        class_models[cls] = cls_models
+        class_retained[cls] = cls_ret
+    return class_models, class_retained
+
+
+def _compute_af(uid, data, nodes, models, retained, against_scale):
+    lvl_nodes = _route_user(uid, data, nodes)
+    af_for, af_against = 0.0, 0.0
+    n_for, n_against, n_used = 0, 0, 0
+    max_for_contrib = 0.0
+    fisher_map = {}
+    for a in retained:
+        fisher_map[a[0]] = max(fisher_map.get(a[0], 0), a[3])
+    max_fisher = max(fisher_map.values()) if fisher_map else 1.0
+    for lvl in sorted(lvl_nodes.keys()):
+        for nd in lvl_nodes[lvl]:
+            for a in retained:
+                if a[1] != nd.nid:
+                    continue
+                f = a[0]
+                v = data[uid, f]
+                if np.isnan(v):
+                    continue
+                mo = models.get((nd.nid, f))
+                if not mo:
+                    continue
+                bin_idx = int(np.clip(np.searchsorted(mo.edges[1:], v, side='right'),
+                                     0, mo.n_bins - 1))
+                bc = mo.bin_counts[bin_idx]
+                if bc < 3:
+                    continue
+                p_c = mo.p_class[bin_idx]
+                shift = p_c - mo.prior
+                confidence = min(1.0, bc / 10)
+                fw = max(np.sqrt(fisher_map.get(f, 0.0) / (max_fisher + 1e-10)), 0.1)
+                weighted = abs(shift) * confidence * fw
+                if shift >= 0:
+                    af_for += weighted
+                    n_for += 1
+                    if weighted > max_for_contrib:
+                        max_for_contrib = weighted
+                else:
+                    af_against += weighted * against_scale
+                    n_against += 1
+                n_used += 1
+    return af_for, af_against, n_used, n_for, n_against, max_for_contrib
+
+
+def predict(uid, data, nodes, all_cls, train_result, cfg):
+    class_models, class_retained = train_result
+    class_scores = {}
+    for cls in all_cls:
+        ag = cfg["AGAINST_SCALE"].get(cls, 0.8)
+        af = _compute_af(uid, data, nodes, class_models[cls], class_retained[cls], ag)
+        class_scores[cls] = (af[0] + RATIO_EPS) / (af[1] + RATIO_EPS)
+
+    h_score = class_scores.get(HEALTHY, 1.0)
+    abnormal_score = class_scores.get(ABNORMAL, 0.0)
+    threshold = cfg["CLASS_THRESHOLD"]
+    healthy_bar = min(cfg["HEALTHY_WEIGHT"] * h_score, cfg["HEALTHY_BAR_CAP"])
+    effective_threshold = max(threshold, healthy_bar)
+
+    if abnormal_score >= effective_threshold:
+        return ABNORMAL, class_scores
+    else:
+        return HEALTHY, class_scores
+
+
+def run_split(data, labels, is_bin, cfg, seed=13, train_frac=0.9):
+    n = data.shape[0]
+    rng = np.random.RandomState(seed)
+    idx = rng.permutation(n)
+    split = int(n * train_frac)
+    train_idx, test_idx = idx[:split], idx[split:]
+    td, tl = data[train_idx], labels[train_idx]
+    all_cls = sorted(set(labels))
+    nodes = build_tree(td, tl, is_bin, cfg)
+    train_result = train(nodes, td, tl, is_bin, all_cls, cfg)
+    results = []
+    for uid in test_idx:
+        true_cls = int(labels[uid])
+        pred, scores = predict(uid, data, nodes, all_cls, train_result, cfg)
+        results.append((int(uid), true_cls, int(pred), pred == true_cls))
+    return results
+
+
+def stats(results):
+    n = len(results)
+    correct = sum(r[3] for r in results)
+    acc = correct / n
+    normals = [r for r in results if r[1] == HEALTHY]
+    spec = sum(r[3] for r in normals) / len(normals) if normals else 0
+    abnormals = [r for r in results if r[1] == ABNORMAL]
+    sens = sum(r[3] for r in abnormals) / len(abnormals) if abnormals else 0
+    tp = sum(1 for r in results if r[1] == ABNORMAL and r[2] == ABNORMAL)
+    fp = sum(1 for r in results if r[1] == HEALTHY and r[2] == ABNORMAL)
+    fn = sum(1 for r in results if r[1] == ABNORMAL and r[2] == HEALTHY)
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    recall = sens
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    return acc, spec, sens, f1
+
+
+# ─── Main ───
+
+if __name__ == "__main__":
+    strategy_name = sys.argv[1] if len(sys.argv) > 1 else "A_norm_afev"
+    cfg = STRATEGIES[strategy_name]
+
+    print(f"{'='*60}")
+    print(f"STRATEGY: {strategy_name}")
+    print(f"{'='*60}")
+    print(f"  Split feat:  {cfg['TREE_SPLIT_FEAT']}")
+    print(f"  Normalize:   {cfg['NORMALIZE']}")
+    print(f"  Clip:        {cfg['CLIP_OUTLIERS']}")
+    print(f"  FPC:         {cfg['FEATURES_PER_CLASS']}")
+    print(f"  MAX_BINS:    {cfg['MAX_BINS']}")
+    print(f"  CORR_THRESH: {cfg['CORR_THRESHOLD']}")
+    print(f"  Laplace:     {cfg['LAPLACE_ALPHA']}")
+    print(f"  Threshold:   {cfg['CLASS_THRESHOLD']}")
+    print(f"  H_WEIGHT:    {cfg['HEALTHY_WEIGHT']}")
+    print(f"  Against:     {cfg['AGAINST_SCALE']}")
+
+    print(f"\nLoading data...", flush=True)
+    data, labels = load_data()
+    data = preprocess(data, cfg)
+    is_bin = classify_features(data)
+    print(f"  {data.shape[0]} records, Normal={int((labels==1).sum())}, Abnormal={int((labels==2).sum())}")
+
+    print(f"\nRunning 90/10 splits across seeds {SEEDS}...", flush=True)
+    all_acc, all_spec, all_sens, all_f1 = [], [], [], []
+
+    for seed in SEEDS:
+        t0 = time.time()
+        results = run_split(data, labels, is_bin, cfg, seed, 0.9)
+        elapsed = time.time() - t0
+        acc, spec, sens, f1 = stats(results)
+        all_acc.append(acc)
+        all_spec.append(spec)
+        all_sens.append(sens)
+        all_f1.append(f1)
+        print(f"  Seed {seed:2d}: Acc={100*acc:.1f}% Spec={100*spec:.1f}% "
+              f"Sens={100*sens:.1f}% F1={100*f1:.1f}% ({elapsed:.0f}s)", flush=True)
+
+    print(f"\n{'-'*60}")
+    print(f"  MEAN:   Acc={100*np.mean(all_acc):.1f}% Spec={100*np.mean(all_spec):.1f}% "
+          f"Sens={100*np.mean(all_sens):.1f}% F1={100*np.mean(all_f1):.1f}%")
+    print(f"  STDEV:  Acc=±{100*np.std(all_acc):.1f}% Spec=±{100*np.std(all_spec):.1f}% "
+          f"Sens=±{100*np.std(all_sens):.1f}% F1=±{100*np.std(all_f1):.1f}%")
+    print(f"  BEST:   Acc={100*max(all_acc):.1f}% (seed={SEEDS[np.argmax(all_acc)]})")
+    print(f"{'='*60}")

@@ -1,0 +1,447 @@
+
+================================================================================
+  1. CLASS DISTRIBUTION AND IMBALANCE RATIOS
+================================================================================
+
+Class distribution in CDS-OVR working dataset (416 patients, 8 classes):
+  Class  1: 245 patients (58.9%)
+  Class  2:  44 patients (10.6%)
+  Class  3:  15 patients (3.6%)
+  Class  4:  15 patients (3.6%)
+  Class  5:  13 patients (3.1%)
+  Class  6:  25 patients (6.0%)
+  Class  9:   9 patients (2.2%)
+  Class 10:  50 patients (12.0%)
+
+  Max class size: 245 (class 1)
+  Min class size: 9 (class 4)
+  Imbalance ratio: 245:9 = 27.2:1
+
+Mustaqeem OAO pairwise imbalance (simulated with 16 original classes):
+  Original 16-class distribution:
+    Class  1: 245 patients
+    Class  2:  44 patients
+    Class  3:  15 patients
+    Class  4:  15 patients
+    Class  5:  13 patients
+    Class  6:  25 patients
+    Class  7:   3 patients
+    Class  8:   2 patients
+    Class  9:   9 patients
+    Class 10:  50 patients
+    Class 14:   4 patients
+    Class 15:   5 patients
+    Class 16:  22 patients
+
+  Top 10 most imbalanced OAO pairs:
+    Class  1 vs Class  8: 245 vs   2 = 122.5:1
+    Class  1 vs Class  7: 245 vs   3 = 81.7:1
+    Class  1 vs Class 14: 245 vs   4 = 61.2:1
+    Class  1 vs Class 15: 245 vs   5 = 49.0:1
+    Class  1 vs Class  9: 245 vs   9 = 27.2:1
+    Class  8 vs Class 10:   2 vs  50 = 25.0:1
+    Class  2 vs Class  8:  44 vs   2 = 22.0:1
+    Class  1 vs Class  5: 245 vs  13 = 18.8:1
+    Class  7 vs Class 10:   3 vs  50 = 16.7:1
+    Class  1 vs Class  3: 245 vs  15 = 16.3:1
+
+  Total OAO classifiers for 16 classes: 78
+  Pairs with >10:1 imbalance: 17 / 78 (21.8%)
+
+================================================================================
+  2. MISSING VALUE ANALYSIS
+================================================================================
+
+Total missing values: 371 out of 116064 = 0.320%
+
+Features with missing values (4 total):
+  Feature  13: 349 missing (83.9%)
+  Feature  11:  14 missing (3.4%)
+  Feature  10:   7 missing (1.7%)
+  Feature  12:   1 missing (0.2%)
+
+Missing values per class:
+  Class  1:  231 missing out of  68355 = 0.338%
+  Class  2:   33 missing out of  12276 = 0.269%
+  Class  3:   12 missing out of   4185 = 0.287%
+  Class  4:   15 missing out of   4185 = 0.358%
+  Class  5:   11 missing out of   3627 = 0.303%
+  Class  6:   25 missing out of   6975 = 0.358%
+  Class  9:    0 missing out of   2511 = 0.000%
+  Class 10:   44 missing out of  13950 = 0.315%
+
+Patients with any missing value: 354 / 416
+Distribution of patients with missing values by class:
+  Class  1: 225 / 245 (91.8%) have missing values
+  Class  2:  27 /  44 (61.4%) have missing values
+  Class  3:  11 /  15 (73.3%) have missing values
+  Class  4:  14 /  15 (93.3%) have missing values
+  Class  5:  11 /  13 (84.6%) have missing values
+  Class  6:  24 /  25 (96.0%) have missing values
+  Class  9:   0 /   9 (0.0%) have missing values
+  Class 10:  42 /  50 (84.0%) have missing values
+
+--- Simulating Sharma's preprocessing (drop col 14, remove rows with missing) ---
+After dropping column 14: 22 patients have remaining missing values
+Removed patients by class:
+  Class  1:  8 / 245 removed (3.3%)
+  Class  2:  8 /  44 removed (18.2%)
+  Class  3:  2 /  15 removed (13.3%)
+  Class  4:  1 /  15 removed (6.7%)
+  Class  5:  0 /  13 removed (0.0%)
+  Class  6:  1 /  25 removed (4.0%)
+  Class  9:  0 /   9 removed (0.0%)
+  Class 10:  2 /  50 removed (4.0%)
+
+================================================================================
+  3. INTER-FEATURE CORRELATION ANALYSIS
+================================================================================
+
+Simulating Sharma's feature selection (Pearson |r| > 0.1 with binary target):
+  Features retained: 106 / 279
+  Features with |r| < 0.05 (essentially noise): 90
+  Features with |r| in [0.1, 0.15] (borderline): 51
+  Sharma features with r² < 0.02 (explain <2% variance): 42
+
+Inter-feature correlation among Sharma's 106 features:
+  Pairs with |r| > 0.8: 32
+  Pairs with |r| > 0.9: 2
+
+================================================================================
+  4. PER-CLASS FEATURE SELECTION: CDS-OVR vs GLOBAL
+================================================================================
+
+Features retained per class (top 18 by action score, filtered by correlation):
+  Class  1: 29 features -> [4, 6, 10, 12, 14, 113, 125, 166, 168, 178, 198, 207, 208, 210, 218, 219, 226, 227, 228, 236, 237, 246, 247, 249, 256, 257, 268, 276, 278]
+  Class  2: 26 features -> [7, 10, 12, 13, 166, 168, 176, 182, 189, 196, 198, 199, 216, 218, 228, 231, 246, 248, 249, 256, 258, 259, 266, 267, 268, 278]
+  Class  3: 18 features -> [99, 111, 112, 113, 124, 128, 198, 241, 242, 247, 248, 250, 251, 252, 257, 261, 267, 278]
+  Class  4: 31 features -> [6, 7, 9, 12, 39, 53, 75, 80, 147, 168, 170, 176, 177, 178, 180, 188, 190, 193, 201, 210, 211, 222, 226, 228, 247, 251, 258, 267, 268, 271, 278]
+  Class  5: 27 features -> [0, 3, 6, 9, 11, 12, 14, 16, 20, 162, 167, 168, 190, 202, 205, 208, 227, 228, 232, 239, 242, 247, 252, 268, 276, 277, 278]
+  Class  6: 27 features -> [5, 6, 14, 167, 168, 171, 180, 186, 188, 190, 197, 198, 201, 208, 217, 222, 228, 238, 242, 247, 251, 252, 256, 258, 262, 267, 278]
+  Class  9: 25 features -> [4, 7, 16, 20, 51, 68, 101, 113, 148, 152, 196, 199, 219, 226, 227, 229, 236, 237, 239, 242, 247, 251, 257, 269, 277]
+  Class 10: 27 features -> [0, 4, 5, 9, 17, 56, 65, 89, 90, 92, 101, 102, 167, 172, 179, 191, 202, 223, 226, 227, 232, 233, 235, 238, 256, 267, 268]
+
+Pairwise feature overlap between class models:
+  Class  1 vs Class  2: 12 shared features (Jaccard = 0.279)
+  Class  1 vs Class  3:  5 shared features (Jaccard = 0.119)
+  Class  1 vs Class  4: 10 shared features (Jaccard = 0.200)
+  Class  1 vs Class  5: 11 shared features (Jaccard = 0.244)
+  Class  1 vs Class  6:  9 shared features (Jaccard = 0.191)
+  Class  1 vs Class  9:  9 shared features (Jaccard = 0.200)
+  Class  1 vs Class 10:  5 shared features (Jaccard = 0.098)
+  Class  2 vs Class  3:  4 shared features (Jaccard = 0.100)
+  Class  2 vs Class  4:  9 shared features (Jaccard = 0.188)
+  Class  2 vs Class  5:  5 shared features (Jaccard = 0.104)
+  Class  2 vs Class  6:  7 shared features (Jaccard = 0.152)
+  Class  2 vs Class  9:  3 shared features (Jaccard = 0.062)
+  Class  2 vs Class 10:  3 shared features (Jaccard = 0.060)
+  Class  3 vs Class  4:  4 shared features (Jaccard = 0.089)
+  Class  3 vs Class  5:  4 shared features (Jaccard = 0.098)
+  Class  3 vs Class  6:  7 shared features (Jaccard = 0.184)
+  Class  3 vs Class  9:  5 shared features (Jaccard = 0.132)
+  Class  3 vs Class 10:  1 shared features (Jaccard = 0.023)
+  Class  4 vs Class  5:  9 shared features (Jaccard = 0.184)
+  Class  4 vs Class  6: 13 shared features (Jaccard = 0.289)
+  Class  4 vs Class  9:  4 shared features (Jaccard = 0.077)
+  Class  4 vs Class 10:  4 shared features (Jaccard = 0.074)
+  Class  5 vs Class  6: 11 shared features (Jaccard = 0.256)
+  Class  5 vs Class  9:  7 shared features (Jaccard = 0.156)
+  Class  5 vs Class 10:  7 shared features (Jaccard = 0.149)
+  Class  6 vs Class  9:  3 shared features (Jaccard = 0.061)
+  Class  6 vs Class 10:  5 shared features (Jaccard = 0.102)
+  Class  9 vs Class 10:  4 shared features (Jaccard = 0.083)
+
+Total unique features used across all 8 class models: 109
+Features per class: 18
+Maximum possible: 8 × 18 = 144
+
+Features unique to each class (not shared with any other class model):
+  Class  1: 2 unique features -> [125, 207]
+  Class  2: 7 unique features -> [13, 182, 189, 216, 231, 259, 266]
+  Class  3: 8 unique features -> [99, 111, 112, 124, 128, 241, 250, 261]
+  Class  4: 10 unique features -> [39, 53, 75, 80, 147, 170, 177, 193, 211, 271]
+  Class  5: 4 unique features -> [3, 11, 162, 205]
+  Class  6: 5 unique features -> [171, 186, 197, 217, 262]
+  Class  9: 6 unique features -> [51, 68, 148, 152, 229, 269]
+  Class 10: 13 unique features -> [17, 56, 65, 89, 90, 92, 102, 172, 179, 191, 223, 233, 235]
+
+================================================================================
+  5. FISHER DISCRIMINANT RATIO ANALYSIS
+================================================================================
+
+Top 5 features by Fisher Discriminant Ratio for each class:
+  Class  1: [(198, np.float64(0.262)), (166, np.float64(0.232)), (4, np.float64(0.221)), (196, np.float64(0.202)), (168, np.float64(0.198))]
+  Class  2: [(266, np.float64(1.838)), (276, np.float64(1.455)), (176, np.float64(1.366)), (196, np.float64(1.309)), (166, np.float64(0.935))]
+  Class  3: [(111, np.float64(19.471)), (112, np.float64(10.988)), (99, np.float64(8.245)), (113, np.float64(4.18)), (116, np.float64(3.931))]
+  Class  4: [(75, np.float64(4.637)), (210, np.float64(3.414)), (170, np.float64(2.403)), (180, np.float64(2.395)), (39, np.float64(2.275))]
+  Class  5: [(14, np.float64(3.303)), (6, np.float64(2.12)), (148, np.float64(0.747)), (162, np.float64(0.647)), (136, np.float64(0.601))]
+  Class  6: [(14, np.float64(2.526)), (6, np.float64(0.462)), (267, np.float64(0.208)), (7, np.float64(0.197)), (262, np.float64(0.168))]
+  Class  9: [(16, np.float64(18.526)), (4, np.float64(11.842)), (113, np.float64(11.38)), (148, np.float64(10.624)), (237, np.float64(6.845))]
+  Class 10: [(90, np.float64(1.121)), (92, np.float64(1.001)), (56, np.float64(0.659)), (52, np.float64(0.54)), (29, np.float64(0.534))]
+
+Fisher ratio for feature 0 (heart rate) across classes:
+  Class  1: FDR = 0.0005
+  Class  2: FDR = 0.0754
+  Class  3: FDR = 0.1322
+  Class  4: FDR = 0.3195
+  Class  5: FDR = 0.2735
+  Class  6: FDR = 0.0053
+  Class  9: FDR = 0.2203
+  Class 10: FDR = 0.1348
+
+================================================================================
+  6. BIN DENSITY ANALYSIS AT DIFFERENT SPLIT RATIOS
+================================================================================
+
+
+--- Split 50/50 (seed=13) ---
+    Class | n_train | retained_feats | avg_bins | bins_with_bc>=3 | usable%
+  --------+---------+----------------+----------+-----------------+--------
+  Class  1 |     124 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  2 |      19 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  3 |       9 |             18 |      5.2 |    94 /    94   | 100.0%
+  Class  4 |       6 |             18 |      5.9 |    93 /   106   |  87.7%
+  Class  5 |       8 |             18 |      5.9 |    97 /   107   |  90.7%
+  Class  6 |      14 |             18 |      5.9 |   107 /   107   | 100.0%
+  Class  9 |       3 |             18 |      3.9 |    61 /    70   |  87.1%
+  Class 10 |      25 |             18 |      5.9 |   107 /   107   | 100.0%
+
+--- Split 60/40 (seed=13) ---
+    Class | n_train | retained_feats | avg_bins | bins_with_bc>=3 | usable%
+  --------+---------+----------------+----------+-----------------+--------
+  Class  1 |     153 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  2 |      22 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  3 |      11 |             18 |      5.4 |    97 /    97   | 100.0%
+  Class  4 |       8 |             18 |      5.8 |    97 /   105   |  92.4%
+  Class  5 |       8 |             18 |      6.0 |    99 /   108   |  91.7%
+  Class  6 |      15 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  9 |       4 |             18 |      4.4 |    70 /    80   |  87.5%
+  Class 10 |      28 |             18 |      5.9 |   106 /   106   | 100.0%
+
+--- Split 70/30 (seed=13) ---
+    Class | n_train | retained_feats | avg_bins | bins_with_bc>=3 | usable%
+  --------+---------+----------------+----------+-----------------+--------
+  Class  1 |     183 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  2 |      28 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  3 |      11 |             18 |      5.4 |    97 /    97   | 100.0%
+  Class  4 |      10 |             18 |      5.8 |    96 /   105   |  91.4%
+  Class  5 |       9 |             18 |      6.0 |    94 /   108   |  87.0%
+  Class  6 |      16 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  9 |       4 |             18 |      4.3 |    62 /    77   |  80.5%
+  Class 10 |      30 |             18 |      5.9 |   106 /   106   | 100.0%
+
+--- Split 80/19 (seed=13) ---
+    Class | n_train | retained_feats | avg_bins | bins_with_bc>=3 | usable%
+  --------+---------+----------------+----------+-----------------+--------
+  Class  1 |     206 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  2 |      29 |             18 |      6.0 |   108 /   108   | 100.0%
+  Class  3 |      14 |             18 |      5.5 |    99 /    99   | 100.0%
+  Class  4 |      11 |             18 |      5.8 |    94 /   104   |  90.4%
+  Class  5 |      10 |             18 |      5.9 |    94 /   107   |  87.9%
+  Class  6 |      19 |             18 |      5.9 |   106 /   106   | 100.0%
+  Class  9 |       5 |             18 |      4.1 |    57 /    74   |  77.0%
+  Class 10 |      38 |             18 |      5.8 |   105 /   105   | 100.0%
+
+--- Split 90/9 (seed=13) ---
+    Class | n_train | retained_feats | avg_bins | bins_with_bc>=3 | usable%
+  --------+---------+----------------+----------+-----------------+--------
+  Class  1 |     227 |             31 |      7.0 |   216 /   216   | 100.0%
+  Class  2 |      33 |             28 |      7.7 |   216 /   216   | 100.0%
+  Class  3 |      14 |             18 |      5.5 |    99 /    99   | 100.0%
+  Class  4 |      12 |             31 |      6.6 |   180 /   204   |  88.2%
+  Class  5 |      13 |             27 |      8.0 |   185 /   215   |  86.0%
+  Class  6 |      23 |             33 |      6.5 |   213 /   213   | 100.0%
+  Class  9 |       8 |             25 |      5.6 |   125 /   141   |  88.7%
+  Class 10 |      44 |             24 |      8.5 |   205 /   205   | 100.0%
+
+================================================================================
+  7. PEARSON CORRELATION THRESHOLD ANALYSIS
+================================================================================
+
+Features retained at different Pearson correlation thresholds with binary target:
+  |r| > 0.05: 189 features retained, ~86.0 expected false positives (by chance)
+  |r| > 0.10: 106 features retained, ~11.4 expected false positives (by chance)
+  |r| > 0.15:  55 features retained, ~0.6 expected false positives (by chance)
+  |r| > 0.20:  33 features retained, ~0.0 expected false positives (by chance)
+  |r| > 0.25:  12 features retained, ~0.0 expected false positives (by chance)
+  |r| > 0.30:   6 features retained, ~0.0 expected false positives (by chance)
+
+Variance explained (r²) distribution of Sharma's features:
+  r² <1%: 0 features
+  r² 1-2%: 42 features
+  r² 2-5%: 43 features
+  r² 5-10%: 18 features
+  r² >10%: 3 features
+
+================================================================================
+  8. SEX-BASED POPULATION STRATIFICATION
+================================================================================
+
+Population: 179 male (sex=0), 237 female (sex=1)
+
+Class distribution by sex:
+  Class  1:  85 male, 160 female (male%: 35%)
+  Class  2:  18 male,  26 female (male%: 41%)
+  Class  3:  15 male,   0 female (male%: 100%)
+  Class  4:  11 male,   4 female (male%: 73%)
+  Class  5:   4 male,   9 female (male%: 31%)
+  Class  6:  14 male,  11 female (male%: 56%)
+  Class  9:   4 male,   5 female (male%: 44%)
+  Class 10:  28 male,  22 female (male%: 56%)
+
+Feature mean differences by sex (top ECG features):
+  Features with Cohen's d > 0.5 (medium+ effect): 4
+  Features with Cohen's d > 0.8 (large effect): 0
+
+  Top 10 sex-differentiated features:
+    Feature   4: Cohen's d = 0.677  (male mean=94.25, female mean=84.26)
+    Feature 190: Cohen's d = 0.536  (male mean=-4.37, female mean=-5.97)
+    Feature 252: Cohen's d = 0.520  (male mean=-8.32, female mean=-5.76)
+    Feature   3: Cohen's d = 0.511  (male mean=72.89, female mean=64.59)
+    Feature 135: Cohen's d = 0.484  (male mean=7.44, female mean=2.5)
+    Feature 147: Cohen's d = 0.480  (male mean=9.47, female mean=4.22)
+    Feature 270: Cohen's d = 0.471  (male mean=-0.39, female mean=-0.16)
+    Feature 123: Cohen's d = 0.469  (male mean=6.28, female mean=0.73)
+    Feature 251: Cohen's d = 0.458  (male mean=13.15, female mean=10.55)
+    Feature 111: Cohen's d = 0.451  (male mean=7.49, female mean=0.2)
+
+================================================================================
+  9. SUPERVISED vs UNSUPERVISED BINNING COMPARISON
+================================================================================
+
+Comparing supervised chi-squared binning vs equal-width binning:
+(Using full training data, showing posterior quality difference)
+
+  Class 1 (n=245), best feature=198 (FDR=0.262):
+    Supervised: 6 bins
+      Bin 0: 100 patients, 81 target, posterior=0.8078, |shift|=0.2189
+      Bin 1:   3 patients,  0 target, posterior=0.1472, |shift|=0.4417
+      Bin 2: 142 patients, 92 target, posterior=0.6475, |shift|=0.0585
+      Bin 3:  10 patients,  3 target, posterior=0.3263, |shift|=0.2627
+      Bin 4: 113 patients, 64 target, posterior=0.5666, |shift|=0.0224
+      Bin 5:  48 patients,  5 target, posterior=0.1141, |shift|=0.4749
+    Equal-width (Sturges): 10 bins
+    Avg |posterior shift|: supervised=0.2465, equal-width=0.2340 (supervised 1.1x stronger)
+  Class 2 (n=44), best feature=266 (FDR=1.838):
+    Supervised: 6 bins
+      Bin 0:  33 patients, 24 target, posterior=0.7090, |shift|=0.6032
+      Bin 1:  29 patients, 11 target, posterior=0.3702, |shift|=0.2644
+      Bin 2:  24 patients,  1 target, posterior=0.0442, |shift|=0.0615
+      Bin 3:  14 patients,  3 target, posterior=0.2071, |shift|=0.1013
+      Bin 4: 172 patients,  5 target, posterior=0.0295, |shift|=0.0763
+      Bin 5: 144 patients,  0 target, posterior=0.0007, |shift|=0.1050
+    Equal-width (Sturges): 10 bins
+    Avg |posterior shift|: supervised=0.2020, equal-width=0.2278 (supervised 0.9x stronger)
+  Class 6 (n=25), best feature=14 (FDR=2.526):
+    Supervised: 6 bins
+      Bin 0:  15 patients, 12 target, posterior=0.7538, |shift|=0.6937
+      Bin 1:  17 patients, 11 target, posterior=0.6144, |shift|=0.5544
+      Bin 2:   4 patients,  1 target, posterior=0.2120, |shift|=0.1519
+      Bin 3:  30 patients,  0 target, posterior=0.0019, |shift|=0.0582
+      Bin 4:  17 patients,  1 target, posterior=0.0589, |shift|=0.0012
+      Bin 5: 333 patients,  0 target, posterior=0.0002, |shift|=0.0599
+    Equal-width (Sturges): 10 bins
+    Avg |posterior shift|: supervised=0.2532, equal-width=0.1019 (supervised 2.5x stronger)
+  Class 10 (n=50), best feature=90 (FDR=1.121):
+    Supervised: 5 bins
+      Bin 0: 374 patients, 18 target, posterior=0.0483, |shift|=0.0719
+      Bin 1:   4 patients,  3 target, posterior=0.6240, |shift|=0.5038
+      Bin 2:  13 patients,  7 target, posterior=0.5086, |shift|=0.3884
+      Bin 3:  18 patients, 15 target, posterior=0.7958, |shift|=0.6756
+      Bin 4:   7 patients,  7 target, posterior=0.8900, |shift|=0.7698
+    Equal-width (Sturges): 10 bins
+    Avg |posterior shift|: supervised=0.4819, equal-width=0.4413 (supervised 1.1x stronger)
+
+================================================================================
+  10. DUAL AF vs SINGLE ACCUMULATOR COMPARISON
+================================================================================
+
+Evidence accumulation patterns for correctly vs incorrectly classified patients:
+(Using full training data, 10-fold CV seed=13)
+
+Correctly classified patients (361):
+  AF_for:     mean=1.389, median=1.183
+  AF_against: mean=0.241, median=0.164
+  Ratio:      mean=6.859, median=4.545
+
+Incorrectly classified patients (55):
+  AF_for:     mean=0.505, median=0.382
+  AF_against: mean=0.565, median=0.311
+  Ratio:      mean=1.664, median=1.247
+
+  Key insight: Correct predictions have ratio >> 1 (strong for-evidence),
+  Wrong predictions have ratio ~= 1 (balanced/ambiguous evidence).
+  A single accumulator cannot distinguish these two states.
+
+================================================================================
+  11. CORRELATION FILTERING EFFECTIVENESS
+================================================================================
+
+Maximum pairwise correlation among retained features per class:
+  Class  1: max |r| = 0.895 (threshold: 0.8)
+  Class  2: max |r| = 0.895 (threshold: 0.8)
+  Class  3: max |r| = 0.796 (threshold: 0.8)
+  Class  4: max |r| = 0.895 (threshold: 0.8)
+  Class  5: max |r| = 0.895 (threshold: 0.8)
+  Class  6: max |r| = 0.846 (threshold: 0.8)
+  Class  9: max |r| = 0.789 (threshold: 0.8)
+  Class 10: max |r| = 0.798 (threshold: 0.8)
+
+Comparison: features retained WITHOUT correlation filtering:
+  Class  1: max |r| without filter = 0.819, pairs >0.8: 1
+  Class  2: max |r| without filter = 0.895, pairs >0.8: 6
+  Class 10: max |r| without filter = 0.805, pairs >0.8: 1
+
+================================================================================
+  12. GUPTA/ISLAM COLUMN DELETION IMPACT
+================================================================================
+
+Columns removed by Gupta's approach: 4 features
+Column indices: [10, 11, 12, 13]
+  Class  1: Gupta would remove 2 features used by CDS-OVR: [10, 12]
+  Class  2: Gupta would remove 3 features used by CDS-OVR: [10, 12, 13]
+  Class  4: Gupta would remove 1 features used by CDS-OVR: [12]
+  Class  5: Gupta would remove 2 features used by CDS-OVR: [11, 12]
+
+Fisher discriminant ratios of removed columns (showing they carry signal):
+  Feature  10: best FDR = 0.1230 (for class 3)
+  Feature  11: best FDR = 0.1052 (for class 4)
+  Feature  12: best FDR = 0.2736 (for class 5)
+  Feature  13: best FDR = 1.4368 (for class 3)
+
+================================================================================
+  13. HEALTHY BAR EFFECTIVENESS
+================================================================================
+
+Healthy bar analysis on 10-fold CV (seed=13):
+  Healthy patients: 224 correct, 21 false negatives
+  Disease patients: 137 correct, 26 missed (predicted healthy), 8 misclassified (wrong disease)
+  Specificity: 91.4%
+  Disease detection rate: 84.8%
+  False positive rate: 8.6%
+
+================================================================================
+  14. PER-CLASS ACCURACY BREAKDOWN (10-fold CV)
+================================================================================
+
+Per-class accuracy in 10-fold CV (seed=13):
+  Class  1: 224 / 245 = 91.4%
+  Class  2:  34 /  44 = 77.3%
+  Class  3:  14 /  15 = 93.3%
+  Class  4:  11 /  15 = 73.3%
+  Class  5:   8 /  13 = 61.5%
+  Class  6:  21 /  25 = 84.0%
+  Class  9:   8 /   9 = 88.9%
+  Class 10:  41 /  50 = 82.0%
+
+Confusion matrix (10-fold CV, seed=13):
+  Truev/Pred-> | Cls  1 | Cls  2 | Cls  3 | Cls  4 | Cls  5 | Cls  6 | Cls  9 | Cls 10 |
+  -------------+--------+--------+--------+--------+--------+--------+--------+--------+
+  Class  1     |    224 |     11 |      0 |      0 |      2 |      2 |      0 |      6 |
+  Class  2     |      8 |     34 |      0 |      1 |      0 |      0 |      0 |      1 |
+  Class  3     |      0 |      1 |     14 |      0 |      0 |      0 |      0 |      0 |
+  Class  4     |      3 |      1 |      0 |     11 |      0 |      0 |      0 |      0 |
+  Class  5     |      5 |      0 |      0 |      0 |      8 |      0 |      0 |      0 |
+  Class  6     |      2 |      0 |      1 |      1 |      0 |     21 |      0 |      0 |
+  Class  9     |      0 |      1 |      0 |      0 |      0 |      0 |      8 |      0 |
+  Class 10     |      8 |      1 |      0 |      0 |      0 |      0 |      0 |     41 |

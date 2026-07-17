@@ -1,0 +1,5 @@
+numpy>=1.21
+scipy>=1.7
+scikit-learn>=1.0
+bleak>=0.21
+PyWavelets>=1.1
