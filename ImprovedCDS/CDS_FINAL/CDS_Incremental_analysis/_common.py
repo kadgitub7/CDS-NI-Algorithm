@@ -7,13 +7,16 @@ import numpy as np
 from collections import defaultdict
 from pathlib import Path
 import time
+import os
 
 DATA_PATH = str(Path(__file__).resolve().parent.parent / "data" / "arrhythmia.data")
 U_MIN = 200
 HEALTHY = 1
 N_FEAT = 279
 SEX_FEAT = 1
-SEEDS = [13, 34, 55, 69, 76]
+
+_env_seeds = os.environ.get("CDS_SEEDS")
+SEEDS = [int(s) for s in _env_seeds.split(",")] if _env_seeds else [13, 34, 55, 69, 76]
 
 
 def load_data(path=None, remove_classes=None):
