@@ -513,19 +513,11 @@ At every split ratio, CDS-OVR's **mean** binary accuracy exceeds Sharma's report
 **Published in**: Computational and Mathematical Methods in Medicine, 2018
 
 **Method pipeline**:
-<<<<<<< Updated upstream
-1. Remove binary/categorical features (279 → ~206 linear features)
-2. Wrapper Feature Selection (WFS) using Random Forest as evaluator: ~206 → 94 features. WFS creates 5× shadow copies (452 → 2,260 records) to train the RF evaluator for robust feature importance ranking; the augmented data is used only within WFS, not for final SVM classification.
-3. Replace missing values with column mean
-4. Z-score normalization (centering and scaling)
-5. Train SVM with polynomial kernel (degree unspecified, γ = 0.001), OAO decomposition → 78 classifiers for the 13 non-empty classes (C(13,2) = 78; the dataset has 16 class labels but classes 11, 12, 13 have zero patients)
-=======
 1. Remove binary features (279 → ~206)
 2. Wrapper feature selection via Boruta/Random Forest with shadow variables: 206 → 94 features
 3. Shadow augmentation: each record duplicated ~5× → 452 → 2,260 records
 4. Z-score normalization (zero mean, unit variance)
 5. Train SVM with polynomial kernel (degree unspecified, γ = 0.001), OAO decomposition → 120 classifiers
->>>>>>> Stashed changes
 6. Evaluate on five splits: 50/50 through 90/10
 
 **Results across splits** (their Table 1):
@@ -903,17 +895,6 @@ CDS-OVR's staged pipeline (binning → posterior estimation → feature selectio
 
 The tradeoff: end-to-end optimization requires more data to avoid overfitting. CDS-OVR's staged optimization is more sample-efficient, which explains its strong performance at 90/10 where most classes have ≥10 training patients but the total dataset is too small for deep learning to fully generalize.
 
-<<<<<<< Updated upstream
-### 7.4 SMOTE / Synthetic Oversampling for Rare Classes
-
-Irfan et al. apply SMOTE to the MIT-BIH dataset (D2) to balance class distributions before training. CDS-OVR uses no data augmentation — it handles rare classes through per-class parameter adaptation (against_scale, MIN_SUPPORT). At 60/40 splits, the rarest class (class 9, LBBB) has only 4 training patients, creating a **posterior quality** problem: bins exist and pass the `bc ≥ 3` filter (87.5% usable, `evidence_analysis.py`, Section 6), but with only 4 target patients across ~79 bin slots, posteriors carry almost no discriminative signal. SMOTE or a similar oversampling strategy applied to the training data before binning could populate rare-class bins, allowing more features to contribute evidence. This is the single most impactful improvement CDS-OVR could adopt from benchmark methods.
-
-### 7.5 Soft / Fuzzy Bin Boundaries
-
-CDS-OVR assigns each feature value to exactly one bin, creating hard boundaries. A patient at 119.9 ms QRS duration receives entirely different evidence than one at 120.1 ms if a bin edge falls at 120 ms. Soft binning — where a value near a bin edge contributes partially to both adjacent bins — would produce smoother posterior estimates and reduce sensitivity to exact bin placement. This is analogous to the continuous decision boundaries that SVM and neural networks provide naturally.
-
-=======
->>>>>>> Stashed changes
 ---
 
 ## 8. Summary of CDS-OVR vs. Benchmark Performance Sources
