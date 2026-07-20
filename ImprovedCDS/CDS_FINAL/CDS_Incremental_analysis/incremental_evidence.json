@@ -1,0 +1,495 @@
+{
+  "section3_n_patients_all": 452,
+  "section3_n_patients_kept": 416,
+  "section3_n_classes_all": 13,
+  "section3_n_classes_kept": 8,
+  "section3_class_sizes": {
+    "1": 245,
+    "2": 44,
+    "3": 15,
+    "4": 15,
+    "5": 13,
+    "6": 25,
+    "9": 9,
+    "10": 50
+  },
+  "section3_all_class_sizes": {
+    "1": 245,
+    "2": 44,
+    "3": 15,
+    "4": 15,
+    "5": 13,
+    "6": 25,
+    "7": 3,
+    "8": 2,
+    "9": 9,
+    "10": 50,
+    "11": 4,
+    "12": 5,
+    "13": 22
+  },
+  "section3_imbalance_ratio": 27.2,
+  "section3_n_features": 279,
+  "section4_total_unique_features": 109,
+  "section4_per_class_feature_counts": {
+    "1": 29,
+    "2": 26,
+    "3": 18,
+    "4": 31,
+    "5": 27,
+    "6": 27,
+    "9": 25,
+    "10": 27
+  },
+  "section4_per_class_unique_counts": {
+    "1": 2,
+    "2": 7,
+    "3": 8,
+    "4": 10,
+    "5": 4,
+    "6": 5,
+    "9": 6,
+    "10": 13
+  },
+  "section4_min_jaccard": 0.023,
+  "section4_max_jaccard": 0.289,
+  "section4_mean_jaccard": 0.141,
+  "section4_jaccard_pairs": {
+    "1_vs_2": 0.279,
+    "1_vs_3": 0.119,
+    "1_vs_4": 0.2,
+    "1_vs_5": 0.244,
+    "1_vs_6": 0.191,
+    "1_vs_9": 0.2,
+    "1_vs_10": 0.098,
+    "2_vs_3": 0.1,
+    "2_vs_4": 0.188,
+    "2_vs_5": 0.104,
+    "2_vs_6": 0.152,
+    "2_vs_9": 0.062,
+    "2_vs_10": 0.06,
+    "3_vs_4": 0.089,
+    "3_vs_5": 0.098,
+    "3_vs_6": 0.184,
+    "3_vs_9": 0.132,
+    "3_vs_10": 0.023,
+    "4_vs_5": 0.184,
+    "4_vs_6": 0.289,
+    "4_vs_9": 0.077,
+    "4_vs_10": 0.074,
+    "5_vs_6": 0.256,
+    "5_vs_9": 0.156,
+    "5_vs_10": 0.149,
+    "6_vs_9": 0.061,
+    "6_vs_10": 0.102,
+    "9_vs_10": 0.083
+  },
+  "section5_class6_supervised_avg_shift": 0.0681,
+  "section5_class6_equalwidth_avg_shift": 0.032,
+  "section5_shift_ratio": 2.13,
+  "section5_n_features_compared": 198,
+  "section5_example_feature_14": {
+    "feature": 14,
+    "supervised_n_bins": 6,
+    "equalwidth_n_bins": 6,
+    "supervised_max_posterior": 0.7538,
+    "equalwidth_max_posterior": 0.2983,
+    "prior": 0.0601,
+    "supervised_avg_shift": 0.2532,
+    "equalwidth_avg_shift": 0.08
+  },
+  "section5_prior_class6": 0.0601,
+  "section6_total_pairs_above_08": 77,
+  "section6_total_pairs_above_09": 19,
+  "section6_total_pairs_computed": 19503,
+  "section6_n_features_in_correlated_groups": 113,
+  "section6_largest_correlated_group_size": 5,
+  "section6_largest_correlated_group_anchor": 188,
+  "section6_example_correlated_group": [
+    12,
+    187,
+    208,
+    218
+  ],
+  "section6_n_features_surviving_per_class": {
+    "1": 29,
+    "2": 26,
+    "3": 18,
+    "4": 31,
+    "5": 27,
+    "6": 27,
+    "9": 25,
+    "10": 27
+  },
+  "section6_avg_features_per_class": 26.2,
+  "section7_correct_mean_ratio": 6.859,
+  "section7_correct_median_ratio": 4.545,
+  "section7_wrong_mean_ratio": 5.397,
+  "section7_wrong_median_ratio": 4.401,
+  "section7_n_correct": 361,
+  "section7_n_wrong": 55,
+  "section7_ratio_separation": 1.27,
+  "section8_feature_111_class3_fdr": 19.471,
+  "section8_feature_111_max_ratio": 193.4,
+  "section8_feature_16_class9_fdr": 18.526,
+  "section8_feature_16_max_other": 0.584,
+  "section8_feature_14_class5_fdr": 3.303,
+  "section8_feature_14_class6_fdr": 2.526,
+  "section8_top5_overlap_more_than_2_classes": 0,
+  "section8_fdr_top5_per_class": {
+    "1": [
+      [
+        198,
+        0.262
+      ],
+      [
+        166,
+        0.232
+      ],
+      [
+        4,
+        0.221
+      ],
+      [
+        196,
+        0.202
+      ],
+      [
+        168,
+        0.198
+      ]
+    ],
+    "2": [
+      [
+        266,
+        1.838
+      ],
+      [
+        276,
+        1.455
+      ],
+      [
+        176,
+        1.366
+      ],
+      [
+        196,
+        1.309
+      ],
+      [
+        166,
+        0.935
+      ]
+    ],
+    "3": [
+      [
+        111,
+        19.471
+      ],
+      [
+        112,
+        10.988
+      ],
+      [
+        99,
+        8.245
+      ],
+      [
+        113,
+        4.18
+      ],
+      [
+        116,
+        3.931
+      ]
+    ],
+    "4": [
+      [
+        75,
+        4.637
+      ],
+      [
+        210,
+        3.414
+      ],
+      [
+        170,
+        2.403
+      ],
+      [
+        180,
+        2.395
+      ],
+      [
+        39,
+        2.275
+      ]
+    ],
+    "5": [
+      [
+        14,
+        3.303
+      ],
+      [
+        6,
+        2.12
+      ],
+      [
+        148,
+        0.747
+      ],
+      [
+        162,
+        0.647
+      ],
+      [
+        136,
+        0.601
+      ]
+    ],
+    "6": [
+      [
+        14,
+        2.526
+      ],
+      [
+        6,
+        0.462
+      ],
+      [
+        267,
+        0.208
+      ],
+      [
+        7,
+        0.197
+      ],
+      [
+        262,
+        0.168
+      ]
+    ],
+    "9": [
+      [
+        16,
+        18.526
+      ],
+      [
+        4,
+        11.842
+      ],
+      [
+        113,
+        11.38
+      ],
+      [
+        148,
+        10.624
+      ],
+      [
+        237,
+        6.845
+      ]
+    ],
+    "10": [
+      [
+        90,
+        1.121
+      ],
+      [
+        92,
+        1.001
+      ],
+      [
+        56,
+        0.659
+      ],
+      [
+        52,
+        0.54
+      ],
+      [
+        29,
+        0.534
+      ]
+    ]
+  },
+  "section8_max_fdr_ratio_feature": 112,
+  "section8_max_fdr_ratio_value": 736.8,
+  "section9_healthy_mean_score": 4.188,
+  "section9_healthy_median_score": 2.987,
+  "section9_disease_mean_score": 10.216,
+  "section9_disease_median_score": 7.294,
+  "section9_ambiguous_count_08_15": 35,
+  "section9_total_patients": 416,
+  "section9_score_p25": 2.296,
+  "section9_score_p75": 8.276,
+  "section9_score_max": 38.326,
+  "section10_specificity": 91.4,
+  "section10_fpr": 8.6,
+  "section10_disease_detection_rate": 84.8,
+  "section10_false_negatives_by_class": {
+    "2": 8,
+    "3": 0,
+    "4": 3,
+    "5": 5,
+    "6": 2,
+    "9": 0,
+    "10": 8
+  },
+  "section10_mean_healthy_score_for_healthy": 3.668,
+  "section10_mean_healthy_score_for_disease": 1.45,
+  "section10_median_healthy_score_for_healthy": 2.508,
+  "section10_median_healthy_score_for_disease": 0.864,
+  "section10_accuracy": 86.8,
+  "section11_class_sizes": {
+    "1": 245,
+    "2": 44,
+    "3": 15,
+    "4": 15,
+    "5": 13,
+    "6": 25,
+    "9": 9,
+    "10": 50
+  },
+  "section11_rare_classes": [
+    4,
+    5,
+    9
+  ],
+  "section11_per_class_accuracy": {
+    "1": 91.4,
+    "2": 77.3,
+    "3": 93.3,
+    "4": 73.3,
+    "5": 61.5,
+    "6": 84.0,
+    "9": 88.9,
+    "10": 82.0
+  },
+  "section11_rare_min_support": {
+    "9": 2,
+    "4": 2,
+    "5": 2
+  },
+  "section11_rare_conf_support": {
+    "9": 5,
+    "4": 5,
+    "5": 5
+  },
+  "section11_rare_against_scale": {
+    "9": 0.5,
+    "4": 0.5,
+    "5": 0.5
+  },
+  "section11_common_against_scale": 0.8,
+  "section12_removed_classes": [
+    7,
+    8,
+    11,
+    12,
+    13
+  ],
+  "section12_removed_class_sizes": {
+    "7": 3,
+    "8": 2,
+    "11": 4,
+    "12": 5,
+    "13": 22
+  },
+  "section12_total_removed_patients": 36,
+  "section12_loocv_accuracy_removed_classes": {
+    "7": 0.0,
+    "8": 0.0,
+    "11": 0.0,
+    "12": 40.0,
+    "13": 0.0
+  },
+  "section12_n_patients_before": 452,
+  "section12_n_patients_after": 416,
+  "section13_n_empty_bins_supervised": 1892,
+  "section13_n_empty_bins_sturges": 4652,
+  "section13_total_bins_supervised": 7740,
+  "section13_total_bins_sturges": 9504,
+  "section13_empty_pct_supervised": 24.4,
+  "section13_empty_pct_sturges": 48.9,
+  "section13_example": {
+    "feature": 2,
+    "class": 1,
+    "bin_index": 5,
+    "bin_count": 3,
+    "target_count": 0,
+    "prior": 0.5889,
+    "posterior_without_laplace": 0.0,
+    "posterior_with_laplace": 0.1472
+  },
+  "section14_per_class_accuracy": {
+    "1": 91.4,
+    "2": 77.3,
+    "3": 93.3,
+    "4": 73.3,
+    "5": 61.5,
+    "6": 84.0,
+    "9": 88.9,
+    "10": 82.0
+  },
+  "section14_class_thresholds": {
+    "2": 3.5,
+    "3": 5.0,
+    "4": 4.0,
+    "5": 3.5,
+    "6": 3.5,
+    "9": 5.0,
+    "10": 3.0
+  },
+  "section14_per_class_score_distributions": {
+    "1": {
+      "mean": 3.67,
+      "median": 2.51,
+      "p25": 1.56,
+      "p75": 4.53
+    },
+    "2": {
+      "mean": 9.02,
+      "median": 7.05,
+      "p25": 3.71,
+      "p75": 13.8
+    },
+    "3": {
+      "mean": 22.0,
+      "median": 21.64,
+      "p25": 19.14,
+      "p75": 27.78
+    },
+    "4": {
+      "mean": 7.16,
+      "median": 6.54,
+      "p25": 4.84,
+      "p75": 9.21
+    },
+    "5": {
+      "mean": 5.26,
+      "median": 4.39,
+      "p25": 2.41,
+      "p75": 7.33
+    },
+    "6": {
+      "mean": 5.49,
+      "median": 5.87,
+      "p25": 4.51,
+      "p75": 7.18
+    },
+    "9": {
+      "mean": 24.0,
+      "median": 24.3,
+      "p25": 17.17,
+      "p75": 34.14
+    },
+    "10": {
+      "mean": 8.27,
+      "median": 6.98,
+      "p25": 3.63,
+      "p75": 10.33
+    }
+  }
+}
