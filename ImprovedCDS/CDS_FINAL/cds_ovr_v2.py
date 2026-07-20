@@ -1,9 +1,21 @@
 """CDS-OVR Arrhythmia Classifier — V2 (improved from W11-01).
 
-Improvements over W11-01:
+Improvement over W11-01:
   - Adaptive MAX_BINS: scales bin count with per-class training size.
-  - SMOTE oversampling for rare classes to improve posterior quality.
-  - Concordance bonus: boosts disease scores when many features agree.
+    Prevents posterior quality degradation when rare classes have very
+    few training patients (e.g., class 9 LBBB with 4 patients at 60/40).
+    Bins: n<5 -> 2, n<8 -> 3, n<12 -> 4, else 6.
+
+Results (10 seeds: 13,20,27,34,41,48,55,62,69,76):
+  10-fold CV:  best 86.8% | mean 84.9% (W11-01: 86.8% | 84.7%)
+  90/10 multi: best 92.9%             (W11-01: 92.9%)
+  60/40 multi: best 88.0% | mean 82.0% (W11-01: 86.2% | 80.2%)
+  LOOCV:       85.6% multi | 88.9% binary
+
+Tested but rejected (all hurt 10-fold on this framework):
+  SMOTE, feature interactions, soft bin boundaries, concordance bonus,
+  FDR-weighted ranking, per-class feature count, correlation threshold
+  changes, prediction bin count threshold changes.
 """
 import numpy as np
 from collections import defaultdict
@@ -21,7 +33,6 @@ LAPLACE_ALPHA = 1.0
 RATIO_EPS = 0.1
 CORR_THRESHOLD = 0.8
 FEATURES_PER_CLASS = 18
-FPC_MAP = {}
 MAX_BINS = 6
 HEALTHY_WEIGHT = 1.05
 SUSPICION_HCUT = 2.0
@@ -36,18 +47,10 @@ MIN_SUPPORT_MAP = {cls: (2 if cls in RARE_CLASSES else 3) for cls in range(1, 14
 CONF_SUPPORT_MAP = {cls: (5 if cls in RARE_CLASSES else 10) for cls in range(1, 14)}
 AGAINST_SCALE_MAP = {cls: (0.5 if cls in RARE_CLASSES else 0.8) for cls in range(1, 14)}
 
-# V2: Interaction parameters (disabled)
+# V2: Interaction parameters (disabled — tested but hurt accuracy)
 INTERACTION_CLASSES = set()
 INTERACTION_PAIRS = 3
 INTERACTION_WEIGHT = 0.35
-
-# V2: SMOTE parameters
-SMOTE_TARGET = 0
-SMOTE_K = 5
-
-# V2: Concordance bonus parameters
-CONCORDANCE_RATE = 0.0
-CONCORDANCE_FLOOR = 5
 
 
 # ─── Data loading ───
@@ -293,75 +296,6 @@ def _adaptive_max_bins(n_target_train, base_max=MAX_BINS):
     return base_max
 
 
-# ─── SMOTE oversampling ───
-
-def _smote_oversample(data, labels, is_bin, target_class, target_count, k=SMOTE_K, seed=42):
-    idx = np.where(labels == target_class)[0]
-    n = len(idx)
-    if n >= target_count or n < 2:
-        return data, labels
-
-    n_synthetic = target_count - n
-    rng = np.random.RandomState(seed)
-
-    class_data = data[idx]
-    k_actual = min(k, n - 1)
-
-    cont_feats = np.where(~is_bin)[0]
-    class_cont = class_data[:, cont_feats].copy()
-    for c in range(class_cont.shape[1]):
-        col = class_cont[:, c]
-        nan_mask = np.isnan(col)
-        if nan_mask.any():
-            mean_val = np.nanmean(col) if not nan_mask.all() else 0.0
-            col[nan_mask] = mean_val
-
-    stds = np.std(class_cont, axis=0)
-    stds[stds == 0] = 1.0
-    class_norm = class_cont / stds
-
-    n_cont = len(cont_feats)
-    dists = np.zeros((n, n))
-    for i in range(n):
-        for j in range(i + 1, n):
-            d = np.sqrt(np.sum((class_norm[i] - class_norm[j]) ** 2))
-            dists[i, j] = d
-            dists[j, i] = d
-    np.fill_diagonal(dists, np.inf)
-    knn_idx = np.argsort(dists, axis=1)[:, :k_actual]
-
-    synthetics = []
-    for _ in range(n_synthetic):
-        i = rng.randint(n)
-        j = knn_idx[i, rng.randint(k_actual)]
-        lam = rng.random()
-
-        synth = data[idx[i]].copy()
-        neighbor = data[idx[j]]
-
-        for f in cont_feats:
-            if np.isnan(synth[f]) or np.isnan(neighbor[f]):
-                continue
-            synth[f] = synth[f] + lam * (neighbor[f] - synth[f])
-
-        synthetics.append(synth)
-
-    synth_array = np.array(synthetics)
-    synth_labels = np.full(n_synthetic, target_class, dtype=labels.dtype)
-
-    return np.vstack([data, synth_array]), np.concatenate([labels, synth_labels])
-
-
-def _apply_smote(data, labels, is_bin, target_count=SMOTE_TARGET, k=SMOTE_K, seed=42):
-    aug_data, aug_labels = data.copy(), labels.copy()
-    for cls in RARE_CLASSES:
-        n_cls = (aug_labels == cls).sum()
-        if n_cls < target_count and n_cls >= 2:
-            aug_data, aug_labels = _smote_oversample(
-                aug_data, aug_labels, is_bin, cls, target_count, k, seed)
-    return aug_data, aug_labels
-
-
 # ─── Training ───
 
 def _train_ovr_node(node, data, labels, is_bin, target_class, min_support, conf_support,
@@ -428,7 +362,7 @@ def _train_ovr_node(node, data, labels, is_bin, target_class, min_support, conf_
 
 
 def _refine_ovr_node(node, models, node_actions, data, fpc=FEATURES_PER_CLASS):
-    scored = [(a, a[2] * (1.0 + 0.5 * np.sqrt(a[3]))) for a in node_actions]
+    scored = [(a, a[2]) for a in node_actions]
     scored.sort(key=lambda x: x[1], reverse=True)
     if not scored:
         return []
@@ -543,7 +477,7 @@ def _train_class_interactions(data, labels, idx, target_class, retained, is_bin,
     return [m for _, m in candidates[:INTERACTION_PAIRS]]
 
 
-def train(nodes, data, labels, is_bin, all_cls, real_counts=None):
+def train(nodes, data, labels, is_bin, all_cls):
     """Train OVR models for all classes with per-class parameters."""
     class_models, class_retained = {}, {}
     class_interactions = {}
@@ -552,11 +486,8 @@ def train(nodes, data, labels, is_bin, all_cls, real_counts=None):
         ms = MIN_SUPPORT_MAP.get(cls, 3)
         cs = CONF_SUPPORT_MAP.get(cls, 10)
 
-        if real_counts:
-            n_real = real_counts.get(cls, int((labels[nodes[0].uidx] == cls).sum()))
-        else:
-            n_real = int((labels[nodes[0].uidx] == cls).sum())
-        adaptive_bins = _adaptive_max_bins(n_real)
+        n_target = int((labels[nodes[0].uidx] == cls).sum())
+        adaptive_bins = _adaptive_max_bins(n_target)
 
         cls_models = {}
         cls_actions = defaultdict(list)
@@ -566,11 +497,10 @@ def train(nodes, data, labels, is_bin, all_cls, real_counts=None):
             for a in na:
                 cls_actions[a[1]].append(a)
 
-        fpc = FPC_MAP.get(cls, FEATURES_PER_CLASS)
         cls_ret = []
         for nd in nodes:
             cls_ret.extend(_refine_ovr_node(
-                nd, cls_models, cls_actions.get(nd.nid, []), data, fpc))
+                nd, cls_models, cls_actions.get(nd.nid, []), data))
 
         # V2: Interaction models only for specified classes
         cls_interact = []
@@ -673,11 +603,7 @@ def predict(uid, data, nodes, all_cls, train_result):
         ag = AGAINST_SCALE_MAP.get(cls, 0.8)
         af = _compute_af(uid, data, nodes, class_models[cls], class_retained[cls], ag,
                          class_interactions.get(cls, []))
-        af_for = af[0]
-        n_for = af[3]
-        if cls != HEALTHY and n_for > CONCORDANCE_FLOOR:
-            af_for *= 1.0 + CONCORDANCE_RATE * (n_for - CONCORDANCE_FLOOR)
-        class_scores[cls] = (af_for + RATIO_EPS) / (af[1] + RATIO_EPS)
+        class_scores[cls] = (af[0] + RATIO_EPS) / (af[1] + RATIO_EPS)
 
     h_score = class_scores.get(HEALTHY, 1.0)
     healthy_bar = min(HEALTHY_WEIGHT * h_score, HEALTHY_BAR_CAP)
@@ -710,10 +636,8 @@ def run_10fold(data, labels, is_bin, seed=13):
         test_idx = folds[fi]
         train_idx = np.concatenate([folds[j] for j in range(10) if j != fi])
         td, tl = data[train_idx], labels[train_idx]
-        real_counts = {cls: int((tl == cls).sum()) for cls in all_cls}
-        td, tl = _apply_smote(td, tl, is_bin, seed=seed + fi)
         nodes = build_tree(td, tl, is_bin)
-        train_result = train(nodes, td, tl, is_bin, all_cls, real_counts=real_counts)
+        train_result = train(nodes, td, tl, is_bin, all_cls)
         for uid in test_idx:
             true_cls = int(labels[uid])
             pred, scores = predict(uid, data, nodes, all_cls, train_result)
@@ -729,10 +653,8 @@ def run_split(data, labels, is_bin, seed=13, train_frac=0.9):
     train_idx, test_idx = idx[:split], idx[split:]
     td, tl = data[train_idx], labels[train_idx]
     all_cls = sorted(set(labels))
-    real_counts = {cls: int((tl == cls).sum()) for cls in all_cls}
-    td, tl = _apply_smote(td, tl, is_bin, seed=seed)
     nodes = build_tree(td, tl, is_bin)
-    train_result = train(nodes, td, tl, is_bin, all_cls, real_counts=real_counts)
+    train_result = train(nodes, td, tl, is_bin, all_cls)
     results = []
     for uid in test_idx:
         true_cls = int(labels[uid])
@@ -748,10 +670,8 @@ def run_loocv(data, labels, is_bin):
     for i in range(n):
         train_idx = np.concatenate([np.arange(0, i), np.arange(i+1, n)])
         td, tl = data[train_idx], labels[train_idx]
-        real_counts = {cls: int((tl == cls).sum()) for cls in all_cls}
-        td, tl = _apply_smote(td, tl, is_bin, seed=i)
         nodes = build_tree(td, tl, is_bin)
-        train_result = train(nodes, td, tl, is_bin, all_cls, real_counts=real_counts)
+        train_result = train(nodes, td, tl, is_bin, all_cls)
         true_cls = int(labels[i])
         pred, scores = predict(i, data, nodes, all_cls, train_result)
         results.append((i, true_cls, int(pred), pred == true_cls))
