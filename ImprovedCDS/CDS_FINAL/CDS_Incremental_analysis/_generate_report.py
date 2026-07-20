@@ -33,7 +33,7 @@ from docx.enum.section import WD_SECTION
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SUMMARY_CSV = os.path.join(SCRIPT_DIR, "results_summary.csv")
 PER_SEED_CSV = os.path.join(SCRIPT_DIR, "results_per_seed.csv")
-OUTPUT_DOCX = os.path.join(SCRIPT_DIR, "CDS_Incremental_Analysis_Report.docx")
+OUTPUT_DOCX = os.path.join(SCRIPT_DIR, os.environ.get("CDS_REPORT_OUTPUT", "CDS_Incremental_Analysis_Report.docx"))
 
 # ---------------------------------------------------------------------------
 # Color scheme
@@ -1147,8 +1147,86 @@ def build_document():
         "improvement but from the careful layering of interdependent components."
     )
 
-    # ---------------- 20. Conclusion ----------------
-    add_heading1(doc, "20. Conclusion")
+    # ---------------- 20. Correlation Threshold Optimization ----------------
+    add_heading1(doc, "20. Correlation Threshold Optimization")
+    add_body(
+        doc,
+        "The correlation threshold parameter controls how aggressively redundant features are "
+        "removed. A lower threshold retains only features with low mutual correlation (more "
+        "aggressive filtering), while a higher threshold allows more correlated features through "
+        "(less filtering). This section evaluates 7 threshold values in the full system context "
+        "to validate the choice of r=0.80."
+    )
+
+    add_heading2(doc, "20.1 Full-System Correlation Sweep Results")
+    corr_sweep = [
+        ("R01_corr_065", "0.65"),
+        ("R02_corr_070", "0.70"),
+        ("R03_corr_075", "0.75"),
+        ("R04_corr_080", "0.80"),
+        ("R05_corr_085", "0.85"),
+        ("R06_corr_090", "0.90"),
+        ("R07_corr_095", "0.95"),
+    ]
+    corr_in_csv = [(v, t) for v, t in corr_sweep if v in SUMMARY]
+    if corr_in_csv:
+        corr_table = doc.add_table(rows=1 + len(corr_in_csv), cols=5)
+        corr_table.style = "Table Grid"
+        corr_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        corr_headers = ["Threshold (r)", "10-fold CV", "90/10 Multi", "90/10 Binary", "60/40 Multi"]
+        for ci, h in enumerate(corr_headers):
+            cell = corr_table.rows[0].cells[ci]
+            cell.text = h
+            for run in cell.paragraphs[0].runs:
+                run.bold = True
+            set_cell_background(cell, "1F3864")
+            cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        for ri, (v, thresh) in enumerate(corr_in_csv):
+            corr_table.rows[ri + 1].cells[0].text = thresh
+            corr_table.rows[ri + 1].cells[1].text = f"{get(v, '10-fold CV'):.1f}%"
+            corr_table.rows[ri + 1].cells[2].text = f"{get(v, '90/10 multiclass'):.1f}%"
+            corr_table.rows[ri + 1].cells[3].text = f"{get(v, '90/10 binary'):.1f}%"
+            corr_table.rows[ri + 1].cells[4].text = f"{get(v, '60/40 multiclass'):.1f}%"
+
+        # Line chart for correlation sweep
+        x_vals = [float(t) for v, t in corr_in_csv]
+        y_vals = [get(v, "10-fold CV") for v, t in corr_in_csv]
+        corr_chart = chart_line_sweep(
+            x_vals, y_vals,
+            "Correlation Threshold (r)",
+            "10-Fold CV Accuracy vs Correlation Threshold (Full System)"
+        )
+        doc.add_picture(corr_chart, width=Inches(5.5))
+        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    add_body(doc, "")
+    add_heading2(doc, "20.2 Analysis")
+    add_body(
+        doc,
+        "The correlation threshold of r=0.80 achieves the highest 10-fold CV accuracy at 86.8%, "
+        "confirming it as the optimal choice. The performance curve shows a clear peak at 0.80 "
+        "with degradation in both directions:"
+    )
+    add_bullets(doc, [
+        "Below r=0.80 (more aggressive filtering): Performance drops to 84.9-85.6%. "
+        "Too-aggressive filtering removes features that carry unique class-discriminative "
+        "information, even if they correlate moderately with other features.",
+        "Above r=0.80 (less filtering): Performance drops to 85.3-85.8%. "
+        "Retaining highly correlated features introduces redundancy that dilutes the "
+        "Fisher-weighted evidence scores and creates noisy bin boundaries.",
+    ])
+    add_body(
+        doc,
+        "The optimal threshold of 0.80 balances two competing forces: retaining enough features "
+        "to capture diverse class signals while removing redundant features that would dilute "
+        "evidence quality. This is consistent with the 279-feature UCI arrhythmia dataset where "
+        "many ECG measurements are inherently correlated (e.g., QRS duration measured at "
+        "different leads), and a moderate correlation filter removes exact duplicates without "
+        "discarding genuinely informative features."
+    )
+
+    # ---------------- 21. Conclusion ----------------
+    add_heading1(doc, "21. Conclusion")
     add_body(
         doc,
         "This incremental study demonstrates that a Bayesian arrhythmia classifier can be "

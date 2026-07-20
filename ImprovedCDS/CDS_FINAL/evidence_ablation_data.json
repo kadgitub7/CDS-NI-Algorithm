@@ -1,0 +1,97 @@
+{
+  "against_scale_ablation": {
+    "current_mean": 84.66,
+    "uniform_mean": 84.59,
+    "difference_pp": 0.07,
+    "current_wins": "5"
+  },
+  "sex_branching_ablation": {
+    "with_sex_mean": 84.66,
+    "without_sex_mean": 84.25,
+    "difference_pp": 0.41
+  },
+  "per_class_60_40": {
+    "1": {
+      "correct": "96",
+      "total": 100,
+      "accuracy": 96.0
+    },
+    "2": {
+      "correct": "14",
+      "total": 17,
+      "accuracy": 82.4
+    },
+    "3": {
+      "correct": "6",
+      "total": 6,
+      "accuracy": 100.0
+    },
+    "4": {
+      "correct": "5",
+      "total": 6,
+      "accuracy": 83.3
+    },
+    "5": {
+      "correct": "3",
+      "total": 4,
+      "accuracy": 75.0
+    },
+    "6": {
+      "correct": "5",
+      "total": 6,
+      "accuracy": 83.3
+    },
+    "9": {
+      "correct": "2",
+      "total": 6,
+      "accuracy": 33.3
+    },
+    "10": {
+      "correct": "13",
+      "total": 22,
+      "accuracy": 59.1
+    }
+  },
+  "per_class_90_10": {
+    "1": {
+      "correct": 27,
+      "total": 27,
+      "accuracy": 100.0
+    },
+    "2": {
+      "correct": "5",
+      "total": 5,
+      "accuracy": 100.0
+    },
+    "3": {
+      "correct": "1",
+      "total": 1,
+      "accuracy": 100.0
+    },
+    "4": {
+      "correct": "1",
+      "total": 2,
+      "accuracy": 50.0
+    },
+    "6": {
+      "correct": "1",
+      "total": 2,
+      "accuracy": 50.0
+    },
+    "9": {
+      "correct": "1",
+      "total": 1,
+      "accuracy": 100.0
+    },
+    "10": {
+      "correct": "3",
+      "total": 4,
+      "accuracy": 75.0
+    }
+  },
+  "sharma_feature_count": {
+    "our_simulation": 106,
+    "sharma_pipeline_simulation": 108,
+    "sharma_reported": 101
+  }
+}

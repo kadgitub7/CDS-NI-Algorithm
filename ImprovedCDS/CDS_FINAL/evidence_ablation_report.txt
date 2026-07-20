@@ -1,0 +1,116 @@
+
+================================================================================
+  1. AGAINST_SCALE ABLATION: 0.5 vs 0.8 FOR RARE CLASSES
+================================================================================
+
+Testing whether against_scale=0.5 for rare classes improves accuracy
+vs. uniform against_scale=0.8 for all classes.
+
+--- Current settings (against_scale=0.5 for rare, 0.8 for common) ---
+  10-fold CV mean: 84.66% (std=0.93%)
+
+--- Uniform against_scale=0.8 for ALL classes ---
+  10-fold CV mean: 84.59% (std=0.66%)
+
+  Difference: +0.07 pp (current - uniform)
+  Current wins in 5/10 seeds
+
+  Per-class accuracy for rare classes (averaged over 10 seeds):
+    Class  4: current=69.3%, uniform=62.7%, diff=+6.7 pp
+    Class  5: current=59.2%, uniform=50.0%, diff=+9.2 pp
+    Class  9: current=96.7%, uniform=95.6%, diff=+1.1 pp
+
+================================================================================
+  2. SEX BRANCHING ABLATION: WITH vs WITHOUT
+================================================================================
+
+Testing whether sex-based branching (SEX_FEAT=1) improves accuracy
+vs. no sex branching.
+
+--- Current: sex branching enabled (SEX_FEAT=1) ---
+  10-fold CV mean: 84.66% (std=0.93%)
+
+--- Ablation: sex branching disabled (SEX_FEAT=-1) ---
+  10-fold CV mean: 84.25% (std=0.88%)
+
+  Difference: +0.41 pp (sex_on - sex_off)
+  Sex branching wins in 6/10 seeds
+
+================================================================================
+  3. PER-CLASS ACCURACY ACROSS SPLITS (for Irfan comparison)
+================================================================================
+
+Per-class accuracy at 60/40 and 90/10 (best seed for overall accuracy):
+
+--- 60/40 split (best seed=76, overall acc=86.2%) ---
+  Class  1: 96/100 = 96.0%
+  Class  2: 14/17 = 82.4%
+  Class  3: 6/6 = 100.0%
+  Class  4: 5/6 = 83.3%
+  Class  5: 3/4 = 75.0%
+  Class  6: 5/6 = 83.3%
+  Class  9: 2/6 = 33.3%
+  Class 10: 13/22 = 59.1%
+
+  Mean per-class accuracy across 10 seeds:
+  Class  1: mean=92.6%, std=2.6%, best=98.0%, worst=89.4%
+  Class  2: mean=63.6%, std=8.3%, best=82.4%, worst=50.0%
+  Class  3: mean=97.6%, std=5.0%, best=100.0%, worst=85.7%
+  Class  4: mean=57.2%, std=28.0%, best=100.0%, worst=12.5%
+  Class  5: mean=45.8%, std=31.5%, best=100.0%, worst=0.0%
+  Class  6: mean=56.4%, std=18.6%, best=87.5%, worst=25.0%
+  Class  9: mean=77.2%, std=22.3%, best=100.0%, worst=33.3%
+  Class 10: mean=64.1%, std=8.6%, best=77.3%, worst=42.9%
+
+--- 90/10 split (best seed=76, overall acc=92.9%) ---
+  Class  1: 27/27 = 100.0%
+  Class  2: 5/5 = 100.0%
+  Class  3: 1/1 = 100.0%
+  Class  4: 1/2 = 50.0%
+  Class  6: 1/2 = 50.0%
+  Class  9: 1/1 = 100.0%
+  Class 10: 3/4 = 75.0%
+
+  Mean per-class accuracy across 10 seeds:
+  Class  1: mean=94.1%, std=5.3%, best=100.0%, worst=85.2%
+  Class  2: mean=75.4%, std=23.0%, best=100.0%, worst=33.3%
+  Class  3: mean=100.0%, std=0.0%, best=100.0%, worst=100.0%
+  Class  4: mean=65.0%, std=45.0%, best=100.0%, worst=0.0%
+  Class  6: mean=72.5%, std=21.1%, best=100.0%, worst=50.0%
+  Class  9: mean=100.0%, std=0.0%, best=100.0%, worst=100.0%
+  Class 10: mean=77.3%, std=12.2%, best=100.0%, worst=50.0%
+
+
+================================================================================
+  4. SHARMA FEATURE COUNT DISCREPANCY (101 vs 106)
+================================================================================
+
+Sharma reports retaining 101 features with |r| > 0.1.
+Our simulation gets a different count because:
+  - Sharma drops column 14 first, then removes 32 rows with missing values
+  - We simulate on the full 416-patient, 279-feature dataset
+  - The different patient count and missing value handling changes correlations
+
+Our simulation (416 patients, 279 features): 106 features with |r| > 0.1
+Sharma's pipeline (394 patients, 278 features): 108 features with |r| > 0.1
+
+Note: Sharma uses all 452 patients (including classes 7,8,11-13,16)
+with binary labels, so their feature count may differ due to
+different class composition affecting correlations.
+
+================================================================================
+  5. CDS-OVR SENSITIVITY/SPECIFICITY AT 90/10 (all seeds)
+================================================================================
+
+Full sensitivity and specificity data for Jadhav comparison:
+
+  seed=13: binary=85.7%  sens=83.3%  spec=88.9%  TP=20 FN=4 TN=16 FP=2
+  seed=20: binary=85.7%  sens=78.9%  spec=91.3%  TP=15 FN=4 TN=21 FP=2
+  seed=27: binary=81.0%  sens=73.3%  spec=85.2%  TP=11 FN=4 TN=23 FP=4
+  seed=34: binary=90.5%  sens=80.0%  spec=96.3%  TP=12 FN=3 TN=26 FP=1
+  seed=41: binary=88.1%  sens=72.2%  spec=100.0%  TP=13 FN=5 TN=24 FP=0
+  seed=48: binary=92.9%  sens=84.2%  spec=100.0%  TP=16 FN=3 TN=23 FP=0
+  seed=55: binary=88.1%  sens=71.4%  spec=96.4%  TP=10 FN=4 TN=27 FP=1
+  seed=62: binary=92.9%  sens=88.2%  spec=96.0%  TP=15 FN=2 TN=24 FP=1
+  seed=69: binary=83.3%  sens=78.9%  spec=87.0%  TP=15 FN=4 TN=20 FP=3
+  seed=76: binary=97.6%  sens=93.3%  spec=100.0%  TP=14 FN=1 TN=27 FP=0
