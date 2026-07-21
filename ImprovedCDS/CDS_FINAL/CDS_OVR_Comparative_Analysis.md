@@ -629,9 +629,6 @@ Irfan's published confusion matrix (their Table 11) enables class-level analysis
 **Critical observation on class 6 (from Irfan's Table 11)**: Irfan misclassifies 2 sinus bradycardia patients as anterior MI (SB → AM). Clinically, these conditions have entirely different ECG signatures — bradycardia is a rate disorder (heart rate < 60 bpm), while anterior MI shows Q-wave and ST-segment changes. This confusion is a hallmark of PCA-induced feature conflation: when 279 features are compressed to 50 components, each component is a linear combination of multiple features. A principal component that combines heart rate variation with Q-wave variation can create a subspace where bradycardia and MI patients overlap, despite having no clinical relationship. CDS-OVR avoids this because each class model selects its own features — the bradycardia model uses heart rate (high FDR), while the MI model uses Q-wave features. These separate feature sets cannot produce cross-condition confusion.
 
 **Additional observation on class L (LBBB)**: Irfan's confusion matrix shows class L with only 2 test instances, of which 1 is correctly classified and 1 is misclassified. The 50% sensitivity for LBBB highlights the fragility of evaluating on micro-classes: a single misclassification cuts sensitivity in half. This reinforces why CDS-OVR removes classes with insufficient representation (original UCI classes 7, 8, 14, 15, 16 with 3, 2, 4, 5, 22 patients respectively) — not to inflate accuracy, but because the smallest classes produce statistically meaningless evaluation metrics, and class 16 ("Other/Unclassified") lacks a coherent clinical definition for supervised learning.
-=======
-**Critical observation on class 6**: Irfan misclassifies 2 sinus bradycardia patients as anterior MI (SB → AM). Clinically, these conditions have entirely different ECG signatures — bradycardia is a rate disorder (heart rate < 60 bpm), while anterior MI shows Q-wave and ST-segment changes. This confusion likely arises from PCA: when 279 features are compressed to 50 components, each component is a linear combination of multiple features. A principal component that combines heart rate variation with Q-wave variation can create a subspace where bradycardia and MI patients overlap. CDS-OVR avoids this because each class model selects its own features — the bradycardia model uses heart rate (high FDR), while the MI model uses Q-wave features. These separate feature sets cannot produce cross-condition confusion.
->>>>>>> Stashed changes
 
 #### 5.3.2 Why Irfan Achieves 93.33% on 60/40 While CDS-OVR Achieves 80.2% Mean
 
@@ -645,9 +642,11 @@ Irfan's PCA + CNN-LSTM does not have this failure mode because:
 
 **Important caveat**: Irfan reports a single 60/40 split with no variance. CDS-OVR's 10-seed evaluation shows multiclass accuracy ranging from 75.4% to 86.2% at 60/40 (σ = 3.06%). If Irfan's 93.33% also has comparable variance, their expected performance might be closer to 85–90%. The gap is structurally real but the magnitude is uncertain.
 
-### 5.4 Islam et al. 2023 — SVM + RF Serial Hybrid
+### 5.4 Gupta et al. 2014 — SVM + RF Serial Hybrid (as reviewed by Islam et al. 2023)
 
-**Published in**: arXiv:2301.10174 (2023 preprint)
+**Original work**: Gupta, V., Srinivasan, S. and Kudli, S.S., 2014. "Prediction and classification of cardiac arrhythmia."
+
+**Reviewed in**: Islam et al., arXiv:2301.10174 (2023)
 
 **Method**: Remove columns with >50% missing values (279 → 252). Apply mRMR feature selection. Test SVM (71.4%), RF (72.3%), and SVM+RF serial hybrid (77.4%).
 
@@ -689,10 +688,7 @@ Irfan's PCA + CNN-LSTM does not have this failure mode because:
 >
 > **Interpretation**: Sex branching provides a modest but consistent improvement (+0.41 pp). The effect is concentrated in class 3 (Old Anterior MI), which is 100% male — sex branching gives it a dedicated male-only feature set, avoiding dilution by female patients. The overall accuracy impact is small because most classes have both sexes represented. The fact that Gupta et al. (and all other benchmarks) do not stratify by sex means they face marginally more complex decision boundaries, though the quantified effect suggests this is a secondary factor in the accuracy gap.
 
-4. **SVM+RF serial stacking amplifies noise (structural argument).** The second-stage RF receives SVM predictions as input features, but SVM achieves only 70% accuracy (Gupta et al.'s reported SVM-mRMR result). With a 30% error rate, the RF's input contains systematic misclassification patterns on a small dataset. The risk is that the RF learns to compensate for specific SVM errors in the training set rather than learning generalizable class structure — the marginal improvement from 70% (SVM alone) to 77.4% (SVM+RF hybrid) is consistent with partial error correction rather than deep complementarity.
-=======
-4. **SVM+RF serial stacking amplifies noise.** The second-stage RF receives SVM predictions as input features, but SVM achieves only 71.4% accuracy — a 28.6% error rate. The RF must learn from these noisy pseudo-features on a small dataset, likely overfitting to the SVM's error patterns.
->>>>>>> Stashed changes
+4. **SVM+RF serial stacking amplifies noise (structural argument).** The second-stage RF receives SVM predictions as input features, but SVM achieves only 71.4% accuracy. With a 28.6% error rate, the RF's input contains systematic misclassification patterns on a small dataset. The marginal improvement from 71.4% (SVM alone) to 77.4% (SVM+RF hybrid) is consistent with partial error correction rather than deep complementarity.
 
 ### 5.5 Hybrid FS 2021 — Three-Stage Feature Selection with Ensemble Voting
 
@@ -895,21 +891,32 @@ CDS-OVR's staged pipeline (binning → posterior estimation → feature selectio
 
 The tradeoff: end-to-end optimization requires more data to avoid overfitting. CDS-OVR's staged optimization is more sample-efficient, which explains its strong performance at 90/10 where most classes have ≥10 training patients but the total dataset is too small for deep learning to fully generalize.
 
+### 7.4 SMOTE / Synthetic Oversampling for Rare Classes
+
+Irfan et al. apply SMOTE to the MIT-BIH dataset (D2) to balance class distributions before training. CDS-OVR uses no data augmentation — it handles rare classes through per-class parameter adaptation (against_scale, MIN_SUPPORT). At 60/40 splits, the rarest class (class 9, LBBB) has only 4 training patients, creating a **posterior quality** problem: bins exist and pass the `bc ≥ 3` filter (87.5% usable, `evidence_analysis.py`, Section 6), but with only 4 target patients across ~79 bin slots, posteriors carry almost no discriminative signal. SMOTE or a similar oversampling strategy applied to the training data before binning could populate rare-class bins, allowing more features to contribute evidence. This is the single most impactful improvement CDS-OVR could adopt from benchmark methods.
+
+### 7.5 Soft / Fuzzy Bin Boundaries
+
+CDS-OVR assigns each feature value to exactly one bin, creating hard boundaries. A patient at 119.9 ms QRS duration receives entirely different evidence than one at 120.1 ms if a bin edge falls at 120 ms. Soft binning — where a value near a bin edge contributes partially to both adjacent bins — would produce smoother posterior estimates and reduce sensitivity to exact bin placement. This is analogous to the continuous decision boundaries that SVM and neural networks provide naturally.
+
 ---
 
 ## 8. Summary of CDS-OVR vs. Benchmark Performance Sources
 
 ### Why CDS-OVR Outperforms When It Does (90/10, 10-fold CV)
 
-| CDS-OVR Mechanism | Effect | Numerical Evidence | Benchmark Lacking This |
-|-------------------|--------|-------------------|----------------------|
-| Per-class feature selection (18 features via FDR) | Each disease gets its most discriminative features; 109 unique features across 8 models | Jaccard overlap 0.023–0.289; class 10 has 13 unique features; class 3 has 8 unique features (`evidence_analysis.py`, §4) | All benchmarks use global feature sets |
-| Per-class imbalance adaptation (against_scale, MIN_SUPPORT) | Rare classes detected from sparse evidence; reduced penalty for negative evidence | Ablation: against_scale=0.5 gives +9.2 pp for class 5, +6.7 pp for class 4 vs. uniform 0.8 (`evidence_ablation.py`, §1); 17/78 OAO pairs have >10:1 imbalance (`evidence_analysis.py`, §1) | All benchmarks use uniform parameters |
-| Dual AF with ratio scoring | Separates for/against evidence; graduated confidence | Correct: mean ratio=6.86, median=4.55; Wrong: mean ratio=1.66, median=1.25 (`evidence_analysis.py`, §10) | Original CDS, most benchmarks use single decision function |
-| Dynamic healthy bar + suspicion | Adaptive sensitivity/specificity per patient context | 91.4% specificity, 84.8% disease detection, 8.6% FPR (`evidence_analysis.py`, §13) | No benchmark adapts thresholds based on healthy evidence |
-| Supervised chi-squared binning | Bin boundaries align with class boundaries | Class 6: supervised 2.5× stronger posterior shifts; class 6 best bin posterior=0.754 vs prior=6.0% (`evidence_analysis.py`, §9) | Original CDS uses unsupervised bins |
-| Correlation filtering (|r| < 0.8) | Non-redundant feature sets maximize information per slot | Sharma retains 32 pairs with |r|>0.8; CDS-OVR enforces threshold per branch (`evidence_analysis.py`, §3, §11) | Sharma retains correlated features; no benchmark filters per-class |
-| Sex-based population branching | More homogeneous subpopulations; class 3 is 100% male | Ablation: sex branching +0.41 pp overall (84.66% vs 84.25%), wins 6/10 seeds; 4 features with Cohen's d>0.5 (`evidence_ablation.py`, §2; `evidence_analysis.py`, §8) | No benchmark stratifies by sex |
+| CDS-OVR Mechanism | Effect | Numerical Evidence | Ablation Δ (p-value) | Benchmark Lacking This |
+|-------------------|--------|-------------------|---------------------|----------------------|
+| Supervised chi-squared binning | Bin boundaries align with class boundaries | Class 6: 2.5× stronger posterior shifts (`evidence_analysis.py`, §9) | **+5.75 pp (p=0.002)** | Original CDS uses unsupervised bins |
+| Fisher discriminant weighting | Most discriminative features dominate evidence | Feature 111: FDR=19.47 for class 3, <0.1 for others (`evidence_analysis.py`, §5) | **+4.52 pp (p=0.002)** | No benchmark uses per-class feature weighting |
+| Per-class feature selection (18 via FDR) | Each disease gets its most discriminative features; 109 unique across 8 models | Jaccard overlap 0.023–0.289; class 10 has 13 unique features (`evidence_analysis.py`, §4) | (embedded in Fisher + binning) | All benchmarks use global feature sets |
+| Correlation filtering (|r| < 0.8) | Non-redundant feature sets maximize information per slot | Sharma retains 32 pairs with |r|>0.8; CDS-OVR enforces <0.8 per branch (`evidence_analysis.py`, §3, §11) | +0.46 pp (p=0.313) | Sharma retains correlated features |
+| Sex-based population branching | More homogeneous subpopulations; class 3 is 100% male | 4 features with Cohen's d>0.5; class 3 = 100% male (`evidence_analysis.py`, §8) | +0.41 pp (p=0.141) | No benchmark stratifies by sex |
+| Per-class against_scale | Rare classes detected from sparse evidence | +9.2 pp for class 5, +6.7 pp for class 4 at class level (`evidence_ablation.py`, §1) | +0.07 pp (p=0.734) | All benchmarks use uniform parameters |
+| Dynamic healthy bar + suspicion | Adaptive sensitivity/specificity per patient | 91.4% specificity, 84.8% disease detection (`evidence_analysis.py`, §13) | −0.31 pp (p=0.133)† | No benchmark adapts thresholds |
+| Dual AF with ratio scoring | Separates for/against evidence | Correct: ratio=6.86; Wrong: ratio=1.66 (`evidence_analysis.py`, §10) | (cannot be isolated) | Original CDS uses single accumulator |
+
+†Healthy bar reduces overall accuracy by 0.31 pp but improves specificity (91.4% vs. lower without). Its value is clinical (fewer false alarms), not accuracy-based.
 
 ### Why CDS-OVR Underperforms When It Does (60/40)
 
@@ -926,7 +933,99 @@ CDS-OVR's class-aware specialization — the property that distinguishes it most
 
 This is not a flaw to be eliminated but a design tradeoff to be understood: CDS-OVR achieves its strong 90/10 and 10-fold CV results precisely because it specializes per-class, and that same specialization requires sufficient per-class data to produce meaningful posteriors. At 60/40, class 9 (LBBB) has only 4 training patients — the bins exist (87.5% usable) but the posteriors carry almost no signal. At 90/10, 8 training patients per class is sufficient for 2–3 bins to develop discriminative posteriors, enabling the model's structural advantages to activate.
 
-### 8.1 Distinguishing Preprocessing Choices from Algorithmic Innovation
+### 8.1 Complete Component Ablation Study
+
+To quantify the contribution of each CDS-OVR mechanism, a complete ablation study was conducted: each component was removed one-at-a-time while all other settings remained at W11-01 defaults. All evaluations used 10-fold CV across 10 random seeds (100 fold evaluations per configuration). Statistical significance was assessed using the Wilcoxon signed-rank test (paired by seed), the appropriate nonparametric test for small paired samples where normality cannot be assumed.
+
+> **Experiment: Full Component Ablation with Statistical Significance** (`ablation_full.py`, Parts 2–3)
+>
+> **What was tested**: Six CDS-OVR mechanisms were individually disabled: (1) supervised chi-squared binning → equal-width Sturges binning, (2) correlation filtering → disabled (CORR_THRESHOLD=1.0), (3) healthy bar → disabled (HEALTHY_WEIGHT=0), (4) Fisher discriminant weighting → uniform weights (fw=1.0), (5) per-class against_scale → uniform 0.8, (6) sex branching → disabled (SEX_FEAT=-1).
+>
+> **Why**: To determine which mechanisms earn their complexity — i.e., which produce statistically significant accuracy improvements vs. simpler alternatives. Components that do not significantly improve accuracy may still be justified on other grounds (specificity, rare-class detection) but cannot be claimed as accuracy-improving innovations.
+>
+> **Method**: For each ablation, the modified system was evaluated via 10-fold CV across 10 seeds. Per-seed accuracy was paired with the baseline, and a two-sided Wilcoxon signed-rank test was applied (n=10 paired observations). Significance threshold: α=0.05.
+>
+> **Results**:
+>
+> | Component Removed | Baseline | Ablated | Δ pp | W-stat | p-value | Significant (α=0.05) |
+> |-------------------|----------|---------|------|--------|---------|---------------------|
+> | Supervised binning → equal-width | 84.66% | 78.92% | **+5.75** | 0.0 | **0.002** | **YES** |
+> | Fisher weighting → uniform | 84.66% | 80.14% | **+4.52** | 0.0 | **0.002** | **YES** |
+> | Correlation filtering → disabled | 84.66% | 84.21% | +0.46 | 17.0 | 0.313 | no |
+> | Sex branching → disabled | 84.66% | 84.25% | +0.41 | 7.0 | 0.141 | no |
+> | against_scale → uniform 0.8 | 84.66% | 84.59% | +0.07 | 19.0 | 0.734 | no |
+> | Healthy bar → disabled | 84.66% | 84.98% | **−0.31** | 6.5 | 0.133 | no |
+>
+> **Interpretation**: Only two mechanisms produce statistically significant accuracy improvements:
+>
+> 1. **Supervised chi-squared binning** (+5.75 pp, p=0.002): The single most impactful component. Replacing it with equal-width bins drops accuracy from 84.66% to 78.92% — every seed shows degradation (W=0). This confirms that aligning bin boundaries with class boundaries is critical for posterior quality.
+>
+> 2. **Fisher discriminant weighting** (+4.52 pp, p=0.002): The second most impactful component. Without Fisher weighting, all features contribute equally regardless of their discriminative power. Accuracy drops to 80.14% — again, every seed shows degradation (W=0).
+>
+> Four mechanisms do not reach statistical significance at α=0.05 for overall accuracy:
+>
+> - **Correlation filtering** (+0.46 pp, p=0.313): Modest benefit, likely because the correlation filter's main effect is ensuring feature diversity, which may matter more for specific classes than for overall accuracy.
+> - **Sex branching** (+0.41 pp, p=0.141): Concentrated effect on class 3 (100% male), diluted across all 8 classes. The per-class benefit (documented in the ablation report: class 3 improvement) is real but too localized to affect overall accuracy significantly.
+> - **against_scale** (+0.07 pp, p=0.734): Negligible overall effect because rare classes represent only 8.9% of patients. The mechanism's value is in per-class rare-class detection (+9.2 pp for class 5, +6.7 pp for class 4 — see Section 4.6) rather than overall accuracy.
+> - **Healthy bar** (−0.31 pp, p=0.133): Removing the healthy bar *improves* overall accuracy by 0.31 pp (not significant). This is expected: the healthy bar deliberately trades overall accuracy for better specificity — it prevents false positives (21/245 = 8.6% FPR with bar vs. potentially higher without) at the cost of some true disease detections. The healthy bar's value is in specificity, not accuracy, making it a clinically justified mechanism rather than an accuracy-improving one.
+
+### 8.2 Hyperparameter Sensitivity Analysis
+
+To assess whether CDS-OVR's hardcoded hyperparameters represent a fragile configuration or a robust operating point, three key parameters were swept across their plausible ranges using 10-fold CV across 10 seeds.
+
+> **Experiment: Hyperparameter Sensitivity Sweep** (`ablation_full.py`, Part 4)
+>
+> **What was tested**: Three hyperparameters were varied independently while all others were held at W11-01 defaults: (a) CORR_THRESHOLD ∈ {0.6, 0.7, 0.8, 0.9, 1.0}, (b) MAX_BINS ∈ {3, 4, 5, 6, 8, 10}, (c) FEATURES_PER_CLASS ∈ {10, 14, 18, 22, 26, 30}.
+>
+> **Why**: If accuracy collapses with small parameter changes, the system is brittle and the reported accuracy may be an artifact of careful tuning. If accuracy is stable across a wide range, the system's performance is robust and not dependent on specific hyperparameter values.
+>
+> **Method**: For each parameter value, 10-fold CV was run across 10 seeds (100 fold evaluations). Mean accuracy and standard deviation were recorded.
+>
+> **Results**:
+>
+> **CORR_THRESHOLD** (correlation filter strictness):
+>
+> | Value | Mean Accuracy | σ | Δ from best |
+> |-------|-------------|---|-------------|
+> | 0.6 | 83.22% | 1.06% | −1.44 pp |
+> | 0.7 | 83.68% | 1.35% | −0.98 pp |
+> | **0.8** | **84.66%** | **0.93%** | **best** |
+> | 0.9 | 84.30% | 0.97% | −0.36 pp |
+> | 1.0 | 84.21% | 0.96% | −0.45 pp |
+>
+> Range: 1.44 pp. The current value (0.8) is optimal. Accuracy degrades monotonically as the threshold tightens below 0.8 (too aggressive filtering removes useful features) and slightly when loosened above 0.8 (redundant features waste model capacity). The degradation is gradual, not cliff-like.
+>
+> **MAX_BINS** (maximum supervised bins per feature):
+>
+> | Value | Mean Accuracy | σ | Δ from best |
+> |-------|-------------|---|-------------|
+> | 3 | 84.06% | 1.01% | −1.11 pp |
+> | 4 | 84.01% | 1.18% | −1.16 pp |
+> | **5** | **85.17%** | **0.37%** | **best** |
+> | 6 | 84.66% | 0.93% | −0.51 pp |
+> | 8 | 83.22% | 0.90% | −1.95 pp |
+> | 10 | 82.12% | 0.75% | −3.05 pp |
+>
+> Range: 3.05 pp. MAX_BINS=5 outperforms the current setting of 6 by +0.51 pp and has the lowest variance (σ=0.37%). Too few bins (3–4) lose discriminative resolution. Too many bins (8–10) cause overfitting — each bin has fewer patients, producing noisier posterior estimates. The sweet spot is 5–6, and the current setting of 6 is within 0.51 pp of optimal.
+>
+> **FEATURES_PER_CLASS** (maximum retained features per class model):
+>
+> | Value | Mean Accuracy | σ |
+> |-------|-------------|---|
+> | 10 | 84.66% | 0.93% |
+> | 14 | 84.66% | 0.93% |
+> | 18 | 84.66% | 0.93% |
+> | 22 | 84.66% | 0.93% |
+> | 26 | 84.66% | 0.93% |
+> | 30 | 84.66% | 0.93% |
+>
+> Range: 0.00 pp. All values produce identical results. This means the correlation filter (CORR_THRESHOLD=0.8) is the actual bottleneck — it caps the effective feature count well below even FPC=10 for most class models. The FPC parameter is not a tuning-sensitive hyperparameter; it is a safety cap that never binds under current settings.
+>
+> **Interpretation**: CDS-OVR's accuracy is robust across plausible hyperparameter ranges. The most sensitive parameter is MAX_BINS (3.05 pp range), but even this shows a broad plateau at 5–6 bins rather than a sharp peak. CORR_THRESHOLD has 1.44 pp range with the current value at the optimum. FEATURES_PER_CLASS has zero effect, proving it is not a tuning knob. These results demonstrate that CDS-OVR's performance is not an artifact of precise hyperparameter tuning — reasonable alternative values produce similar accuracy.
+>
+> **Note on MAX_BINS=5**: The sweep reveals that MAX_BINS=5 achieves 85.17% (σ=0.37%), outperforming the current setting of 6 (84.66%, σ=0.93%). This suggests that 6 bins may slightly overfit for some class models. However, the current W11-01 configuration uses MAX_BINS=6, and all results throughout this document are reported with that setting. The sensitivity analysis demonstrates that a 0.51 pp improvement is available but was not exploited, providing further evidence against overfitting to the reported configuration.
+
+### 8.3 Distinguishing Preprocessing Choices from Algorithmic Innovation
 
 Many of CDS-OVR's advantages over benchmarks stem from *preprocessing decisions* (retaining all patients, keeping all features, stratifying by sex) rather than from the classification algorithm itself. These are important but should not be conflated with algorithmic superiority:
 

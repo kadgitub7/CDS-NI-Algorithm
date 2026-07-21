@@ -1,0 +1,101 @@
+Loading data...
+  416 patients, 279 features, 8 classes
+
+================================================================================
+  PART 1: BASELINE (W11-01 current settings)
+================================================================================
+
+  Baseline mean: 84.66% (σ=0.93%)
+  Per-seed: ['86.8', '84.1', '85.8', '84.6', '84.1', '83.9', '84.6', '83.4', '84.9', '84.4']
+  Time: 1509s
+
+================================================================================
+  PART 2: FULL COMPONENT ABLATION (remove one at a time)
+================================================================================
+
+--- 2a. Supervised Binning → Equal-Width (Sturges) ---
+  Equal-width mean: 78.92% (σ=0.99%)
+  Δ from baseline: +5.75 pp
+  Time: 419s
+
+--- 2b. Correlation Filtering → Disabled ---
+  No corr filter mean: 84.21% (σ=0.96%)
+  Δ from baseline: +0.46 pp
+  Time: 5460s
+
+--- 2c. Healthy Bar → Disabled ---
+  No healthy bar mean: 84.98% (σ=0.78%)
+  Δ from baseline: -0.31 pp
+  Time: 1273s
+
+--- 2d. Fisher Weighting → Uniform ---
+  No Fisher mean: 80.14% (σ=0.89%)
+  Δ from baseline: +4.52 pp
+  Time: 1335s
+
+--- 2e. Per-Class against_scale → Uniform 0.8 ---
+  Uniform against mean: 84.59% (σ=0.66%)
+  Δ from baseline: +0.07 pp
+  Time: 1626s
+
+--- 2f. Sex Branching → Disabled ---
+  No sex branch mean: 84.25% (σ=0.88%)
+  Δ from baseline: +0.41 pp
+  Time: 1511s
+
+================================================================================
+  PART 3: STATISTICAL SIGNIFICANCE (Wilcoxon signed-rank, paired by seed)
+================================================================================
+
+  Component                  Baseline   Ablated    Δ pp  W-stat   p-value  Significant
+  ------------------------- --------- --------- ------- ------- --------- ------------
+  supervised_binning           84.66%    78.92%  +5.75     0.0    0.0020 YES (p<0.05)
+  correlation_filter           84.66%    84.21%  +0.46    17.0    0.3125           no
+  healthy_bar                  84.66%    84.98%  -0.31     6.5    0.1328           no
+  fisher_weighting             84.66%    80.14%  +4.52     0.0    0.0020 YES (p<0.05)
+  against_scale                84.66%    84.59%  +0.07    19.0    0.7344           no
+  sex_branching                84.66%    84.25%  +0.41     7.0    0.1406           no
+
+================================================================================
+  PART 4: HYPERPARAMETER SENSITIVITY SWEEPS
+================================================================================
+
+--- 4a. CORR_THRESHOLD sweep ---
+  CORR_THRESHOLD=0.6: mean=83.22% (σ=1.06%)
+  CORR_THRESHOLD=0.7: mean=83.68% (σ=1.35%)
+  CORR_THRESHOLD=0.8: mean=84.66% (σ=0.93%)
+  CORR_THRESHOLD=0.9: mean=84.30% (σ=0.97%)
+  CORR_THRESHOLD=1.0: mean=84.21% (σ=0.96%)
+
+--- 4b. MAX_BINS sweep ---
+  MAX_BINS=3: mean=84.06% (σ=1.01%)
+  MAX_BINS=4: mean=84.01% (σ=1.18%)
+  MAX_BINS=5: mean=85.17% (σ=0.37%)
+  MAX_BINS=6: mean=84.66% (σ=0.93%)
+  MAX_BINS=8: mean=83.22% (σ=0.90%)
+  MAX_BINS=10: mean=82.12% (σ=0.75%)
+
+--- 4c. FEATURES_PER_CLASS sweep ---
+  FEATURES_PER_CLASS=10: mean=84.66% (σ=0.93%)
+  FEATURES_PER_CLASS=14: mean=84.66% (σ=0.93%)
+  FEATURES_PER_CLASS=18: mean=84.66% (σ=0.93%)
+  FEATURES_PER_CLASS=22: mean=84.66% (σ=0.93%)
+  FEATURES_PER_CLASS=26: mean=84.66% (σ=0.93%)
+  FEATURES_PER_CLASS=30: mean=84.66% (σ=0.93%)
+
+================================================================================
+  PART 5: SUMMARY
+================================================================================
+
+ABLATION RANKING (by accuracy drop when removed):
+  1. supervised_binning        Δ = +5.75 pp  p = 0.0020 *
+  2. fisher_weighting          Δ = +4.52 pp  p = 0.0020 *
+  3. correlation_filter        Δ = +0.46 pp  p = 0.3125  
+  4. sex_branching             Δ = +0.41 pp  p = 0.1406  
+  5. against_scale             Δ = +0.07 pp  p = 0.7344  
+  6. healthy_bar               Δ = -0.31 pp  p = 0.1328  
+
+HYPERPARAMETER SENSITIVITY SUMMARY:
+  CORR_THRESHOLD: best = 0.8 (84.66%), range = 83.22–84.66%
+  MAX_BINS: best = 5 (85.17%), range = 82.12–85.17%
+  FEATURES_PER_CLASS: best = 10 (84.66%), range = 84.66–84.66%
