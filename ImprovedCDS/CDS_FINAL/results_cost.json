@@ -1,0 +1,16 @@
+{
+  "10fold_cv_time_s": 260.67,
+  "90_10_split_time_s": 34.65,
+  "training_time_s": 249.7761,
+  "prediction_all_patients_s": 17.0692,
+  "prediction_per_patient_ms": 41.0316,
+  "memory_current_bytes": 3203311,
+  "memory_peak_bytes": 4475647,
+  "memory_current_mb": 3.05,
+  "memory_peak_mb": 4.27,
+  "data_matrix_mb": 0.89,
+  "n_tree_nodes": 2,
+  "n_class_models": 4185,
+  "n_retained_features": 270,
+  "platform": "win32"
+}

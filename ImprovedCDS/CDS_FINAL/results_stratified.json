@@ -1,0 +1,4124 @@
+{
+  "stratified_10fold": {
+    "summary": {
+      "acc_mean": 85.32,
+      "acc_std": 0.62,
+      "acc_best": 86.3,
+      "acc_worst": 84.38,
+      "binary_mean": 88.56,
+      "binary_std": 0.67,
+      "binary_best": 89.66,
+      "ba_mean": 80.71,
+      "ba_std": 0.58,
+      "spec_mean": 91.18,
+      "sens_mean": 84.8
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 86.06,
+        "binary_acc": 89.66,
+        "specificity": 91.43,
+        "sensitivity": 87.13,
+        "balanced_acc": 81.25,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 224,
+            "multi_acc": 0.9143,
+            "binary_correct": 224,
+            "binary_acc": 0.9143
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 33,
+            "multi_acc": 0.75,
+            "binary_correct": 38,
+            "binary_acc": 0.8636
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 13,
+            "multi_acc": 0.8667,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 21,
+            "multi_acc": 0.84,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 39,
+            "multi_acc": 0.78,
+            "binary_correct": 42,
+            "binary_acc": 0.84
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 85.1,
+        "binary_acc": 87.98,
+        "specificity": 89.8,
+        "sensitivity": 85.38,
+        "balanced_acc": 81.08,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 220,
+            "multi_acc": 0.898,
+            "binary_correct": 220,
+            "binary_acc": 0.898
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "multi_acc": 0.7727,
+            "binary_correct": 38,
+            "binary_acc": 0.8636
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 10,
+            "multi_acc": 0.6667,
+            "binary_correct": 11,
+            "binary_acc": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 21,
+            "multi_acc": 0.84,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 38,
+            "multi_acc": 0.76,
+            "binary_correct": 41,
+            "binary_acc": 0.82
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 84.86,
+        "binary_acc": 88.46,
+        "specificity": 91.02,
+        "sensitivity": 84.8,
+        "balanced_acc": 79.87,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 223,
+            "multi_acc": 0.9102,
+            "binary_correct": 223,
+            "binary_acc": 0.9102
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 32,
+            "multi_acc": 0.7273,
+            "binary_correct": 37,
+            "binary_acc": 0.8409
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 12,
+            "multi_acc": 0.8,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 7,
+            "multi_acc": 0.5385,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 18,
+            "multi_acc": 0.72,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 38,
+            "multi_acc": 0.76,
+            "binary_correct": 40,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 85.1,
+        "binary_acc": 88.46,
+        "specificity": 91.84,
+        "sensitivity": 83.63,
+        "balanced_acc": 80.99,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 225,
+            "multi_acc": 0.9184,
+            "binary_correct": 225,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 30,
+            "multi_acc": 0.6818,
+            "binary_correct": 34,
+            "binary_acc": 0.7727
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "multi_acc": 0.6923,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "multi_acc": 0.8,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "multi_acc": 0.72,
+            "binary_correct": 40,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 84.62,
+        "binary_acc": 87.98,
+        "specificity": 90.61,
+        "sensitivity": 84.21,
+        "balanced_acc": 80.87,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 222,
+            "multi_acc": 0.9061,
+            "binary_correct": 222,
+            "binary_acc": 0.9061
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "multi_acc": 0.7045,
+            "binary_correct": 36,
+            "binary_acc": 0.8182
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "multi_acc": 0.6923,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 19,
+            "multi_acc": 0.76,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 37,
+            "multi_acc": 0.74,
+            "binary_correct": 40,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 84.38,
+        "binary_acc": 87.5,
+        "specificity": 91.02,
+        "sensitivity": 82.46,
+        "balanced_acc": 79.5,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 223,
+            "multi_acc": 0.9102,
+            "binary_correct": 223,
+            "binary_acc": 0.9102
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 31,
+            "multi_acc": 0.7045,
+            "binary_correct": 35,
+            "binary_acc": 0.7955
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 9,
+            "multi_acc": 0.6,
+            "binary_correct": 11,
+            "binary_acc": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "multi_acc": 0.6923,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "multi_acc": 0.8,
+            "binary_correct": 22,
+            "binary_acc": 0.88
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "multi_acc": 0.72,
+            "binary_correct": 39,
+            "binary_acc": 0.78
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 85.1,
+        "binary_acc": 88.22,
+        "specificity": 90.61,
+        "sensitivity": 84.8,
+        "balanced_acc": 81.01,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 222,
+            "multi_acc": 0.9061,
+            "binary_correct": 222,
+            "binary_acc": 0.9061
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "multi_acc": 0.7727,
+            "binary_correct": 38,
+            "binary_acc": 0.8636
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "multi_acc": 0.8,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 36,
+            "multi_acc": 0.72,
+            "binary_correct": 37,
+            "binary_acc": 0.74
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 85.58,
+        "binary_acc": 88.7,
+        "specificity": 91.43,
+        "sensitivity": 84.8,
+        "balanced_acc": 80.5,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 224,
+            "multi_acc": 0.9143,
+            "binary_correct": 224,
+            "binary_acc": 0.9143
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 33,
+            "multi_acc": 0.75,
+            "binary_correct": 37,
+            "binary_acc": 0.8409
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 10,
+            "multi_acc": 0.6667,
+            "binary_correct": 11,
+            "binary_acc": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 20,
+            "multi_acc": 0.8,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 38,
+            "multi_acc": 0.76,
+            "binary_correct": 40,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 86.06,
+        "binary_acc": 88.94,
+        "specificity": 91.84,
+        "sensitivity": 84.8,
+        "balanced_acc": 80.58,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 225,
+            "multi_acc": 0.9184,
+            "binary_correct": 225,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 34,
+            "multi_acc": 0.7727,
+            "binary_correct": 38,
+            "binary_acc": 0.8636
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 13,
+            "multi_acc": 0.8667,
+            "binary_correct": 14,
+            "binary_acc": 0.9333
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 11,
+            "binary_acc": 0.7333
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 19,
+            "multi_acc": 0.76,
+            "binary_correct": 22,
+            "binary_acc": 0.88
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 39,
+            "multi_acc": 0.78,
+            "binary_correct": 42,
+            "binary_acc": 0.84
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 86.3,
+        "binary_acc": 89.66,
+        "specificity": 92.24,
+        "sensitivity": 85.96,
+        "balanced_acc": 81.46,
+        "n_test": 416,
+        "per_class": {
+          "1": {
+            "n_test": 245,
+            "correct": 226,
+            "multi_acc": 0.9224,
+            "binary_correct": 226,
+            "binary_acc": 0.9224
+          },
+          "2": {
+            "n_test": 44,
+            "correct": 35,
+            "multi_acc": 0.7955,
+            "binary_correct": 38,
+            "binary_acc": 0.8636
+          },
+          "3": {
+            "n_test": 15,
+            "correct": 14,
+            "multi_acc": 0.9333,
+            "binary_correct": 15,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 13,
+            "binary_acc": 0.8667
+          },
+          "5": {
+            "n_test": 13,
+            "correct": 9,
+            "multi_acc": 0.6923,
+            "binary_correct": 10,
+            "binary_acc": 0.7692
+          },
+          "6": {
+            "n_test": 25,
+            "correct": 17,
+            "multi_acc": 0.68,
+            "binary_correct": 22,
+            "binary_acc": 0.88
+          },
+          "9": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 50,
+            "correct": 38,
+            "multi_acc": 0.76,
+            "binary_correct": 40,
+            "binary_acc": 0.8
+          }
+        }
+      }
+    ]
+  },
+  "stratified_90_10": {
+    "summary": {
+      "acc_mean": 85.56,
+      "acc_std": 4.58,
+      "acc_best": 91.11,
+      "acc_worst": 75.56,
+      "binary_mean": 89.56,
+      "binary_std": 3.98,
+      "binary_best": 95.56,
+      "ba_mean": 79.59,
+      "ba_std": 6.31,
+      "spec_mean": 94.4,
+      "sens_mean": 83.5
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 86.67,
+        "binary_acc": 88.89,
+        "specificity": 96.0,
+        "sensitivity": 80.0,
+        "balanced_acc": 83.25,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "multi_acc": 0.96,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 2,
+            "multi_acc": 0.4,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 86.67,
+        "binary_acc": 88.89,
+        "specificity": 96.0,
+        "sensitivity": 80.0,
+        "balanced_acc": 75.75,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "multi_acc": 0.96,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 80.0,
+        "binary_acc": 86.67,
+        "specificity": 88.0,
+        "sensitivity": 85.0,
+        "balanced_acc": 70.58,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 22,
+            "multi_acc": 0.88,
+            "binary_correct": 22,
+            "binary_acc": 0.88
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 91.11,
+        "binary_acc": 93.33,
+        "specificity": 92.0,
+        "sensitivity": 95.0,
+        "balanced_acc": 88.58,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 23,
+            "multi_acc": 0.92,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 88.89,
+        "binary_acc": 91.11,
+        "specificity": 100.0,
+        "sensitivity": 80.0,
+        "balanced_acc": 85.83,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 25,
+            "multi_acc": 1.0,
+            "binary_correct": 25,
+            "binary_acc": 1.0
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 2,
+            "multi_acc": 0.4,
+            "binary_correct": 2,
+            "binary_acc": 0.4
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 86.67,
+        "binary_acc": 91.11,
+        "specificity": 96.0,
+        "sensitivity": 85.0,
+        "balanced_acc": 77.83,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "multi_acc": 0.96,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 75.56,
+        "binary_acc": 80.0,
+        "specificity": 92.0,
+        "sensitivity": 65.0,
+        "balanced_acc": 71.08,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 23,
+            "multi_acc": 0.92,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 1,
+            "multi_acc": 0.2,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 1,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 2,
+            "multi_acc": 0.4,
+            "binary_correct": 2,
+            "binary_acc": 0.4
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 84.44,
+        "binary_acc": 91.11,
+        "specificity": 92.0,
+        "sensitivity": 90.0,
+        "balanced_acc": 79.42,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 23,
+            "multi_acc": 0.92,
+            "binary_correct": 23,
+            "binary_acc": 0.92
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 84.44,
+        "binary_acc": 88.89,
+        "specificity": 96.0,
+        "sensitivity": 80.0,
+        "balanced_acc": 75.33,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "multi_acc": 0.96,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 0,
+            "binary_acc": 0.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 91.11,
+        "binary_acc": 95.56,
+        "specificity": 96.0,
+        "sensitivity": 95.0,
+        "balanced_acc": 88.25,
+        "n_test": 45,
+        "per_class": {
+          "1": {
+            "n_test": 25,
+            "correct": 24,
+            "multi_acc": 0.96,
+            "binary_correct": 24,
+            "binary_acc": 0.96
+          },
+          "2": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "3": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 1,
+            "correct": 1,
+            "multi_acc": 1.0,
+            "binary_correct": 1,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          }
+        }
+      }
+    ]
+  },
+  "stratified_80_20": {
+    "summary": {
+      "acc_mean": 82.26,
+      "acc_std": 5.26,
+      "acc_best": 89.29,
+      "acc_worst": 72.62,
+      "binary_mean": 86.19,
+      "binary_std": 4.33,
+      "binary_best": 92.86,
+      "ba_mean": 73.32,
+      "ba_std": 7.14,
+      "spec_mean": 92.25,
+      "sens_mean": 77.71
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 83.33,
+        "binary_acc": 84.52,
+        "specificity": 91.84,
+        "sensitivity": 74.29,
+        "balanced_acc": 77.45,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 45,
+            "multi_acc": 0.9184,
+            "binary_correct": 45,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 7,
+            "multi_acc": 0.7778,
+            "binary_correct": 7,
+            "binary_acc": 0.7778
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 1,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 5,
+            "multi_acc": 0.5,
+            "binary_correct": 6,
+            "binary_acc": 0.6
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 83.33,
+        "binary_acc": 85.71,
+        "specificity": 95.92,
+        "sensitivity": 71.43,
+        "balanced_acc": 68.38,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 47,
+            "multi_acc": 0.9592,
+            "binary_correct": 47,
+            "binary_acc": 0.9592
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 7,
+            "multi_acc": 0.7778,
+            "binary_correct": 7,
+            "binary_acc": 0.7778
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 1,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 6,
+            "multi_acc": 0.6,
+            "binary_correct": 6,
+            "binary_acc": 0.6
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 76.19,
+        "binary_acc": 82.14,
+        "specificity": 87.76,
+        "sensitivity": 74.29,
+        "balanced_acc": 69.16,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 43,
+            "multi_acc": 0.8776,
+            "binary_correct": 43,
+            "binary_acc": 0.8776
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 5,
+            "multi_acc": 0.5556,
+            "binary_correct": 6,
+            "binary_acc": 0.6667
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 5,
+            "multi_acc": 0.5,
+            "binary_correct": 5,
+            "binary_acc": 0.5
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 86.9,
+        "binary_acc": 88.1,
+        "specificity": 95.92,
+        "sensitivity": 77.14,
+        "balanced_acc": 75.18,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 47,
+            "multi_acc": 0.9592,
+            "binary_correct": 47,
+            "binary_acc": 0.9592
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 8,
+            "multi_acc": 0.8889,
+            "binary_correct": 8,
+            "binary_acc": 0.8889
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 1,
+            "binary_acc": 0.3333
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 7,
+            "multi_acc": 0.7,
+            "binary_correct": 7,
+            "binary_acc": 0.7
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 89.29,
+        "binary_acc": 92.86,
+        "specificity": 95.92,
+        "sensitivity": 88.57,
+        "balanced_acc": 83.38,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 47,
+            "multi_acc": 0.9592,
+            "binary_correct": 47,
+            "binary_acc": 0.9592
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 7,
+            "multi_acc": 0.7778,
+            "binary_correct": 8,
+            "binary_acc": 0.8889
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 8,
+            "multi_acc": 0.8,
+            "binary_correct": 8,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 78.57,
+        "binary_acc": 84.52,
+        "specificity": 93.88,
+        "sensitivity": 71.43,
+        "balanced_acc": 70.48,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 46,
+            "multi_acc": 0.9388,
+            "binary_correct": 46,
+            "binary_acc": 0.9388
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 6,
+            "multi_acc": 0.6667,
+            "binary_correct": 7,
+            "binary_acc": 0.7778
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 2,
+            "multi_acc": 0.4,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 3,
+            "multi_acc": 0.3,
+            "binary_correct": 5,
+            "binary_acc": 0.5
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 72.62,
+        "binary_acc": 77.38,
+        "specificity": 89.8,
+        "sensitivity": 60.0,
+        "balanced_acc": 59.56,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 44,
+            "multi_acc": 0.898,
+            "binary_correct": 44,
+            "binary_acc": 0.898
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 3,
+            "multi_acc": 0.3333,
+            "binary_correct": 4,
+            "binary_acc": 0.4444
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 1,
+            "binary_acc": 0.3333
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 4,
+            "multi_acc": 0.4,
+            "binary_correct": 5,
+            "binary_acc": 0.5
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 78.57,
+        "binary_acc": 85.71,
+        "specificity": 87.76,
+        "sensitivity": 82.86,
+        "balanced_acc": 71.66,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 43,
+            "multi_acc": 0.8776,
+            "binary_correct": 43,
+            "binary_acc": 0.8776
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 5,
+            "multi_acc": 0.5556,
+            "binary_correct": 6,
+            "binary_acc": 0.6667
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 7,
+            "multi_acc": 0.7,
+            "binary_correct": 8,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 85.71,
+        "binary_acc": 91.67,
+        "specificity": 93.88,
+        "sensitivity": 88.57,
+        "balanced_acc": 72.57,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 46,
+            "multi_acc": 0.9388,
+            "binary_correct": 46,
+            "binary_acc": 0.9388
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 6,
+            "multi_acc": 0.6667,
+            "binary_correct": 8,
+            "binary_acc": 0.8889
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 1,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 1,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 9,
+            "multi_acc": 0.9,
+            "binary_correct": 9,
+            "binary_acc": 0.9
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 88.1,
+        "binary_acc": 89.29,
+        "specificity": 89.8,
+        "sensitivity": 88.57,
+        "balanced_acc": 85.39,
+        "n_test": 84,
+        "per_class": {
+          "1": {
+            "n_test": 49,
+            "correct": 44,
+            "multi_acc": 0.898,
+            "binary_correct": 44,
+            "binary_acc": 0.898
+          },
+          "2": {
+            "n_test": 9,
+            "correct": 9,
+            "multi_acc": 1.0,
+            "binary_correct": 9,
+            "binary_acc": 1.0
+          },
+          "3": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 2,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "9": {
+            "n_test": 2,
+            "correct": 2,
+            "multi_acc": 1.0,
+            "binary_correct": 2,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 10,
+            "correct": 8,
+            "multi_acc": 0.8,
+            "binary_correct": 8,
+            "binary_acc": 0.8
+          }
+        }
+      }
+    ]
+  },
+  "stratified_70_30": {
+    "summary": {
+      "acc_mean": 81.09,
+      "acc_std": 2.83,
+      "acc_best": 85.94,
+      "acc_worst": 76.56,
+      "binary_mean": 85.7,
+      "binary_std": 2.04,
+      "binary_best": 87.5,
+      "ba_mean": 69.87,
+      "ba_std": 6.1,
+      "spec_mean": 92.57,
+      "sens_mean": 76.3
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 76.56,
+        "binary_acc": 82.03,
+        "specificity": 91.89,
+        "sensitivity": 68.52,
+        "balanced_acc": 57.39,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 68,
+            "multi_acc": 0.9189,
+            "binary_correct": 68,
+            "binary_acc": 0.9189
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 10,
+            "multi_acc": 0.7143,
+            "binary_correct": 10,
+            "binary_acc": 0.7143
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 1,
+            "multi_acc": 0.2,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 0,
+            "binary_acc": 0.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 5,
+            "multi_acc": 0.625,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 7,
+            "multi_acc": 0.4667,
+            "binary_correct": 9,
+            "binary_acc": 0.6
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 82.03,
+        "binary_acc": 87.5,
+        "specificity": 89.19,
+        "sensitivity": 85.19,
+        "balanced_acc": 77.1,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 66,
+            "multi_acc": 0.8919,
+            "binary_correct": 66,
+            "binary_acc": 0.8919
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 9,
+            "multi_acc": 0.6429,
+            "binary_correct": 11,
+            "binary_acc": 0.7857
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 3,
+            "multi_acc": 0.75,
+            "binary_correct": 3,
+            "binary_acc": 0.75
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 6,
+            "multi_acc": 0.75,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 82.03,
+        "binary_acc": 85.16,
+        "specificity": 93.24,
+        "sensitivity": 74.07,
+        "balanced_acc": 72.13,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 69,
+            "multi_acc": 0.9324,
+            "binary_correct": 69,
+            "binary_acc": 0.9324
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 8,
+            "multi_acc": 0.5714,
+            "binary_correct": 8,
+            "binary_acc": 0.5714
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 1,
+            "multi_acc": 0.25,
+            "binary_correct": 3,
+            "binary_acc": 0.75
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 6,
+            "multi_acc": 0.75,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 10,
+            "multi_acc": 0.6667,
+            "binary_correct": 10,
+            "binary_acc": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 83.59,
+        "binary_acc": 87.5,
+        "specificity": 97.3,
+        "sensitivity": 74.07,
+        "balanced_acc": 68.8,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 72,
+            "multi_acc": 0.973,
+            "binary_correct": 72,
+            "binary_acc": 0.973
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 10,
+            "multi_acc": 0.7143,
+            "binary_correct": 11,
+            "binary_acc": 0.7857
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 1,
+            "multi_acc": 0.25,
+            "binary_correct": 1,
+            "binary_acc": 0.25
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 4,
+            "multi_acc": 0.5,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 10,
+            "multi_acc": 0.6667,
+            "binary_correct": 10,
+            "binary_acc": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 78.12,
+        "binary_acc": 86.72,
+        "specificity": 90.54,
+        "sensitivity": 81.48,
+        "balanced_acc": 68.73,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 67,
+            "multi_acc": 0.9054,
+            "binary_correct": 67,
+            "binary_acc": 0.9054
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 9,
+            "multi_acc": 0.6429,
+            "binary_correct": 12,
+            "binary_acc": 0.8571
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 2,
+            "multi_acc": 0.25,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 9,
+            "multi_acc": 0.6,
+            "binary_correct": 10,
+            "binary_acc": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 82.81,
+        "binary_acc": 85.94,
+        "specificity": 95.95,
+        "sensitivity": 72.22,
+        "balanced_acc": 67.69,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 71,
+            "multi_acc": 0.9595,
+            "binary_correct": 71,
+            "binary_acc": 0.9595
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 10,
+            "multi_acc": 0.7143,
+            "binary_correct": 11,
+            "binary_acc": 0.7857
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 2,
+            "multi_acc": 0.4,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 1,
+            "multi_acc": 0.25,
+            "binary_correct": 1,
+            "binary_acc": 0.25
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 5,
+            "multi_acc": 0.625,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 10,
+            "multi_acc": 0.6667,
+            "binary_correct": 10,
+            "binary_acc": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 78.91,
+        "binary_acc": 82.03,
+        "specificity": 91.89,
+        "sensitivity": 68.52,
+        "balanced_acc": 71.03,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 68,
+            "multi_acc": 0.9189,
+            "binary_correct": 68,
+            "binary_acc": 0.9189
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 8,
+            "multi_acc": 0.5714,
+            "binary_correct": 9,
+            "binary_acc": 0.6429
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 2,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 5,
+            "multi_acc": 0.625,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 7,
+            "multi_acc": 0.4667,
+            "binary_correct": 8,
+            "binary_acc": 0.5333
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 78.12,
+        "binary_acc": 85.16,
+        "specificity": 89.19,
+        "sensitivity": 79.63,
+        "balanced_acc": 63.29,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 66,
+            "multi_acc": 0.8919,
+            "binary_correct": 66,
+            "binary_acc": 0.8919
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 8,
+            "multi_acc": 0.5714,
+            "binary_correct": 10,
+            "binary_acc": 0.7143
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 1,
+            "multi_acc": 0.2,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 1,
+            "multi_acc": 0.25,
+            "binary_correct": 2,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 6,
+            "multi_acc": 0.75,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 11,
+            "multi_acc": 0.7333,
+            "binary_correct": 12,
+            "binary_acc": 0.8
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 82.81,
+        "binary_acc": 87.5,
+        "specificity": 93.24,
+        "sensitivity": 79.63,
+        "balanced_acc": 72.71,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 69,
+            "multi_acc": 0.9324,
+            "binary_correct": 69,
+            "binary_acc": 0.9324
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 9,
+            "multi_acc": 0.6429,
+            "binary_correct": 10,
+            "binary_acc": 0.7143
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 3,
+            "binary_acc": 0.6
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 2,
+            "multi_acc": 0.6667,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 9,
+            "multi_acc": 0.6,
+            "binary_correct": 10,
+            "binary_acc": 0.6667
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 85.94,
+        "binary_acc": 87.5,
+        "specificity": 93.24,
+        "sensitivity": 79.63,
+        "balanced_acc": 79.85,
+        "n_test": 128,
+        "per_class": {
+          "1": {
+            "n_test": 74,
+            "correct": 69,
+            "multi_acc": 0.9324,
+            "binary_correct": 69,
+            "binary_acc": 0.9324
+          },
+          "2": {
+            "n_test": 14,
+            "correct": 10,
+            "multi_acc": 0.7143,
+            "binary_correct": 10,
+            "binary_acc": 0.7143
+          },
+          "3": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 3,
+            "binary_acc": 0.75
+          },
+          "6": {
+            "n_test": 8,
+            "correct": 3,
+            "multi_acc": 0.375,
+            "binary_correct": 4,
+            "binary_acc": 0.5
+          },
+          "9": {
+            "n_test": 3,
+            "correct": 3,
+            "multi_acc": 1.0,
+            "binary_correct": 3,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 15,
+            "correct": 13,
+            "multi_acc": 0.8667,
+            "binary_correct": 13,
+            "binary_acc": 0.8667
+          }
+        }
+      }
+    ]
+  },
+  "stratified_60_40": {
+    "summary": {
+      "acc_mean": 80.36,
+      "acc_std": 2.94,
+      "acc_best": 85.71,
+      "acc_worst": 75.6,
+      "binary_mean": 84.29,
+      "binary_std": 2.87,
+      "binary_best": 89.29,
+      "ba_mean": 66.75,
+      "ba_std": 5.91,
+      "spec_mean": 92.96,
+      "sens_mean": 72.14
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 79.76,
+        "binary_acc": 83.93,
+        "specificity": 94.9,
+        "sensitivity": 68.57,
+        "balanced_acc": 61.58,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 93,
+            "multi_acc": 0.949,
+            "binary_correct": 93,
+            "binary_acc": 0.949
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 11,
+            "multi_acc": 0.6111,
+            "binary_correct": 11,
+            "binary_acc": 0.6111
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 3,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 6,
+            "multi_acc": 0.6,
+            "binary_correct": 8,
+            "binary_acc": 0.8
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 12,
+            "multi_acc": 0.6,
+            "binary_correct": 14,
+            "binary_acc": 0.7
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 79.76,
+        "binary_acc": 82.14,
+        "specificity": 91.84,
+        "sensitivity": 68.57,
+        "balanced_acc": 68.29,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 90,
+            "multi_acc": 0.9184,
+            "binary_correct": 90,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 11,
+            "multi_acc": 0.6111,
+            "binary_correct": 13,
+            "binary_acc": 0.7222
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "multi_acc": 0.8333,
+            "binary_correct": 5,
+            "binary_acc": 0.8333
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 4,
+            "multi_acc": 0.6667,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 4,
+            "multi_acc": 0.4,
+            "binary_correct": 6,
+            "binary_acc": 0.6
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "multi_acc": 1.0,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 14,
+            "multi_acc": 0.7,
+            "binary_correct": 14,
+            "binary_acc": 0.7
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 85.71,
+        "binary_acc": 88.69,
+        "specificity": 92.86,
+        "sensitivity": 82.86,
+        "balanced_acc": 78.76,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 91,
+            "multi_acc": 0.9286,
+            "binary_correct": 91,
+            "binary_acc": 0.9286
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 13,
+            "multi_acc": 0.7222,
+            "binary_correct": 13,
+            "binary_acc": 0.7222
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "multi_acc": 0.8333,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 1,
+            "multi_acc": 0.1667,
+            "binary_correct": 5,
+            "binary_acc": 0.8333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 9,
+            "multi_acc": 0.9,
+            "binary_correct": 9,
+            "binary_acc": 0.9
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "multi_acc": 1.0,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 15,
+            "multi_acc": 0.75,
+            "binary_correct": 15,
+            "binary_acc": 0.75
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 78.57,
+        "binary_acc": 84.52,
+        "specificity": 91.84,
+        "sensitivity": 74.29,
+        "balanced_acc": 60.65,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 90,
+            "multi_acc": 0.9184,
+            "binary_correct": 90,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 12,
+            "multi_acc": 0.6667,
+            "binary_correct": 14,
+            "binary_acc": 0.7778
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "multi_acc": 0.8333,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 4,
+            "multi_acc": 0.6667,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 1,
+            "multi_acc": 0.1667,
+            "binary_correct": 1,
+            "binary_acc": 0.1667
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 4,
+            "multi_acc": 0.4,
+            "binary_correct": 8,
+            "binary_acc": 0.8
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 14,
+            "multi_acc": 0.7,
+            "binary_correct": 15,
+            "binary_acc": 0.75
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 77.98,
+        "binary_acc": 82.74,
+        "specificity": 90.82,
+        "sensitivity": 71.43,
+        "balanced_acc": 61.84,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 89,
+            "multi_acc": 0.9082,
+            "binary_correct": 89,
+            "binary_acc": 0.9082
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 13,
+            "multi_acc": 0.7222,
+            "binary_correct": 14,
+            "binary_acc": 0.7778
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 3,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 2,
+            "multi_acc": 0.2,
+            "binary_correct": 6,
+            "binary_acc": 0.6
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 3,
+            "multi_acc": 0.75,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 14,
+            "multi_acc": 0.7,
+            "binary_correct": 15,
+            "binary_acc": 0.75
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 80.36,
+        "binary_acc": 82.74,
+        "specificity": 94.9,
+        "sensitivity": 65.71,
+        "balanced_acc": 68.46,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 93,
+            "multi_acc": 0.949,
+            "binary_correct": 93,
+            "binary_acc": 0.949
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 11,
+            "multi_acc": 0.6111,
+            "binary_correct": 11,
+            "binary_acc": 0.6111
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 5,
+            "multi_acc": 0.8333,
+            "binary_correct": 5,
+            "binary_acc": 0.8333
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 3,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 3,
+            "binary_acc": 0.5
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 8,
+            "multi_acc": 0.8,
+            "binary_correct": 9,
+            "binary_acc": 0.9
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 4,
+            "multi_acc": 1.0,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 9,
+            "multi_acc": 0.45,
+            "binary_correct": 10,
+            "binary_acc": 0.5
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 75.6,
+        "binary_acc": 79.17,
+        "specificity": 91.84,
+        "sensitivity": 61.43,
+        "balanced_acc": 61.55,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 90,
+            "multi_acc": 0.9184,
+            "binary_correct": 90,
+            "binary_acc": 0.9184
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 10,
+            "multi_acc": 0.5556,
+            "binary_correct": 11,
+            "binary_acc": 0.6111
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 4,
+            "multi_acc": 0.6667,
+            "binary_correct": 5,
+            "binary_acc": 0.8333
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 2,
+            "binary_acc": 0.3333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 6,
+            "multi_acc": 0.6,
+            "binary_correct": 7,
+            "binary_acc": 0.7
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 7,
+            "multi_acc": 0.35,
+            "binary_correct": 8,
+            "binary_acc": 0.4
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 79.17,
+        "binary_acc": 85.71,
+        "specificity": 90.82,
+        "sensitivity": 78.57,
+        "balanced_acc": 62.46,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 89,
+            "multi_acc": 0.9082,
+            "binary_correct": 89,
+            "binary_acc": 0.9082
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 13,
+            "multi_acc": 0.7222,
+            "binary_correct": 15,
+            "binary_acc": 0.8333
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 3,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 1,
+            "multi_acc": 0.1667,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 5,
+            "multi_acc": 0.5,
+            "binary_correct": 7,
+            "binary_acc": 0.7
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 2,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 14,
+            "multi_acc": 0.7,
+            "binary_correct": 15,
+            "binary_acc": 0.75
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 85.12,
+        "binary_acc": 89.29,
+        "specificity": 96.94,
+        "sensitivity": 78.57,
+        "balanced_acc": 74.34,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 95,
+            "multi_acc": 0.9694,
+            "binary_correct": 95,
+            "binary_acc": 0.9694
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 11,
+            "multi_acc": 0.6111,
+            "binary_correct": 13,
+            "binary_acc": 0.7222
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 3,
+            "multi_acc": 0.5,
+            "binary_correct": 4,
+            "binary_acc": 0.6667
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 4,
+            "multi_acc": 0.6667,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 8,
+            "multi_acc": 0.8,
+            "binary_correct": 9,
+            "binary_acc": 0.9
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 3,
+            "multi_acc": 0.75,
+            "binary_correct": 3,
+            "binary_acc": 0.75
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 13,
+            "multi_acc": 0.65,
+            "binary_correct": 14,
+            "binary_acc": 0.7
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 81.55,
+        "binary_acc": 83.93,
+        "specificity": 92.86,
+        "sensitivity": 71.43,
+        "balanced_acc": 69.59,
+        "n_test": 168,
+        "per_class": {
+          "1": {
+            "n_test": 98,
+            "correct": 91,
+            "multi_acc": 0.9286,
+            "binary_correct": 91,
+            "binary_acc": 0.9286
+          },
+          "2": {
+            "n_test": 18,
+            "correct": 13,
+            "multi_acc": 0.7222,
+            "binary_correct": 13,
+            "binary_acc": 0.7222
+          },
+          "3": {
+            "n_test": 6,
+            "correct": 6,
+            "multi_acc": 1.0,
+            "binary_correct": 6,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 6,
+            "correct": 2,
+            "multi_acc": 0.3333,
+            "binary_correct": 3,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 6,
+            "correct": 5,
+            "multi_acc": 0.8333,
+            "binary_correct": 5,
+            "binary_acc": 0.8333
+          },
+          "6": {
+            "n_test": 10,
+            "correct": 3,
+            "multi_acc": 0.3,
+            "binary_correct": 4,
+            "binary_acc": 0.4
+          },
+          "9": {
+            "n_test": 4,
+            "correct": 3,
+            "multi_acc": 0.75,
+            "binary_correct": 4,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 20,
+            "correct": 14,
+            "multi_acc": 0.7,
+            "binary_correct": 15,
+            "binary_acc": 0.75
+          }
+        }
+      }
+    ]
+  },
+  "stratified_50_50": {
+    "summary": {
+      "acc_mean": 77.21,
+      "acc_std": 1.74,
+      "acc_best": 81.52,
+      "acc_worst": 75.36,
+      "binary_mean": 81.37,
+      "binary_std": 1.97,
+      "binary_best": 84.83,
+      "ba_mean": 58.71,
+      "ba_std": 5.42,
+      "spec_mean": 93.5,
+      "sens_mean": 64.43
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "accuracy": 76.78,
+        "binary_acc": 80.57,
+        "specificity": 95.12,
+        "sensitivity": 60.23,
+        "balanced_acc": 57.33,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 117,
+            "multi_acc": 0.9512,
+            "binary_correct": 117,
+            "binary_acc": 0.9512
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 17,
+            "multi_acc": 0.7727,
+            "binary_correct": 17,
+            "binary_acc": 0.7727
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 5,
+            "multi_acc": 0.625,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 2,
+            "multi_acc": 0.2857,
+            "binary_correct": 3,
+            "binary_acc": 0.4286
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 1,
+            "multi_acc": 0.0769,
+            "binary_correct": 3,
+            "binary_acc": 0.2308
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 10,
+            "multi_acc": 0.4,
+            "binary_correct": 11,
+            "binary_acc": 0.44
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "accuracy": 81.52,
+        "binary_acc": 84.83,
+        "specificity": 92.68,
+        "sensitivity": 73.86,
+        "balanced_acc": 68.54,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 114,
+            "multi_acc": 0.9268,
+            "binary_correct": 114,
+            "binary_acc": 0.9268
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 14,
+            "multi_acc": 0.6364,
+            "binary_correct": 16,
+            "binary_acc": 0.7273
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 6,
+            "multi_acc": 0.75,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 2,
+            "multi_acc": 0.2857,
+            "binary_correct": 2,
+            "binary_acc": 0.2857
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 10,
+            "multi_acc": 0.7692,
+            "binary_correct": 12,
+            "binary_acc": 0.9231
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 16,
+            "multi_acc": 0.64,
+            "binary_correct": 16,
+            "binary_acc": 0.64
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "accuracy": 76.78,
+        "binary_acc": 81.52,
+        "specificity": 92.68,
+        "sensitivity": 65.91,
+        "balanced_acc": 59.76,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 114,
+            "multi_acc": 0.9268,
+            "binary_correct": 114,
+            "binary_acc": 0.9268
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 15,
+            "multi_acc": 0.6818,
+            "binary_correct": 16,
+            "binary_acc": 0.7273
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 2,
+            "multi_acc": 0.25,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 1,
+            "multi_acc": 0.1429,
+            "binary_correct": 4,
+            "binary_acc": 0.5714
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 5,
+            "multi_acc": 0.3846,
+            "binary_correct": 6,
+            "binary_acc": 0.4615
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 5,
+            "multi_acc": 1.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 13,
+            "multi_acc": 0.52,
+            "binary_correct": 13,
+            "binary_acc": 0.52
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "accuracy": 75.36,
+        "binary_acc": 81.04,
+        "specificity": 95.12,
+        "sensitivity": 61.36,
+        "balanced_acc": 48.25,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 117,
+            "multi_acc": 0.9512,
+            "binary_correct": 117,
+            "binary_acc": 0.9512
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 12,
+            "multi_acc": 0.5455,
+            "binary_correct": 14,
+            "binary_acc": 0.6364
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 2,
+            "multi_acc": 0.25,
+            "binary_correct": 4,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 1,
+            "multi_acc": 0.1429,
+            "binary_correct": 1,
+            "binary_acc": 0.1429
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 8,
+            "multi_acc": 0.6154,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 12,
+            "multi_acc": 0.48,
+            "binary_correct": 14,
+            "binary_acc": 0.56
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "accuracy": 77.73,
+        "binary_acc": 82.46,
+        "specificity": 95.12,
+        "sensitivity": 64.77,
+        "balanced_acc": 58.9,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 117,
+            "multi_acc": 0.9512,
+            "binary_correct": 117,
+            "binary_acc": 0.9512
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 15,
+            "multi_acc": 0.6818,
+            "binary_correct": 16,
+            "binary_acc": 0.7273
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "multi_acc": 1.0,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 2,
+            "multi_acc": 0.25,
+            "binary_correct": 4,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 3,
+            "multi_acc": 0.4286,
+            "binary_correct": 4,
+            "binary_acc": 0.5714
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 3,
+            "binary_acc": 0.2308
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 15,
+            "multi_acc": 0.6,
+            "binary_correct": 17,
+            "binary_acc": 0.68
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "accuracy": 75.83,
+        "binary_acc": 79.62,
+        "specificity": 95.93,
+        "sensitivity": 56.82,
+        "balanced_acc": 52.78,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 118,
+            "multi_acc": 0.9593,
+            "binary_correct": 118,
+            "binary_acc": 0.9593
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 14,
+            "multi_acc": 0.6364,
+            "binary_correct": 14,
+            "binary_acc": 0.6364
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 3,
+            "multi_acc": 0.375,
+            "binary_correct": 5,
+            "binary_acc": 0.625
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 1,
+            "multi_acc": 0.1429,
+            "binary_correct": 1,
+            "binary_acc": 0.1429
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 2,
+            "multi_acc": 0.1538,
+            "binary_correct": 5,
+            "binary_acc": 0.3846
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 12,
+            "multi_acc": 0.48,
+            "binary_correct": 13,
+            "binary_acc": 0.52
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "accuracy": 77.25,
+        "binary_acc": 81.04,
+        "specificity": 91.06,
+        "sensitivity": 67.05,
+        "balanced_acc": 64.39,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 112,
+            "multi_acc": 0.9106,
+            "binary_correct": 112,
+            "binary_acc": 0.9106
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 14,
+            "multi_acc": 0.6364,
+            "binary_correct": 15,
+            "binary_acc": 0.6818
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "multi_acc": 1.0,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 4,
+            "multi_acc": 0.5,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 2,
+            "multi_acc": 0.2857,
+            "binary_correct": 2,
+            "binary_acc": 0.2857
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 7,
+            "multi_acc": 0.5385,
+            "binary_correct": 9,
+            "binary_acc": 0.6923
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 4,
+            "multi_acc": 0.8,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 12,
+            "multi_acc": 0.48,
+            "binary_correct": 13,
+            "binary_acc": 0.52
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "accuracy": 76.78,
+        "binary_acc": 81.99,
+        "specificity": 91.06,
+        "sensitivity": 69.32,
+        "balanced_acc": 59.14,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 112,
+            "multi_acc": 0.9106,
+            "binary_correct": 112,
+            "binary_acc": 0.9106
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 13,
+            "multi_acc": 0.5909,
+            "binary_correct": 16,
+            "binary_acc": 0.7273
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "multi_acc": 1.0,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 2,
+            "multi_acc": 0.25,
+            "binary_correct": 4,
+            "binary_acc": 0.5
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 3,
+            "multi_acc": 0.4286,
+            "binary_correct": 5,
+            "binary_acc": 0.7143
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 3,
+            "multi_acc": 0.2308,
+            "binary_correct": 5,
+            "binary_acc": 0.3846
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 5,
+            "binary_acc": 1.0
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 18,
+            "multi_acc": 0.72,
+            "binary_correct": 18,
+            "binary_acc": 0.72
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "accuracy": 78.67,
+        "binary_acc": 83.41,
+        "specificity": 93.5,
+        "sensitivity": 69.32,
+        "balanced_acc": 61.87,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 115,
+            "multi_acc": 0.935,
+            "binary_correct": 115,
+            "binary_acc": 0.935
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 12,
+            "multi_acc": 0.5455,
+            "binary_correct": 15,
+            "binary_acc": 0.6818
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 8,
+            "multi_acc": 1.0,
+            "binary_correct": 8,
+            "binary_acc": 1.0
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 5,
+            "multi_acc": 0.625,
+            "binary_correct": 6,
+            "binary_acc": 0.75
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 1,
+            "multi_acc": 0.1429,
+            "binary_correct": 4,
+            "binary_acc": 0.5714
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 6,
+            "multi_acc": 0.4615,
+            "binary_correct": 8,
+            "binary_acc": 0.6154
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 16,
+            "multi_acc": 0.64,
+            "binary_correct": 16,
+            "binary_acc": 0.64
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "accuracy": 75.36,
+        "binary_acc": 77.25,
+        "specificity": 92.68,
+        "sensitivity": 55.68,
+        "balanced_acc": 56.1,
+        "n_test": 211,
+        "per_class": {
+          "1": {
+            "n_test": 123,
+            "correct": 114,
+            "multi_acc": 0.9268,
+            "binary_correct": 114,
+            "binary_acc": 0.9268
+          },
+          "2": {
+            "n_test": 22,
+            "correct": 12,
+            "multi_acc": 0.5455,
+            "binary_correct": 12,
+            "binary_acc": 0.5455
+          },
+          "3": {
+            "n_test": 8,
+            "correct": 7,
+            "multi_acc": 0.875,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "4": {
+            "n_test": 8,
+            "correct": 6,
+            "multi_acc": 0.75,
+            "binary_correct": 7,
+            "binary_acc": 0.875
+          },
+          "5": {
+            "n_test": 7,
+            "correct": 0,
+            "multi_acc": 0.0,
+            "binary_correct": 2,
+            "binary_acc": 0.2857
+          },
+          "6": {
+            "n_test": 13,
+            "correct": 3,
+            "multi_acc": 0.2308,
+            "binary_correct": 3,
+            "binary_acc": 0.2308
+          },
+          "9": {
+            "n_test": 5,
+            "correct": 3,
+            "multi_acc": 0.6,
+            "binary_correct": 4,
+            "binary_acc": 0.8
+          },
+          "10": {
+            "n_test": 25,
+            "correct": 14,
+            "multi_acc": 0.56,
+            "binary_correct": 14,
+            "binary_acc": 0.56
+          }
+        }
+      }
+    ]
+  }
+}
