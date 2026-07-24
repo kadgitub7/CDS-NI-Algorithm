@@ -1,0 +1,35 @@
+{
+  "per_class_thresholds": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 83.92,
+    "delta_pp": 0.75,
+    "wilcoxon_W": 1.0,
+    "p_value": 0.0312,
+    "significant_005": true,
+    "effect_size_r": 0.681,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      84.38,
+      84.13,
+      85.1,
+      84.62,
+      83.41,
+      82.45,
+      83.89,
+      83.41,
+      85.1,
+      82.69
+    ]
+  }
+}

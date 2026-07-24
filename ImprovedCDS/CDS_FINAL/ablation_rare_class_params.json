@@ -1,0 +1,35 @@
+{
+  "rare_class_params": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 84.69,
+    "delta_pp": -0.02,
+    "wilcoxon_W": 22.0,
+    "p_value": 0.9844,
+    "significant_005": false,
+    "effect_size_r": 0.006,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      85.82,
+      84.62,
+      85.34,
+      85.1,
+      83.17,
+      84.86,
+      85.34,
+      83.41,
+      85.1,
+      84.13
+    ]
+  }
+}

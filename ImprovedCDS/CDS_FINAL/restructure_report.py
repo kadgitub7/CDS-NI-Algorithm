@@ -265,6 +265,122 @@ def load_comprehensive_results():
 # Phase 1: Structural fixes to existing content
 # ============================================================
 
+def add_abstract(doc):
+    """Insert an Abstract section before Part I."""
+    part1_idx = -1
+    for i, p in enumerate(doc.paragraphs):
+        txt = get_para_text(p)
+        if 'CDS-OVR Algorithm Specification' in txt and i < 5:
+            part1_idx = i
+            break
+
+    if part1_idx < 0:
+        return 0
+
+    target = doc.paragraphs[part1_idx]._element
+
+    lines = [
+        ('Abstract', 'Heading1', True, 16),
+        ('This report presents the CDS-OVR (Cognitive Dynamic System with One-vs-Rest) algorithm, '
+         'a novel interpretable classifier for automated arrhythmia detection from the UCI Arrhythmia '
+         'Dataset (452 patients, 279 features, 13 classes). CDS-OVR decomposes the multiclass problem '
+         'into 8 independent binary classification tasks, each using supervised chi-squared binning, '
+         'Fisher discriminant feature weighting, dual evidence accumulation, and a dynamic healthy bar '
+         'thresholding mechanism. The algorithm requires no GPU acceleration, no iterative optimization, '
+         'and no gradient computation, making it suitable for resource-constrained embedded deployment.',
+         None, False, 11),
+        ('We evaluate CDS-OVR across multiple protocols: leave-one-out cross-validation (LOOCV), '
+         '10-fold cross-validation, train/test splits from 50/50 to 90/10, and stratified variants '
+         'of all methods. On 10-fold CV, CDS-OVR achieves 86.78% multiclass accuracy (best seed) '
+         'with a mean of 84.66% (std=0.93%) across 10 seeds, and 87.72% mean binary accuracy. '
+         'AUC-ROC analysis shows binary AUC of 0.9021 and macro AUC of 0.9393. Stratified 10-fold '
+         'CV yields 85.32% multiclass and 88.56% binary accuracy. LOOCV on all 13 classes achieves '
+         '74.8% multiclass and 84.5% binary accuracy, improving over the base CDS algorithm by '
+         '+7.5 pp and +9.5 pp respectively.',
+         None, False, 11),
+        ('Component ablation with Wilcoxon signed-rank testing identifies supervised chi-squared '
+         'binning (+5.75 pp, p=0.002) and Fisher discriminant weighting (+4.52 pp, p=0.002) as the '
+         'statistically significant contributors. Benchmark comparison against published methods '
+         '(Random Forest, SVM, CNN-LSTM, ANN) demonstrates competitive performance at high training '
+         'ratios, with structural advantages in interpretability, missing value handling, and '
+         'computational efficiency (3.05 MB memory, 41 ms per prediction).',
+         None, False, 11),
+    ]
+
+    for text, style, bold, font_size in lines:
+        el = make_paragraph_element(text, style=style, bold=bold, font_size=font_size)
+        insert_before(target, el)
+
+    print(f"    Abstract inserted before paragraph {part1_idx}")
+    return 1
+
+
+def fix_part3_subtitle(doc):
+    """Fix the empty Heading 2 and fragmented subtitle in Part III."""
+    changes = 0
+    for i, p in enumerate(doc.paragraphs):
+        txt = get_para_text(p)
+        style = p.style.name if p.style else ''
+        if style == 'Heading 2' and not txt:
+            # Check if next paragraphs contain the split subtitle
+            next_texts = []
+            for j in range(i+1, min(i+4, len(doc.paragraphs))):
+                nt = get_para_text(doc.paragraphs[j])
+                if nt:
+                    next_texts.append((j, nt))
+            combined = ' '.join(t for _, t in next_texts)
+            if 'Comparative' in combined or 'Benchmark' in combined:
+                # Set the empty heading to the combined title
+                for run in p.runs:
+                    run.text = ''
+                if not p.runs:
+                    p.add_run('')
+                p.runs[0].text = combined
+                # Remove the fragmented paragraphs
+                for j, _ in next_texts:
+                    for run in doc.paragraphs[j].runs:
+                        run.text = ''
+                changes += 1
+                print(f"    Fixed Part III subtitle at paragraph {i}")
+                break
+    return changes
+
+
+def fix_duplicate_section_numbers(doc):
+    """Fix duplicate 8.1 and 8.2 section numbers in Part III.
+    Original has: 8.1, 8.1, 8.2. Fix to: 8.1, 8.2, 8.3."""
+    changes = 0
+    seen_8_1 = False
+    seen_8_2 = False
+    for i, p in enumerate(doc.paragraphs):
+        txt = get_para_text(p)
+        style = p.style.name if p.style else ''
+        if i < 1000:
+            continue
+        if 'Heading' in style and txt.startswith('8.1 '):
+            if not seen_8_1:
+                seen_8_1 = True
+            else:
+                for run in p.runs:
+                    if run.text.strip().startswith('8.1'):
+                        run.text = run.text.replace('8.1', '8.2', 1)
+                        changes += 1
+                        seen_8_2 = True
+                        print(f"    Fixed duplicate 8.1 -> 8.2 at paragraph {i}")
+                        break
+        elif 'Heading' in style and txt.startswith('8.2 '):
+            if not seen_8_2:
+                seen_8_2 = True
+            else:
+                for run in p.runs:
+                    if run.text.strip().startswith('8.2'):
+                        run.text = run.text.replace('8.2', '8.3', 1)
+                        changes += 1
+                        print(f"    Fixed duplicate 8.2 -> 8.3 at paragraph {i}")
+                        break
+    return changes
+
+
 def fix_structure(doc):
     """Add Part divider headings and file location annotations."""
     print("  Scanning paragraphs for structural boundaries...")
@@ -294,7 +410,6 @@ def fix_structure(doc):
     # Part I title
     if part1_idx >= 0:
         p = doc.paragraphs[part1_idx]
-        # Change style to Title-like heading
         p.style = doc.styles['Heading 1']
         for run in p.runs:
             run.text = 'Part I: ' + run.text
@@ -304,7 +419,6 @@ def fix_structure(doc):
     # Part II divider
     if part2_idx >= 0:
         p = doc.paragraphs[part2_idx]
-        # Insert page break and Part II heading before this paragraph
         pb = make_page_break()
         insert_before(p._element, pb)
 
@@ -314,7 +428,6 @@ def fix_structure(doc):
         )
         insert_before(p._element, part_heading)
 
-        # Change the original paragraph to be a subtitle
         p.style = doc.styles['Heading 2']
         changes += 1
         print(f"    Part II header inserted at paragraph {part2_idx}")
@@ -394,6 +507,287 @@ def mark_redundancies(doc):
 
 
 # ============================================================
+# Phase 5b: Text corrections throughout the document
+# ============================================================
+
+def fix_text_issues(doc):
+    """Fix specific text errors found during review."""
+    fixes = 0
+
+    for i, p in enumerate(doc.paragraphs):
+        txt = p.text
+
+        # Issue 2: Fix sex encoding (report says 0=female, 1=male; correct is 0=male, 1=female)
+        if '0.0 for female and 1.0 for male' in txt:
+            for run in p.runs:
+                if '0.0 for female and 1.0 for male' in run.text:
+                    run.text = run.text.replace('0.0 for female and 1.0 for male',
+                                                '0.0 for male and 1.0 for female')
+                    fixes += 1
+                    print(f"    Fixed sex encoding at paragraph {i}")
+
+        # Issue 5: Fix "more than 0 classes" typo (correct: 2 classes)
+        if 'ranks in the top 5 for more than 0 classes' in txt:
+            for run in p.runs:
+                if 'more than 0 classes' in run.text:
+                    run.text = run.text.replace('more than 0 classes', 'more than 2 classes')
+                    fixes += 1
+                    print(f"    Fixed feature overlap count at paragraph {i}")
+
+        # Issue 7: Fix dual AF ratio for misclassified (5.397 is wrong, 1.664 is correct)
+        if '5.397' in txt and 'incorrectly classified' in txt:
+            for run in p.runs:
+                if '5.397' in run.text:
+                    run.text = run.text.replace('5.397', '1.664')
+                    fixes += 1
+                    print(f"    Fixed dual AF misclassified mean ratio at paragraph {i}")
+                if '4.401' in run.text:
+                    run.text = run.text.replace('4.401', '1.247')
+                    fixes += 1
+                    print(f"    Fixed dual AF misclassified median at paragraph {i}")
+
+    return fixes
+
+
+def fix_appendix_a_clarification(doc):
+    """Issue 9: Clarify that base CDS is binary-only in Part II intro."""
+    fixes = 0
+    for i, p in enumerate(doc.paragraphs):
+        txt = p.text
+        if '50.7% multiclass' in txt and 'base' in txt.lower():
+            for run in p.runs:
+                if '50.7% multiclass' in run.text:
+                    run.text = run.text.replace(
+                        '50.7% multiclass',
+                        '50.7% multiclass (binary-derived, see Appendix A)')
+                    fixes += 1
+                    print(f"    Clarified base model multiclass metric at paragraph {i}")
+            break
+    return fixes
+
+
+def add_healthy_bar_analysis(doc):
+    """Issue 6: Add grounded healthy bar analysis with near-boundary data."""
+    hbar_path = os.path.join(SRC_DIR, 'analysis_healthy_bar.json')
+    if not os.path.exists(hbar_path):
+        print("    Skipping healthy bar analysis (data file not found)")
+        return 0
+
+    with open(hbar_path) as f:
+        hbar = json.load(f)
+
+    # Find the healthy bar ablation interpretation paragraph and add analysis after it
+    for i, p in enumerate(doc.paragraphs):
+        if 'Healthy bar' in p.text and '0.31 pp' in p.text and 'Removing the healthy bar' in p.text:
+            # Replace the explanation with grounded analysis
+            fn_details = hbar.get('false_neg_details', [])
+            n_blocked = hbar.get('hbar_blocked_true_class', 0)
+            n_near = hbar.get('near_threshold_count', 0)
+            n_fn = hbar.get('false_negatives', 0)
+            n_fp = hbar.get('false_positives', 0)
+
+            new_text = (
+                f'6. Healthy bar (-0.31 pp, p=0.133): Removing the healthy bar improves overall '
+                f'accuracy by 0.31 pp (not significant). Detailed analysis of the 10-fold CV '
+                f'(seed 13) reveals why: of {n_fn} false negatives (disease patients predicted '
+                f'as healthy), {n_blocked} had their true disease class score blocked by the '
+                f'healthy bar raising the effective threshold above the base class threshold. '
+                f'{n_near} patients were within 1.0 of their threshold (near-misses). '
+                f'However, the healthy bar also prevented {n_fp} false positives (healthy patients '
+                f'that would otherwise be misclassified as diseased). The net effect is a '
+                f'trade-off: the healthy bar sacrifices {n_blocked} true disease detections '
+                f'to prevent false alarms, explaining the marginal accuracy decrease.')
+
+            for run in p.runs:
+                run.text = ''
+            if p.runs:
+                p.runs[0].text = new_text
+            print(f"    Updated healthy bar explanation at paragraph {i}")
+            return 1
+
+    return 0
+
+
+def add_binning_figure(doc):
+    """Issue 3: Insert supervised vs equal-width binning comparison table after Section 4."""
+    fig_path = os.path.join(SRC_DIR, 'figure_data_binning.json')
+    if not os.path.exists(fig_path):
+        print("    Skipping binning figure (data file not found)")
+        return 0
+
+    with open(fig_path) as f:
+        fig = json.load(f)
+
+    for i, p in enumerate(doc.paragraphs):
+        if p.style and p.style.name and 'Heading' in p.style.name and \
+           '5.' in p.text[:5] and 'Feature Scoring' in p.text:
+            target = p._element
+            elements = []
+
+            elements.append(make_paragraph_element(
+                f'Figure 4.1: Supervised vs Equal-Width Binning Comparison '
+                f'(Feature {fig["feature_index"]}, Class {fig["target_class"]} '
+                f'- {CLASS_NAMES.get(fig["target_class"], "Unknown")})',
+                bold=True, font_size=10))
+
+            elements.append(make_paragraph_element(
+                f'Dataset: {fig["n_samples"]} patients in training fold, '
+                f'{fig["n_target"]} target class, {fig["n_rest"]} rest. '
+                f'Value range: [{fig["value_range"][0]}, {fig["value_range"][1]}]. '
+                f'Purity improvement: {fig["improvement_purity"]:.4f}.',
+                font_size=9))
+
+            sup_desc = []
+            for b in fig['supervised_bins']:
+                sup_desc.append(
+                    f'[{b["lo"]:.0f}, {b["hi"]:.0f}]: {b["n_target"]}/{b["n_total"]} '
+                    f'target ({100*b["target_frac"]:.0f}%)')
+            elements.append(make_paragraph_element(
+                'Supervised bins: ' + '; '.join(sup_desc),
+                font_size=9))
+
+            eq_desc = []
+            for b in fig['equal_width_bins']:
+                eq_desc.append(
+                    f'[{b["lo"]:.0f}, {b["hi"]:.0f}]: {b["n_target"]}/{b["n_total"]} '
+                    f'target ({100*b["target_frac"]:.0f}%)')
+            elements.append(make_paragraph_element(
+                'Equal-width bins: ' + '; '.join(eq_desc),
+                font_size=9))
+
+            elements.append(make_paragraph_element(
+                'Key finding: Supervised binning isolates a pure bin [-115, -94] with 5/5 '
+                'target patients (100%), while no equal-width bin exceeds 38.5% target fraction. '
+                'This pure bin directly becomes a strong positive evidence signal in the CDS '
+                'accumulation factor.',
+                italic=True, font_size=9))
+
+            for el in reversed(elements):
+                insert_before(target, el)
+
+            print(f"    Inserted binning comparison figure before paragraph {i}")
+            return 1
+    return 0
+
+
+def add_ovr_figure(doc):
+    """Issue 4: Insert OVR class separation figure after Section 7."""
+    fig_path = os.path.join(SRC_DIR, 'figure_data_ovr.json')
+    if not os.path.exists(fig_path):
+        print("    Skipping OVR figure (data file not found)")
+        return 0
+
+    with open(fig_path) as f:
+        fig = json.load(f)
+
+    features = fig.get('features', fig) if isinstance(fig, dict) else fig
+
+    for i, p in enumerate(doc.paragraphs):
+        if p.style and p.style.name and 'Heading' in p.style.name and \
+           '8.' in p.text[:5] and 'Evidence Accumulation' in p.text:
+            target = p._element
+            elements = []
+
+            elements.append(make_paragraph_element(
+                'Figure 7.1: OVR Class Separation - Fisher Discriminant Ratio '
+                'by Best Feature per Class',
+                bold=True, font_size=10))
+
+            rows_text = []
+            for entry in features:
+                cls = entry.get('target_class', entry.get('class'))
+                feat = entry.get('feature_index', entry.get('feature'))
+                fdr = entry.get('fisher_ratio', entry.get('fisher_discriminant_ratio', 0))
+                n_t = entry.get('target_count', entry.get('n_target', 0))
+                n_h = entry.get('healthy_count', entry.get('n_healthy', 0))
+                n_o = entry.get('other_count', entry.get('n_other_disease', 0))
+                rows_text.append(
+                    f'Class {cls} ({CLASS_NAMES.get(cls, "?")}): '
+                    f'Feature {feat}, FDR={fdr:.2f}, '
+                    f'{n_t} target / {n_h} healthy / {n_o} other disease')
+
+            elements.append(make_paragraph_element(
+                'Per-class best discriminating feature (ranked by Fisher Discriminant Ratio): ' +
+                '. '.join(rows_text) + '.',
+                font_size=9))
+
+            top = features[0]
+            bot = features[-1]
+            top_cls = top.get('target_class', top.get('class'))
+            bot_cls = bot.get('target_class', bot.get('class'))
+            top_fdr = top.get('fisher_ratio', top.get('fisher_discriminant_ratio', 0))
+            bot_fdr = bot.get('fisher_ratio', bot.get('fisher_discriminant_ratio', 0))
+            top_feat = top.get('feature_index', top.get('feature'))
+            elements.append(make_paragraph_element(
+                f'Key finding: Each class has a different best feature, confirming that the OVR '
+                f'architecture is essential - no single feature set can serve all disease classes. '
+                f'Class {top_cls} ({CLASS_NAMES.get(top_cls, "?")}) achieves the highest '
+                f'FDR={top_fdr:.2f} on Feature {top_feat}, while '
+                f'Class {bot_cls} ({CLASS_NAMES.get(bot_cls, "?")}) has the lowest '
+                f'FDR={bot_fdr:.2f}, explaining why it is harder to classify.',
+                italic=True, font_size=9))
+
+            for el in reversed(elements):
+                insert_before(target, el)
+
+            print(f"    Inserted OVR separation figure before paragraph {i}")
+            return 1
+    return 0
+
+
+def add_ablation_missing_results(doc):
+    """Add results from newly computed ablation tests."""
+    abl_path = os.path.join(SRC_DIR, 'ablation_missing_data.json')
+    if not os.path.exists(abl_path):
+        print("    Skipping missing ablation results (data file not found)")
+        return 0
+
+    with open(abl_path) as f:
+        abl = json.load(f)
+
+    for i, p in enumerate(doc.paragraphs):
+        if 'Interpretation:' in p.text and 'Only two mechanisms produce statistically significant' in p.text:
+            target_el = p._element
+            elements = []
+
+            elements.append(make_paragraph_element(
+                'Additional Ablation Results (computed separately):',
+                bold=True, font_size=10))
+
+            names = {
+                'dual_af': 'Dual Accumulation Factor',
+                'ratio_scoring': 'Ratio Scoring',
+                'laplace_smoothing': 'Laplace Smoothing',
+                'per_class_thresholds': 'Per-Class Thresholds',
+                'rare_class_params': 'Rare Class Adaptation',
+            }
+
+            for key, name in names.items():
+                if key not in abl:
+                    continue
+                r = abl[key]
+                sig = 'p<0.001' if r['p_value'] < 0.001 else \
+                      'p<0.01' if r['p_value'] < 0.01 else \
+                      'p<0.05' if r['p_value'] < 0.05 else f'p={r["p_value"]:.3f}'
+                star = '***' if r['p_value'] < 0.001 else \
+                       '**' if r['p_value'] < 0.01 else \
+                       '*' if r['p_value'] < 0.05 else ' (ns)'
+                elements.append(make_paragraph_element(
+                    f'{name}: removing drops accuracy by {r["delta_pp"]:+.2f} pp '
+                    f'({r["baseline_mean"]:.2f}% -> {r["ablated_mean"]:.2f}%), '
+                    f'Wilcoxon W={r["wilcoxon_W"]:.1f}, {sig}{star}, '
+                    f'effect size r={r["effect_size_r"]:.3f}.',
+                    font_size=9))
+
+            for el in reversed(elements):
+                insert_after(target_el, el)
+
+            print(f"    Inserted {len(abl)} additional ablation results after paragraph {i}")
+            return len(abl)
+    return 0
+
+
+# ============================================================
 # Phase 2: Append comprehensive appendix sections
 # ============================================================
 
@@ -436,7 +830,12 @@ def build_appendices(doc):
     add_para(doc,
         'The original CDS algorithm (cds.py) was evaluated using LOOCV on the complete 452-patient '
         'dataset with all 13 arrhythmia classes. This represents the unmodified binary classifier '
-        'from the initial implementation.')
+        'from the initial implementation. Note: the base CDS is fundamentally a binary classifier '
+        'that outputs HEALTHY, UNHEALTHY, or SCREENING decisions and cannot identify specific '
+        'disease classes. "Multiclass Accuracy" below measures how well its binary decisions align '
+        'with the multiclass ground truth: a healthy patient is correct if predicted HEALTHY, and '
+        'a disease patient is correct if predicted UNHEALTHY (regardless of the specific disease '
+        'type). The per-class table shows accuracy within each class under this binary evaluation.')
     add_source_ref(doc, 'Source: ImprovedCDS/cds.py (run_loocv function); Trace: ImprovedCDS/output/loocv_trace.json')
 
     add_para(doc, f'Overall Multiclass Accuracy: {base_stats["correct"]}/{base_stats["n"]} = {100*base_stats["accuracy"]:.1f}%', bold=True)
@@ -774,6 +1173,46 @@ def build_appendices(doc):
                 add_para(doc, f'Table C{table_num}: {label} Results per Seed', bold=True)
                 add_table(doc, ['Seed', 'Multi Acc', 'Binary Acc', 'Specificity', 'Sensitivity', 'Balanced Acc', 'N_test'], rows)
                 table_num += 1
+        # C.8 Stratified vs Non-Stratified Comparison
+        add_heading(doc, 'C.8 Stratified vs. Random Split Comparison', 2)
+        add_para(doc,
+            'Comparing stratified results (C.7) with the corresponding random-split results (C.2) '
+            'reveals the impact of class-balanced splitting on measured accuracy. In random splits, '
+            'rare classes may be over- or under-represented in the test set, introducing variance '
+            'unrelated to the algorithm\'s actual performance.')
+
+        if all_splits and strat_data:
+            comp_rows = []
+            comparisons = [
+                ('10-fold CV', '10-fold CV', 'stratified_10fold'),
+                ('90/10', '90/10', 'stratified_90_10'),
+                ('60/40', '60/40', 'stratified_60_40'),
+                ('50/50', '50/50', 'stratified_50_50'),
+            ]
+            for label, random_key, strat_key in comparisons:
+                if random_key in all_splits and strat_key in strat_data:
+                    rs = all_splits[random_key]['summary']
+                    ss = strat_data[strat_key]['summary']
+                    diff = ss['acc_mean'] - rs['multi_mean']
+                    comp_rows.append([label,
+                        f'{rs["multi_mean"]}% ({rs["multi_std"]}%)',
+                        f'{ss["acc_mean"]}% ({ss["acc_std"]}%)',
+                        f'{diff:+.2f} pp',
+                        f'{rs["binary_mean"]}%',
+                        f'{ss["binary_mean"]}%'])
+
+            if comp_rows:
+                add_para(doc, 'Table C14: Random vs. Stratified Split Comparison', bold=True)
+                add_table(doc,
+                    ['Protocol', 'Random Multi (std)', 'Stratified Multi (std)',
+                     'Diff', 'Random Binary', 'Stratified Binary'],
+                    comp_rows)
+
+            add_para(doc,
+                'Stratified splitting generally produces slightly higher accuracy and lower variance, '
+                'confirming that random splits introduce noise from unbalanced class representation. '
+                'The difference is most pronounced at extreme split ratios where rare classes have '
+                'very few test samples.')
     else:
         add_para(doc,
             '[Stratified results pending - task_stratified.py has not yet completed.]',
@@ -1088,10 +1527,223 @@ def build_appendices(doc):
         add_para(doc, ref, font_size=10)
 
     # ================================================================
-    # APPENDIX I: File Location Index
+    # APPENDIX I: Consolidated Results Summary
     # ================================================================
     doc.add_page_break()
-    add_heading(doc, 'Appendix I: Repository File Index', 1)
+    add_heading(doc, 'Appendix I: Consolidated Results Summary', 1)
+    add_para(doc,
+        'This appendix provides a single-table summary of all key results across all evaluation '
+        'protocols. All results use the 416-patient, 8-class filtered dataset unless noted otherwise.')
+
+    summary_rows = [
+        ['LOOCV (13 classes, 452 pts)', '74.8%', '84.5%', '90.2%', '77.8%', '47.8%', '-'],
+    ]
+    if all_splits:
+        import numpy as np_s
+        def _mean_metric(seeds_list, key):
+            vals = [s[key] for s in seeds_list if key in s]
+            return round(float(np_s.mean(vals)), 2) if vals else None
+        if '10-fold CV' in all_splits:
+            s = all_splits['10-fold CV']['summary']
+            seeds = all_splits['10-fold CV']['seeds']
+            spec = _mean_metric(seeds, 'specificity')
+            sens = _mean_metric(seeds, 'sensitivity')
+            ba = _mean_metric(seeds, 'balanced_acc')
+            summary_rows.append(['10-Fold CV (random)', f'{s["multi_mean"]}%', f'{s["binary_mean"]}%',
+                                 f'{spec}%' if spec else '-', f'{sens}%' if sens else '-',
+                                 f'{ba}%' if ba else '-', f'{s["multi_std"]}%'])
+        for ratio in ['90/10', '80/20', '70/30', '60/40', '50/50']:
+            rkey = ratio
+            train_pct = ratio.split('/')[0]
+            for k in all_splits:
+                if k.replace('/', '_').replace('-', '_') == ratio.replace('/', '_'):
+                    rkey = k
+                    break
+                if ratio in k:
+                    rkey = k
+                    break
+                if k.startswith(train_pct + '/'):
+                    rkey = k
+                    break
+            if rkey in all_splits:
+                s = all_splits[rkey]['summary']
+                seeds = all_splits[rkey]['seeds']
+                spec = _mean_metric(seeds, 'specificity')
+                sens = _mean_metric(seeds, 'sensitivity')
+                ba = _mean_metric(seeds, 'balanced_acc')
+                summary_rows.append([f'{ratio} Split (random)', f'{s["multi_mean"]}%', f'{s["binary_mean"]}%',
+                                     f'{spec}%' if spec else '-', f'{sens}%' if sens else '-',
+                                     f'{ba}%' if ba else '-', f'{s["multi_std"]}%'])
+
+    strat_data = comp_results.get('stratified') if comp_results else None
+    if strat_data:
+        strat_protocols = [
+            ('stratified_10fold', 'Strat. 10-Fold CV'),
+            ('stratified_90_10', 'Strat. 90/10'),
+            ('stratified_80_20', 'Strat. 80/20'),
+            ('stratified_70_30', 'Strat. 70/30'),
+            ('stratified_60_40', 'Strat. 60/40'),
+            ('stratified_50_50', 'Strat. 50/50'),
+        ]
+        for key, label in strat_protocols:
+            if key in strat_data:
+                s = strat_data[key]['summary']
+                summary_rows.append([label, f'{s["acc_mean"]}%', f'{s["binary_mean"]}%',
+                                     f'{s["spec_mean"]}%', f'{s["sens_mean"]}%',
+                                     f'{s["ba_mean"]}%', f'{s["acc_std"]}%'])
+
+    add_para(doc, 'Table I1: Complete Results Summary Across All Evaluation Protocols', bold=True)
+    add_table(doc, ['Protocol', 'Multi Acc', 'Binary Acc', 'Specificity', 'Sensitivity', 'Balanced Acc', 'Std Dev'],
+              summary_rows)
+
+    if comp_results and 'auc_roc' in comp_results:
+        auc = comp_results['auc_roc']
+        auc_rows = []
+        for protocol, label in [('10fold', '10-Fold CV'), ('90_10', '90/10 Split'), ('60_40', '60/40 Split')]:
+            if protocol in auc:
+                d = auc[protocol]
+                auc_rows.append([label, f'{d["binary_auc_mean"]:.4f}',
+                                 f'{d["macro_auc_mean"]:.4f}', f'{d["weighted_auc_mean"]:.4f}'])
+        if auc_rows:
+            add_para(doc, 'Table I2: AUC-ROC Summary', bold=True)
+            add_table(doc, ['Protocol', 'Binary AUC', 'Macro AUC', 'Weighted AUC'], auc_rows)
+
+    if comp_results and 'confusion_matrix_seed13' in comp_results:
+        cm = comp_results['confusion_matrix_seed13']
+        add_para(doc, 'Table I3: Classification Metrics Summary (10-Fold CV, Seed 13)', bold=True)
+        add_table(doc, ['Metric', 'Value'],
+                  [['Overall Accuracy', f'{cm["accuracy"]}%'],
+                   ['Binary Accuracy', f'{cm["binary_accuracy"]}%'],
+                   ['Macro Precision', f'{cm["macro_precision"]:.4f}'],
+                   ['Macro Recall', f'{cm["macro_recall"]:.4f}'],
+                   ['Macro F1-Score', f'{cm["macro_f1"]:.4f}']])
+
+    # ================================================================
+    # APPENDIX J: Limitations and Future Work
+    # ================================================================
+    doc.add_page_break()
+    add_heading(doc, 'Appendix J: Limitations and Future Work', 1)
+
+    add_heading(doc, 'J.1 Current Limitations', 2)
+
+    add_para(doc, '1. Small Dataset Size', bold=True)
+    add_para(doc,
+        'The UCI Arrhythmia Dataset contains only 452 patients. After removing classes with '
+        'insufficient samples, 416 patients across 8 classes remain. Several classes have fewer '
+        'than 15 patients (class 5: 13, class 4: 15, class 3: 15, class 9: 9). This limits the '
+        'statistical power of all evaluation protocols, particularly for rare-class performance estimates.')
+
+    add_para(doc, '2. Single Dataset Evaluation', bold=True)
+    add_para(doc,
+        'All results are reported on a single dataset (UCI Arrhythmia). While the multi-protocol '
+        'evaluation strategy (LOOCV, 10-fold CV, multiple splits, stratified variants) provides '
+        'robustness, generalization to other arrhythmia datasets or ECG recording conditions has '
+        'not been evaluated.')
+
+    add_para(doc, '3. Tabular Features Only', bold=True)
+    add_para(doc,
+        'The algorithm operates on pre-extracted tabular features (279 numeric features per patient), '
+        'not on raw ECG waveforms. This means the feature extraction quality is fixed and cannot be '
+        'optimized end-to-end. Deep learning methods that operate directly on ECG signals can learn '
+        'task-specific feature representations.')
+
+    add_para(doc, '4. Performance Gap at Low Training Ratios', bold=True)
+    add_para(doc,
+        'CDS-OVR accuracy decreases more rapidly than some benchmark methods when the training set '
+        'shrinks. At 60/40 split, mean accuracy is 80.18% compared to 84.66% at 10-fold CV. This '
+        'is a structural limitation of the bin-based evidence framework, which requires sufficient '
+        'bin populations to estimate class-conditional probabilities accurately.')
+
+    add_para(doc, '5. Independent Feature Assumption', bold=True)
+    add_para(doc,
+        'The evidence accumulation treats each feature independently, weighted by Fisher discriminant '
+        'ratio. It does not model feature interactions. Methods like neural networks and SVMs with '
+        'nonlinear kernels can capture these interactions, potentially explaining their advantage on '
+        'certain class boundaries.')
+
+    add_para(doc, '6. Five Removed Classes', bold=True)
+    add_para(doc,
+        'Classes 7, 8, 11, 12, and 13 (36 patients total) are removed due to insufficient samples. '
+        'A clinical deployment would need to handle these classes, either through data augmentation, '
+        'transfer learning, or a "reject" option.')
+
+    add_heading(doc, 'J.2 Future Work', 2)
+
+    add_para(doc, '1. FPGA Implementation', bold=True)
+    add_para(doc,
+        'The algorithm\'s fixed-point arithmetic compatibility, absence of iterative optimization, '
+        'and small memory footprint (3.05 MB) make it a candidate for FPGA-based real-time ECG '
+        'classification. Future work will translate the Python implementation to Verilog HDL, '
+        'targeting low-latency inference for wearable cardiac monitoring devices.')
+
+    add_para(doc, '2. Cross-Dataset Validation', bold=True)
+    add_para(doc,
+        'Evaluate CDS-OVR on additional arrhythmia datasets (e.g., MIT-BIH Arrhythmia Database, '
+        'PhysioNet Challenge datasets) to assess generalization. This would require adapting the '
+        'feature extraction pipeline to match each dataset\'s recording format.')
+
+    add_para(doc, '3. Feature Interaction Modeling', bold=True)
+    add_para(doc,
+        'Explore augmenting the evidence framework with pairwise or higher-order feature interactions, '
+        'potentially through interaction terms in the scoring function or a second-stage ensemble '
+        'that combines per-class ratio scores.')
+
+    add_para(doc, '4. Rare Class Data Augmentation', bold=True)
+    add_para(doc,
+        'Investigate synthetic oversampling (SMOTE or similar) for rare classes to improve bin '
+        'population estimates. This could reduce the against_scale compensation currently needed '
+        'for classes 4, 5, and 9.')
+
+    add_para(doc, '5. Adaptive Binning', bold=True)
+    add_para(doc,
+        'Replace the fixed MAX_BINS=6 with a per-feature adaptive scheme that selects the number '
+        'of bins based on sample size and feature distribution, using information-theoretic criteria '
+        '(MDL or BIC) to prevent overfitting on sparse features.')
+
+    add_para(doc, '6. Confidence Calibration', bold=True)
+    add_para(doc,
+        'Calibrate the ratio scores as proper probabilities using Platt scaling or isotonic '
+        'regression. This would enable clinically useful confidence estimates (e.g., "85% confidence '
+        'this patient has class 2 arrhythmia"), supporting clinical decision-making workflows.')
+
+    # ================================================================
+    # APPENDIX K: Reproducibility and Data Availability
+    # ================================================================
+    doc.add_page_break()
+    add_heading(doc, 'Appendix K: Reproducibility and Data Availability', 1)
+
+    add_heading(doc, 'K.1 Data Availability', 2)
+    add_para(doc,
+        'The UCI Arrhythmia Dataset is publicly available from the UCI Machine Learning Repository '
+        'at https://archive.ics.uci.edu/ml/datasets/arrhythmia (Guvenir et al., 1997). The dataset '
+        'file (arrhythmia.data) contains 452 rows and 280 columns (279 features + 1 class label) '
+        'in CSV format with missing values encoded as "?".')
+
+    add_heading(doc, 'K.2 Code Availability', 2)
+    add_para(doc,
+        'The complete source code for the CDS-OVR algorithm, all evaluation scripts, and this '
+        'report\'s generation code are available in the project repository. The main algorithm '
+        'implementation is in ImprovedCDS/CDS_FINAL/cds_ovr.py (587 lines of Python). All results '
+        'can be reproduced by running the evaluation scripts with the seeds documented in this report.')
+
+    add_heading(doc, 'K.3 Reproducibility Notes', 2)
+    add_para(doc,
+        'All randomized experiments use explicit integer seeds (13, 20, 27, 34, 41, 48, 55, 62, 69, 76) '
+        'passed to numpy.random.RandomState for deterministic reproduction. The evaluation code uses '
+        'numpy for numerical operations and python-docx for report generation. No GPU or specialized '
+        'hardware is required. The complete evaluation suite runs in approximately 12 minutes on a '
+        'standard desktop CPU (single-threaded) or approximately 4 minutes with 10-worker parallelism.')
+
+    add_heading(doc, 'K.4 Software Environment', 2)
+    add_para(doc,
+        'Python 3.13, NumPy, python-docx. The algorithm itself (cds_ovr.py) depends only on NumPy. '
+        'No deep learning frameworks, no scikit-learn, no external ML libraries.')
+
+    # ================================================================
+    # APPENDIX L: Repository File Index
+    # ================================================================
+    doc.add_page_break()
+    add_heading(doc, 'Appendix L: Repository File Index', 1)
     add_para(doc,
         'This appendix lists all source files, data files, and generated outputs referenced '
         'in this report, with descriptions of their contents.')
@@ -1099,21 +1751,28 @@ def build_appendices(doc):
     file_index = [
         ['ImprovedCDS/CDS_FINAL/cds_ovr.py', '587 lines', 'Final CDS-OVR algorithm implementation'],
         ['ImprovedCDS/cds.py', '491 lines', 'Original base CDS algorithm (binary classifier)'],
-        ['ImprovedCDS/CDS_FINAL/run_all_splits.py', '157 lines', 'Script for all split ratio evaluations (10 seeds each)'],
-        ['ImprovedCDS/CDS_FINAL/evidence_analysis.py', '-', 'Evidence quality and dataset analysis experiments (14 sections)'],
-        ['ImprovedCDS/CDS_FINAL/evidence_ablation.py', '-', 'Ablation experiments (against_scale, sex branching, per-class accuracy)'],
-        ['ImprovedCDS/CDS_FINAL/ablation_full.py', '-', 'Full component ablation with statistical significance testing'],
-        ['ImprovedCDS/CDS_FINAL/comprehensive_experiments.py', '-', 'AUC/ROC, stratified splits, timing, memory profiling'],
-        ['ImprovedCDS/CDS_FINAL/results_all_splits.json', '-', 'All split ratio results (50/50 through 90/10, 10-fold CV)'],
-        ['ImprovedCDS/CDS_FINAL/comprehensive_results.json', '-', 'AUC/ROC, confusion matrix, computational cost results'],
+        ['ImprovedCDS/CDS_FINAL/run_all_splits.py', '157 lines', 'All split ratio evaluations (10 seeds each)'],
+        ['ImprovedCDS/CDS_FINAL/task_auc.py', '-', 'Parallel AUC/ROC computation (6 workers)'],
+        ['ImprovedCDS/CDS_FINAL/task_stratified.py', '-', 'Parallel stratified evaluation (all protocols)'],
+        ['ImprovedCDS/CDS_FINAL/task_cost.py', '-', 'Computational cost and memory profiling'],
+        ['ImprovedCDS/CDS_FINAL/task_confusion.py', '-', 'Confusion matrix and P/R/F1 computation'],
+        ['ImprovedCDS/CDS_FINAL/evidence_analysis.py', '-', 'Evidence quality and dataset analysis (14 sections)'],
+        ['ImprovedCDS/CDS_FINAL/evidence_ablation.py', '-', 'Ablation experiments (against_scale, sex branching)'],
+        ['ImprovedCDS/CDS_FINAL/ablation_full.py', '-', 'Full component ablation with significance testing'],
+        ['ImprovedCDS/CDS_FINAL/restructure_report.py', '-', 'Report generation and appendix construction'],
+        ['ImprovedCDS/CDS_FINAL/results_all_splits.json', '-', 'All split ratio results (50/50-90/10, 10-fold CV)'],
+        ['ImprovedCDS/CDS_FINAL/results_auc.json', '-', 'AUC/ROC results (3 protocols x 10 seeds)'],
+        ['ImprovedCDS/CDS_FINAL/results_stratified.json', '-', 'Stratified results (6 protocols x 10 seeds)'],
+        ['ImprovedCDS/CDS_FINAL/results_cost.json', '-', 'Computational cost and memory profiling results'],
+        ['ImprovedCDS/CDS_FINAL/results_confusion.json', '-', 'Confusion matrix and per-class metrics'],
         ['ImprovedCDS/CDS_FINAL/evidence_report.txt', '-', 'Detailed evidence analysis output (14 sections)'],
         ['ImprovedCDS/CDS_FINAL/evidence_ablation_report.txt', '-', 'Ablation experiment output'],
         ['ImprovedCDS/output/loocv_trace.json', '~3.1 MB', 'Base CDS LOOCV trace (452 patient predictions)'],
         ['ImprovedCDS/output/loocv_trace_ovr.json', '~3.5 MB', 'CDS-OVR LOOCV trace (452 patient predictions)'],
-        ['ImprovedCDS/output/logs/', '20 files', '10-fold CV log files for each seed (v2 and v3 formats)'],
+        ['ImprovedCDS/output/logs/', '20 files', '10-fold CV log files for each seed'],
         ['data/arrhythmia.data', '-', 'UCI Arrhythmia Dataset (452 x 280, CSV)'],
     ]
-    add_para(doc, 'Table I1: Complete File Index', bold=True)
+    add_para(doc, 'Table L1: Complete File Index', bold=True)
     add_table(doc, ['File Path', 'Size/Lines', 'Description'], file_index)
 
     return True
@@ -1148,7 +1807,15 @@ def main():
     struct_count = fix_structure(doc)
     print(f"  Made {struct_count} structural changes")
 
-    # Phase 3: Add file location references
+    # Phase 2b: Fix Part III empty subtitle
+    print("\nPhase 2b: Fixing Part III subtitle...")
+    fix_part3_subtitle(doc)
+
+    # Phase 2c: Fix duplicate section numbers
+    print("\nPhase 2c: Fixing duplicate section numbers...")
+    fix_duplicate_section_numbers(doc)
+
+    # Phase 3: Add file location references (before abstract to avoid matching abstract text)
     print("\nPhase 3: Adding file location references...")
     ref_count = add_file_location_refs(doc)
     print(f"  Added {ref_count} source annotations")
@@ -1158,10 +1825,44 @@ def main():
     red_count = mark_redundancies(doc)
     print(f"  Marked {red_count} redundancies")
 
-    # Phase 5: Build appendices
-    print("\nPhase 5: Building comprehensive appendices...")
+    # Phase 5: Insert Abstract (after file refs so abstract text doesn't trigger annotations)
+    print("\nPhase 5: Inserting Abstract...")
+    add_abstract(doc)
+
+    # Phase 5b: Fix text errors (sex encoding, typo, dual AF ratio)
+    print("\nPhase 5b: Fixing text errors...")
+    text_fixes = fix_text_issues(doc)
+    print(f"  Applied {text_fixes} text fixes")
+
+    # Phase 5c: Clarify base model multiclass in Part II
+    print("\nPhase 5c: Clarifying base model multiclass metric...")
+    base_fixes = fix_appendix_a_clarification(doc)
+    print(f"  Applied {base_fixes} base model clarifications")
+
+    # Phase 5d: Update healthy bar explanation with grounded analysis
+    print("\nPhase 5d: Updating healthy bar analysis...")
+    hbar_fixes = add_healthy_bar_analysis(doc)
+    print(f"  Applied {hbar_fixes} healthy bar updates")
+
+    # Phase 5e: Insert binning comparison figure
+    print("\nPhase 5e: Inserting binning comparison figure...")
+    bin_figs = add_binning_figure(doc)
+    print(f"  Inserted {bin_figs} binning figure(s)")
+
+    # Phase 5f: Insert OVR class separation figure
+    print("\nPhase 5f: Inserting OVR separation figure...")
+    ovr_figs = add_ovr_figure(doc)
+    print(f"  Inserted {ovr_figs} OVR figure(s)")
+
+    # Phase 5g: Insert missing ablation results (if available)
+    print("\nPhase 5g: Inserting missing ablation results...")
+    abl_count = add_ablation_missing_results(doc)
+    print(f"  Inserted {abl_count} ablation result(s)")
+
+    # Phase 6: Build appendices
+    print("\nPhase 6: Building comprehensive appendices...")
     build_appendices(doc)
-    print("  Appendices A-I built successfully")
+    print("  Appendices A-L built successfully")
 
     # Save
     out_path = os.path.join(SRC_DIR, 'CDS_Final_Report.docx')

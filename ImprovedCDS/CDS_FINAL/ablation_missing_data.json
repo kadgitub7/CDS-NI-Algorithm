@@ -1,0 +1,167 @@
+{
+  "dual_af": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 64.06,
+    "delta_pp": 20.6,
+    "wilcoxon_W": 0.0,
+    "p_value": 0.002,
+    "significant_005": true,
+    "effect_size_r": 0.979,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      63.46,
+      64.18,
+      62.98,
+      64.42,
+      65.38,
+      63.94,
+      63.46,
+      64.42,
+      64.18,
+      64.18
+    ]
+  },
+  "ratio_scoring": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 63.94,
+    "delta_pp": 20.72,
+    "wilcoxon_W": 0.0,
+    "p_value": 0.002,
+    "significant_005": true,
+    "effect_size_r": 0.979,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      63.22,
+      63.7,
+      63.22,
+      64.18,
+      63.46,
+      64.9,
+      64.42,
+      63.7,
+      64.42,
+      64.18
+    ]
+  },
+  "laplace_smoothing": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 84.78,
+    "delta_pp": -0.12,
+    "wilcoxon_W": 22.0,
+    "p_value": 0.9922,
+    "significant_005": false,
+    "effect_size_r": 0.003,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      86.06,
+      84.13,
+      86.06,
+      86.06,
+      84.38,
+      83.65,
+      86.06,
+      83.17,
+      84.38,
+      83.89
+    ]
+  },
+  "per_class_thresholds": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 83.92,
+    "delta_pp": 0.75,
+    "wilcoxon_W": 1.0,
+    "p_value": 0.0312,
+    "significant_005": true,
+    "effect_size_r": 0.681,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      84.38,
+      84.13,
+      85.1,
+      84.62,
+      83.41,
+      82.45,
+      83.89,
+      83.41,
+      85.1,
+      82.69
+    ]
+  },
+  "rare_class_params": {
+    "baseline_mean": 84.66,
+    "ablated_mean": 84.69,
+    "delta_pp": -0.02,
+    "wilcoxon_W": 22.0,
+    "p_value": 0.9844,
+    "significant_005": false,
+    "effect_size_r": 0.006,
+    "baseline_accs": [
+      86.78,
+      84.13,
+      85.82,
+      84.62,
+      84.13,
+      83.89,
+      84.62,
+      83.41,
+      84.86,
+      84.38
+    ],
+    "ablated_accs": [
+      85.82,
+      84.62,
+      85.34,
+      85.1,
+      83.17,
+      84.86,
+      85.34,
+      83.41,
+      85.1,
+      84.13
+    ]
+  }
+}
