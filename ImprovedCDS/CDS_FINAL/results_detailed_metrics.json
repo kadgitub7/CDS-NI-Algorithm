@@ -1,0 +1,7714 @@
+{
+  "50_50": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 79.329,
+        "std": 3.1077
+      },
+      "binary_precision": {
+        "mean": 0.8793,
+        "std": 0.0371
+      },
+      "binary_recall": {
+        "mean": 0.6802,
+        "std": 0.0541
+      },
+      "binary_f1": {
+        "mean": 0.7657,
+        "std": 0.0372
+      },
+      "binary_sensitivity": {
+        "mean": 0.6802,
+        "std": 0.0541
+      },
+      "binary_specificity": {
+        "mean": 0.935,
+        "std": 0.0223
+      },
+      "macro_precision": {
+        "mean": 0.794,
+        "std": 0.062
+      },
+      "macro_recall": {
+        "mean": 0.632,
+        "std": 0.0694
+      },
+      "macro_f1": {
+        "mean": 0.666,
+        "std": 0.0578
+      },
+      "weighted_precision": {
+        "mean": 0.7951,
+        "std": 0.0304
+      },
+      "weighted_recall": {
+        "mean": 0.7933,
+        "std": 0.0311
+      },
+      "weighted_f1": {
+        "mean": 0.7734,
+        "std": 0.034
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 80.77,
+        "binary_precision": 0.9104,
+        "binary_recall": 0.7011,
+        "binary_f1": 0.7922,
+        "binary_sensitivity": 0.7011,
+        "binary_specificity": 0.9504,
+        "macro_precision": 0.7781,
+        "macro_recall": 0.6118,
+        "macro_f1": 0.6523,
+        "weighted_precision": 0.8053,
+        "weighted_recall": 0.8077,
+        "weighted_f1": 0.7902,
+        "per_class": {
+          "1": {
+            "support": 121,
+            "precision": 0.8156,
+            "recall": 0.9504,
+            "f1": 0.8779,
+            "tp": 115,
+            "fp": 26,
+            "fn": 6
+          },
+          "2": {
+            "support": 25,
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1": 0.6667,
+            "tp": 15,
+            "fp": 5,
+            "fn": 10
+          },
+          "3": {
+            "support": 6,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 6,
+            "fp": 2,
+            "fn": 0
+          },
+          "4": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.7778,
+            "f1": 0.875,
+            "tp": 7,
+            "fp": 0,
+            "fn": 2
+          },
+          "5": {
+            "support": 5,
+            "precision": 0.3333,
+            "recall": 0.2,
+            "f1": 0.25,
+            "tp": 1,
+            "fp": 2,
+            "fn": 4
+          },
+          "6": {
+            "support": 11,
+            "precision": 0.75,
+            "recall": 0.2727,
+            "f1": 0.4,
+            "tp": 3,
+            "fp": 1,
+            "fn": 8
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 0,
+            "fn": 4
+          },
+          "10": {
+            "support": 25,
+            "precision": 0.8261,
+            "recall": 0.76,
+            "f1": 0.7917,
+            "tp": 19,
+            "fp": 4,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 73.08,
+        "binary_precision": 0.806,
+        "binary_recall": 0.6136,
+        "binary_f1": 0.6968,
+        "binary_sensitivity": 0.6136,
+        "binary_specificity": 0.8917,
+        "macro_precision": 0.8484,
+        "macro_recall": 0.588,
+        "macro_f1": 0.6287,
+        "weighted_precision": 0.7775,
+        "weighted_recall": 0.7308,
+        "weighted_f1": 0.7097,
+        "per_class": {
+          "1": {
+            "support": 120,
+            "precision": 0.7589,
+            "recall": 0.8917,
+            "f1": 0.8199,
+            "tp": 107,
+            "fp": 34,
+            "fn": 13
+          },
+          "2": {
+            "support": 18,
+            "precision": 0.4138,
+            "recall": 0.6667,
+            "f1": 0.5106,
+            "tp": 12,
+            "fp": 17,
+            "fn": 6
+          },
+          "3": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 8,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.3,
+            "f1": 0.4615,
+            "tp": 3,
+            "fp": 0,
+            "fn": 7
+          },
+          "5": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.1429,
+            "f1": 0.25,
+            "tp": 1,
+            "fp": 0,
+            "fn": 6
+          },
+          "6": {
+            "support": 14,
+            "precision": 0.7143,
+            "recall": 0.7143,
+            "f1": 0.7143,
+            "tp": 10,
+            "fp": 4,
+            "fn": 4
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 28,
+            "precision": 0.9,
+            "recall": 0.3214,
+            "f1": 0.4737,
+            "tp": 9,
+            "fp": 1,
+            "fn": 19
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 81.25,
+        "binary_precision": 0.8611,
+        "binary_recall": 0.7654,
+        "binary_f1": 0.8105,
+        "binary_sensitivity": 0.7654,
+        "binary_specificity": 0.9213,
+        "macro_precision": 0.8191,
+        "macro_recall": 0.6923,
+        "macro_f1": 0.7072,
+        "weighted_precision": 0.8178,
+        "weighted_recall": 0.8125,
+        "weighted_f1": 0.7984,
+        "per_class": {
+          "1": {
+            "support": 127,
+            "precision": 0.8603,
+            "recall": 0.9213,
+            "f1": 0.8897,
+            "tp": 117,
+            "fp": 19,
+            "fn": 10
+          },
+          "2": {
+            "support": 21,
+            "precision": 0.75,
+            "recall": 0.5714,
+            "f1": 0.6486,
+            "tp": 12,
+            "fp": 4,
+            "fn": 9
+          },
+          "3": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 7,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 8,
+            "precision": 0.6,
+            "recall": 0.375,
+            "f1": 0.4615,
+            "tp": 3,
+            "fp": 2,
+            "fn": 5
+          },
+          "5": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1": 0.2222,
+            "tp": 1,
+            "fp": 0,
+            "fn": 7
+          },
+          "6": {
+            "support": 11,
+            "precision": 0.75,
+            "recall": 0.8182,
+            "f1": 0.7826,
+            "tp": 9,
+            "fp": 3,
+            "fn": 2
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 22,
+            "precision": 0.5926,
+            "recall": 0.7273,
+            "f1": 0.6531,
+            "tp": 16,
+            "fp": 11,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 78.37,
+        "binary_precision": 0.8529,
+        "binary_recall": 0.6824,
+        "binary_f1": 0.7582,
+        "binary_sensitivity": 0.6824,
+        "binary_specificity": 0.9187,
+        "macro_precision": 0.6801,
+        "macro_recall": 0.6461,
+        "macro_f1": 0.6547,
+        "weighted_precision": 0.7551,
+        "weighted_recall": 0.7837,
+        "weighted_f1": 0.7636,
+        "per_class": {
+          "1": {
+            "support": 123,
+            "precision": 0.8071,
+            "recall": 0.9187,
+            "f1": 0.8593,
+            "tp": 113,
+            "fp": 27,
+            "fn": 10
+          },
+          "2": {
+            "support": 22,
+            "precision": 0.7,
+            "recall": 0.6364,
+            "f1": 0.6667,
+            "tp": 14,
+            "fp": 6,
+            "fn": 8
+          },
+          "3": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.875,
+            "f1": 0.9333,
+            "tp": 7,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 6,
+            "precision": 0.5556,
+            "recall": 0.8333,
+            "f1": 0.6667,
+            "tp": 5,
+            "fp": 4,
+            "fn": 1
+          },
+          "5": {
+            "support": 8,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 8
+          },
+          "6": {
+            "support": 11,
+            "precision": 0.6,
+            "recall": 0.5455,
+            "f1": 0.5714,
+            "tp": 6,
+            "fp": 4,
+            "fn": 5
+          },
+          "9": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 25,
+            "precision": 0.7778,
+            "recall": 0.56,
+            "f1": 0.6512,
+            "tp": 14,
+            "fp": 4,
+            "fn": 11
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 76.92,
+        "binary_precision": 0.9104,
+        "binary_recall": 0.6421,
+        "binary_f1": 0.7531,
+        "binary_sensitivity": 0.6421,
+        "binary_specificity": 0.9469,
+        "macro_precision": 0.755,
+        "macro_recall": 0.5724,
+        "macro_f1": 0.6167,
+        "weighted_precision": 0.7781,
+        "weighted_recall": 0.7692,
+        "weighted_f1": 0.7491,
+        "per_class": {
+          "1": {
+            "support": 113,
+            "precision": 0.7589,
+            "recall": 0.9469,
+            "f1": 0.8425,
+            "tp": 107,
+            "fp": 34,
+            "fn": 6
+          },
+          "2": {
+            "support": 27,
+            "precision": 0.7222,
+            "recall": 0.4815,
+            "f1": 0.5778,
+            "tp": 13,
+            "fp": 5,
+            "fn": 14
+          },
+          "3": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1": 0.9474,
+            "tp": 9,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1": 0.5714,
+            "tp": 4,
+            "fp": 0,
+            "fn": 6
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 2,
+            "fn": 3
+          },
+          "6": {
+            "support": 10,
+            "precision": 0.7692,
+            "recall": 1.0,
+            "f1": 0.8696,
+            "tp": 10,
+            "fp": 3,
+            "fn": 0
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 0,
+            "fn": 4
+          },
+          "10": {
+            "support": 29,
+            "precision": 0.7895,
+            "recall": 0.5172,
+            "f1": 0.625,
+            "tp": 15,
+            "fp": 4,
+            "fn": 14
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 79.81,
+        "binary_precision": 0.9167,
+        "binary_recall": 0.6548,
+        "binary_f1": 0.7639,
+        "binary_sensitivity": 0.6548,
+        "binary_specificity": 0.9597,
+        "macro_precision": 0.7496,
+        "macro_recall": 0.5607,
+        "macro_f1": 0.6098,
+        "weighted_precision": 0.7842,
+        "weighted_recall": 0.7981,
+        "weighted_f1": 0.7717,
+        "per_class": {
+          "1": {
+            "support": 124,
+            "precision": 0.8041,
+            "recall": 0.9597,
+            "f1": 0.875,
+            "tp": 119,
+            "fp": 29,
+            "fn": 5
+          },
+          "2": {
+            "support": 18,
+            "precision": 0.65,
+            "recall": 0.7222,
+            "f1": 0.6842,
+            "tp": 13,
+            "fp": 7,
+            "fn": 5
+          },
+          "3": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.3,
+            "f1": 0.4615,
+            "tp": 3,
+            "fp": 0,
+            "fn": 7
+          },
+          "5": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 13,
+            "precision": 0.7778,
+            "recall": 0.5385,
+            "f1": 0.6364,
+            "tp": 7,
+            "fp": 2,
+            "fn": 6
+          },
+          "9": {
+            "support": 6,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 6
+          },
+          "10": {
+            "support": 23,
+            "precision": 0.7647,
+            "recall": 0.5652,
+            "f1": 0.65,
+            "tp": 13,
+            "fp": 4,
+            "fn": 10
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 79.33,
+        "binary_precision": 0.8929,
+        "binary_recall": 0.6173,
+        "binary_f1": 0.7299,
+        "binary_sensitivity": 0.6173,
+        "binary_specificity": 0.9528,
+        "macro_precision": 0.8529,
+        "macro_recall": 0.672,
+        "macro_f1": 0.706,
+        "weighted_precision": 0.8063,
+        "weighted_recall": 0.7933,
+        "weighted_f1": 0.7669,
+        "per_class": {
+          "1": {
+            "support": 127,
+            "precision": 0.7961,
+            "recall": 0.9528,
+            "f1": 0.8674,
+            "tp": 121,
+            "fp": 31,
+            "fn": 6
+          },
+          "2": {
+            "support": 22,
+            "precision": 0.6667,
+            "recall": 0.5455,
+            "f1": 0.6,
+            "tp": 12,
+            "fp": 6,
+            "fn": 10
+          },
+          "3": {
+            "support": 5,
+            "precision": 0.8333,
+            "recall": 1.0,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 8,
+            "precision": 0.7143,
+            "recall": 0.625,
+            "f1": 0.6667,
+            "tp": 5,
+            "fp": 2,
+            "fn": 3
+          },
+          "5": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 15,
+            "precision": 1.0,
+            "recall": 0.1333,
+            "f1": 0.2353,
+            "tp": 2,
+            "fp": 0,
+            "fn": 13
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 21,
+            "precision": 0.8125,
+            "recall": 0.619,
+            "f1": 0.7027,
+            "tp": 13,
+            "fp": 3,
+            "fn": 8
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 78.37,
+        "binary_precision": 0.8406,
+        "binary_recall": 0.7073,
+        "binary_f1": 0.7682,
+        "binary_sensitivity": 0.7073,
+        "binary_specificity": 0.9127,
+        "macro_precision": 0.8317,
+        "macro_recall": 0.5555,
+        "macro_f1": 0.6157,
+        "weighted_precision": 0.7952,
+        "weighted_recall": 0.7837,
+        "weighted_f1": 0.7688,
+        "per_class": {
+          "1": {
+            "support": 126,
+            "precision": 0.8273,
+            "recall": 0.9127,
+            "f1": 0.8679,
+            "tp": 115,
+            "fp": 24,
+            "fn": 11
+          },
+          "2": {
+            "support": 21,
+            "precision": 0.5484,
+            "recall": 0.8095,
+            "f1": 0.6538,
+            "tp": 17,
+            "fp": 14,
+            "fn": 4
+          },
+          "3": {
+            "support": 10,
+            "precision": 0.9,
+            "recall": 0.9,
+            "f1": 0.9,
+            "tp": 9,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.4286,
+            "f1": 0.6,
+            "tp": 3,
+            "fp": 0,
+            "fn": 4
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 12,
+            "precision": 0.6,
+            "recall": 0.25,
+            "f1": 0.3529,
+            "tp": 3,
+            "fp": 2,
+            "fn": 9
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "10": {
+            "support": 25,
+            "precision": 0.7778,
+            "recall": 0.56,
+            "f1": 0.6512,
+            "tp": 14,
+            "fp": 4,
+            "fn": 11
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 80.29,
+        "binary_precision": 0.9048,
+        "binary_recall": 0.6552,
+        "binary_f1": 0.76,
+        "binary_sensitivity": 0.6552,
+        "binary_specificity": 0.9504,
+        "macro_precision": 0.7467,
+        "macro_recall": 0.6446,
+        "macro_f1": 0.6724,
+        "weighted_precision": 0.7685,
+        "weighted_recall": 0.8029,
+        "weighted_f1": 0.7737,
+        "per_class": {
+          "1": {
+            "support": 121,
+            "precision": 0.7931,
+            "recall": 0.9504,
+            "f1": 0.8647,
+            "tp": 115,
+            "fp": 30,
+            "fn": 6
+          },
+          "2": {
+            "support": 24,
+            "precision": 0.8421,
+            "recall": 0.6667,
+            "f1": 0.7442,
+            "tp": 16,
+            "fp": 3,
+            "fn": 8
+          },
+          "3": {
+            "support": 8,
+            "precision": 0.8889,
+            "recall": 1.0,
+            "f1": 0.9412,
+            "tp": 8,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.375,
+            "f1": 0.5455,
+            "tp": 3,
+            "fp": 0,
+            "fn": 5
+          },
+          "5": {
+            "support": 10,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 10
+          },
+          "6": {
+            "support": 9,
+            "precision": 0.6667,
+            "recall": 0.4444,
+            "f1": 0.5333,
+            "tp": 4,
+            "fp": 2,
+            "fn": 5
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 25,
+            "precision": 0.7826,
+            "recall": 0.72,
+            "f1": 0.75,
+            "tp": 18,
+            "fp": 5,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "50_50",
+        "n_test": 208,
+        "multiclass_acc": 85.1,
+        "binary_precision": 0.8971,
+        "binary_recall": 0.7625,
+        "binary_f1": 0.8243,
+        "binary_sensitivity": 0.7625,
+        "binary_specificity": 0.9453,
+        "macro_precision": 0.8787,
+        "macro_recall": 0.7768,
+        "macro_f1": 0.796,
+        "weighted_precision": 0.8627,
+        "weighted_recall": 0.851,
+        "weighted_f1": 0.8417,
+        "per_class": {
+          "1": {
+            "support": 128,
+            "precision": 0.8643,
+            "recall": 0.9453,
+            "f1": 0.903,
+            "tp": 121,
+            "fp": 19,
+            "fn": 7
+          },
+          "2": {
+            "support": 20,
+            "precision": 0.7273,
+            "recall": 0.8,
+            "f1": 0.7619,
+            "tp": 16,
+            "fp": 6,
+            "fn": 4
+          },
+          "3": {
+            "support": 7,
+            "precision": 0.7778,
+            "recall": 1.0,
+            "f1": 0.875,
+            "tp": 7,
+            "fp": 2,
+            "fn": 0
+          },
+          "4": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.375,
+            "f1": 0.5455,
+            "tp": 3,
+            "fp": 0,
+            "fn": 5
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 9,
+            "precision": 0.7273,
+            "recall": 0.8889,
+            "f1": 0.8,
+            "tp": 8,
+            "fp": 3,
+            "fn": 1
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 0,
+            "fn": 2
+          },
+          "10": {
+            "support": 26,
+            "precision": 0.9333,
+            "recall": 0.5385,
+            "f1": 0.6829,
+            "tp": 14,
+            "fp": 1,
+            "fn": 12
+          }
+        }
+      }
+    ]
+  },
+  "60_40": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 80.179,
+        "std": 3.2255
+      },
+      "binary_precision": {
+        "mean": 0.8757,
+        "std": 0.048
+      },
+      "binary_recall": {
+        "mean": 0.7315,
+        "std": 0.0705
+      },
+      "binary_f1": {
+        "mean": 0.7954,
+        "std": 0.0508
+      },
+      "binary_sensitivity": {
+        "mean": 0.7315,
+        "std": 0.0705
+      },
+      "binary_specificity": {
+        "mean": 0.9265,
+        "std": 0.0269
+      },
+      "macro_precision": {
+        "mean": 0.8091,
+        "std": 0.0558
+      },
+      "macro_recall": {
+        "mean": 0.6931,
+        "std": 0.0495
+      },
+      "macro_f1": {
+        "mean": 0.7139,
+        "std": 0.0428
+      },
+      "weighted_precision": {
+        "mean": 0.809,
+        "std": 0.0404
+      },
+      "weighted_recall": {
+        "mean": 0.8018,
+        "std": 0.0323
+      },
+      "weighted_f1": {
+        "mean": 0.7901,
+        "std": 0.038
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 80.84,
+        "binary_precision": 0.8906,
+        "binary_recall": 0.76,
+        "binary_f1": 0.8201,
+        "binary_sensitivity": 0.76,
+        "binary_specificity": 0.9239,
+        "macro_precision": 0.7782,
+        "macro_recall": 0.7178,
+        "macro_f1": 0.7414,
+        "weighted_precision": 0.799,
+        "weighted_recall": 0.8084,
+        "weighted_f1": 0.7993,
+        "per_class": {
+          "1": {
+            "support": 92,
+            "precision": 0.8252,
+            "recall": 0.9239,
+            "f1": 0.8718,
+            "tp": 85,
+            "fp": 18,
+            "fn": 7
+          },
+          "2": {
+            "support": 22,
+            "precision": 0.7778,
+            "recall": 0.6364,
+            "f1": 0.7,
+            "tp": 14,
+            "fp": 4,
+            "fn": 8
+          },
+          "3": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 7,
+            "precision": 0.875,
+            "recall": 1.0,
+            "f1": 0.9333,
+            "tp": 7,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 5,
+            "precision": 0.3333,
+            "recall": 0.2,
+            "f1": 0.25,
+            "tp": 1,
+            "fp": 2,
+            "fn": 4
+          },
+          "6": {
+            "support": 10,
+            "precision": 0.625,
+            "recall": 0.5,
+            "f1": 0.5556,
+            "tp": 5,
+            "fp": 3,
+            "fn": 5
+          },
+          "9": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 22,
+            "precision": 0.7895,
+            "recall": 0.6818,
+            "f1": 0.7317,
+            "tp": 15,
+            "fp": 4,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 75.45,
+        "binary_precision": 0.8491,
+        "binary_recall": 0.6429,
+        "binary_f1": 0.7317,
+        "binary_sensitivity": 0.6429,
+        "binary_specificity": 0.9175,
+        "macro_precision": 0.845,
+        "macro_recall": 0.6256,
+        "macro_f1": 0.6679,
+        "weighted_precision": 0.7841,
+        "weighted_recall": 0.7545,
+        "weighted_f1": 0.7375,
+        "per_class": {
+          "1": {
+            "support": 97,
+            "precision": 0.7807,
+            "recall": 0.9175,
+            "f1": 0.8436,
+            "tp": 89,
+            "fp": 25,
+            "fn": 8
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.4545,
+            "recall": 0.6667,
+            "f1": 0.5405,
+            "tp": 10,
+            "fp": 12,
+            "fn": 5
+          },
+          "3": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 7,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.375,
+            "f1": 0.5455,
+            "tp": 3,
+            "fp": 0,
+            "fn": 5
+          },
+          "5": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1": 0.3333,
+            "tp": 1,
+            "fp": 0,
+            "fn": 4
+          },
+          "6": {
+            "support": 12,
+            "precision": 0.625,
+            "recall": 0.4167,
+            "f1": 0.5,
+            "tp": 5,
+            "fp": 3,
+            "fn": 7
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 21,
+            "precision": 0.9,
+            "recall": 0.4286,
+            "f1": 0.5806,
+            "tp": 9,
+            "fp": 1,
+            "fn": 12
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 78.44,
+        "binary_precision": 0.807,
+        "binary_recall": 0.7302,
+        "binary_f1": 0.7667,
+        "binary_sensitivity": 0.7302,
+        "binary_specificity": 0.8942,
+        "macro_precision": 0.7665,
+        "macro_recall": 0.6732,
+        "macro_f1": 0.7018,
+        "weighted_precision": 0.7856,
+        "weighted_recall": 0.7844,
+        "weighted_f1": 0.7778,
+        "per_class": {
+          "1": {
+            "support": 104,
+            "precision": 0.8455,
+            "recall": 0.8942,
+            "f1": 0.8692,
+            "tp": 93,
+            "fp": 17,
+            "fn": 11
+          },
+          "2": {
+            "support": 16,
+            "precision": 0.6154,
+            "recall": 0.5,
+            "f1": 0.5517,
+            "tp": 8,
+            "fp": 5,
+            "fn": 8
+          },
+          "3": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 7,
+            "precision": 0.6,
+            "recall": 0.4286,
+            "f1": 0.5,
+            "tp": 3,
+            "fp": 2,
+            "fn": 4
+          },
+          "5": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.4286,
+            "f1": 0.6,
+            "tp": 3,
+            "fp": 0,
+            "fn": 4
+          },
+          "6": {
+            "support": 7,
+            "precision": 0.5,
+            "recall": 0.4286,
+            "f1": 0.4615,
+            "tp": 3,
+            "fp": 3,
+            "fn": 4
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 17,
+            "precision": 0.5714,
+            "recall": 0.7059,
+            "f1": 0.6316,
+            "tp": 12,
+            "fp": 9,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 80.84,
+        "binary_precision": 0.8387,
+        "binary_recall": 0.7647,
+        "binary_f1": 0.8,
+        "binary_sensitivity": 0.7647,
+        "binary_specificity": 0.899,
+        "macro_precision": 0.7904,
+        "macro_recall": 0.7463,
+        "macro_f1": 0.7012,
+        "weighted_precision": 0.8309,
+        "weighted_recall": 0.8084,
+        "weighted_f1": 0.8045,
+        "per_class": {
+          "1": {
+            "support": 99,
+            "precision": 0.8476,
+            "recall": 0.899,
+            "f1": 0.8725,
+            "tp": 89,
+            "fp": 16,
+            "fn": 10
+          },
+          "2": {
+            "support": 19,
+            "precision": 0.7059,
+            "recall": 0.6316,
+            "f1": 0.6667,
+            "tp": 12,
+            "fp": 5,
+            "fn": 7
+          },
+          "3": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1": 0.4,
+            "tp": 2,
+            "fp": 6,
+            "fn": 0
+          },
+          "5": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.1667,
+            "f1": 0.2857,
+            "tp": 1,
+            "fp": 0,
+            "fn": 5
+          },
+          "6": {
+            "support": 10,
+            "precision": 0.625,
+            "recall": 0.5,
+            "f1": 0.5556,
+            "tp": 5,
+            "fp": 3,
+            "fn": 5
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 22,
+            "precision": 0.8947,
+            "recall": 0.7727,
+            "f1": 0.8293,
+            "tp": 17,
+            "fp": 2,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 77.84,
+        "binary_precision": 0.9032,
+        "binary_recall": 0.7,
+        "binary_f1": 0.7887,
+        "binary_sensitivity": 0.7,
+        "binary_specificity": 0.931,
+        "macro_precision": 0.8196,
+        "macro_recall": 0.6897,
+        "macro_f1": 0.6872,
+        "weighted_precision": 0.7948,
+        "weighted_recall": 0.7784,
+        "weighted_f1": 0.7595,
+        "per_class": {
+          "1": {
+            "support": 87,
+            "precision": 0.7714,
+            "recall": 0.931,
+            "f1": 0.8438,
+            "tp": 81,
+            "fp": 24,
+            "fn": 6
+          },
+          "2": {
+            "support": 25,
+            "precision": 0.6842,
+            "recall": 0.52,
+            "f1": 0.5909,
+            "tp": 13,
+            "fp": 6,
+            "fn": 12
+          },
+          "3": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1": 0.9474,
+            "tp": 9,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1": 0.2222,
+            "tp": 1,
+            "fp": 0,
+            "fn": 7
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 2,
+            "fn": 0
+          },
+          "6": {
+            "support": 8,
+            "precision": 0.7778,
+            "recall": 0.875,
+            "f1": 0.8235,
+            "tp": 7,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 0,
+            "fn": 3
+          },
+          "10": {
+            "support": 21,
+            "precision": 0.8235,
+            "recall": 0.6667,
+            "f1": 0.7368,
+            "tp": 14,
+            "fp": 3,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 83.83,
+        "binary_precision": 0.9615,
+        "binary_recall": 0.7246,
+        "binary_f1": 0.8264,
+        "binary_sensitivity": 0.7246,
+        "binary_specificity": 0.9796,
+        "macro_precision": 0.8922,
+        "macro_recall": 0.6865,
+        "macro_f1": 0.7533,
+        "weighted_precision": 0.8443,
+        "weighted_recall": 0.8383,
+        "weighted_f1": 0.8252,
+        "per_class": {
+          "1": {
+            "support": 98,
+            "precision": 0.8348,
+            "recall": 0.9796,
+            "f1": 0.9014,
+            "tp": 96,
+            "fp": 19,
+            "fn": 2
+          },
+          "2": {
+            "support": 14,
+            "precision": 0.9,
+            "recall": 0.6429,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 1,
+            "fn": 5
+          },
+          "3": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 7,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.2857,
+            "f1": 0.4444,
+            "tp": 2,
+            "fp": 0,
+            "fn": 5
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 10,
+            "precision": 0.625,
+            "recall": 0.5,
+            "f1": 0.5556,
+            "tp": 5,
+            "fp": 3,
+            "fn": 5
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 0,
+            "fn": 2
+          },
+          "10": {
+            "support": 21,
+            "precision": 0.7778,
+            "recall": 0.6667,
+            "f1": 0.7179,
+            "tp": 14,
+            "fp": 4,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 77.84,
+        "binary_precision": 0.88,
+        "binary_recall": 0.6377,
+        "binary_f1": 0.7395,
+        "binary_sensitivity": 0.6377,
+        "binary_specificity": 0.9388,
+        "macro_precision": 0.8326,
+        "macro_recall": 0.6328,
+        "macro_f1": 0.6778,
+        "weighted_precision": 0.7942,
+        "weighted_recall": 0.7784,
+        "weighted_f1": 0.7583,
+        "per_class": {
+          "1": {
+            "support": 98,
+            "precision": 0.7863,
+            "recall": 0.9388,
+            "f1": 0.8558,
+            "tp": 92,
+            "fp": 25,
+            "fn": 6
+          },
+          "2": {
+            "support": 21,
+            "precision": 0.7647,
+            "recall": 0.619,
+            "f1": 0.6842,
+            "tp": 13,
+            "fp": 4,
+            "fn": 8
+          },
+          "3": {
+            "support": 4,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 7,
+            "precision": 0.6667,
+            "recall": 0.5714,
+            "f1": 0.6154,
+            "tp": 4,
+            "fp": 2,
+            "fn": 3
+          },
+          "5": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 0,
+            "fn": 4
+          },
+          "6": {
+            "support": 12,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 3,
+            "fp": 0,
+            "fn": 9
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 15,
+            "precision": 0.6429,
+            "recall": 0.6,
+            "f1": 0.6207,
+            "tp": 9,
+            "fp": 5,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 82.04,
+        "binary_precision": 0.8548,
+        "binary_recall": 0.803,
+        "binary_f1": 0.8281,
+        "binary_sensitivity": 0.803,
+        "binary_specificity": 0.9109,
+        "macro_precision": 0.8239,
+        "macro_recall": 0.745,
+        "macro_f1": 0.779,
+        "weighted_precision": 0.8211,
+        "weighted_recall": 0.8204,
+        "weighted_f1": 0.819,
+        "per_class": {
+          "1": {
+            "support": 101,
+            "precision": 0.8762,
+            "recall": 0.9109,
+            "f1": 0.8932,
+            "tp": 92,
+            "fp": 13,
+            "fn": 9
+          },
+          "2": {
+            "support": 18,
+            "precision": 0.6316,
+            "recall": 0.6667,
+            "f1": 0.6486,
+            "tp": 12,
+            "fp": 7,
+            "fn": 6
+          },
+          "3": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.8571,
+            "f1": 0.9231,
+            "tp": 6,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 6,
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1": 0.5455,
+            "tp": 3,
+            "fp": 2,
+            "fn": 3
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 8,
+            "precision": 0.8333,
+            "recall": 0.625,
+            "f1": 0.7143,
+            "tp": 5,
+            "fp": 1,
+            "fn": 3
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 20,
+            "precision": 0.65,
+            "recall": 0.65,
+            "f1": 0.65,
+            "tp": 13,
+            "fp": 7,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 78.44,
+        "binary_precision": 0.8364,
+        "binary_recall": 0.6866,
+        "binary_f1": 0.7541,
+        "binary_sensitivity": 0.6866,
+        "binary_specificity": 0.91,
+        "macro_precision": 0.6907,
+        "macro_recall": 0.6485,
+        "macro_f1": 0.662,
+        "weighted_precision": 0.7439,
+        "weighted_recall": 0.7844,
+        "weighted_f1": 0.7602,
+        "per_class": {
+          "1": {
+            "support": 100,
+            "precision": 0.8125,
+            "recall": 0.91,
+            "f1": 0.8585,
+            "tp": 91,
+            "fp": 21,
+            "fn": 9
+          },
+          "2": {
+            "support": 20,
+            "precision": 0.8125,
+            "recall": 0.65,
+            "f1": 0.7222,
+            "tp": 13,
+            "fp": 3,
+            "fn": 7
+          },
+          "3": {
+            "support": 6,
+            "precision": 0.8571,
+            "recall": 1.0,
+            "f1": 0.9231,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 9,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 9
+          },
+          "6": {
+            "support": 7,
+            "precision": 0.7143,
+            "recall": 0.7143,
+            "f1": 0.7143,
+            "tp": 5,
+            "fp": 2,
+            "fn": 2
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 17,
+            "precision": 0.5789,
+            "recall": 0.6471,
+            "f1": 0.6111,
+            "tp": 11,
+            "fp": 8,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "60_40",
+        "n_test": 167,
+        "multiclass_acc": 86.23,
+        "binary_precision": 0.9355,
+        "binary_recall": 0.8657,
+        "binary_f1": 0.8992,
+        "binary_sensitivity": 0.8657,
+        "binary_specificity": 0.96,
+        "macro_precision": 0.8522,
+        "macro_recall": 0.7655,
+        "macro_f1": 0.767,
+        "weighted_precision": 0.892,
+        "weighted_recall": 0.8623,
+        "weighted_f1": 0.8598,
+        "per_class": {
+          "1": {
+            "support": 100,
+            "precision": 0.9143,
+            "recall": 0.96,
+            "f1": 0.9366,
+            "tp": 96,
+            "fp": 9,
+            "fn": 4
+          },
+          "2": {
+            "support": 17,
+            "precision": 0.7368,
+            "recall": 0.8235,
+            "f1": 0.7778,
+            "tp": 14,
+            "fp": 5,
+            "fn": 3
+          },
+          "3": {
+            "support": 6,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 6,
+            "fp": 2,
+            "fn": 0
+          },
+          "4": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.8333,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.4167,
+            "recall": 0.8333,
+            "f1": 0.5556,
+            "tp": 5,
+            "fp": 7,
+            "fn": 1
+          },
+          "9": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 0,
+            "fn": 4
+          },
+          "10": {
+            "support": 22,
+            "precision": 1.0,
+            "recall": 0.5909,
+            "f1": 0.7429,
+            "tp": 13,
+            "fp": 0,
+            "fn": 9
+          }
+        }
+      }
+    ]
+  },
+  "70_30": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 81.36,
+        "std": 3.9562
+      },
+      "binary_precision": {
+        "mean": 0.8626,
+        "std": 0.0633
+      },
+      "binary_recall": {
+        "mean": 0.7633,
+        "std": 0.0899
+      },
+      "binary_f1": {
+        "mean": 0.8072,
+        "std": 0.0632
+      },
+      "binary_sensitivity": {
+        "mean": 0.7633,
+        "std": 0.0899
+      },
+      "binary_specificity": {
+        "mean": 0.9143,
+        "std": 0.0367
+      },
+      "macro_precision": {
+        "mean": 0.7974,
+        "std": 0.0791
+      },
+      "macro_recall": {
+        "mean": 0.73,
+        "std": 0.0862
+      },
+      "macro_f1": {
+        "mean": 0.7346,
+        "std": 0.065
+      },
+      "weighted_precision": {
+        "mean": 0.8207,
+        "std": 0.0523
+      },
+      "weighted_recall": {
+        "mean": 0.8136,
+        "std": 0.0396
+      },
+      "weighted_f1": {
+        "mean": 0.8047,
+        "std": 0.0456
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 80.0,
+        "binary_precision": 0.9074,
+        "binary_recall": 0.7778,
+        "binary_f1": 0.8376,
+        "binary_sensitivity": 0.7778,
+        "binary_specificity": 0.9194,
+        "macro_precision": 0.8495,
+        "macro_recall": 0.7016,
+        "macro_f1": 0.7304,
+        "weighted_precision": 0.8163,
+        "weighted_recall": 0.8,
+        "weighted_f1": 0.7891,
+        "per_class": {
+          "1": {
+            "support": 62,
+            "precision": 0.8028,
+            "recall": 0.9194,
+            "f1": 0.8571,
+            "tp": 57,
+            "fp": 14,
+            "fn": 5
+          },
+          "2": {
+            "support": 16,
+            "precision": 0.6111,
+            "recall": 0.6875,
+            "f1": 0.6471,
+            "tp": 11,
+            "fp": 7,
+            "fn": 5
+          },
+          "3": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 0.8333,
+            "recall": 1.0,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 0.5,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 1,
+            "fn": 2
+          },
+          "6": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.5556,
+            "f1": 0.7143,
+            "tp": 5,
+            "fp": 0,
+            "fn": 4
+          },
+          "9": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1": 0.3333,
+            "tp": 1,
+            "fp": 0,
+            "fn": 4
+          },
+          "10": {
+            "support": 20,
+            "precision": 0.8824,
+            "recall": 0.75,
+            "f1": 0.8108,
+            "tp": 15,
+            "fp": 2,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 76.0,
+        "binary_precision": 0.8043,
+        "binary_recall": 0.6852,
+        "binary_f1": 0.74,
+        "binary_sensitivity": 0.6852,
+        "binary_specificity": 0.8732,
+        "macro_precision": 0.6909,
+        "macro_recall": 0.5993,
+        "macro_f1": 0.6218,
+        "weighted_precision": 0.7534,
+        "weighted_recall": 0.76,
+        "weighted_f1": 0.7443,
+        "per_class": {
+          "1": {
+            "support": 71,
+            "precision": 0.7848,
+            "recall": 0.8732,
+            "f1": 0.8267,
+            "tp": 62,
+            "fp": 17,
+            "fn": 9
+          },
+          "2": {
+            "support": 12,
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1": 0.6,
+            "tp": 9,
+            "fp": 9,
+            "fn": 3
+          },
+          "3": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 8,
+            "precision": 0.5,
+            "recall": 0.25,
+            "f1": 0.3333,
+            "tp": 2,
+            "fp": 2,
+            "fn": 6
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 17,
+            "precision": 0.9091,
+            "recall": 0.5882,
+            "f1": 0.7143,
+            "tp": 10,
+            "fp": 1,
+            "fn": 7
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 77.6,
+        "binary_precision": 0.7872,
+        "binary_recall": 0.7708,
+        "binary_f1": 0.7789,
+        "binary_sensitivity": 0.7708,
+        "binary_specificity": 0.8701,
+        "macro_precision": 0.7261,
+        "macro_recall": 0.7032,
+        "macro_f1": 0.7085,
+        "weighted_precision": 0.7785,
+        "weighted_recall": 0.776,
+        "weighted_f1": 0.7737,
+        "per_class": {
+          "1": {
+            "support": 77,
+            "precision": 0.859,
+            "recall": 0.8701,
+            "f1": 0.8645,
+            "tp": 67,
+            "fp": 11,
+            "fn": 10
+          },
+          "2": {
+            "support": 13,
+            "precision": 0.6,
+            "recall": 0.4615,
+            "f1": 0.5217,
+            "tp": 6,
+            "fp": 4,
+            "fn": 7
+          },
+          "3": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 6,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 4,
+            "fp": 2,
+            "fn": 2
+          },
+          "5": {
+            "support": 6,
+            "precision": 0.75,
+            "recall": 0.5,
+            "f1": 0.6,
+            "tp": 3,
+            "fp": 1,
+            "fn": 3
+          },
+          "6": {
+            "support": 5,
+            "precision": 0.4,
+            "recall": 0.4,
+            "f1": 0.4,
+            "tp": 2,
+            "fp": 3,
+            "fn": 3
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 11,
+            "precision": 0.5333,
+            "recall": 0.7273,
+            "f1": 0.6154,
+            "tp": 8,
+            "fp": 7,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 87.2,
+        "binary_precision": 0.8519,
+        "binary_recall": 0.92,
+        "binary_f1": 0.8846,
+        "binary_sensitivity": 0.92,
+        "binary_specificity": 0.8933,
+        "macro_precision": 0.8132,
+        "macro_recall": 0.9181,
+        "macro_f1": 0.8417,
+        "weighted_precision": 0.894,
+        "weighted_recall": 0.872,
+        "weighted_f1": 0.8788,
+        "per_class": {
+          "1": {
+            "support": 75,
+            "precision": 0.9437,
+            "recall": 0.8933,
+            "f1": 0.9178,
+            "tp": 67,
+            "fp": 4,
+            "fn": 8
+          },
+          "2": {
+            "support": 16,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "tp": 12,
+            "fp": 4,
+            "fn": 4
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.3333,
+            "recall": 1.0,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 4,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 9,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421,
+            "tp": 8,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "10": {
+            "support": 16,
+            "precision": 0.9286,
+            "recall": 0.8125,
+            "f1": 0.8667,
+            "tp": 13,
+            "fp": 1,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 81.6,
+        "binary_precision": 0.913,
+        "binary_recall": 0.7241,
+        "binary_f1": 0.8077,
+        "binary_sensitivity": 0.7241,
+        "binary_specificity": 0.9403,
+        "macro_precision": 0.8452,
+        "macro_recall": 0.7688,
+        "macro_f1": 0.7798,
+        "weighted_precision": 0.8277,
+        "weighted_recall": 0.816,
+        "weighted_f1": 0.8097,
+        "per_class": {
+          "1": {
+            "support": 67,
+            "precision": 0.7975,
+            "recall": 0.9403,
+            "f1": 0.863,
+            "tp": 63,
+            "fp": 16,
+            "fn": 4
+          },
+          "2": {
+            "support": 18,
+            "precision": 0.7143,
+            "recall": 0.5556,
+            "f1": 0.625,
+            "tp": 10,
+            "fp": 4,
+            "fn": 8
+          },
+          "3": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.8333,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 0,
+            "fn": 3
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 16,
+            "precision": 0.9167,
+            "recall": 0.6875,
+            "f1": 0.7857,
+            "tp": 11,
+            "fp": 1,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 85.6,
+        "binary_precision": 0.9524,
+        "binary_recall": 0.7843,
+        "binary_f1": 0.8602,
+        "binary_sensitivity": 0.7843,
+        "binary_specificity": 0.973,
+        "macro_precision": 0.9013,
+        "macro_recall": 0.7067,
+        "macro_f1": 0.7534,
+        "weighted_precision": 0.8593,
+        "weighted_recall": 0.856,
+        "weighted_f1": 0.8435,
+        "per_class": {
+          "1": {
+            "support": 74,
+            "precision": 0.8675,
+            "recall": 0.973,
+            "f1": 0.9172,
+            "tp": 72,
+            "fp": 11,
+            "fn": 2
+          },
+          "2": {
+            "support": 10,
+            "precision": 0.7,
+            "recall": 0.7,
+            "f1": 0.7,
+            "tp": 7,
+            "fp": 3,
+            "fn": 3
+          },
+          "3": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 8,
+            "precision": 0.8571,
+            "recall": 0.75,
+            "f1": 0.8,
+            "tp": 6,
+            "fp": 1,
+            "fn": 2
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 17,
+            "precision": 0.7857,
+            "recall": 0.6471,
+            "f1": 0.7097,
+            "tp": 11,
+            "fp": 3,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 80.0,
+        "binary_precision": 0.8857,
+        "binary_recall": 0.62,
+        "binary_f1": 0.7294,
+        "binary_sensitivity": 0.62,
+        "binary_specificity": 0.9467,
+        "macro_precision": 0.8495,
+        "macro_recall": 0.6755,
+        "macro_f1": 0.6926,
+        "weighted_precision": 0.8254,
+        "weighted_recall": 0.8,
+        "weighted_f1": 0.7735,
+        "per_class": {
+          "1": {
+            "support": 75,
+            "precision": 0.7889,
+            "recall": 0.9467,
+            "f1": 0.8606,
+            "tp": 71,
+            "fp": 19,
+            "fn": 4
+          },
+          "2": {
+            "support": 13,
+            "precision": 0.8182,
+            "recall": 0.6923,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 2,
+            "fn": 4
+          },
+          "3": {
+            "support": 4,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.5,
+            "recall": 0.6667,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 2,
+            "fn": 1
+          },
+          "6": {
+            "support": 11,
+            "precision": 1.0,
+            "recall": 0.1818,
+            "f1": 0.3077,
+            "tp": 2,
+            "fp": 0,
+            "fn": 9
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.8889,
+            "recall": 0.6667,
+            "f1": 0.7619,
+            "tp": 8,
+            "fp": 1,
+            "fn": 4
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 83.2,
+        "binary_precision": 0.8571,
+        "binary_recall": 0.84,
+        "binary_f1": 0.8485,
+        "binary_sensitivity": 0.84,
+        "binary_specificity": 0.9067,
+        "macro_precision": 0.8197,
+        "macro_recall": 0.7696,
+        "macro_f1": 0.7893,
+        "weighted_precision": 0.8355,
+        "weighted_recall": 0.832,
+        "weighted_f1": 0.8321,
+        "per_class": {
+          "1": {
+            "support": 75,
+            "precision": 0.8947,
+            "recall": 0.9067,
+            "f1": 0.9007,
+            "tp": 68,
+            "fp": 8,
+            "fn": 7
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 10,
+            "fp": 5,
+            "fn": 5
+          },
+          "3": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.8333,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 0.5,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.7143,
+            "recall": 0.8333,
+            "f1": 0.7692,
+            "tp": 5,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.6154,
+            "recall": 0.6667,
+            "f1": 0.64,
+            "tp": 8,
+            "fp": 5,
+            "fn": 4
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 76.8,
+        "binary_precision": 0.7561,
+        "binary_recall": 0.6739,
+        "binary_f1": 0.7126,
+        "binary_sensitivity": 0.6739,
+        "binary_specificity": 0.8734,
+        "macro_precision": 0.6562,
+        "macro_recall": 0.6727,
+        "macro_f1": 0.6634,
+        "weighted_precision": 0.7349,
+        "weighted_recall": 0.768,
+        "weighted_f1": 0.7506,
+        "per_class": {
+          "1": {
+            "support": 79,
+            "precision": 0.8214,
+            "recall": 0.8734,
+            "f1": 0.8466,
+            "tp": 69,
+            "fp": 15,
+            "fn": 10
+          },
+          "2": {
+            "support": 16,
+            "precision": 0.625,
+            "recall": 0.625,
+            "f1": 0.625,
+            "tp": 10,
+            "fp": 6,
+            "fn": 6
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 2,
+            "fn": 2
+          },
+          "5": {
+            "support": 5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 5
+          },
+          "6": {
+            "support": 5,
+            "precision": 0.6667,
+            "recall": 0.8,
+            "f1": 0.7273,
+            "tp": 4,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.6364,
+            "recall": 0.5833,
+            "f1": 0.6087,
+            "tp": 7,
+            "fp": 4,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "70_30",
+        "n_test": 125,
+        "multiclass_acc": 85.6,
+        "binary_precision": 0.9111,
+        "binary_recall": 0.8367,
+        "binary_f1": 0.8723,
+        "binary_sensitivity": 0.8367,
+        "binary_specificity": 0.9474,
+        "macro_precision": 0.8229,
+        "macro_recall": 0.7849,
+        "macro_f1": 0.7654,
+        "weighted_precision": 0.8825,
+        "weighted_recall": 0.856,
+        "weighted_f1": 0.8518,
+        "per_class": {
+          "1": {
+            "support": 76,
+            "precision": 0.9,
+            "recall": 0.9474,
+            "f1": 0.9231,
+            "tp": 72,
+            "fp": 8,
+            "fn": 4
+          },
+          "2": {
+            "support": 10,
+            "precision": 0.6,
+            "recall": 0.9,
+            "f1": 0.72,
+            "tp": 9,
+            "fp": 6,
+            "fn": 1
+          },
+          "3": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 5,
+            "precision": 0.6667,
+            "recall": 0.8,
+            "f1": 0.7273,
+            "tp": 4,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 0,
+            "fn": 3
+          },
+          "10": {
+            "support": 19,
+            "precision": 1.0,
+            "recall": 0.6316,
+            "f1": 0.7742,
+            "tp": 12,
+            "fp": 0,
+            "fn": 7
+          }
+        }
+      }
+    ]
+  },
+  "75_25": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 82.309,
+        "std": 3.307
+      },
+      "binary_precision": {
+        "mean": 0.8797,
+        "std": 0.0545
+      },
+      "binary_recall": {
+        "mean": 0.7619,
+        "std": 0.0919
+      },
+      "binary_f1": {
+        "mean": 0.8136,
+        "std": 0.0629
+      },
+      "binary_sensitivity": {
+        "mean": 0.7619,
+        "std": 0.0919
+      },
+      "binary_specificity": {
+        "mean": 0.9264,
+        "std": 0.0308
+      },
+      "macro_precision": {
+        "mean": 0.7866,
+        "std": 0.0957
+      },
+      "macro_recall": {
+        "mean": 0.7326,
+        "std": 0.0837
+      },
+      "macro_f1": {
+        "mean": 0.7347,
+        "std": 0.0765
+      },
+      "weighted_precision": {
+        "mean": 0.8266,
+        "std": 0.0485
+      },
+      "weighted_recall": {
+        "mean": 0.8231,
+        "std": 0.0331
+      },
+      "weighted_f1": {
+        "mean": 0.8123,
+        "std": 0.0389
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 84.62,
+        "binary_precision": 0.9565,
+        "binary_recall": 0.8148,
+        "binary_f1": 0.88,
+        "binary_sensitivity": 0.8148,
+        "binary_specificity": 0.96,
+        "macro_precision": 0.9034,
+        "macro_recall": 0.8115,
+        "macro_f1": 0.8284,
+        "weighted_precision": 0.8623,
+        "weighted_recall": 0.8462,
+        "weighted_f1": 0.836,
+        "per_class": {
+          "1": {
+            "support": 50,
+            "precision": 0.8276,
+            "recall": 0.96,
+            "f1": 0.8889,
+            "tp": 48,
+            "fp": 10,
+            "fn": 2
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.9091,
+            "recall": 0.6667,
+            "f1": 0.7692,
+            "tp": 10,
+            "fp": 1,
+            "fn": 5
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 2,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.375,
+            "f1": 0.5455,
+            "tp": 3,
+            "fp": 0,
+            "fn": 5
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 17,
+            "precision": 0.8235,
+            "recall": 0.8235,
+            "f1": 0.8235,
+            "tp": 14,
+            "fp": 3,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 80.77,
+        "binary_precision": 0.85,
+        "binary_recall": 0.7391,
+        "binary_f1": 0.7907,
+        "binary_sensitivity": 0.7391,
+        "binary_specificity": 0.8966,
+        "macro_precision": 0.7605,
+        "macro_recall": 0.6567,
+        "macro_f1": 0.692,
+        "weighted_precision": 0.8071,
+        "weighted_recall": 0.8077,
+        "weighted_f1": 0.7999,
+        "per_class": {
+          "1": {
+            "support": 58,
+            "precision": 0.8125,
+            "recall": 0.8966,
+            "f1": 0.8525,
+            "tp": 52,
+            "fp": 12,
+            "fn": 6
+          },
+          "2": {
+            "support": 10,
+            "precision": 0.5385,
+            "recall": 0.7,
+            "f1": 0.6087,
+            "tp": 7,
+            "fp": 6,
+            "fn": 3
+          },
+          "3": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 7,
+            "precision": 0.8333,
+            "recall": 0.7143,
+            "f1": 0.7692,
+            "tp": 5,
+            "fp": 1,
+            "fn": 2
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 14,
+            "precision": 0.9,
+            "recall": 0.6429,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 1,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 76.92,
+        "binary_precision": 0.7632,
+        "binary_recall": 0.7632,
+        "binary_f1": 0.7632,
+        "binary_sensitivity": 0.7632,
+        "binary_specificity": 0.8636,
+        "macro_precision": 0.6357,
+        "macro_recall": 0.7059,
+        "macro_f1": 0.6632,
+        "weighted_precision": 0.7421,
+        "weighted_recall": 0.7692,
+        "weighted_f1": 0.7532,
+        "per_class": {
+          "1": {
+            "support": 66,
+            "precision": 0.8636,
+            "recall": 0.8636,
+            "f1": 0.8636,
+            "tp": 57,
+            "fp": 9,
+            "fn": 9
+          },
+          "2": {
+            "support": 12,
+            "precision": 0.5833,
+            "recall": 0.5833,
+            "f1": 0.5833,
+            "tp": 7,
+            "fp": 5,
+            "fn": 5
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 2,
+            "fn": 0
+          },
+          "5": {
+            "support": 5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 5
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 2,
+            "fn": 2
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 10,
+            "precision": 0.5385,
+            "recall": 0.7,
+            "f1": 0.6087,
+            "tp": 7,
+            "fp": 6,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 83.65,
+        "binary_precision": 0.878,
+        "binary_recall": 0.8182,
+        "binary_f1": 0.8471,
+        "binary_sensitivity": 0.8182,
+        "binary_specificity": 0.9167,
+        "macro_precision": 0.805,
+        "macro_recall": 0.8462,
+        "macro_f1": 0.7986,
+        "weighted_precision": 0.8463,
+        "weighted_recall": 0.8366,
+        "weighted_f1": 0.8325,
+        "per_class": {
+          "1": {
+            "support": 60,
+            "precision": 0.873,
+            "recall": 0.9167,
+            "f1": 0.8943,
+            "tp": 55,
+            "fp": 8,
+            "fn": 5
+          },
+          "2": {
+            "support": 13,
+            "precision": 0.75,
+            "recall": 0.6923,
+            "f1": 0.72,
+            "tp": 9,
+            "fp": 3,
+            "fn": 4
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 3,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 8,
+            "precision": 0.75,
+            "recall": 0.375,
+            "f1": 0.5,
+            "tp": 3,
+            "fp": 1,
+            "fn": 5
+          },
+          "9": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "10": {
+            "support": 14,
+            "precision": 0.9167,
+            "recall": 0.7857,
+            "f1": 0.8462,
+            "tp": 11,
+            "fp": 1,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 79.81,
+        "binary_precision": 0.8824,
+        "binary_recall": 0.6522,
+        "binary_f1": 0.75,
+        "binary_sensitivity": 0.6522,
+        "binary_specificity": 0.931,
+        "macro_precision": 0.8291,
+        "macro_recall": 0.7539,
+        "macro_f1": 0.7629,
+        "weighted_precision": 0.8164,
+        "weighted_recall": 0.7981,
+        "weighted_f1": 0.7889,
+        "per_class": {
+          "1": {
+            "support": 58,
+            "precision": 0.7714,
+            "recall": 0.931,
+            "f1": 0.8438,
+            "tp": 54,
+            "fp": 16,
+            "fn": 4
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.7778,
+            "recall": 0.4667,
+            "f1": 0.5833,
+            "tp": 7,
+            "fp": 2,
+            "fn": 8
+          },
+          "3": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "4": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 4,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 1,
+            "fn": 1
+          },
+          "10": {
+            "support": 12,
+            "precision": 1.0,
+            "recall": 0.5833,
+            "f1": 0.7368,
+            "tp": 7,
+            "fp": 0,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 85.58,
+        "binary_precision": 0.925,
+        "binary_recall": 0.8222,
+        "binary_f1": 0.8706,
+        "binary_sensitivity": 0.8222,
+        "binary_specificity": 0.9492,
+        "macro_precision": 0.8924,
+        "macro_recall": 0.7291,
+        "macro_f1": 0.7607,
+        "weighted_precision": 0.8621,
+        "weighted_recall": 0.8558,
+        "weighted_f1": 0.8442,
+        "per_class": {
+          "1": {
+            "support": 59,
+            "precision": 0.875,
+            "recall": 0.9492,
+            "f1": 0.9106,
+            "tp": 56,
+            "fp": 8,
+            "fn": 3
+          },
+          "2": {
+            "support": 9,
+            "precision": 0.75,
+            "recall": 0.6667,
+            "f1": 0.7059,
+            "tp": 6,
+            "fp": 2,
+            "fn": 3
+          },
+          "3": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.7143,
+            "recall": 0.8333,
+            "f1": 0.7692,
+            "tp": 5,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 15,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1": 0.8,
+            "tp": 12,
+            "fp": 3,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 80.77,
+        "binary_precision": 0.9259,
+        "binary_recall": 0.625,
+        "binary_f1": 0.7463,
+        "binary_sensitivity": 0.625,
+        "binary_specificity": 0.9688,
+        "macro_precision": 0.7291,
+        "macro_recall": 0.6076,
+        "macro_f1": 0.628,
+        "weighted_precision": 0.8158,
+        "weighted_recall": 0.8077,
+        "weighted_f1": 0.7813,
+        "per_class": {
+          "1": {
+            "support": 64,
+            "precision": 0.8052,
+            "recall": 0.9688,
+            "f1": 0.8794,
+            "tp": 62,
+            "fp": 15,
+            "fn": 2
+          },
+          "2": {
+            "support": 11,
+            "precision": 0.7778,
+            "recall": 0.6364,
+            "f1": 0.7,
+            "tp": 7,
+            "fp": 2,
+            "fn": 4
+          },
+          "3": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.5,
+            "recall": 0.3333,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 1,
+            "fn": 2
+          },
+          "6": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.2222,
+            "f1": 0.3636,
+            "tp": 2,
+            "fp": 0,
+            "fn": 7
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.7,
+            "f1": 0.8235,
+            "tp": 7,
+            "fp": 0,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 85.58,
+        "binary_precision": 0.875,
+        "binary_recall": 0.8537,
+        "binary_f1": 0.8642,
+        "binary_sensitivity": 0.8537,
+        "binary_specificity": 0.9206,
+        "macro_precision": 0.8415,
+        "macro_recall": 0.7893,
+        "macro_f1": 0.803,
+        "weighted_precision": 0.8609,
+        "weighted_recall": 0.8558,
+        "weighted_f1": 0.8546,
+        "per_class": {
+          "1": {
+            "support": 63,
+            "precision": 0.9062,
+            "recall": 0.9206,
+            "f1": 0.9134,
+            "tp": 58,
+            "fp": 6,
+            "fn": 5
+          },
+          "2": {
+            "support": 12,
+            "precision": 0.6923,
+            "recall": 0.75,
+            "f1": 0.72,
+            "tp": 9,
+            "fp": 4,
+            "fn": 3
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 0.5,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 11,
+            "precision": 0.8,
+            "recall": 0.7273,
+            "f1": 0.7619,
+            "tp": 8,
+            "fp": 2,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 78.85,
+        "binary_precision": 0.8387,
+        "binary_recall": 0.65,
+        "binary_f1": 0.7324,
+        "binary_sensitivity": 0.65,
+        "binary_specificity": 0.9219,
+        "macro_precision": 0.6339,
+        "macro_recall": 0.6198,
+        "macro_f1": 0.6226,
+        "weighted_precision": 0.7585,
+        "weighted_recall": 0.7885,
+        "weighted_f1": 0.7677,
+        "per_class": {
+          "1": {
+            "support": 64,
+            "precision": 0.8082,
+            "recall": 0.9219,
+            "f1": 0.8613,
+            "tp": 59,
+            "fp": 14,
+            "fn": 5
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.8182,
+            "recall": 0.6,
+            "f1": 0.6923,
+            "tp": 9,
+            "fp": 2,
+            "fn": 6
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 2,
+            "fn": 3
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 5,
+            "precision": 0.6667,
+            "recall": 0.8,
+            "f1": 0.7273,
+            "tp": 4,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 11,
+            "precision": 0.7778,
+            "recall": 0.6364,
+            "f1": 0.7,
+            "tp": 7,
+            "fp": 2,
+            "fn": 4
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "75_25",
+        "n_test": 104,
+        "multiclass_acc": 86.54,
+        "binary_precision": 0.9024,
+        "binary_recall": 0.881,
+        "binary_f1": 0.8916,
+        "binary_sensitivity": 0.881,
+        "binary_specificity": 0.9355,
+        "macro_precision": 0.8359,
+        "macro_recall": 0.8065,
+        "macro_f1": 0.7877,
+        "weighted_precision": 0.8948,
+        "weighted_recall": 0.8654,
+        "weighted_f1": 0.8642,
+        "per_class": {
+          "1": {
+            "support": 62,
+            "precision": 0.9206,
+            "recall": 0.9355,
+            "f1": 0.928,
+            "tp": 58,
+            "fp": 5,
+            "fn": 4
+          },
+          "2": {
+            "support": 9,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 6,
+            "fn": 0
+          },
+          "3": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 0,
+            "fn": 2
+          },
+          "10": {
+            "support": 15,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 10,
+            "fp": 0,
+            "fn": 5
+          }
+        }
+      }
+    ]
+  },
+  "80_20": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 85.356,
+        "std": 2.5778
+      },
+      "binary_precision": {
+        "mean": 0.8962,
+        "std": 0.0406
+      },
+      "binary_recall": {
+        "mean": 0.797,
+        "std": 0.0869
+      },
+      "binary_f1": {
+        "mean": 0.8414,
+        "std": 0.056
+      },
+      "binary_sensitivity": {
+        "mean": 0.797,
+        "std": 0.0869
+      },
+      "binary_specificity": {
+        "mean": 0.9383,
+        "std": 0.0214
+      },
+      "macro_precision": {
+        "mean": 0.8356,
+        "std": 0.0837
+      },
+      "macro_recall": {
+        "mean": 0.7797,
+        "std": 0.0851
+      },
+      "macro_f1": {
+        "mean": 0.7856,
+        "std": 0.0863
+      },
+      "weighted_precision": {
+        "mean": 0.8643,
+        "std": 0.0306
+      },
+      "weighted_recall": {
+        "mean": 0.8536,
+        "std": 0.0258
+      },
+      "weighted_f1": {
+        "mean": 0.8484,
+        "std": 0.0295
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 89.29,
+        "binary_precision": 0.9744,
+        "binary_recall": 0.8444,
+        "binary_f1": 0.9048,
+        "binary_sensitivity": 0.8444,
+        "binary_specificity": 0.9744,
+        "macro_precision": 0.9588,
+        "macro_recall": 0.8801,
+        "macro_f1": 0.9123,
+        "weighted_precision": 0.8999,
+        "weighted_recall": 0.8929,
+        "weighted_f1": 0.8905,
+        "per_class": {
+          "1": {
+            "support": 39,
+            "precision": 0.8444,
+            "recall": 0.9744,
+            "f1": 0.9048,
+            "tp": 38,
+            "fp": 7,
+            "fn": 1
+          },
+          "2": {
+            "support": 15,
+            "precision": 0.9167,
+            "recall": 0.7333,
+            "f1": 0.8148,
+            "tp": 11,
+            "fp": 1,
+            "fn": 4
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.8333,
+            "f1": 0.9091,
+            "tp": 5,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.9091,
+            "recall": 0.8333,
+            "f1": 0.8696,
+            "tp": 10,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 82.14,
+        "binary_precision": 0.9091,
+        "binary_recall": 0.7692,
+        "binary_f1": 0.8333,
+        "binary_sensitivity": 0.7692,
+        "binary_specificity": 0.9333,
+        "macro_precision": 0.8634,
+        "macro_recall": 0.8167,
+        "macro_f1": 0.8293,
+        "weighted_precision": 0.835,
+        "weighted_recall": 0.8214,
+        "weighted_f1": 0.8149,
+        "per_class": {
+          "1": {
+            "support": 45,
+            "precision": 0.8235,
+            "recall": 0.9333,
+            "f1": 0.875,
+            "tp": 42,
+            "fp": 9,
+            "fn": 3
+          },
+          "2": {
+            "support": 7,
+            "precision": 0.6667,
+            "recall": 0.8571,
+            "f1": 0.75,
+            "tp": 6,
+            "fp": 3,
+            "fn": 1
+          },
+          "3": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 5,
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 7,
+            "precision": 0.6667,
+            "recall": 0.5714,
+            "f1": 0.6154,
+            "tp": 4,
+            "fp": 2,
+            "fn": 3
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 14,
+            "precision": 1.0,
+            "recall": 0.5714,
+            "f1": 0.7273,
+            "tp": 8,
+            "fp": 0,
+            "fn": 6
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 84.52,
+        "binary_precision": 0.8333,
+        "binary_recall": 0.8333,
+        "binary_f1": 0.8333,
+        "binary_sensitivity": 0.8333,
+        "binary_specificity": 0.9074,
+        "macro_precision": 0.848,
+        "macro_recall": 0.7804,
+        "macro_f1": 0.7967,
+        "weighted_precision": 0.8588,
+        "weighted_recall": 0.8452,
+        "weighted_f1": 0.847,
+        "per_class": {
+          "1": {
+            "support": 54,
+            "precision": 0.9074,
+            "recall": 0.9074,
+            "f1": 0.9074,
+            "tp": 49,
+            "fp": 5,
+            "fn": 5
+          },
+          "2": {
+            "support": 7,
+            "precision": 0.5714,
+            "recall": 0.5714,
+            "f1": 0.5714,
+            "tp": 4,
+            "fp": 3,
+            "fn": 3
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 7,
+            "precision": 0.5556,
+            "recall": 0.7143,
+            "f1": 0.625,
+            "tp": 5,
+            "fp": 4,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 88.1,
+        "binary_precision": 0.9032,
+        "binary_recall": 0.8485,
+        "binary_f1": 0.875,
+        "binary_sensitivity": 0.8485,
+        "binary_specificity": 0.9412,
+        "macro_precision": 0.8458,
+        "macro_recall": 0.826,
+        "macro_f1": 0.8207,
+        "weighted_precision": 0.8941,
+        "weighted_recall": 0.881,
+        "weighted_f1": 0.88,
+        "per_class": {
+          "1": {
+            "support": 51,
+            "precision": 0.9057,
+            "recall": 0.9412,
+            "f1": 0.9231,
+            "tp": 48,
+            "fp": 5,
+            "fn": 3
+          },
+          "2": {
+            "support": 9,
+            "precision": 0.7778,
+            "recall": 0.7778,
+            "f1": 0.7778,
+            "tp": 7,
+            "fp": 2,
+            "fn": 2
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.3333,
+            "recall": 0.5,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 2,
+            "fn": 1
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 0,
+            "fn": 3
+          },
+          "9": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.8889,
+            "f1": 0.9412,
+            "tp": 8,
+            "fp": 0,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 82.14,
+        "binary_precision": 0.8889,
+        "binary_recall": 0.6667,
+        "binary_f1": 0.7619,
+        "binary_sensitivity": 0.6667,
+        "binary_specificity": 0.9375,
+        "macro_precision": 0.8556,
+        "macro_recall": 0.8345,
+        "macro_f1": 0.8191,
+        "weighted_precision": 0.8433,
+        "weighted_recall": 0.8214,
+        "weighted_f1": 0.8121,
+        "per_class": {
+          "1": {
+            "support": 48,
+            "precision": 0.7895,
+            "recall": 0.9375,
+            "f1": 0.8571,
+            "tp": 45,
+            "fp": 12,
+            "fn": 3
+          },
+          "2": {
+            "support": 14,
+            "precision": 0.8889,
+            "recall": 0.5714,
+            "f1": 0.6957,
+            "tp": 8,
+            "fp": 1,
+            "fn": 6
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 3,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 10,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 5,
+            "fp": 0,
+            "fn": 5
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 88.1,
+        "binary_precision": 0.9333,
+        "binary_recall": 0.8235,
+        "binary_f1": 0.875,
+        "binary_sensitivity": 0.8235,
+        "binary_specificity": 0.96,
+        "macro_precision": 0.9134,
+        "macro_recall": 0.7896,
+        "macro_f1": 0.8244,
+        "weighted_precision": 0.8888,
+        "weighted_recall": 0.8809,
+        "weighted_f1": 0.8759,
+        "per_class": {
+          "1": {
+            "support": 50,
+            "precision": 0.8889,
+            "recall": 0.96,
+            "f1": 0.9231,
+            "tp": 48,
+            "fp": 6,
+            "fn": 2
+          },
+          "2": {
+            "support": 7,
+            "precision": 1.0,
+            "recall": 0.8571,
+            "f1": 0.9231,
+            "tp": 6,
+            "fp": 0,
+            "fn": 1
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 2,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.8182,
+            "recall": 0.75,
+            "f1": 0.7826,
+            "tp": 9,
+            "fp": 2,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 84.52,
+        "binary_precision": 0.875,
+        "binary_recall": 0.6774,
+        "binary_f1": 0.7636,
+        "binary_sensitivity": 0.6774,
+        "binary_specificity": 0.9434,
+        "macro_precision": 0.8363,
+        "macro_recall": 0.6839,
+        "macro_f1": 0.7367,
+        "weighted_precision": 0.8574,
+        "weighted_recall": 0.8452,
+        "weighted_f1": 0.8394,
+        "per_class": {
+          "1": {
+            "support": 53,
+            "precision": 0.8333,
+            "recall": 0.9434,
+            "f1": 0.885,
+            "tp": 50,
+            "fp": 10,
+            "fn": 3
+          },
+          "2": {
+            "support": 8,
+            "precision": 0.8571,
+            "recall": 0.75,
+            "f1": 0.8,
+            "tp": 6,
+            "fp": 1,
+            "fn": 2
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 2,
+            "fn": 2
+          },
+          "6": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 3,
+            "fp": 0,
+            "fn": 3
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.7778,
+            "f1": 0.875,
+            "tp": 7,
+            "fp": 0,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 84.52,
+        "binary_precision": 0.8485,
+        "binary_recall": 0.8485,
+        "binary_f1": 0.8485,
+        "binary_sensitivity": 0.8485,
+        "binary_specificity": 0.902,
+        "macro_precision": 0.818,
+        "macro_recall": 0.8044,
+        "macro_f1": 0.8004,
+        "weighted_precision": 0.8538,
+        "weighted_recall": 0.8453,
+        "weighted_f1": 0.8445,
+        "per_class": {
+          "1": {
+            "support": 51,
+            "precision": 0.902,
+            "recall": 0.902,
+            "f1": 0.902,
+            "tp": 46,
+            "fp": 5,
+            "fn": 5
+          },
+          "2": {
+            "support": 8,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1": 0.6667,
+            "tp": 6,
+            "fp": 4,
+            "fn": 2
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.5,
+            "recall": 0.3333,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 1,
+            "fn": 2
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 10,
+            "precision": 0.875,
+            "recall": 0.7,
+            "f1": 0.7778,
+            "tp": 7,
+            "fp": 1,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 83.33,
+        "binary_precision": 0.8846,
+        "binary_recall": 0.7188,
+        "binary_f1": 0.7931,
+        "binary_sensitivity": 0.7188,
+        "binary_specificity": 0.9423,
+        "macro_precision": 0.6461,
+        "macro_recall": 0.5837,
+        "macro_f1": 0.5878,
+        "weighted_precision": 0.8108,
+        "weighted_recall": 0.8333,
+        "weighted_f1": 0.8114,
+        "per_class": {
+          "1": {
+            "support": 52,
+            "precision": 0.8448,
+            "recall": 0.9423,
+            "f1": 0.8909,
+            "tp": 49,
+            "fp": 9,
+            "fn": 3
+          },
+          "2": {
+            "support": 11,
+            "precision": 0.8,
+            "recall": 0.7273,
+            "f1": 0.7619,
+            "tp": 8,
+            "fp": 2,
+            "fn": 3
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 0.8571,
+            "recall": 0.6667,
+            "f1": 0.75,
+            "tp": 6,
+            "fp": 1,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "80_20",
+        "n_test": 84,
+        "multiclass_acc": 86.9,
+        "binary_precision": 0.9118,
+        "binary_recall": 0.9394,
+        "binary_f1": 0.9254,
+        "binary_sensitivity": 0.9394,
+        "binary_specificity": 0.9412,
+        "macro_precision": 0.7706,
+        "macro_recall": 0.7977,
+        "macro_f1": 0.7284,
+        "weighted_precision": 0.901,
+        "weighted_recall": 0.8691,
+        "weighted_f1": 0.8683,
+        "per_class": {
+          "1": {
+            "support": 51,
+            "precision": 0.96,
+            "recall": 0.9412,
+            "f1": 0.9505,
+            "tp": 48,
+            "fp": 2,
+            "fn": 3
+          },
+          "2": {
+            "support": 7,
+            "precision": 0.5455,
+            "recall": 0.8571,
+            "f1": 0.6667,
+            "tp": 6,
+            "fp": 5,
+            "fn": 1
+          },
+          "3": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "10": {
+            "support": 12,
+            "precision": 0.9091,
+            "recall": 0.8333,
+            "f1": 0.8696,
+            "tp": 10,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      }
+    ]
+  },
+  "85_15": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 85.873,
+        "std": 2.7447
+      },
+      "binary_precision": {
+        "mean": 0.8952,
+        "std": 0.0452
+      },
+      "binary_recall": {
+        "mean": 0.8212,
+        "std": 0.0727
+      },
+      "binary_f1": {
+        "mean": 0.855,
+        "std": 0.049
+      },
+      "binary_sensitivity": {
+        "mean": 0.8212,
+        "std": 0.0727
+      },
+      "binary_specificity": {
+        "mean": 0.9365,
+        "std": 0.0233
+      },
+      "macro_precision": {
+        "mean": 0.7952,
+        "std": 0.0993
+      },
+      "macro_recall": {
+        "mean": 0.7573,
+        "std": 0.0628
+      },
+      "macro_f1": {
+        "mean": 0.7549,
+        "std": 0.0802
+      },
+      "weighted_precision": {
+        "mean": 0.8652,
+        "std": 0.0306
+      },
+      "weighted_recall": {
+        "mean": 0.8587,
+        "std": 0.0274
+      },
+      "weighted_f1": {
+        "mean": 0.852,
+        "std": 0.0301
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_precision": 0.9643,
+        "binary_recall": 0.8182,
+        "binary_f1": 0.8852,
+        "binary_sensitivity": 0.8182,
+        "binary_specificity": 0.9667,
+        "macro_precision": 0.938,
+        "macro_recall": 0.822,
+        "macro_f1": 0.8636,
+        "weighted_precision": 0.8627,
+        "weighted_recall": 0.8572,
+        "weighted_f1": 0.8516,
+        "per_class": {
+          "1": {
+            "support": 30,
+            "precision": 0.8286,
+            "recall": 0.9667,
+            "f1": 0.8923,
+            "tp": 29,
+            "fp": 6,
+            "fn": 1
+          },
+          "2": {
+            "support": 13,
+            "precision": 0.8182,
+            "recall": 0.6923,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 2,
+            "fn": 4
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 8,
+            "precision": 0.8571,
+            "recall": 0.75,
+            "f1": 0.8,
+            "tp": 6,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 84.13,
+        "binary_precision": 0.8846,
+        "binary_recall": 0.8214,
+        "binary_f1": 0.8519,
+        "binary_sensitivity": 0.8214,
+        "binary_specificity": 0.9143,
+        "macro_precision": 0.7688,
+        "macro_recall": 0.711,
+        "macro_f1": 0.7029,
+        "weighted_precision": 0.8614,
+        "weighted_recall": 0.8413,
+        "weighted_f1": 0.8313,
+        "per_class": {
+          "1": {
+            "support": 35,
+            "precision": 0.8649,
+            "recall": 0.9143,
+            "f1": 0.8889,
+            "tp": 32,
+            "fp": 5,
+            "fn": 3
+          },
+          "2": {
+            "support": 4,
+            "precision": 0.5714,
+            "recall": 1.0,
+            "f1": 0.7273,
+            "tp": 4,
+            "fp": 3,
+            "fn": 0
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 0,
+            "fn": 3
+          },
+          "5": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 7,
+            "precision": 0.8571,
+            "recall": 0.8571,
+            "f1": 0.8571,
+            "tp": 6,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 0.8571,
+            "recall": 0.6667,
+            "f1": 0.75,
+            "tp": 6,
+            "fp": 1,
+            "fn": 3
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 82.54,
+        "binary_precision": 0.8095,
+        "binary_recall": 0.8095,
+        "binary_f1": 0.8095,
+        "binary_sensitivity": 0.8095,
+        "binary_specificity": 0.9048,
+        "macro_precision": 0.7016,
+        "macro_recall": 0.6568,
+        "macro_f1": 0.6577,
+        "weighted_precision": 0.8552,
+        "weighted_recall": 0.8254,
+        "weighted_f1": 0.83,
+        "per_class": {
+          "1": {
+            "support": 42,
+            "precision": 0.9048,
+            "recall": 0.9048,
+            "f1": 0.9048,
+            "tp": 38,
+            "fp": 4,
+            "fn": 4
+          },
+          "2": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 0.5,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 1,
+            "fn": 2
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 0.375,
+            "recall": 0.6,
+            "f1": 0.4615,
+            "tp": 3,
+            "fp": 5,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 88.89,
+        "binary_precision": 0.9,
+        "binary_recall": 0.7826,
+        "binary_f1": 0.8372,
+        "binary_sensitivity": 0.7826,
+        "binary_specificity": 0.95,
+        "macro_precision": 0.9396,
+        "macro_recall": 0.8354,
+        "macro_f1": 0.8707,
+        "weighted_precision": 0.8944,
+        "weighted_recall": 0.8889,
+        "weighted_f1": 0.8843,
+        "per_class": {
+          "1": {
+            "support": 40,
+            "precision": 0.8837,
+            "recall": 0.95,
+            "f1": 0.9157,
+            "tp": 38,
+            "fp": 5,
+            "fn": 2
+          },
+          "2": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 1,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 82.54,
+        "binary_precision": 0.9048,
+        "binary_recall": 0.7037,
+        "binary_f1": 0.7917,
+        "binary_sensitivity": 0.7037,
+        "binary_specificity": 0.9444,
+        "macro_precision": 0.7054,
+        "macro_recall": 0.7743,
+        "macro_f1": 0.7109,
+        "weighted_precision": 0.8171,
+        "weighted_recall": 0.8254,
+        "weighted_f1": 0.8067,
+        "per_class": {
+          "1": {
+            "support": 36,
+            "precision": 0.8095,
+            "recall": 0.9444,
+            "f1": 0.8718,
+            "tp": 34,
+            "fp": 8,
+            "fn": 2
+          },
+          "2": {
+            "support": 10,
+            "precision": 0.8333,
+            "recall": 0.5,
+            "f1": 0.625,
+            "tp": 5,
+            "fp": 1,
+            "fn": 5
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 6,
+            "fp": 0,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_precision": 0.875,
+        "binary_recall": 0.8077,
+        "binary_f1": 0.84,
+        "binary_sensitivity": 0.8077,
+        "binary_specificity": 0.9189,
+        "macro_precision": 0.8767,
+        "macro_recall": 0.8058,
+        "macro_f1": 0.8115,
+        "weighted_precision": 0.8719,
+        "weighted_recall": 0.8571,
+        "weighted_f1": 0.8523,
+        "per_class": {
+          "1": {
+            "support": 37,
+            "precision": 0.8718,
+            "recall": 0.9189,
+            "f1": 0.8947,
+            "tp": 34,
+            "fp": 5,
+            "fn": 3
+          },
+          "2": {
+            "support": 3,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 2,
+            "fn": 0
+          },
+          "3": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 1,
+            "fn": 1
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 0.875,
+            "recall": 0.7778,
+            "f1": 0.8235,
+            "tp": 7,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 88.89,
+        "binary_precision": 0.8571,
+        "binary_recall": 0.8182,
+        "binary_f1": 0.8372,
+        "binary_sensitivity": 0.8182,
+        "binary_specificity": 0.9268,
+        "macro_precision": 0.8274,
+        "macro_recall": 0.7575,
+        "macro_f1": 0.7801,
+        "weighted_precision": 0.895,
+        "weighted_recall": 0.8889,
+        "weighted_f1": 0.8879,
+        "per_class": {
+          "1": {
+            "support": 41,
+            "precision": 0.9048,
+            "recall": 0.9268,
+            "f1": 0.9157,
+            "tp": 38,
+            "fp": 4,
+            "fn": 3
+          },
+          "2": {
+            "support": 6,
+            "precision": 0.7143,
+            "recall": 0.8333,
+            "f1": 0.7692,
+            "tp": 5,
+            "fp": 2,
+            "fn": 1
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 1,
+            "fn": 1
+          },
+          "6": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 84.13,
+        "binary_precision": 0.8889,
+        "binary_recall": 0.9231,
+        "binary_f1": 0.9057,
+        "binary_sensitivity": 0.9231,
+        "binary_specificity": 0.9189,
+        "macro_precision": 0.8076,
+        "macro_recall": 0.8128,
+        "macro_f1": 0.7998,
+        "weighted_precision": 0.8478,
+        "weighted_recall": 0.8413,
+        "weighted_f1": 0.8381,
+        "per_class": {
+          "1": {
+            "support": 37,
+            "precision": 0.9444,
+            "recall": 0.9189,
+            "f1": 0.9315,
+            "tp": 34,
+            "fp": 2,
+            "fn": 3
+          },
+          "2": {
+            "support": 6,
+            "precision": 0.75,
+            "recall": 0.5,
+            "f1": 0.6,
+            "tp": 3,
+            "fp": 1,
+            "fn": 3
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.5,
+            "recall": 0.3333,
+            "f1": 0.4,
+            "tp": 1,
+            "fp": 1,
+            "fn": 2
+          },
+          "6": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 8,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1": 0.6667,
+            "tp": 6,
+            "fp": 4,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 85.71,
+        "binary_precision": 0.9091,
+        "binary_recall": 0.7692,
+        "binary_f1": 0.8333,
+        "binary_sensitivity": 0.7692,
+        "binary_specificity": 0.9459,
+        "macro_precision": 0.6661,
+        "macro_recall": 0.6842,
+        "macro_f1": 0.666,
+        "weighted_precision": 0.8296,
+        "weighted_recall": 0.8571,
+        "weighted_f1": 0.8369,
+        "per_class": {
+          "1": {
+            "support": 37,
+            "precision": 0.8537,
+            "recall": 0.9459,
+            "f1": 0.8974,
+            "tp": 35,
+            "fp": 6,
+            "fn": 2
+          },
+          "2": {
+            "support": 8,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 6,
+            "fp": 0,
+            "fn": 2
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3
+          },
+          "6": {
+            "support": 3,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 9,
+            "precision": 0.875,
+            "recall": 0.7778,
+            "f1": 0.8235,
+            "tp": 7,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "85_15",
+        "n_test": 63,
+        "multiclass_acc": 90.48,
+        "binary_precision": 0.9583,
+        "binary_recall": 0.9583,
+        "binary_f1": 0.9583,
+        "binary_sensitivity": 0.9583,
+        "binary_specificity": 0.9744,
+        "macro_precision": 0.7208,
+        "macro_recall": 0.7133,
+        "macro_f1": 0.6854,
+        "weighted_precision": 0.9167,
+        "weighted_recall": 0.9048,
+        "weighted_f1": 0.9011,
+        "per_class": {
+          "1": {
+            "support": 39,
+            "precision": 0.9744,
+            "recall": 0.9744,
+            "f1": 0.9744,
+            "tp": 38,
+            "fp": 1,
+            "fn": 1
+          },
+          "2": {
+            "support": 7,
+            "precision": 0.75,
+            "recall": 0.8571,
+            "f1": 0.8,
+            "tp": 6,
+            "fp": 2,
+            "fn": 1
+          },
+          "3": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 0,
+            "fn": 2
+          },
+          "5": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 3,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 8,
+            "precision": 0.875,
+            "recall": 0.875,
+            "f1": 0.875,
+            "tp": 7,
+            "fp": 1,
+            "fn": 1
+          }
+        }
+      }
+    ]
+  },
+  "90_10": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 86.192,
+        "std": 5.2428
+      },
+      "binary_precision": {
+        "mean": 0.9128,
+        "std": 0.0837
+      },
+      "binary_recall": {
+        "mean": 0.804,
+        "std": 0.071
+      },
+      "binary_f1": {
+        "mean": 0.8532,
+        "std": 0.0661
+      },
+      "binary_sensitivity": {
+        "mean": 0.804,
+        "std": 0.071
+      },
+      "binary_specificity": {
+        "mean": 0.9411,
+        "std": 0.0561
+      },
+      "macro_precision": {
+        "mean": 0.7146,
+        "std": 0.1422
+      },
+      "macro_recall": {
+        "mean": 0.6887,
+        "std": 0.1335
+      },
+      "macro_f1": {
+        "mean": 0.688,
+        "std": 0.135
+      },
+      "weighted_precision": {
+        "mean": 0.8613,
+        "std": 0.0475
+      },
+      "weighted_recall": {
+        "mean": 0.8619,
+        "std": 0.0524
+      },
+      "weighted_f1": {
+        "mean": 0.8519,
+        "std": 0.0497
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 80.95,
+        "binary_precision": 0.9091,
+        "binary_recall": 0.8333,
+        "binary_f1": 0.8696,
+        "binary_sensitivity": 0.8333,
+        "binary_specificity": 0.8889,
+        "macro_precision": 0.7875,
+        "macro_recall": 0.7323,
+        "macro_f1": 0.745,
+        "weighted_precision": 0.828,
+        "weighted_recall": 0.8095,
+        "weighted_f1": 0.8067,
+        "per_class": {
+          "1": {
+            "support": 18,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421,
+            "tp": 16,
+            "fp": 4,
+            "fn": 2
+          },
+          "2": {
+            "support": 11,
+            "precision": 0.875,
+            "recall": 0.6364,
+            "f1": 0.7368,
+            "tp": 7,
+            "fp": 1,
+            "fn": 4
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 6,
+            "precision": 0.625,
+            "recall": 0.8333,
+            "f1": 0.7143,
+            "tp": 5,
+            "fp": 3,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 85.71,
+        "binary_precision": 0.8824,
+        "binary_recall": 0.7895,
+        "binary_f1": 0.8333,
+        "binary_sensitivity": 0.7895,
+        "binary_specificity": 0.913,
+        "macro_precision": 0.6779,
+        "macro_recall": 0.6766,
+        "macro_f1": 0.6707,
+        "weighted_precision": 0.8469,
+        "weighted_recall": 0.8571,
+        "weighted_f1": 0.8451,
+        "per_class": {
+          "1": {
+            "support": 23,
+            "precision": 0.84,
+            "recall": 0.913,
+            "f1": 0.875,
+            "tp": 21,
+            "fp": 4,
+            "fn": 2
+          },
+          "2": {
+            "support": 3,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 0,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 76.19,
+        "binary_precision": 0.7333,
+        "binary_recall": 0.7333,
+        "binary_f1": 0.7333,
+        "binary_sensitivity": 0.7333,
+        "binary_specificity": 0.8519,
+        "macro_precision": 0.5648,
+        "macro_recall": 0.5023,
+        "macro_f1": 0.5112,
+        "weighted_precision": 0.7937,
+        "weighted_recall": 0.7619,
+        "weighted_f1": 0.7671,
+        "per_class": {
+          "1": {
+            "support": 27,
+            "precision": 0.8519,
+            "recall": 0.8519,
+            "f1": 0.8519,
+            "tp": 23,
+            "fp": 4,
+            "fn": 4
+          },
+          "2": {
+            "support": 4,
+            "precision": 0.6667,
+            "recall": 0.5,
+            "f1": 0.5714,
+            "tp": 2,
+            "fp": 1,
+            "fn": 2
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1
+          },
+          "6": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 4,
+            "precision": 0.3333,
+            "recall": 0.5,
+            "f1": 0.4,
+            "tp": 2,
+            "fp": 4,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 90.48,
+        "binary_precision": 0.9231,
+        "binary_recall": 0.8,
+        "binary_f1": 0.8571,
+        "binary_sensitivity": 0.8,
+        "binary_specificity": 0.963,
+        "macro_precision": 0.7121,
+        "macro_recall": 0.6891,
+        "macro_f1": 0.6982,
+        "weighted_precision": 0.8859,
+        "weighted_recall": 0.9048,
+        "weighted_f1": 0.8929,
+        "per_class": {
+          "1": {
+            "support": 27,
+            "precision": 0.8966,
+            "recall": 0.963,
+            "f1": 0.9286,
+            "tp": 26,
+            "fp": 3,
+            "fn": 1
+          },
+          "2": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 1,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_precision": 1.0,
+        "binary_recall": 0.7222,
+        "binary_f1": 0.8387,
+        "binary_sensitivity": 0.7222,
+        "binary_specificity": 1.0,
+        "macro_precision": 0.9785,
+        "macro_recall": 0.8917,
+        "macro_f1": 0.9118,
+        "weighted_precision": 0.9015,
+        "weighted_recall": 0.8809,
+        "weighted_f1": 0.8615,
+        "per_class": {
+          "1": {
+            "support": 24,
+            "precision": 0.8276,
+            "recall": 1.0,
+            "f1": 0.9057,
+            "tp": 24,
+            "fp": 5,
+            "fn": 0
+          },
+          "2": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "tp": 2,
+            "fp": 0,
+            "fn": 4
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "9": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 90.48,
+        "binary_precision": 1.0,
+        "binary_recall": 0.8421,
+        "binary_f1": 0.9143,
+        "binary_sensitivity": 0.8421,
+        "binary_specificity": 1.0,
+        "macro_precision": 0.7177,
+        "macro_recall": 0.7188,
+        "macro_f1": 0.7174,
+        "weighted_precision": 0.862,
+        "weighted_recall": 0.9048,
+        "weighted_f1": 0.8808,
+        "per_class": {
+          "1": {
+            "support": 23,
+            "precision": 0.8846,
+            "recall": 1.0,
+            "f1": 0.9388,
+            "tp": 23,
+            "fp": 3,
+            "fn": 0
+          },
+          "2": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "3": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0
+          },
+          "9": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 8,
+            "precision": 0.8571,
+            "recall": 0.75,
+            "f1": 0.8,
+            "tp": 6,
+            "fp": 1,
+            "fn": 2
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_precision": 0.9091,
+        "binary_recall": 0.7143,
+        "binary_f1": 0.8,
+        "binary_sensitivity": 0.7143,
+        "binary_specificity": 0.9643,
+        "macro_precision": 0.6089,
+        "macro_recall": 0.533,
+        "macro_f1": 0.5589,
+        "weighted_precision": 0.8664,
+        "weighted_recall": 0.881,
+        "weighted_f1": 0.8668,
+        "per_class": {
+          "1": {
+            "support": 28,
+            "precision": 0.871,
+            "recall": 0.9643,
+            "f1": 0.9153,
+            "tp": 27,
+            "fp": 4,
+            "fn": 1
+          },
+          "2": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 1,
+            "fn": 1
+          },
+          "6": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "9": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 88.1,
+        "binary_precision": 0.9375,
+        "binary_recall": 0.8824,
+        "binary_f1": 0.9091,
+        "binary_sensitivity": 0.8824,
+        "binary_specificity": 0.96,
+        "macro_precision": 0.8612,
+        "macro_recall": 0.8783,
+        "macro_f1": 0.8531,
+        "weighted_precision": 0.8947,
+        "weighted_recall": 0.881,
+        "weighted_f1": 0.8797,
+        "per_class": {
+          "1": {
+            "support": 25,
+            "precision": 0.9231,
+            "recall": 0.96,
+            "f1": 0.9412,
+            "tp": 24,
+            "fp": 2,
+            "fn": 1
+          },
+          "2": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 0,
+            "fn": 2
+          },
+          "3": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "5": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "6": {
+            "support": 3,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667,
+            "tp": 2,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 5,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 1,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 80.95,
+        "binary_precision": 0.8333,
+        "binary_recall": 0.7895,
+        "binary_f1": 0.8108,
+        "binary_sensitivity": 0.7895,
+        "binary_specificity": 0.8696,
+        "macro_precision": 0.4917,
+        "macro_recall": 0.5462,
+        "macro_f1": 0.5043,
+        "weighted_precision": 0.7928,
+        "weighted_recall": 0.8095,
+        "weighted_f1": 0.7911,
+        "per_class": {
+          "1": {
+            "support": 23,
+            "precision": 0.8333,
+            "recall": 0.8696,
+            "f1": 0.8511,
+            "tp": 20,
+            "fp": 4,
+            "fn": 3
+          },
+          "2": {
+            "support": 6,
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "tp": 4,
+            "fp": 0,
+            "fn": 2
+          },
+          "3": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 0.6667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0
+          },
+          "5": {
+            "support": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 2
+          },
+          "6": {
+            "support": 3,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75,
+            "tp": 3,
+            "fp": 2,
+            "fn": 0
+          },
+          "9": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 6,
+            "precision": 0.8333,
+            "recall": 0.8333,
+            "f1": 0.8333,
+            "tp": 5,
+            "fp": 1,
+            "fn": 1
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "90_10",
+        "n_test": 42,
+        "multiclass_acc": 92.86,
+        "binary_precision": 1.0,
+        "binary_recall": 0.9333,
+        "binary_f1": 0.9655,
+        "binary_sensitivity": 0.9333,
+        "binary_specificity": 1.0,
+        "macro_precision": 0.7455,
+        "macro_recall": 0.7188,
+        "macro_f1": 0.709,
+        "weighted_precision": 0.9413,
+        "weighted_recall": 0.9286,
+        "weighted_f1": 0.9271,
+        "per_class": {
+          "1": {
+            "support": 27,
+            "precision": 0.9643,
+            "recall": 1.0,
+            "f1": 0.9818,
+            "tp": 27,
+            "fp": 1,
+            "fn": 0
+          },
+          "2": {
+            "support": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "3": {
+            "support": 1,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0
+          },
+          "4": {
+            "support": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1
+          },
+          "5": {
+            "support": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "6": {
+            "support": 2,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "tp": 1,
+            "fp": 1,
+            "fn": 1
+          },
+          "9": {
+            "support": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 4,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.8571,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1
+          }
+        }
+      }
+    ]
+  },
+  "10fold": {
+    "summary": {
+      "multiclass_acc": {
+        "mean": 84.664,
+        "std": 0.982
+      },
+      "binary_precision": {
+        "mean": 0.8631,
+        "std": 0.0085
+      },
+      "binary_recall": {
+        "mean": 0.8334,
+        "std": 0.0114
+      },
+      "binary_f1": {
+        "mean": 0.848,
+        "std": 0.0086
+      },
+      "binary_sensitivity": {
+        "mean": 0.8334,
+        "std": 0.0114
+      },
+      "binary_specificity": {
+        "mean": 0.9077,
+        "std": 0.0062
+      },
+      "macro_precision": {
+        "mean": 0.8234,
+        "std": 0.0223
+      },
+      "macro_recall": {
+        "mean": 0.7933,
+        "std": 0.013
+      },
+      "macro_f1": {
+        "mean": 0.8064,
+        "std": 0.0156
+      },
+      "weighted_precision": {
+        "mean": 0.8462,
+        "std": 0.0105
+      },
+      "weighted_recall": {
+        "mean": 0.8466,
+        "std": 0.0098
+      },
+      "weighted_f1": {
+        "mean": 0.8456,
+        "std": 0.0101
+      }
+    },
+    "seeds": [
+      {
+        "seed": 13,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 86.78,
+        "binary_precision": 0.8735,
+        "binary_recall": 0.848,
+        "binary_f1": 0.8605,
+        "binary_sensitivity": 0.848,
+        "binary_specificity": 0.9143,
+        "macro_precision": 0.8671,
+        "macro_recall": 0.8147,
+        "macro_f1": 0.838,
+        "weighted_precision": 0.8694,
+        "weighted_recall": 0.8678,
+        "weighted_f1": 0.8676,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.896,
+            "recall": 0.9143,
+            "f1": 0.9051,
+            "tp": 224,
+            "fp": 26,
+            "fn": 21
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6939,
+            "recall": 0.7727,
+            "f1": 0.7312,
+            "tp": 34,
+            "fp": 15,
+            "fn": 10
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.8462,
+            "recall": 0.7333,
+            "f1": 0.7857,
+            "tp": 11,
+            "fp": 2,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.8,
+            "recall": 0.6154,
+            "f1": 0.6957,
+            "tp": 8,
+            "fp": 2,
+            "fn": 5
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.913,
+            "recall": 0.84,
+            "f1": 0.875,
+            "tp": 21,
+            "fp": 2,
+            "fn": 4
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.8889,
+            "f1": 0.9412,
+            "tp": 8,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8542,
+            "recall": 0.82,
+            "f1": 0.8367,
+            "tp": 41,
+            "fp": 7,
+            "fn": 9
+          }
+        }
+      },
+      {
+        "seed": 20,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.13,
+        "binary_precision": 0.8571,
+        "binary_recall": 0.8421,
+        "binary_f1": 0.8496,
+        "binary_sensitivity": 0.8421,
+        "binary_specificity": 0.902,
+        "macro_precision": 0.7965,
+        "macro_recall": 0.7869,
+        "macro_f1": 0.7909,
+        "weighted_precision": 0.8406,
+        "weighted_recall": 0.8413,
+        "weighted_f1": 0.8407,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.8911,
+            "recall": 0.902,
+            "f1": 0.8966,
+            "tp": 221,
+            "fp": 27,
+            "fn": 24
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6889,
+            "recall": 0.7045,
+            "f1": 0.6966,
+            "tp": 31,
+            "fp": 14,
+            "fn": 13
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.875,
+            "recall": 0.9333,
+            "f1": 0.9032,
+            "tp": 14,
+            "fp": 2,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.6,
+            "recall": 0.6,
+            "f1": 0.6,
+            "tp": 9,
+            "fp": 6,
+            "fn": 6
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.7273,
+            "recall": 0.6154,
+            "f1": 0.6667,
+            "tp": 8,
+            "fp": 3,
+            "fn": 5
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.76,
+            "recall": 0.76,
+            "f1": 0.76,
+            "tp": 19,
+            "fp": 6,
+            "fn": 6
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8298,
+            "recall": 0.78,
+            "f1": 0.8041,
+            "tp": 39,
+            "fp": 8,
+            "fn": 11
+          }
+        }
+      },
+      {
+        "seed": 27,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 85.82,
+        "binary_precision": 0.878,
+        "binary_recall": 0.8421,
+        "binary_f1": 0.8597,
+        "binary_sensitivity": 0.8421,
+        "binary_specificity": 0.9184,
+        "macro_precision": 0.8516,
+        "macro_recall": 0.8049,
+        "macro_f1": 0.8261,
+        "weighted_precision": 0.8586,
+        "weighted_recall": 0.8582,
+        "weighted_f1": 0.8574,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.8929,
+            "recall": 0.9184,
+            "f1": 0.9054,
+            "tp": 225,
+            "fp": 27,
+            "fn": 20
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.7083,
+            "recall": 0.7727,
+            "f1": 0.7391,
+            "tp": 34,
+            "fp": 14,
+            "fn": 10
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.8462,
+            "recall": 0.7333,
+            "f1": 0.7857,
+            "tp": 11,
+            "fp": 2,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.8182,
+            "recall": 0.6923,
+            "f1": 0.75,
+            "tp": 9,
+            "fp": 2,
+            "fn": 4
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7917,
+            "recall": 0.76,
+            "f1": 0.7755,
+            "tp": 19,
+            "fp": 5,
+            "fn": 6
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.8889,
+            "f1": 0.9412,
+            "tp": 8,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8222,
+            "recall": 0.74,
+            "f1": 0.7789,
+            "tp": 37,
+            "fp": 8,
+            "fn": 13
+          }
+        }
+      },
+      {
+        "seed": 34,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.62,
+        "binary_precision": 0.8554,
+        "binary_recall": 0.8304,
+        "binary_f1": 0.8427,
+        "binary_sensitivity": 0.8304,
+        "binary_specificity": 0.902,
+        "macro_precision": 0.8095,
+        "macro_recall": 0.7933,
+        "macro_f1": 0.7989,
+        "weighted_precision": 0.8448,
+        "weighted_recall": 0.8461,
+        "weighted_f1": 0.8444,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.884,
+            "recall": 0.902,
+            "f1": 0.8929,
+            "tp": 221,
+            "fp": 29,
+            "fn": 24
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.7083,
+            "recall": 0.7727,
+            "f1": 0.7391,
+            "tp": 34,
+            "fp": 14,
+            "fn": 10
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1": 0.6667,
+            "tp": 9,
+            "fp": 3,
+            "fn": 6
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.6364,
+            "recall": 0.5385,
+            "f1": 0.5833,
+            "tp": 7,
+            "fp": 4,
+            "fn": 6
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.8462,
+            "recall": 0.88,
+            "f1": 0.8627,
+            "tp": 22,
+            "fp": 4,
+            "fn": 3
+          },
+          "9": {
+            "support": 9,
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1": 0.9474,
+            "tp": 9,
+            "fp": 1,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8182,
+            "recall": 0.72,
+            "f1": 0.766,
+            "tp": 36,
+            "fp": 8,
+            "fn": 14
+          }
+        }
+      },
+      {
+        "seed": 41,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.13,
+        "binary_precision": 0.8614,
+        "binary_recall": 0.8363,
+        "binary_f1": 0.8487,
+        "binary_sensitivity": 0.8363,
+        "binary_specificity": 0.9061,
+        "macro_precision": 0.8006,
+        "macro_recall": 0.7981,
+        "macro_f1": 0.7989,
+        "weighted_precision": 0.8405,
+        "weighted_recall": 0.8413,
+        "weighted_f1": 0.8406,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.888,
+            "recall": 0.9061,
+            "f1": 0.897,
+            "tp": 222,
+            "fp": 28,
+            "fn": 23
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6667,
+            "recall": 0.6364,
+            "f1": 0.6512,
+            "tp": 28,
+            "fp": 14,
+            "fn": 16
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.6875,
+            "recall": 0.7333,
+            "f1": 0.7097,
+            "tp": 11,
+            "fp": 5,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.6154,
+            "recall": 0.6154,
+            "f1": 0.6154,
+            "tp": 8,
+            "fp": 5,
+            "fn": 5
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7692,
+            "recall": 0.8,
+            "f1": 0.7843,
+            "tp": 20,
+            "fp": 6,
+            "fn": 5
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8444,
+            "recall": 0.76,
+            "f1": 0.8,
+            "tp": 38,
+            "fp": 7,
+            "fn": 12
+          }
+        }
+      },
+      {
+        "seed": 48,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 83.89,
+        "binary_precision": 0.8688,
+        "binary_recall": 0.8129,
+        "binary_f1": 0.8399,
+        "binary_sensitivity": 0.8129,
+        "binary_specificity": 0.9143,
+        "macro_precision": 0.8248,
+        "macro_recall": 0.7747,
+        "macro_f1": 0.7967,
+        "weighted_precision": 0.837,
+        "weighted_recall": 0.8389,
+        "weighted_f1": 0.8367,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.875,
+            "recall": 0.9143,
+            "f1": 0.8942,
+            "tp": 224,
+            "fp": 32,
+            "fn": 21
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6739,
+            "recall": 0.7045,
+            "f1": 0.6889,
+            "tp": 31,
+            "fp": 15,
+            "fn": 13
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.8333,
+            "recall": 0.6667,
+            "f1": 0.7407,
+            "tp": 10,
+            "fp": 2,
+            "fn": 5
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.7,
+            "recall": 0.5385,
+            "f1": 0.6087,
+            "tp": 7,
+            "fp": 3,
+            "fn": 6
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7826,
+            "recall": 0.72,
+            "f1": 0.75,
+            "tp": 18,
+            "fp": 5,
+            "fn": 7
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8,
+            "recall": 0.72,
+            "f1": 0.7579,
+            "tp": 36,
+            "fp": 9,
+            "fn": 14
+          }
+        }
+      },
+      {
+        "seed": 55,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.62,
+        "binary_precision": 0.8614,
+        "binary_recall": 0.8363,
+        "binary_f1": 0.8487,
+        "binary_sensitivity": 0.8363,
+        "binary_specificity": 0.9061,
+        "macro_precision": 0.8234,
+        "macro_recall": 0.7986,
+        "macro_f1": 0.8097,
+        "weighted_precision": 0.8452,
+        "weighted_recall": 0.8461,
+        "weighted_f1": 0.8451,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.888,
+            "recall": 0.9061,
+            "f1": 0.897,
+            "tp": 222,
+            "fp": 28,
+            "fn": 23
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6957,
+            "recall": 0.7273,
+            "f1": 0.7111,
+            "tp": 32,
+            "fp": 14,
+            "fn": 12
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.7692,
+            "recall": 0.6667,
+            "f1": 0.7143,
+            "tp": 10,
+            "fp": 3,
+            "fn": 5
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.7273,
+            "recall": 0.6154,
+            "f1": 0.6667,
+            "tp": 8,
+            "fp": 3,
+            "fn": 5
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7692,
+            "recall": 0.8,
+            "f1": 0.7843,
+            "tp": 20,
+            "fp": 6,
+            "fn": 5
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8043,
+            "recall": 0.74,
+            "f1": 0.7708,
+            "tp": 37,
+            "fp": 9,
+            "fn": 13
+          }
+        }
+      },
+      {
+        "seed": 62,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 83.41,
+        "binary_precision": 0.8545,
+        "binary_recall": 0.8246,
+        "binary_f1": 0.8393,
+        "binary_sensitivity": 0.8246,
+        "binary_specificity": 0.902,
+        "macro_precision": 0.806,
+        "macro_recall": 0.7814,
+        "macro_f1": 0.7916,
+        "weighted_precision": 0.8342,
+        "weighted_recall": 0.8341,
+        "weighted_f1": 0.8331,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.8805,
+            "recall": 0.902,
+            "f1": 0.8911,
+            "tp": 221,
+            "fp": 30,
+            "fn": 24
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6458,
+            "recall": 0.7045,
+            "f1": 0.6739,
+            "tp": 31,
+            "fp": 17,
+            "fn": 13
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.6875,
+            "recall": 0.7333,
+            "f1": 0.7097,
+            "tp": 11,
+            "fp": 5,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.7,
+            "recall": 0.5385,
+            "f1": 0.6087,
+            "tp": 7,
+            "fp": 3,
+            "fn": 6
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7826,
+            "recall": 0.72,
+            "f1": 0.75,
+            "tp": 18,
+            "fp": 5,
+            "fn": 7
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8182,
+            "recall": 0.72,
+            "f1": 0.766,
+            "tp": 36,
+            "fp": 8,
+            "fn": 14
+          }
+        }
+      },
+      {
+        "seed": 69,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.86,
+        "binary_precision": 0.8675,
+        "binary_recall": 0.8421,
+        "binary_f1": 0.8546,
+        "binary_sensitivity": 0.8421,
+        "binary_specificity": 0.9102,
+        "macro_precision": 0.8263,
+        "macro_recall": 0.7772,
+        "macro_f1": 0.7982,
+        "weighted_precision": 0.8486,
+        "weighted_recall": 0.8486,
+        "weighted_f1": 0.8474,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.892,
+            "recall": 0.9102,
+            "f1": 0.901,
+            "tp": 223,
+            "fp": 27,
+            "fn": 22
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6735,
+            "recall": 0.75,
+            "f1": 0.7097,
+            "tp": 33,
+            "fp": 16,
+            "fn": 11
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.7857,
+            "recall": 0.7333,
+            "f1": 0.7586,
+            "tp": 11,
+            "fp": 3,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.6667,
+            "recall": 0.4615,
+            "f1": 0.5455,
+            "tp": 6,
+            "fp": 3,
+            "fn": 7
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.8636,
+            "recall": 0.76,
+            "f1": 0.8085,
+            "tp": 19,
+            "fp": 3,
+            "fn": 6
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 0.8889,
+            "f1": 0.9412,
+            "tp": 8,
+            "fp": 0,
+            "fn": 1
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.7959,
+            "recall": 0.78,
+            "f1": 0.7879,
+            "tp": 39,
+            "fp": 10,
+            "fn": 11
+          }
+        }
+      },
+      {
+        "seed": 76,
+        "protocol": "10fold",
+        "n_test": 416,
+        "multiclass_acc": 84.38,
+        "binary_precision": 0.8537,
+        "binary_recall": 0.8187,
+        "binary_f1": 0.8358,
+        "binary_sensitivity": 0.8187,
+        "binary_specificity": 0.902,
+        "macro_precision": 0.8282,
+        "macro_recall": 0.8032,
+        "macro_f1": 0.8149,
+        "weighted_precision": 0.8434,
+        "weighted_recall": 0.8437,
+        "weighted_f1": 0.843,
+        "per_class": {
+          "1": {
+            "support": 245,
+            "precision": 0.877,
+            "recall": 0.902,
+            "f1": 0.8893,
+            "tp": 221,
+            "fp": 31,
+            "fn": 24
+          },
+          "2": {
+            "support": 44,
+            "precision": 0.6739,
+            "recall": 0.7045,
+            "f1": 0.6889,
+            "tp": 31,
+            "fp": 15,
+            "fn": 13
+          },
+          "3": {
+            "support": 15,
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "tp": 14,
+            "fp": 1,
+            "fn": 1
+          },
+          "4": {
+            "support": 15,
+            "precision": 0.7857,
+            "recall": 0.7333,
+            "f1": 0.7586,
+            "tp": 11,
+            "fp": 3,
+            "fn": 4
+          },
+          "5": {
+            "support": 13,
+            "precision": 0.75,
+            "recall": 0.6923,
+            "f1": 0.72,
+            "tp": 9,
+            "fp": 3,
+            "fn": 4
+          },
+          "6": {
+            "support": 25,
+            "precision": 0.7391,
+            "recall": 0.68,
+            "f1": 0.7083,
+            "tp": 17,
+            "fp": 6,
+            "fn": 8
+          },
+          "9": {
+            "support": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "tp": 9,
+            "fp": 0,
+            "fn": 0
+          },
+          "10": {
+            "support": 50,
+            "precision": 0.8667,
+            "recall": 0.78,
+            "f1": 0.8211,
+            "tp": 39,
+            "fp": 6,
+            "fn": 11
+          }
+        }
+      }
+    ]
+  }
+}

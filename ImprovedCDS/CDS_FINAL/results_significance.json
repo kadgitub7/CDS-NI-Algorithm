@@ -1,0 +1,527 @@
+{
+  "description": "Paired significance tests comparing random vs stratified splitting across 10 seeds",
+  "seeds": [
+    13,
+    20,
+    27,
+    34,
+    41,
+    48,
+    55,
+    62,
+    69,
+    76
+  ],
+  "tests": [
+    "paired_t_test (two-sided)",
+    "wilcoxon_signed_rank (two-sided)"
+  ],
+  "alpha": 0.05,
+  "n_seeds": 10,
+  "protocols": {
+    "10-fold CV": {
+      "multiclass": {
+        "random_per_seed": [
+          86.78,
+          84.13,
+          85.82,
+          84.62,
+          84.13,
+          83.89,
+          84.62,
+          83.41,
+          84.86,
+          84.38
+        ],
+        "stratified_per_seed": [
+          86.06,
+          85.1,
+          84.86,
+          85.1,
+          84.62,
+          84.38,
+          85.1,
+          85.58,
+          86.06,
+          86.3
+        ],
+        "random_mean": 84.66,
+        "random_std": 0.98,
+        "stratified_mean": 85.32,
+        "stratified_std": 0.65,
+        "mean_diff_pp": 0.65,
+        "paired_ttest": {
+          "t_statistic": 2.0726,
+          "p_value": 0.068072
+        },
+        "wilcoxon": {
+          "W_statistic": 11.0,
+          "p_value": 0.099609
+        },
+        "cohens_d": 0.6554,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          88.7,
+          87.74,
+          88.7,
+          87.26,
+          87.74,
+          87.26,
+          87.74,
+          87.02,
+          88.22,
+          86.78
+        ],
+        "stratified_per_seed": [
+          89.66,
+          87.98,
+          88.46,
+          88.46,
+          87.98,
+          87.5,
+          88.22,
+          88.7,
+          88.94,
+          89.66
+        ],
+        "random_mean": 87.72,
+        "random_std": 0.66,
+        "stratified_mean": 88.56,
+        "stratified_std": 0.71,
+        "mean_diff_pp": 0.84,
+        "paired_ttest": {
+          "t_statistic": 2.9291,
+          "p_value": 0.016781
+        },
+        "wilcoxon": {
+          "W_statistic": 3.0,
+          "p_value": 0.009766
+        },
+        "cohens_d": 0.9263,
+        "significant_at_005": true
+      }
+    },
+    "90/10": {
+      "multiclass": {
+        "random_per_seed": [
+          80.95,
+          85.71,
+          76.19,
+          90.48,
+          88.1,
+          90.48,
+          88.1,
+          88.1,
+          80.95,
+          92.86
+        ],
+        "stratified_per_seed": [
+          86.67,
+          86.67,
+          80.0,
+          91.11,
+          88.89,
+          86.67,
+          75.56,
+          84.44,
+          84.44,
+          91.11
+        ],
+        "random_mean": 86.19,
+        "random_std": 5.24,
+        "stratified_mean": 85.56,
+        "stratified_std": 4.83,
+        "mean_diff_pp": -0.64,
+        "paired_ttest": {
+          "t_statistic": -0.3851,
+          "p_value": 0.709141
+        },
+        "wilcoxon": {
+          "W_statistic": 27.5,
+          "p_value": 1.0
+        },
+        "cohens_d": -0.1218,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          85.71,
+          85.71,
+          80.95,
+          90.48,
+          88.1,
+          92.86,
+          88.1,
+          92.86,
+          83.33,
+          97.62
+        ],
+        "stratified_per_seed": [
+          88.89,
+          88.89,
+          86.67,
+          93.33,
+          91.11,
+          91.11,
+          80.0,
+          91.11,
+          88.89,
+          95.56
+        ],
+        "random_mean": 88.57,
+        "random_std": 5.0,
+        "stratified_mean": 89.56,
+        "stratified_std": 4.2,
+        "mean_diff_pp": 0.98,
+        "paired_ttest": {
+          "t_statistic": 0.7216,
+          "p_value": 0.488837
+        },
+        "wilcoxon": {
+          "W_statistic": 16.0,
+          "p_value": 0.267578
+        },
+        "cohens_d": 0.2282,
+        "significant_at_005": false
+      }
+    },
+    "80/20": {
+      "multiclass": {
+        "random_per_seed": [
+          89.29,
+          82.14,
+          85.71,
+          88.1,
+          82.14,
+          88.1,
+          84.52,
+          84.52,
+          83.33,
+          86.9
+        ],
+        "stratified_per_seed": [
+          83.33,
+          83.33,
+          76.19,
+          86.9,
+          89.29,
+          78.57,
+          72.62,
+          78.57,
+          85.71,
+          88.1
+        ],
+        "random_mean": 85.48,
+        "random_std": 2.56,
+        "stratified_mean": 82.26,
+        "stratified_std": 5.54,
+        "mean_diff_pp": -3.21,
+        "paired_ttest": {
+          "t_statistic": -1.6257,
+          "p_value": 0.138461
+        },
+        "wilcoxon": {
+          "W_statistic": 14.5,
+          "p_value": 0.201172
+        },
+        "cohens_d": -0.5141,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          90.48,
+          85.71,
+          88.1,
+          90.48,
+          82.14,
+          90.48,
+          84.52,
+          88.1,
+          85.71,
+          94.05
+        ],
+        "stratified_per_seed": [
+          84.52,
+          85.71,
+          82.14,
+          88.1,
+          92.86,
+          84.52,
+          77.38,
+          85.71,
+          91.67,
+          89.29
+        ],
+        "random_mean": 87.98,
+        "random_std": 3.53,
+        "stratified_mean": 86.19,
+        "stratified_std": 4.57,
+        "mean_diff_pp": -1.79,
+        "paired_ttest": {
+          "t_statistic": -0.9627,
+          "p_value": 0.360834
+        },
+        "wilcoxon": {
+          "W_statistic": 15.0,
+          "p_value": 0.425781
+        },
+        "cohens_d": -0.3044,
+        "significant_at_005": false
+      }
+    },
+    "70/30": {
+      "multiclass": {
+        "random_per_seed": [
+          80.0,
+          76.0,
+          77.6,
+          87.2,
+          81.6,
+          85.6,
+          80.0,
+          83.2,
+          76.8,
+          85.6
+        ],
+        "stratified_per_seed": [
+          76.56,
+          82.03,
+          82.03,
+          83.59,
+          78.12,
+          82.81,
+          78.91,
+          78.12,
+          82.81,
+          85.94
+        ],
+        "random_mean": 81.36,
+        "random_std": 3.96,
+        "stratified_mean": 81.09,
+        "stratified_std": 2.99,
+        "mean_diff_pp": -0.27,
+        "paired_ttest": {
+          "t_statistic": -0.199,
+          "p_value": 0.846698
+        },
+        "wilcoxon": {
+          "W_statistic": 27.0,
+          "p_value": 1.0
+        },
+        "cohens_d": -0.0629,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          84.8,
+          79.2,
+          83.2,
+          90.4,
+          84.0,
+          89.6,
+          81.6,
+          88.0,
+          80.0,
+          90.4
+        ],
+        "stratified_per_seed": [
+          82.03,
+          87.5,
+          85.16,
+          87.5,
+          86.72,
+          85.94,
+          82.03,
+          85.16,
+          87.5,
+          87.5
+        ],
+        "random_mean": 85.12,
+        "random_std": 4.25,
+        "stratified_mean": 85.7,
+        "stratified_std": 2.15,
+        "mean_diff_pp": 0.58,
+        "paired_ttest": {
+          "t_statistic": 0.414,
+          "p_value": 0.688582
+        },
+        "wilcoxon": {
+          "W_statistic": 25.0,
+          "p_value": 0.824219
+        },
+        "cohens_d": 0.1309,
+        "significant_at_005": false
+      }
+    },
+    "60/40": {
+      "multiclass": {
+        "random_per_seed": [
+          80.84,
+          75.45,
+          78.44,
+          80.84,
+          77.84,
+          83.83,
+          77.84,
+          82.04,
+          78.44,
+          86.23
+        ],
+        "stratified_per_seed": [
+          79.76,
+          79.76,
+          85.71,
+          78.57,
+          77.98,
+          80.36,
+          75.6,
+          79.17,
+          85.12,
+          81.55
+        ],
+        "random_mean": 80.18,
+        "random_std": 3.23,
+        "stratified_mean": 80.36,
+        "stratified_std": 3.1,
+        "mean_diff_pp": 0.18,
+        "paired_ttest": {
+          "t_statistic": 0.1305,
+          "p_value": 0.899023
+        },
+        "wilcoxon": {
+          "W_statistic": 27.0,
+          "p_value": 1.0
+        },
+        "cohens_d": 0.0413,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          85.03,
+          80.24,
+          83.23,
+          84.43,
+          82.04,
+          87.43,
+          81.44,
+          86.83,
+          82.04,
+          92.22
+        ],
+        "stratified_per_seed": [
+          83.93,
+          82.14,
+          88.69,
+          84.52,
+          82.74,
+          82.74,
+          79.17,
+          85.71,
+          89.29,
+          83.93
+        ],
+        "random_mean": 84.49,
+        "random_std": 3.58,
+        "stratified_mean": 84.29,
+        "stratified_std": 3.02,
+        "mean_diff_pp": -0.21,
+        "paired_ttest": {
+          "t_statistic": -0.1446,
+          "p_value": 0.888199
+        },
+        "wilcoxon": {
+          "W_statistic": 25.0,
+          "p_value": 0.845703
+        },
+        "cohens_d": -0.0457,
+        "significant_at_005": false
+      }
+    },
+    "50/50": {
+      "multiclass": {
+        "random_per_seed": [
+          80.77,
+          73.56,
+          81.25,
+          78.37,
+          76.92,
+          79.81,
+          79.33,
+          78.37,
+          80.29,
+          85.1
+        ],
+        "stratified_per_seed": [
+          76.78,
+          81.52,
+          76.78,
+          75.36,
+          77.73,
+          75.83,
+          77.25,
+          76.78,
+          78.67,
+          75.36
+        ],
+        "random_mean": 79.38,
+        "random_std": 3.0,
+        "stratified_mean": 77.21,
+        "stratified_std": 1.83,
+        "mean_diff_pp": -2.17,
+        "paired_ttest": {
+          "t_statistic": -1.5265,
+          "p_value": 0.161222
+        },
+        "wilcoxon": {
+          "W_statistic": 10.0,
+          "p_value": 0.083984
+        },
+        "cohens_d": -0.4827,
+        "significant_at_005": false
+      },
+      "binary": {
+        "random_per_seed": [
+          84.62,
+          77.4,
+          86.06,
+          82.21,
+          80.77,
+          83.65,
+          82.21,
+          83.17,
+          82.69,
+          87.5
+        ],
+        "stratified_per_seed": [
+          80.57,
+          84.83,
+          81.52,
+          81.04,
+          82.46,
+          79.62,
+          81.04,
+          81.99,
+          83.41,
+          77.25
+        ],
+        "random_mean": 83.03,
+        "random_std": 2.8,
+        "stratified_mean": 81.37,
+        "stratified_std": 2.07,
+        "mean_diff_pp": -1.66,
+        "paired_ttest": {
+          "t_statistic": -1.1283,
+          "p_value": 0.288371
+        },
+        "wilcoxon": {
+          "W_statistic": 15.0,
+          "p_value": 0.222656
+        },
+        "cohens_d": -0.3568,
+        "significant_at_005": false
+      }
+    }
+  }
+}
